@@ -1,0 +1,55 @@
+<svg width="512" height="512" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+  <rect width="130" height="130" rx="30" fill="white" stroke="#DDD4C8" stroke-width="2"/>
+  <ellipse cx="65" cy="94" rx="33" ry="6" fill="#EDE0D0"/>
+  <circle cx="65" cy="78" r="32" fill="#F9F4EF" stroke="#DDD4C8" stroke-width="2"/>
+  <circle cx="65" cy="78" r="24" fill="white" stroke="#EBE3D9" stroke-width="1.5"/>
+  <!-- ARROZ -->
+  <ellipse cx="57" cy="83" rx="9" ry="5" fill="#F5EDD8"/>
+  <circle cx="52" cy="82" r="2" fill="#EDE0C0"/>
+  <circle cx="55" cy="85" r="2" fill="#F0E8CE"/>
+  <circle cx="58" cy="83" r="2" fill="#EDE0C0"/>
+  <circle cx="61" cy="85" r="2" fill="#F0E8CE"/>
+  <circle cx="54" cy="80" r="1.8" fill="#F5EDD8"/>
+  <circle cx="57" cy="87" r="1.8" fill="#EDE0C0"/>
+  <circle cx="60" cy="81" r="1.8" fill="#F5EDD8"/>
+  <circle cx="63" cy="84" r="1.8" fill="#EDE0C0"/>
+  <circle cx="51" cy="85" r="1.5" fill="#F0E8CE"/>
+  <!-- POLLO -->
+  <ellipse cx="57" cy="72" rx="12" ry="9.5" fill="#C8845A"/>
+  <ellipse cx="57" cy="72" rx="8.5" ry="6.5" fill="#DFA878"/>
+  <ellipse cx="57" cy="72" rx="4.5" ry="3" fill="#C8845A"/>
+  <path d="M52 70 Q55 68 58 70 Q61 72 58 74 Q55 76 52 74 Q49 72 52 70Z" fill="#DFA878" opacity="0.5"/>
+  <line x1="57" y1="63" x2="57" y2="58" stroke="#D0D0D0" stroke-width="3.5" stroke-linecap="round"/>
+  <ellipse cx="57" cy="57" rx="4" ry="2.5" fill="#E8E8E8"/>
+  <ellipse cx="57" cy="57" rx="2" ry="1.2" fill="#D0D0D0"/>
+  <!-- BRÓCOLI -->
+  <line x1="76" y1="86" x2="76" y2="79" stroke="#1E5C34" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="76" cy="75" r="6.5" fill="#2E7A48"/>
+  <circle cx="70" cy="78" r="5" fill="#2E7A48"/>
+  <circle cx="82" cy="78" r="5" fill="#2E7A48"/>
+  <circle cx="73" cy="73" r="4" fill="#3D8A59"/>
+  <circle cx="79" cy="73" r="4" fill="#3D8A59"/>
+  <circle cx="76" cy="70" r="3.5" fill="#4EA870"/>
+  <circle cx="70" cy="76" r="2.5" fill="#4EA870"/>
+  <circle cx="82" cy="76" r="2.5" fill="#4EA870"/>
+  <circle cx="73" cy="71" r="2" fill="#6ECC8A"/>
+  <circle cx="79" cy="71" r="2" fill="#6ECC8A"/>
+  <!-- ZANAHORIA -->
+  <ellipse cx="65" cy="87" rx="6.5" ry="3.5" fill="#E07B4A" transform="rotate(-20 65 87)"/>
+  <ellipse cx="65" cy="87" rx="5" ry="2.5" fill="#EA9060" transform="rotate(-20 65 87)"/>
+  <path d="M61 82 Q62.5 79 64 80.5" stroke="#3D8A59" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M62 81 Q63 78 65 80" stroke="#3D8A59" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <!-- brillo plato -->
+  <ellipse cx="50" cy="63" rx="6" ry="3" fill="white" opacity="0.6" transform="rotate(-35 50 63)"/>
+  <!-- TENEDOR -->
+  <line x1="27" y1="52" x2="27" y2="92" stroke="#285C3E" stroke-width="3" stroke-linecap="round"/>
+  <line x1="22" y1="52" x2="22" y2="64" stroke="#285C3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="27" y1="52" x2="27" y2="64" stroke="#285C3E" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="52" x2="32" y2="64" stroke="#285C3E" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 64 Q27 68 32 64" fill="none" stroke="#285C3E" stroke-width="2"/>
+  <!-- CUCHILLO -->
+  <line x1="103" y1="52" x2="103" y2="92" stroke="#285C3E" stroke-width="3" stroke-linecap="round"/>
+  <path d="M103 52 Q111 60 103 68" fill="#285C3E"/>
+  <!-- TÍTULO -->
+  <text x="65" y="28" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="#285C3E">Calorú</text>
+</svg>
