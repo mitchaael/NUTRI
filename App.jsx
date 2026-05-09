@@ -6811,6 +6811,44 @@ function AppCore() {
             <span style={{color:C.textMuted,fontSize:11}}>·</span>
             <button onClick={()=>setShowLegal('terms')} style={{background:'none',border:'none',fontSize:11,color:C.textMuted,cursor:'pointer',fontFamily:F}}>Términos de servicio</button>
           </div>
+
+          {/* Eliminar cuenta — requerido por Google Play */}
+          {supabaseUser&&(
+            <div style={{marginTop:16,padding:'0 16px'}}>
+              <button className="tap" onClick={async()=>{
+                const confirm1 = window.prompt('Para eliminar tu cuenta y TODOS tus datos permanentemente, escribe ELIMINAR:');
+                if(confirm1!=='ELIMINAR') return;
+                try{
+                  setToast('Eliminando cuenta...');
+                  const session = await supabase.auth.getSession();
+                  const token = session?.data?.session?.access_token;
+                  if(!token){ setToast('❌ No hay sesión activa'); return; }
+                  const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/delete-account',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                  });
+                  const data = await res.json();
+                  if(data.success){
+                    // Clear all local data
+                    localStorage.clear();
+                    setToast('✓ Cuenta eliminada. Adiós 👋');
+                    setTimeout(()=>window.location.reload(), 2000);
+                  } else {
+                    setToast('❌ '+( data.error || 'Error al eliminar'));
+                  }
+                }catch(e){
+                  setToast('❌ Error de conexión');
+                }
+              }} style={{
+                width:'100%',padding:'13px',borderRadius:14,
+                border:'1px solid #FF3B3030',background:'#FF3B3008',
+                color:'#FF3B30',fontSize:12,fontWeight:600,
+                cursor:'pointer',fontFamily:F,
+              }}>
+                🗑️ Eliminar mi cuenta permanentemente
+              </button>
+            </div>
+          )}
         </div>}
       </div>
 
