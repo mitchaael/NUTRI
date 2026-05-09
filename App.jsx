@@ -10,7 +10,7 @@ const DB = [
   {id:1,  nombre:"Leche entera Soprole",          marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:160, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:4.8, sodio:120,   emoji:"🥛"},
   {id:2,  nombre:"Leche semidescremada Soprole",  marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:120, prot:9,   carbs:12,  grasas:4.5, fibra:0, azucar:4.8, sodio:130,   emoji:"🥛"},
   {id:3,  nombre:"Leche descremada Soprole",      marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:90,  prot:9,   carbs:12,  grasas:0.5, fibra:0, azucar:4.8, sodio:130,   emoji:"🥛"},
-  {id:4,  nombre:"Leche entera Colun",            marca:"Colun",        cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:11,  grasas:8.5, fibra:0, azucar:12, sodio:110,   emoji:"🥛"},
+  {id:4,  nombre:"Leche entera Colun",            marca:"Colun",        cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:11,  grasas:8.5, fibra:0, azucar:4.8, sodio:110,   emoji:"🥛"},
   {id:5,  nombre:"Leche semidescremada Colun",    marca:"Colun",        cat:"Lácteos",    porcion:250, cal:118, prot:9,   carbs:12,  grasas:4,   fibra:0, azucar:3.5, sodio:60,   emoji:"🥛"},
   {id:6,  nombre:"Leche entera Loncoleche",       marca:"Loncoleche",   cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:11, sodio:80,   emoji:"🥛"},
   {id:7,  nombre:"Leche de avena Oatly",          marca:"Oatly",        cat:"Lácteos",    porcion:250, cal:120, prot:3,   carbs:16,  grasas:5,   fibra:1.5, azucar:10, sodio:45, emoji:"🥛"},
@@ -35,9 +35,9 @@ const DB = [
   {id:26, nombre:"Queso brie importado",          marca:"Genérico",     cat:"Lácteos",    porcion:30,  cal:100, prot:6,   carbs:0,   grasas:8.5, fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
   {id:27, nombre:"Queso parmesano rallado",       marca:"Genérico",     cat:"Lácteos",    porcion:15,  cal:55,  prot:5,   carbs:0,   grasas:4,   fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
   {id:28, nombre:"Manjar Colun",                  marca:"Colun",        cat:"Lácteos",    porcion:15,  cal:55,  prot:1,   carbs:12,  grasas:0.5, fibra:0, azucar:4.5, sodio:10,   emoji:"🍯"},
-  {id:29, nombre:"Mantequilla Colun",             marca:"Colun",        cat:"Lácteos",    porcion:10,  cal:72,  prot:0.1, carbs:0,   grasas:8,   fibra:0, azucar:4.5, sodio:10,   emoji:"🧈"},
-  {id:30, nombre:"Margarina Soprole",             marca:"Soprole",      cat:"Lácteos",    porcion:10,  cal:62,  prot:0,   carbs:0,   grasas:7,   fibra:0, azucar:4.5, sodio:10,   emoji:"🧈"},
-  {id:31, nombre:"Crema Soprole",                 marca:"Soprole",      cat:"Lácteos",    porcion:100, cal:330, prot:2.5, carbs:3,   grasas:35,  fibra:0, azucar:4.5, sodio:10,   emoji:"🫙"},
+  {id:29, nombre:"Mantequilla Colun",             marca:"Colun",        cat:"Lácteos",    porcion:10,  cal:72,  prot:0.1, carbs:0,   grasas:8,   fibra:0, azucar:0, sodio:10,   emoji:"🧈"},
+  {id:30, nombre:"Margarina Soprole",             marca:"Soprole",      cat:"Lácteos",    porcion:10,  cal:62,  prot:0,   carbs:0,   grasas:7,   fibra:0, azucar:0, sodio:10,   emoji:"🧈"},
+  {id:31, nombre:"Crema Soprole",                 marca:"Soprole",      cat:"Lácteos",    porcion:100, cal:330, prot:2.5, carbs:3,   grasas:35,  fibra:0, azucar:3, sodio:10,   emoji:"🫙"},
 
   /* ── CARNES ── */
   {id:40, nombre:"Pechuga de pollo Ariztía",      marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:110, prot:23,  carbs:0,   grasas:1.5, fibra:0, azucar:0, sodio:60,   emoji:"🍗"},
@@ -488,9 +488,9 @@ const getTips = (tot, metas, obj, agua, pct, exercises, streak) => {
   if(azPct > 0.8 && azPct <= 1)
     tips.push({icon:'🍬', text:`Cerca del límite de azúcar (${Math.round(tot.azucar||0)}/25g). Cuidado con bebidas y snacks.`, color:'#FF9500'});
   if(agua < 4 && hr >= 15)
-    tips.push({icon:'💧', text:`Solo ${agua} vasos de agua. Tomar más mejora el metabolismo.`, color:'#007AFF'});
+    tips.push({icon:'💧', text:`Solo ${agua} vasos de agua. Tomar más mejora el metabolismo.`, color:'#D42020'});
   if(agua >= 8)
-    tips.push({icon:'💧', text:'¡Hidratación perfecta! Tu cuerpo te lo agradece.', color:'#007AFF'});
+    tips.push({icon:'💧', text:'¡Hidratación perfecta! Tu cuerpo te lo agradece.', color:'#D42020'});
   if(exercises.length > 0)
     tips.push({icon:'🔥', text:`Quemaste ${exercises.reduce((s,e)=>s+e.burn,0)} kcal con ejercicio. ¡Sigue así!`, color:'#FF9500'});
   if(streak.days >= 7)
@@ -533,7 +533,7 @@ const DIETAS = [
 ═══════════════════════════════════════════════════════ */
 const CATS = ["Todas","Lácteos","Carnes","Cecinas","Panes","Cereales","Snacks","Bebidas","Frutas","Verduras","Legumbres","Granos","Pescados","Huevos","Comidas CL","Congelados","Comida rápida","Preparados","Aceites","Condimentos","Suplementos","Mis alimentos","Mis recetas","Escaneado"];
 const MEALS = ["Desayuno","Almuerzo","Once","Cena","Snack"];
-const MC = {Desayuno:"#FF9500",Almuerzo:"#FF3B30",Once:"#AF52DE",Cena:"#007AFF",Snack:"#34C759"};
+const MC = {Desayuno:"#FF9500",Almuerzo:"#FF3B30",Once:"#AF52DE",Cena:"#D42020",Snack:"#34C759"};
 const MI = {Desayuno:"🌅",Almuerzo:"☀️",Once:"☕",Cena:"🌙",Snack:"🍎"};
 
 /* ═══════════════════════════════════════════════════════
@@ -640,7 +640,7 @@ const backBtnStyle = (C) => ({
   border: 'none',
   borderRadius: 12,
   cursor: 'pointer',
-  color: '#007AFF',
+  color: '#D42020',
   fontSize: 16,
   fontWeight: 700,
   WebkitTapHighlightColor: 'transparent',
@@ -680,28 +680,30 @@ const LS = {
 ═══════════════════════════════════════════════════════ */
 const OBJ_ACCENT = {
   bajar:   {light:'#FF3B30', dark:'#FF453A'},
-  mantener:{light:'#007AFF', dark:'#0A84FF'},
+  mantener:{light:'#D42020', dark:'#0A84FF'},
   recomp:  {light:'#AF52DE', dark:'#BF5AF2'},
   subir:   {light:'#34C759', dark:'#30D158'},
 };
 
 const LIGHT = {
   bg:'#F2F2F7', surface:'#FFFFFF', surfaceAlt:'#F2F2F7', border:'#E5E5EA',
-  primary:'#1C1C1E', primaryMid:'#3A3A3C', primaryLight:'#636366', glow:'#34C759',
-  accent:'#34C759', accentLight:'#30D158', gold:'#FF9500',
+  primary:'#1C1C1E', primaryMid:'#3A3A3C', primaryLight:'#636366', glow:'#D42020',
+  accent:'#D42020', accentLight:'#F04040', gold:'#F5C21A',
   text:'#000000', textSec:'#6D6D72', textMuted:'#C7C7CC',
   navBg:'rgba(255,255,255,0.94)', headerBg:'#FFFFFF',
-  red:'#FF3B30', blue:'#007AFF', purple:'#AF52DE', green:'#34C759', amber:'#FF9500',
+  red:'#D42020', blue:'#D42020', purple:'#AF52DE', green:'#28B044', amber:'#F5C21A',
   card:'#FFFFFF', cardAlt:'#F2F2F7',
+  brandRed:'#D42020', brandGreen:'#28B044', brandGold:'#F5C21A',
 };
 const DARK = {
   bg:'#000000', surface:'#1C1C1E', surfaceAlt:'#2C2C2E', border:'#38383A',
-  primary:'#FFFFFF', primaryMid:'#EBEBF5', primaryLight:'#AEAEB2', glow:'#30D158',
-  accent:'#30D158', accentLight:'#34C759', gold:'#FF9F0A',
+  primary:'#FFFFFF', primaryMid:'#EBEBF5', primaryLight:'#AEAEB2', glow:'#F04040',
+  accent:'#F04040', accentLight:'#FF6B6B', gold:'#FFD93D',
   text:'#FFFFFF', textSec:'#8E8E93', textMuted:'#48484A',
   navBg:'rgba(0,0,0,0.94)', headerBg:'#000000',
-  red:'#FF453A', blue:'#0A84FF', purple:'#BF5AF2', green:'#30D158', amber:'#FF9F0A',
+  red:'#F04040', blue:'#F04040', purple:'#BF5AF2', green:'#5DD975', amber:'#FFD93D',
   card:'#1C1C1E', cardAlt:'#2C2C2E',
+  brandRed:'#F04040', brandGreen:'#5DD975', brandGold:'#FFD93D',
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -855,7 +857,7 @@ const haptic = (type='light') => {
 ═══════════════════════════════════════════════════════ */
 function Confetti({active}) {
   if(!active) return null;
-  const colors=['#34C759','#007AFF','#FF9500','#FF3B30','#AF52DE','#FFD60A','#FF6B6B','#4ECDC4'];
+  const colors=['#D42020','#F04040','#28B044','#5DD975','#F5C21A','#FFD93D','#FF6B6B','#AF52DE'];
   const particles = Array.from({length:55},(_,i)=>({
     id:i,
     color:colors[i%colors.length],
@@ -887,101 +889,179 @@ function Confetti({active}) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   SPLASH SCREEN
+   SPLASH SCREEN — Premium, brand-aligned
 ═══════════════════════════════════════════════════════ */
 function Splash({onDone}) {
-  const [phase,setPhase] = useState(0); // 0=intro 1=content 2=bar 3=exit
-  const [barW,setBarW]   = useState(0);
+  const [phase,setPhase] = useState(0);
+  const [tipIdx,setTipIdx] = useState(0);
+  const tips = [
+    {emoji:'🇨🇱', text:'400+ productos chilenos'},
+    {emoji:'📸', text:'Escanea tu plato con IA'},
+    {emoji:'🔥', text:'Racha diaria y logros'},
+    {emoji:'🌱', text:'Modo vegano y alérgenos'},
+  ];
 
-  const [tip, setTip] = useState('');
   useEffect(()=>{
-    const t0=setTimeout(()=>{setPhase(1);setTip('Cargando tu catálogo...');setBarW(30);}, 100);
-    const t1=setTimeout(()=>{setPhase(2);setTip('Calculando tus macros...');setBarW(70);}, 700);
-    const t2=setTimeout(()=>{setTip('¡Listo!');setBarW(100);}, 1300);
-    const t3=setTimeout(()=>setPhase(3), 1900);
-    const t4=setTimeout(()=>onDone(), 2300);
-    return ()=>[t0,t1,t2,t3,t4].forEach(clearTimeout);
+    const t0=setTimeout(()=>setPhase(1), 80);
+    const t1=setTimeout(()=>setPhase(2), 700);
+    const t2=setTimeout(()=>setPhase(3), 2600);
+    const t3=setTimeout(()=>onDone(), 3100);
+    return ()=>[t0,t1,t2,t3].forEach(clearTimeout);
   },[]);
+
+  useEffect(()=>{
+    if(phase<2) return;
+    const ti=setInterval(()=>setTipIdx(i=>(i+1)%tips.length), 850);
+    return ()=>clearInterval(ti);
+  },[phase]);
 
   return (
     <div style={{
       position:'fixed',inset:0,bottom:'-50px',paddingBottom:'50px',zIndex:100,
-      background:'linear-gradient(160deg,#1A0A0A 0%,#0D0505 55%,#1A0808 100%)',
+      background:'linear-gradient(160deg,#1A0A0A 0%,#0D0505 55%,#0A0205 100%)',
       display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-      overflow:'hidden',
+      overflow:'hidden',fontFamily:F,
       opacity:phase===3?0:1,
-      transform:phase===3?'scale(1.04)':'scale(1)',
-      transition:phase===3?'opacity .4s ease,transform .4s ease':'none',
+      transform:phase===3?'scale(1.05)':'scale(1)',
+      transition:phase===3?'all .5s cubic-bezier(.4,0,.2,1)':'none',
     }}>
 
-      {/* Background grid dots */}
-      <div style={{position:'absolute',inset:0,opacity:.06,backgroundImage:'radial-gradient(circle,#fff 1px,transparent 1px)',backgroundSize:'28px 28px',pointerEvents:'none'}}/>
+      {/* Ambient glow from brand colors */}
+      <div style={{
+        position:'absolute',inset:'-40%',
+        background:'radial-gradient(ellipse at 35% 30%, rgba(212,32,32,0.15) 0%, transparent 55%),radial-gradient(ellipse at 65% 70%, rgba(40,176,68,0.08) 0%, transparent 50%),radial-gradient(ellipse at 55% 45%, rgba(245,194,26,0.06) 0%, transparent 45%)',
+        animation:phase>=1?'ambientDrift 10s ease infinite':'none',
+        pointerEvents:'none',
+      }}/>
 
-      {/* Pulsing rings */}
+      {/* Expanding rings (brand red) */}
       {phase>=1&&[0,1,2].map(i=>(
         <div key={i} style={{
           position:'absolute',
-          width:200+i*120,height:200+i*120,
+          width:160+i*110,height:160+i*110,
           borderRadius:'50%',
-          border:'1.5px solid rgba(210,43,43,0.18)',
-          animation:`splashRingOut ${1.8+i*.4}s ease-out ${i*.2}s infinite`,
+          border:`1.5px solid rgba(212,32,32,${i===0?0.22:i===1?0.12:0.06})`,
+          animation:`splashRingOut ${2+i*.5}s ease-out ${i*.25}s infinite`,
           pointerEvents:'none',
         }}/>
       ))}
 
-      {/* App icon with spring animation */}
+      {/* Floating leaf/gold particles */}
+      {phase>=1&&Array.from({length:12}).map((_,i)=>{
+        const isGold=i%3===0;
+        const sz=3+Math.random()*4;
+        return <div key={i} style={{
+          position:'absolute',
+          width:isGold?sz:sz*.6, height:sz,
+          borderRadius:isGold?'50%':'50% 0',
+          background:isGold?'rgba(245,194,26,0.35)':'rgba(93,217,117,0.3)',
+          left:`${10+Math.random()*80}%`,
+          top:`${10+Math.random()*80}%`,
+          animation:`leafFloat ${4+Math.random()*3}s ease-in-out ${Math.random()*2}s infinite alternate`,
+          pointerEvents:'none',
+        }}/>;
+      })}
+
+      {/* LOGO — hero element with glow */}
       <div style={{
-        marginBottom:24,
-        animation:phase>=1?'splashLogoIn .7s cubic-bezier(.34,1.56,.64,1) both':'none',
-        filter:phase>=1?'drop-shadow(0 12px 40px rgba(0,0,0,0.6))':'none',
-        borderRadius:28,
-        overflow:'hidden',
-        width:120,height:120,
-        flexShrink:0,
+        position:'relative',marginBottom:28,
+        animation:phase>=1?'splashLogoIn .9s cubic-bezier(.34,1.56,.64,1) both':'none',
       }}>
-        <Logo size={120}/>
+        {/* Red glow */}
+        <div style={{
+          position:'absolute',inset:-35,borderRadius:40,
+          background:'radial-gradient(circle, rgba(212,32,32,0.28), rgba(212,32,32,0.06) 50%, transparent 70%)',
+          filter:'blur(15px)',
+          animation:phase>=1?'glowPulse 2.5s ease-in-out infinite':'none',
+        }}/>
+        {/* Gold accent glow */}
+        <div style={{
+          position:'absolute',right:-20,top:'40%',width:60,height:60,borderRadius:'50%',
+          background:'radial-gradient(circle, rgba(245,194,26,0.18), transparent 70%)',
+          filter:'blur(12px)',
+          animation:phase>=1?'glowPulse 3s ease-in-out .5s infinite':'none',
+        }}/>
+        {/* Green accent glow */}
+        <div style={{
+          position:'absolute',left:-15,top:'20%',width:50,height:50,borderRadius:'50%',
+          background:'radial-gradient(circle, rgba(40,176,68,0.15), transparent 70%)',
+          filter:'blur(10px)',
+          animation:phase>=1?'glowPulse 3.5s ease-in-out 1s infinite':'none',
+        }}/>
+        <div style={{
+          position:'relative',
+          filter:'drop-shadow(0 16px 48px rgba(212,32,32,0.25)) drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
+        }}>
+          <Logo size={130}/>
+        </div>
       </div>
 
-      {/* Text */}
+      {/* Brand name */}
       <div style={{
-        textAlign:'center',marginBottom:40,
-        animation:phase>=1?'splashTextIn .5s ease .3s both':'none',
+        textAlign:'center',marginBottom:6,
+        animation:phase>=1?'splashTextIn .6s ease .25s both':'none',
       }}>
         <div style={{
-          color:'white',fontSize:38,fontWeight:800,
-          fontFamily:F,letterSpacing:'-1.5px',lineHeight:1,
-        }}>Calor<span style={{color:'#D22B2B'}}>ú</span></div>
+          color:'white',fontSize:44,fontWeight:800,fontFamily:F,letterSpacing:'-2px',lineHeight:1,
+        }}>Calor<span style={{color:'#D42020'}}>ú</span></div>
+      </div>
+
+      {/* Tagline */}
+      <div style={{
+        textAlign:'center',marginBottom:40,
+        animation:phase>=1?'splashTextIn .5s ease .4s both':'none',
+      }}>
         <div style={{
-          color:'rgba(255,255,255,0.4)',fontSize:15,
-          fontFamily:F,fontWeight:400,marginTop:8,letterSpacing:'.5px',
+          fontSize:14,color:'rgba(255,255,255,0.35)',fontWeight:500,letterSpacing:'1.5px',
+          textTransform:'uppercase',fontFamily:F,
         }}>Tu nutrición, a tu ritmo</div>
       </div>
 
-      {/* Loading bar */}
+      {/* Loading bar (red → gold) */}
       {phase>=2&&(
         <div style={{
-          width:180,height:3,
-          background:'rgba(255,255,255,0.1)',
-          borderRadius:3,overflow:'hidden',
+          width:200,height:3,background:'rgba(255,255,255,0.07)',borderRadius:3,overflow:'hidden',
+          animation:'splashTextIn .3s ease both',
         }}>
           <div style={{
             height:'100%',borderRadius:3,
-            background:'linear-gradient(90deg,#D22B2B,#F4C430)',
-            width:`${barW}%`,
-            transition:'width 1.1s cubic-bezier(.25,.46,.45,.94)',
-            boxShadow:'0 0 10px rgba(210,43,43,0.5)',
+            background:'linear-gradient(90deg,#D42020,#F5C21A)',
+            animation:'barFillAnim 1.8s cubic-bezier(.25,.46,.45,.94) both',
+            boxShadow:'0 0 12px rgba(212,32,32,0.5)',
           }}/>
         </div>
       )}
 
-      {/* Green accent dot */}
+      {/* Rotating feature tips */}
+      {phase>=2&&(
+        <div style={{
+          position:'absolute',bottom:95,
+          animation:'splashTextIn .4s ease .2s both',
+        }}>
+          <div key={tipIdx} style={{
+            display:'flex',alignItems:'center',gap:8,
+            padding:'8px 18px',borderRadius:24,
+            background:'rgba(255,255,255,0.04)',
+            border:'1px solid rgba(255,255,255,0.06)',
+            animation:'tipFadeIn .35s ease both',
+          }}>
+            <span style={{fontSize:16}}>{tips[tipIdx].emoji}</span>
+            <span style={{color:'rgba(255,255,255,0.45)',fontSize:13,fontWeight:600,fontFamily:F}}>{tips[tipIdx].text}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Progress dots */}
       <div style={{
-        position:'absolute',bottom:60,
-        display:'flex',gap:7,
-        animation:phase>=1?'splashTextIn .4s ease .5s both':'none',
+        position:'absolute',bottom:58,display:'flex',gap:6,
+        animation:phase>=2?'splashTextIn .3s ease .3s both':'none',
       }}>
-        {['#D22B2B','#F4C430','rgba(255,255,255,0.15)'].map((bg,i)=>(
-          <div key={i} style={{width:i===0?20:6,height:6,borderRadius:3,background:bg,transition:'all .3s'}}/>
+        {tips.map((_,i)=>(
+          <div key={i} style={{
+            width:tipIdx===i?22:6,height:6,borderRadius:3,
+            background:tipIdx===i?'#D42020':'rgba(255,255,255,0.1)',
+            transition:'all .4s cubic-bezier(.4,0,.2,1)',
+          }}/>
         ))}
       </div>
     </div>
@@ -1018,7 +1098,7 @@ function Onboarding({onDone}) {
         }}/>
       <button onClick={()=>nombre.trim()&&setStep(1)} style={{
         width:'100%',padding:'16px',borderRadius:18,border:'none',
-        background:nombre.trim()?'#1C1C1E':'#C7C7CC',color:'white',
+        background:nombre.trim()?'#D42020':'#C7C7CC',color:'white',
         fontSize:16,fontWeight:800,fontFamily:F,cursor:nombre.trim()?'pointer':'default',
         transition:'background .2s',
       }}>Continuar →</button>
@@ -1047,7 +1127,7 @@ function Onboarding({onDone}) {
           {[{v:'M',l:'♂ Hombre'},{v:'F',l:'♀ Mujer'}].map(({v,l})=>(
             <button key={v} onClick={()=>setPerfil({...perfil,sexo:v})} style={{
               flex:1,padding:'13px',borderRadius:14,border:'none',
-              background:perfil.sexo===v?'#007AFF':C.surfaceAlt,
+              background:perfil.sexo===v?'#D42020':C.surfaceAlt,
               color:perfil.sexo===v?'#FFFFFF':C.textSec,
               fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F,transition:'all .15s',
             }}>{l}</button>
@@ -1068,7 +1148,7 @@ function Onboarding({onDone}) {
           ))}
         </div>
       </div>
-      <button onClick={()=>setStep(2)} style={{padding:'16px',borderRadius:18,border:'none',background:'#1C1C1E',color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer'}}>Continuar →</button>
+      <button onClick={()=>setStep(2)} style={{padding:'16px',borderRadius:18,border:'none',background:'#D42020',color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer'}}>Continuar →</button>
     </div>,
 
     // Step 2: Objetivo
@@ -1102,10 +1182,10 @@ function Onboarding({onDone}) {
       </div>
       {(()=>{
         const tP=calcTDEE(perfil), mP=calcMetas(tP,obj,parseFloat(perfil.peso)||70);
-        const cols={bajar:'#FF3B30',mantener:'#007AFF',recomp:'#AF52DE',subir:'#34C759'};
-        const col=cols[obj]||'#007AFF';
+        const cols={bajar:'#FF3B30',mantener:'#D42020',recomp:'#AF52DE',subir:'#34C759'};
+        const col=cols[obj]||'#D42020';
         return(
-          <div style={{background:'linear-gradient(135deg,#1A2C22,#0D1710)',borderRadius:20,padding:'16px'}}>
+          <div style={{background:'linear-gradient(135deg,#1A0A0A,#0D0505)',borderRadius:20,padding:'16px'}}>
             <div style={{fontSize:10,color:'rgba(255,255,255,.4)',fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:10}}>Tu plan personalizado</div>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:12}}>
               <div>
@@ -1130,7 +1210,7 @@ function Onboarding({onDone}) {
       })()}
       <button onClick={()=>setStep(3)} style={{
         padding:'16px',borderRadius:18,border:'none',
-        background:'#1C1C1E',
+        background:'#D42020',
         color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
       }}>Ver mi plan →</button>
     </div>,
@@ -1146,8 +1226,8 @@ function Onboarding({onDone}) {
       const pesoFuturo=obj==='bajar'?Math.max(pesoActual-5,pesoActual*0.85).toFixed(1)
         :obj==='subir'?(pesoActual+3).toFixed(1)
         :pesoActual.toFixed(1);
-      const cols={bajar:'#FF3B30',mantener:'#007AFF',recomp:'#AF52DE',subir:'#34C759'};
-      const acc=cols[obj]||'#007AFF';
+      const cols={bajar:'#FF3B30',mantener:'#D42020',recomp:'#AF52DE',subir:'#34C759'};
+      const acc=cols[obj]||'#D42020';
       const msgs={
         bajar:`En ~${semanas} semanas podrías llegar a ${pesoFuturo} kg`,
         subir:`En ~${semanas} semanas podrías ganar 3 kg de músculo`,
@@ -1292,7 +1372,7 @@ function WeekChart({data, meta, C, F}) {
             <g key={d.date}>
               <rect x={x} y={0} width={bW} height={H} rx={7} fill={C.border} opacity={0.25}/>
               <rect x={x} y={y} width={bW} height={barH} rx={7}
-                fill={d.cal===0?C.border:over?C.red:'#007AFF'}
+                fill={d.cal===0?C.border:over?C.red:'#D42020'}
                 opacity={isToday?1:0.55}
                 style={{transition:'height .5s ease,y .5s ease'}}/>
               {isToday&&<rect x={x} y={y} width={bW} height={barH} rx={7} fill="url(#tg)" opacity={0.3}/>}
@@ -1335,7 +1415,7 @@ function ExerciseSheet({C, F, perfil, onAdd, onClose}) {
         {/* Cat filter */}
         <div style={{display:'flex',gap:6,marginBottom:12,overflowX:'auto',paddingBottom:2,scrollbarWidth:'none'}}>
           {cats.map(ct=>(
-            <button key={ct} onClick={()=>setSelCat(ct)} style={{flexShrink:0,padding:'5px 12px',borderRadius:20,border:'none',background:selCat===ct?'#007AFF':'#007AFF18',color:selCat===ct?'white':'#007AFF',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>{ct}</button>
+            <button key={ct} onClick={()=>setSelCat(ct)} style={{flexShrink:0,padding:'5px 12px',borderRadius:20,border:'none',background:selCat===ct?'#D42020':'#D4202018',color:selCat===ct?'white':'#D42020',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>{ct}</button>
           ))}
         </div>
         {/* Exercise grid */}
@@ -1343,12 +1423,12 @@ function ExerciseSheet({C, F, perfil, onAdd, onClose}) {
           {EXERCISES.filter(e=>e.cat===selCat).map(ex=>(
             <button key={ex.id} onClick={()=>setSel(sel?.id===ex.id?null:ex)} className="tap" style={{
               padding:'10px 6px',borderRadius:14,
-              border:`1.5px solid ${sel?.id===ex.id?'#007AFF':C.border}`,
-              background:sel?.id===ex.id?'#007AFF14':C.surfaceAlt,
+              border:`1.5px solid ${sel?.id===ex.id?'#D42020':C.border}`,
+              background:sel?.id===ex.id?'#D4202014':C.surfaceAlt,
               cursor:'pointer',fontFamily:F,textAlign:'center',
             }}>
               <div style={{fontSize:22,marginBottom:3}}>{ex.emoji}</div>
-              <div style={{fontSize:9,fontWeight:600,color:sel?.id===ex.id?'#007AFF':C.textSec,lineHeight:1.2}}>{ex.nombre}</div>
+              <div style={{fontSize:9,fontWeight:600,color:sel?.id===ex.id?'#D42020':C.textSec,lineHeight:1.2}}>{ex.nombre}</div>
             </button>
           ))}
         </div>
@@ -1357,15 +1437,15 @@ function ExerciseSheet({C, F, perfil, onAdd, onClose}) {
             <div style={{fontSize:12,color:C.textSec,fontWeight:600,marginBottom:8}}>Duración (minutos)</div>
             <div style={{display:'flex',gap:6,marginBottom:10}}>
               {[10,15,20,30,45,60].map(m=>(
-                <button key={m} onClick={()=>setMins(m)} style={{flex:1,padding:'8px 2px',borderRadius:11,border:`1.5px solid ${mins===m?'#007AFF':C.border}`,background:mins===m?'#007AFF14':C.surfaceAlt,color:mins===m?'#007AFF':C.textSec,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:F}}>{m}′</button>
+                <button key={m} onClick={()=>setMins(m)} style={{flex:1,padding:'8px 2px',borderRadius:11,border:`1.5px solid ${mins===m?'#D42020':C.border}`,background:mins===m?'#D4202014':C.surfaceAlt,color:mins===m?'#D42020':C.textSec,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:F}}>{m}′</button>
               ))}
             </div>
             <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
               <button onClick={()=>setMins(Math.max(1,mins-5))} style={{width:36,height:36,borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:C.textSec,flexShrink:0}}>−</button>
               <input type="number" value={mins} onChange={e=>setMins(Math.max(1,+e.target.value||1))}
-                style={{flex:1,padding:'10px',border:`1.5px solid #007AFF`,borderRadius:12,fontSize:18,fontWeight:800,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,textAlign:'center'}}/>
+                style={{flex:1,padding:'10px',border:`1.5px solid #D42020`,borderRadius:12,fontSize:18,fontWeight:800,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,textAlign:'center'}}/>
               <span style={{fontSize:13,color:C.textSec}}>min</span>
-              <button onClick={()=>setMins(mins+5)} style={{width:36,height:36,borderRadius:10,border:'none',background:'#007AFF',fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:'white',flexShrink:0}}>+</button>
+              <button onClick={()=>setMins(mins+5)} style={{width:36,height:36,borderRadius:10,border:'none',background:'#D42020',fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:'white',flexShrink:0}}>+</button>
             </div>
             <div style={{background:'#34C75914',borderRadius:14,padding:'12px 16px',marginBottom:14,display:'flex',justifyContent:'space-between',alignItems:'center',border:'1px solid #34C75940'}}>
               <span style={{fontSize:13,color:C.textSec,fontWeight:500}}>Calorías quemadas est.</span>
@@ -1396,7 +1476,7 @@ function CustomFoodSheet({C, F, onSave, onClose}) {
         {/* Emoji picker */}
         <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:8,marginBottom:12,scrollbarWidth:'none'}}>
           {emojis.map(e=>(
-            <button key={e} onClick={()=>setFood({...food,emoji:e})} style={{flexShrink:0,width:40,height:40,borderRadius:12,border:`2px solid ${food.emoji===e?'#007AFF':C.border}`,background:food.emoji===e?'#007AFF18':C.surfaceAlt,fontSize:20,cursor:'pointer'}}>{e}</button>
+            <button key={e} onClick={()=>setFood({...food,emoji:e})} style={{flexShrink:0,width:40,height:40,borderRadius:12,border:`2px solid ${food.emoji===e?'#D42020':C.border}`,background:food.emoji===e?'#D4202018':C.surfaceAlt,fontSize:20,cursor:'pointer'}}>{e}</button>
           ))}
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
@@ -1404,19 +1484,19 @@ function CustomFoodSheet({C, F, onSave, onClose}) {
             <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:5}}>Nombre del alimento</div>
             <input value={food.nombre} onChange={e=>setFood({...food,nombre:e.target.value})}
               placeholder="Ej: Ensalada de mi abuela"
-              style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${food.nombre?'#007AFF':C.border}`,borderRadius:13,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
+              style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${food.nombre?'#D42020':C.border}`,borderRadius:13,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
           </div>
           {[{l:'Porción (g)',k:'porcion'},{l:'Calorías (kcal)',k:'cal',bold:true},{l:'Proteínas (g)',k:'prot'},{l:'Carbohidratos (g)',k:'carbs'},{l:'Grasas (g)',k:'grasas'},{l:'Fibra (g)',k:'fibra'}].map(({l,k,bold})=>(
             <div key={k}>
               <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:5}}>{l}</div>
               <input type="number" min="0" value={food[k]} onChange={e=>setFood({...food,[k]:+e.target.value||0})}
-                style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${bold&&food[k]>0?'#007AFF':C.border}`,borderRadius:13,fontSize:16,fontWeight:bold?800:600,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
+                style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${bold&&food[k]>0?'#D42020':C.border}`,borderRadius:13,fontSize:16,fontWeight:bold?800:600,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
             </div>
           ))}
         </div>
         <button className="tap" onClick={()=>valid&&onSave({...food,id:Date.now()+9000,custom:true})} style={{
           width:'100%',padding:'15px',borderRadius:18,border:'none',
-          background:valid?'#007AFF':'#C7C7CC',color:'white',
+          background:valid?'#D42020':'#C7C7CC',color:'white',
           fontSize:15,fontWeight:700,fontFamily:F,cursor:valid?'pointer':'default',
         }}>Guardar alimento</button>
       </div>
@@ -1675,7 +1755,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.3}}>{found.nombre}</div>
                 <div style={{fontSize:12,color:C.textSec,marginTop:2}}>{found.marca}</div>
-                <div style={{fontSize:13,fontWeight:800,color:'#007AFF',marginTop:4}}>{found.cal} kcal / {found.porcion}g</div>
+                <div style={{fontSize:13,fontWeight:800,color:'#D42020',marginTop:4}}>{found.cal} kcal / {found.porcion}g</div>
               </div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:7,marginBottom:14}}>
@@ -1691,7 +1771,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
               <button className="tap" onClick={()=>{
                 stopAll();
                 setTimeout(()=>onFound(found), 150);
-              }} style={{flex:2,padding:'13px',borderRadius:16,border:'none',background:'#007AFF',color:'white',fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F}}>Agregar al diario</button>
+              }} style={{flex:2,padding:'13px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F}}>Agregar al diario</button>
             </div>
           </div>
         )}
@@ -1706,7 +1786,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
             </div>
             <div style={{display:'flex',gap:8}}>
               <button className="tap" onClick={retry} style={{flex:1,padding:'12px',borderRadius:16,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>🔄 Reintentar</button>
-              <button className="tap" onClick={()=>setStatus('manual')} style={{flex:1,padding:'12px',borderRadius:16,border:'none',background:'#007AFF',color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Ingresar manual</button>
+              <button className="tap" onClick={()=>setStatus('manual')} style={{flex:1,padding:'12px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Ingresar manual</button>
             </div>
           </div>
         )}
@@ -1754,11 +1834,11 @@ function RecipeBuilder({C, F, allFoods, onSave, onClose}) {
         {/* Emoji + name */}
         <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:6,marginBottom:10,scrollbarWidth:'none'}}>
           {emojis.map(e=>(
-            <button key={e} onClick={()=>setEmoji(e)} style={{flexShrink:0,width:38,height:38,borderRadius:11,border:`2px solid ${emoji===e?'#007AFF':C.border}`,background:emoji===e?'#007AFF18':C.surfaceAlt,fontSize:20,cursor:'pointer'}}>{e}</button>
+            <button key={e} onClick={()=>setEmoji(e)} style={{flexShrink:0,width:38,height:38,borderRadius:11,border:`2px solid ${emoji===e?'#D42020':C.border}`,background:emoji===e?'#D4202018':C.surfaceAlt,fontSize:20,cursor:'pointer'}}>{e}</button>
           ))}
         </div>
         <input value={name} onChange={e=>setName(e.target.value)} placeholder="Nombre de la receta"
-          style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${name?'#007AFF':C.border}`,borderRadius:13,fontSize:15,fontFamily:F,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',marginBottom:14}}/>
+          style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${name?'#D42020':C.border}`,borderRadius:13,fontSize:15,fontFamily:F,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',marginBottom:14}}/>
 
         {/* Ingredient search */}
         <div style={{position:'relative',marginBottom:8}}>
@@ -1773,7 +1853,7 @@ function RecipeBuilder({C, F, allFoods, onSave, onClose}) {
                     <div style={{fontSize:13,fontWeight:600,color:C.text}}>{f.nombre}</div>
                     <div style={{fontSize:11,color:C.textSec}}>{f.cal} kcal / {f.porcion}g</div>
                   </div>
-                  <span style={{fontSize:16,color:'#007AFF'}}>+</span>
+                  <span style={{fontSize:16,color:'#D42020'}}>+</span>
                 </div>
               ))}
             </div>
@@ -1793,7 +1873,7 @@ function RecipeBuilder({C, F, allFoods, onSave, onClose}) {
                 <div style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
                   <button onClick={()=>setIngrs(ingrs.map((x,j)=>j===i?{...x,gramsR:Math.max(5,x.gramsR-10)}:x))} style={{width:26,height:26,borderRadius:7,border:`1px solid ${C.border}`,background:C.surfaceAlt,fontSize:14,cursor:'pointer',color:C.textSec,display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
                   <span style={{fontSize:13,fontWeight:700,color:C.text,minWidth:32,textAlign:'center'}}>{ingr.gramsR}g</span>
-                  <button onClick={()=>setIngrs(ingrs.map((x,j)=>j===i?{...x,gramsR:x.gramsR+10}:x))} style={{width:26,height:26,borderRadius:7,border:'none',background:'#007AFF',fontSize:14,cursor:'pointer',color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
+                  <button onClick={()=>setIngrs(ingrs.map((x,j)=>j===i?{...x,gramsR:x.gramsR+10}:x))} style={{width:26,height:26,borderRadius:7,border:'none',background:'#D42020',fontSize:14,cursor:'pointer',color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
                 </div>
                 <button onClick={()=>setIngrs(ingrs.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:C.red,fontSize:14,cursor:'pointer',padding:2,flexShrink:0}}>✕</button>
               </div>
@@ -1803,12 +1883,12 @@ function RecipeBuilder({C, F, allFoods, onSave, onClose}) {
 
         {/* Totals */}
         {ingrs.length>0&&(
-          <div style={{background:'#007AFF0C',borderRadius:14,padding:'12px 14px',marginBottom:14,border:'1px solid #007AFF25'}}>
+          <div style={{background:'#D420200C',borderRadius:14,padding:'12px 14px',marginBottom:14,border:'1px solid #D4202025'}}>
             <div style={{fontSize:11,color:C.textSec,fontWeight:600,marginBottom:8,textTransform:'uppercase',letterSpacing:.5}}>Total de la receta</div>
             <div style={{display:'flex',gap:10}}>
               {[{l:'Kcal',v:Math.round(totals.cal)},{l:'Prot',v:Math.round(totals.prot)+'g'},{l:'Carbs',v:Math.round(totals.carbs)+'g'},{l:'Grasas',v:Math.round(totals.grasas)+'g'}].map(({l,v})=>(
                 <div key={l} style={{flex:1,textAlign:'center'}}>
-                  <div style={{fontSize:15,fontWeight:800,color:'#007AFF',lineHeight:1}}>{v}</div>
+                  <div style={{fontSize:15,fontWeight:800,color:'#D42020',lineHeight:1}}>{v}</div>
                   <div style={{fontSize:9,color:C.textMuted,marginTop:2,textTransform:'uppercase'}}>{l}</div>
                 </div>
               ))}
@@ -1834,7 +1914,7 @@ function RecipeBuilder({C, F, allFoods, onSave, onClose}) {
             custom:true, recipe:true,
           };
           onSave(recipe);
-        }} style={{width:'100%',padding:'15px',borderRadius:18,border:'none',background:valid?'#007AFF':'#C7C7CC',color:'white',fontSize:15,fontWeight:700,fontFamily:F,cursor:valid?'pointer':'default'}}>
+        }} style={{width:'100%',padding:'15px',borderRadius:18,border:'none',background:valid?'#D42020':'#C7C7CC',color:'white',fontSize:15,fontWeight:700,fontFamily:F,cursor:valid?'pointer':'default'}}>
           Guardar receta
         </button>
       </div>
@@ -1899,7 +1979,7 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>
           {view==='plan'?'🗓️ Plan semanal':'🛒 Lista de compras'}
         </div>
-        <button onClick={()=>setView(view==='plan'?'shopping':'plan')} style={{background:'#007AFF18',border:'none',padding:'6px 10px',borderRadius:12,fontSize:11,fontWeight:700,color:'#007AFF',cursor:'pointer',fontFamily:F,flexShrink:0,minHeight:44}}>
+        <button onClick={()=>setView(view==='plan'?'shopping':'plan')} style={{background:'#D4202018',border:'none',padding:'6px 10px',borderRadius:12,fontSize:11,fontWeight:700,color:'#D42020',cursor:'pointer',fontFamily:F,flexShrink:0,minHeight:44}}>
           {view==='plan'?'🛒':'🗓️'}
         </button>
       </div>
@@ -1932,8 +2012,8 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
             {days.map(({key,label})=>(
               <div key={key} style={{marginBottom:14}}>
                 <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:8}}>
-                <div style={{fontSize:13,fontWeight:key===todayKey()?800:700,color:key===todayKey()?'#007AFF':C.textSec,textTransform:'uppercase',letterSpacing:.4}}>{label}</div>
-                {key===todayKey()&&<span style={{fontSize:9,fontWeight:700,background:'#007AFF',color:'white',padding:'2px 8px',borderRadius:8}}>HOY</span>}
+                <div style={{fontSize:13,fontWeight:key===todayKey()?800:700,color:key===todayKey()?'#D42020':C.textSec,textTransform:'uppercase',letterSpacing:.4}}>{label}</div>
+                {key===todayKey()&&<span style={{fontSize:9,fontWeight:700,background:'#D42020',color:'white',padding:'2px 8px',borderRadius:8}}>HOY</span>}
               </div>
                 <div style={{display:'flex',flexDirection:'column',gap:6}}>
                   {['Desayuno','Almuerzo','Once','Cena','Snack'].map(meal=>{
@@ -1953,7 +2033,7 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
                           ):<div style={{fontSize:10,color:C.textMuted}}>Vacío</div>}
                         </div>
                         {cal>0&&<div style={{fontSize:12,fontWeight:700,color:MC[meal],flexShrink:0}}>{cal} kcal</div>}
-                        <button onClick={()=>setPickSlot({dayKey:key,meal})} style={{width:28,height:28,borderRadius:8,border:'none',background:'#007AFF18',color:'#007AFF',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>+</button>
+                        <button onClick={()=>setPickSlot({dayKey:key,meal})} style={{width:28,height:28,borderRadius:8,border:'none',background:'#D4202018',color:'#D42020',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>+</button>
                       </div>
                     );
                   })}
@@ -1981,7 +2061,7 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
                       <div style={{fontSize:13,fontWeight:600,color:C.text}}>{item.nombre}</div>
                       <div style={{fontSize:11,color:C.textSec}}>{item.marca} · {item.count}x esta semana</div>
                     </div>
-                    <div style={{fontSize:11,fontWeight:700,color:'#007AFF',flexShrink:0}}>{item.cal} kcal/p</div>
+                    <div style={{fontSize:11,fontWeight:700,color:'#D42020',flexShrink:0}}>{item.cal} kcal/p</div>
                   </div>
                 ))}
               </>
@@ -2005,7 +2085,7 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
                   <div style={{fontSize:13,fontWeight:600,color:C.text}}>{f.nombre}</div>
                   <div style={{fontSize:11,color:C.textSec}}>{f.cal} kcal</div>
                 </div>
-                <span style={{fontSize:16,color:'#007AFF',fontWeight:700}}>+</span>
+                <span style={{fontSize:16,color:'#D42020',fontWeight:700}}>+</span>
               </div>
             ))}
             {search.length>1&&filtered.length===0&&<div style={{textAlign:'center',padding:'20px',color:C.textMuted,fontSize:13}}>Sin resultados</div>}
@@ -2311,7 +2391,7 @@ function WeeklySummary({C, F, metas, streak, onClose}) {
           {[
             {icon:'🔥',l:'Promedio diario',v:`${avgCal} kcal`,c:'#FF9500'},
             {icon:'🎯',l:'Días en meta',v:`${onGoal}/7`,c:'#34C759'},
-            {icon:'💪',l:'Kcal quemadas',v:`${burned}`,c:'#007AFF'},
+            {icon:'💪',l:'Kcal quemadas',v:`${burned}`,c:'#D42020'},
             {icon:'📈',l:'Racha actual',v:`${streak.days} días`,c:'#AF52DE'},
           ].map(({icon,l,v,c2=null,c})=>(
             <div key={l} style={{background:C.surface,borderRadius:18,padding:'16px',border:`1px solid ${C.border}`}}>
@@ -2333,7 +2413,7 @@ function WeeklySummary({C, F, metas, streak, onClose}) {
                 <span style={{fontSize:14}}>{d.logged?(d.cal>metas.cal?'⚠️':'✅'):'—'}</span>
               </div>
               <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:d.isToday?700:500,color:d.isToday?'#007AFF':C.text}}>{d.label}{d.isToday?' (hoy)':''}</div>
+                <div style={{fontSize:13,fontWeight:d.isToday?700:500,color:d.isToday?'#D42020':C.text}}>{d.label}{d.isToday?' (hoy)':''}</div>
                 {d.logged?<div style={{fontSize:11,color:C.textSec}}>{d.cal} kcal{d.burned>0?` · 🔥${d.burned}`:''}</div>
                   :<div style={{fontSize:11,color:C.textMuted}}>Sin registro</div>}
               </div>
@@ -2345,8 +2425,8 @@ function WeeklySummary({C, F, metas, streak, onClose}) {
         </div>
 
         {/* Mensaje motivacional */}
-        <div style={{background:score>=60?'#34C75914':'#007AFF14',borderRadius:18,padding:'16px',
-          border:`1px solid ${score>=60?'#34C75940':'#007AFF40'}`,textAlign:'center'}}>
+        <div style={{background:score>=60?'#34C75914':'#D4202014',borderRadius:18,padding:'16px',
+          border:`1px solid ${score>=60?'#34C75940':'#D4202040'}`,textAlign:'center'}}>
           <div style={{fontSize:28,marginBottom:8}}>{score>=80?'🏆':score>=60?'💪':score>=40?'📈':'🌱'}</div>
           <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>
             {score>=80?'¡Semana increíble!'
@@ -2528,8 +2608,8 @@ function WeightChart({data, C, F, obj, metaPeso}) {
       <svg width="100%" viewBox={`0 0 ${W} ${H+24}`} style={{overflow:'visible'}}>
         <defs>
           <linearGradient id="wgrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#007AFF" stopOpacity="0.2"/>
-            <stop offset="100%" stopColor="#007AFF" stopOpacity="0"/>
+            <stop offset="0%" stopColor="#D42020" stopOpacity="0.2"/>
+            <stop offset="100%" stopColor="#D42020" stopOpacity="0"/>
           </linearGradient>
           <linearGradient id="wgradproj" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#AF52DE" stopOpacity="0.1"/>
@@ -2554,7 +2634,7 @@ function WeightChart({data, C, F, obj, metaPeso}) {
         )}
         {/* Línea real */}
         {validPts.length>1&&(
-          <polyline points={poly} fill="none" stroke="#007AFF"
+          <polyline points={poly} fill="none" stroke="#D42020"
             strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"/>
         )}
         {/* Línea proyección */}
@@ -2567,8 +2647,8 @@ function WeightChart({data, C, F, obj, metaPeso}) {
         {validPts.map((p,i)=>(
           <circle key={i} cx={p.x} cy={p.y}
             r={i===validPts.length-1?5:3}
-            fill={i===validPts.length-1?'#007AFF':C.surface}
-            stroke="#007AFF" strokeWidth={2}/>
+            fill={i===validPts.length-1?'#D42020':C.surface}
+            stroke="#D42020" strokeWidth={2}/>
         ))}
         {/* Punto proyección final */}
         {projPts.length>0&&(
@@ -2902,8 +2982,589 @@ const getPortionHints = (grams) => {
 
 
 /* ═══════════════════════════════════════════════════════
-   ASISTENTE IA NUTRICIONAL — powered by Claude
+   EDGE FUNCTION URL — tu proxy de Supabase para Claude API
+   Cambia esta URL cuando hagas deploy de la edge function.
 ═══════════════════════════════════════════════════════ */
+const EDGE_FN_URL = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food';
+
+/* Helper: llamar a la edge function con retry */
+const callEdgeFn = async (body, signal) => {
+  const res = await fetch(EDGE_FN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Error ${res.status}`);
+  }
+  return res.json();
+};
+
+
+/* ═══════════════════════════════════════════════════════
+   FOOD PHOTO SCANNER — analiza foto de comida con IA
+═══════════════════════════════════════════════════════ */
+function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose}) {
+  const dark = C.surface !== '#FFFFFF' && C.surface !== '#ffffff'; // derive from theme
+  const [status, setStatus]     = useState('idle');    // idle | capturing | analyzing | results | error
+  const [image, setImage]       = useState(null);      // base64 string
+  const [preview, setPreview]   = useState(null);      // object URL for display
+  const [result, setResult]     = useState(null);      // parsed analysis
+  const [error, setError]       = useState('');
+  const [selected, setSelected] = useState({});        // {index: true} — alimentos seleccionados para agregar
+  const inputRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  /* ── Capturar foto desde cámara o galería ── */
+  const handleCapture = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setStatus('analyzing');
+    setError('');
+
+    try {
+      // Leer como base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('No se pudo leer la imagen'));
+        reader.readAsDataURL(file);
+      });
+
+      // Crear preview
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+
+      // Comprimir si es muy grande (>2MB)
+      let finalBase64 = base64;
+      if (file.size > 2 * 1024 * 1024) {
+        finalBase64 = await compressImage(base64, 1200, 0.8);
+      }
+
+      setImage(finalBase64);
+
+      // Enviar a la edge function
+      const data = await callEdgeFn({
+        mode: 'photo',
+        image: finalBase64,
+        nombre,
+      });
+
+      if (data.result?.error) {
+        setError(data.result.error);
+        setStatus('error');
+        return;
+      }
+
+      if (data.result?.alimentos?.length) {
+        setResult(data.result);
+        // Seleccionar todos por defecto
+        const sel = {};
+        data.result.alimentos.forEach((_, i) => sel[i] = true);
+        setSelected(sel);
+        setStatus('results');
+      } else {
+        setError('No se identificaron alimentos en la imagen. Intenta con una foto más clara.');
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error('Photo analysis error:', err);
+      setError(err.message || 'Error al analizar la imagen');
+      setStatus('error');
+    }
+  };
+
+  /* ── Comprimir imagen ── */
+  const compressImage = (base64, maxDim, quality) => new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width: w, height: h } = img;
+      if (w > maxDim || h > maxDim) {
+        const ratio = Math.min(maxDim / w, maxDim / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = base64;
+  });
+
+  /* ── Agregar alimentos seleccionados al log ── */
+  const addSelected = () => {
+    if (!result?.alimentos) return;
+    result.alimentos.forEach((food, i) => {
+      if (!selected[i]) return;
+      onAdd({
+        id: Date.now() + Math.random() + i,
+        nombre: food.nombre,
+        marca: 'Foto IA',
+        cat: 'Escaneado',
+        porcion: food.porcion_g || 100,
+        cal: food.cal || 0,
+        prot: food.prot || 0,
+        carbs: food.carbs || 0,
+        grasas: food.grasas || 0,
+        fibra: food.fibra || 0,
+        azucar: 0,
+        sodio: 0,
+        emoji: food.emoji || '📸',
+        grams: food.porcion_g || 100,
+        origen: 'foto_ia',
+      });
+    });
+    onClose();
+  };
+
+  const toggleItem = (i) => setSelected(prev => ({ ...prev, [i]: !prev[i] }));
+  const totalSelected = result?.alimentos
+    ? result.alimentos.reduce((t, f, i) => selected[i] ? t + (f.cal || 0) : t, 0)
+    : 0;
+
+  /* ── Confidencia visual ── */
+  const confColor = {alta:'#34C759', media:'#FF9500', baja:'#FF3B30'};
+  const confLabel = {alta:'Alta confianza', media:'Confianza media', baja:'Baja confianza'};
+
+  return (
+    <div onClick={onClose} style={{
+      position:'fixed', inset:0, background:'rgba(0,0,0,0.88)',
+      zIndex:75, display:'flex', flexDirection:'column',
+      alignItems:'center', justifyContent:'flex-end',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        width:'100%', maxHeight:'92vh', background:C.surface,
+        borderRadius:'26px 26px 0 0', padding:'16px 16px 40px',
+        animation:'slideUp .3s ease', overflowY:'auto',
+      }}>
+        {/* Handle */}
+        <div style={{width:40,height:4,borderRadius:2,background:C.border,margin:'0 auto 14px'}}/>
+
+        {/* Header */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+          <div>
+            <div style={{fontSize:17,fontWeight:800,color:C.text,letterSpacing:'-.3px'}}>
+              📸 Escanear tu plato
+            </div>
+            <div style={{fontSize:11,color:C.textSec,marginTop:2}}>
+              La IA analiza tu comida y estima las calorías
+            </div>
+          </div>
+          <div style={{
+            fontSize:9, fontWeight:700, color:'#D42020',
+            background:'#D4202014', padding:'3px 9px',
+            borderRadius:8, border:'1px solid #D4202040',
+          }}>BETA</div>
+        </div>
+
+        {/* ── ESTADO: IDLE — botones de captura ── */}
+        {status === 'idle' && (
+          <div style={{animation:'fadeUp .3s ease'}}>
+            <div style={{
+              background:`linear-gradient(135deg, ${C.surfaceAlt}, ${dark ? '#1a1a2e' : '#f0f4ff'})`,
+              borderRadius:20, padding:'28px 20px', textAlign:'center',
+              border:`1.5px dashed ${C.border}`, marginBottom:14,
+            }}>
+              <div style={{fontSize:56, marginBottom:12}}>🍽️</div>
+              <div style={{fontSize:14, fontWeight:700, color:C.text, marginBottom:6}}>
+                Saca una foto de tu plato
+              </div>
+              <div style={{fontSize:12, color:C.textSec, lineHeight:1.5, maxWidth:260, margin:'0 auto 18px'}}>
+                Puede ser tu almuerzo, once, snack o lo que sea. La IA identificará cada alimento y estimará las calorías.
+              </div>
+
+              <div style={{display:'flex', gap:10, justifyContent:'center'}}>
+                <button className="tap" onClick={() => {
+                  inputRef.current.setAttribute('capture', 'environment');
+                  inputRef.current.click();
+                }} style={{
+                  padding:'13px 22px', borderRadius:16, border:'none',
+                  background:'#D42020', color:'white',
+                  fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:F,
+                  display:'flex', alignItems:'center', gap:7,
+                }}>
+                  <span style={{fontSize:18}}>📷</span> Cámara
+                </button>
+                <button className="tap" onClick={() => {
+                  inputRef.current.removeAttribute('capture');
+                  inputRef.current.click();
+                }} style={{
+                  padding:'13px 22px', borderRadius:16,
+                  border:`1.5px solid ${C.border}`, background:C.surfaceAlt,
+                  color:C.text, fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:F,
+                  display:'flex', alignItems:'center', gap:7,
+                }}>
+                  <span style={{fontSize:18}}>🖼️</span> Galería
+                </button>
+              </div>
+            </div>
+
+            <div style={{
+              background:C.surfaceAlt, borderRadius:14, padding:'10px 14px',
+              border:`1px solid ${C.border}`,
+            }}>
+              <div style={{fontSize:11, fontWeight:700, color:C.textSec, marginBottom:6}}>💡 Tips para mejor precisión</div>
+              {['Foto clara, bien iluminada, sin flash directo',
+                'Incluye todo el plato en el encuadre',
+                'Mientras más se distinguen los alimentos, mejor',
+              ].map(tip => (
+                <div key={tip} style={{fontSize:11, color:C.textSec, padding:'3px 0', display:'flex', gap:6}}>
+                  <span>•</span><span>{tip}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── ESTADO: ANALYZING ── */}
+        {status === 'analyzing' && (
+          <div style={{textAlign:'center', padding:'24px 0', animation:'fadeUp .3s ease'}}>
+            {preview && (
+              <div style={{
+                width:180, height:180, borderRadius:24, overflow:'hidden',
+                margin:'0 auto 18px', border:`3px solid ${C.border}`,
+                position:'relative',
+              }}>
+                <img src={preview} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                <div style={{
+                  position:'absolute', inset:0,
+                  background:'rgba(0,0,0,0.3)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}>
+                  <div style={{
+                    width:48, height:48, borderRadius:'50%',
+                    border:'3px solid rgba(255,255,255,0.8)',
+                    borderTopColor:'transparent',
+                    animation:'spin 1s linear infinite',
+                  }}/>
+                </div>
+              </div>
+            )}
+            <div style={{fontSize:16, fontWeight:700, color:C.text, marginBottom:6}}>
+              Analizando tu plato...
+            </div>
+            <div style={{fontSize:12, color:C.textSec, lineHeight:1.5}}>
+              Identificando alimentos y calculando macros
+            </div>
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+          </div>
+        )}
+
+        {/* ── ESTADO: RESULTS ── */}
+        {status === 'results' && result && (
+          <div style={{animation:'fadeUp .3s ease'}}>
+            {/* Preview + resumen */}
+            <div style={{display:'flex', gap:12, marginBottom:14}}>
+              {preview && (
+                <div style={{
+                  width:80, height:80, borderRadius:16, overflow:'hidden',
+                  flexShrink:0, border:`2px solid ${C.border}`,
+                }}>
+                  <img src={preview} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                </div>
+              )}
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:15, fontWeight:800, color:C.text, lineHeight:1.3}}>
+                  {result.plato || 'Plato analizado'}
+                </div>
+                {result.confianza && (
+                  <div style={{
+                    display:'inline-flex', alignItems:'center', gap:4, marginTop:5,
+                    fontSize:10, fontWeight:700, color:confColor[result.confianza] || C.textSec,
+                    background:(confColor[result.confianza] || C.textSec)+'18',
+                    padding:'3px 8px', borderRadius:8,
+                  }}>
+                    <div style={{width:6,height:6,borderRadius:'50%',background:confColor[result.confianza]}}/>
+                    {confLabel[result.confianza] || result.confianza}
+                  </div>
+                )}
+                {result.total && (
+                  <div style={{
+                    fontSize:13, fontWeight:800, color:'#D42020', marginTop:6,
+                  }}>
+                    Total: ~{result.total.cal} kcal
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Macro totales */}
+            {result.total && (
+              <div style={{
+                display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:7,
+                marginBottom:14,
+              }}>
+                {[
+                  {l:'Proteína',v:`${result.total.prot}g`,c:C.red},
+                  {l:'Carbos',v:`${result.total.carbs}g`,c:C.amber},
+                  {l:'Grasas',v:`${result.total.grasas}g`,c:C.purple},
+                  {l:'Fibra',v:`${result.total.fibra||0}g`,c:C.green},
+                ].map(({l,v,c}) => (
+                  <div key={l} style={{
+                    background:C.surfaceAlt, borderRadius:12, padding:'9px 6px',
+                    textAlign:'center', border:`1px solid ${C.border}`,
+                  }}>
+                    <div style={{fontSize:14,fontWeight:800,color:c,lineHeight:1}}>{v}</div>
+                    <div style={{fontSize:9,color:C.textMuted,fontWeight:600,marginTop:3}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Lista de alimentos — seleccionables */}
+            <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>
+              Alimentos detectados · toca para seleccionar
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:14}}>
+              {result.alimentos.map((food, i) => (
+                <div key={i} onClick={() => toggleItem(i)} style={{
+                  display:'flex', alignItems:'center', gap:10,
+                  background:selected[i] ? (C.surfaceAlt) : C.surface,
+                  borderRadius:14, padding:'10px 12px',
+                  border:`1.5px solid ${selected[i] ? '#D42020' : C.border}`,
+                  cursor:'pointer', transition:'all .2s',
+                }}>
+                  {/* Checkbox */}
+                  <div style={{
+                    width:24, height:24, borderRadius:8, flexShrink:0,
+                    background:selected[i] ? '#D42020' : 'transparent',
+                    border:selected[i] ? 'none' : `2px solid ${C.border}`,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    color:'white', fontSize:14, fontWeight:700,
+                    transition:'all .2s',
+                  }}>
+                    {selected[i] && '✓'}
+                  </div>
+                  {/* Emoji */}
+                  <div style={{fontSize:26, flexShrink:0}}>{food.emoji || '🍽️'}</div>
+                  {/* Info */}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:700,color:C.text,lineHeight:1.3}}>
+                      {food.nombre}
+                    </div>
+                    <div style={{fontSize:11,color:C.textSec,marginTop:2}}>
+                      ~{food.porcion_g}g · P:{food.prot}g · C:{food.carbs}g · G:{food.grasas}g
+                    </div>
+                  </div>
+                  {/* Cals */}
+                  <div style={{
+                    flexShrink:0, textAlign:'right',
+                  }}>
+                    <div style={{fontSize:14,fontWeight:800,color:C.primary}}>{food.cal}</div>
+                    <div style={{fontSize:9,color:C.textMuted}}>kcal</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Consejo IA */}
+            {result.consejo && (
+              <div style={{
+                background:dark?'rgba(0,122,255,0.08)':'rgba(0,122,255,0.06)',
+                borderRadius:13, padding:'10px 13px', marginBottom:14,
+                borderLeft:'3px solid #D42020',
+              }}>
+                <div style={{fontSize:12,color:C.text,lineHeight:1.5,fontWeight:500}}>
+                  💡 {result.consejo}
+                </div>
+              </div>
+            )}
+
+            {/* Disclaimer */}
+            <div style={{
+              fontSize:10, color:C.textMuted, textAlign:'center',
+              marginBottom:14, lineHeight:1.5,
+            }}>
+              ⚠️ Los valores son estimados por IA y pueden variar.
+              Ajusta las porciones manualmente si es necesario.
+            </div>
+
+            {/* Botones de acción */}
+            <div style={{display:'flex',gap:8}}>
+              <button className="tap" onClick={() => {
+                setStatus('idle'); setResult(null); setPreview(null); setImage(null);
+              }} style={{
+                flex:1, padding:'14px', borderRadius:16,
+                border:`1.5px solid ${C.border}`, background:C.surfaceAlt,
+                color:C.textSec, fontSize:13, fontWeight:600,
+                cursor:'pointer', fontFamily:F,
+              }}>
+                📷 Otra foto
+              </button>
+              <button className="tap" onClick={addSelected} disabled={totalSelected===0} style={{
+                flex:2, padding:'14px', borderRadius:16, border:'none',
+                background:totalSelected > 0 ? '#D42020' : '#C7C7CC',
+                color:'white', fontSize:14, fontWeight:700,
+                cursor:totalSelected > 0 ? 'pointer' : 'default', fontFamily:F,
+              }}>
+                {totalSelected > 0
+                  ? `Agregar ${Object.values(selected).filter(Boolean).length} items · ~${totalSelected} kcal`
+                  : 'Selecciona alimentos'
+                }
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── ESTADO: ERROR ── */}
+        {status === 'error' && (
+          <div style={{textAlign:'center', padding:'20px 0', animation:'fadeUp .25s ease'}}>
+            {preview && (
+              <div style={{
+                width:120, height:120, borderRadius:20, overflow:'hidden',
+                margin:'0 auto 14px', border:`2px solid ${C.border}`, opacity:0.6,
+              }}>
+                <img src={preview} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+              </div>
+            )}
+            <div style={{fontSize:36,marginBottom:8}}>😕</div>
+            <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:4}}>
+              No se pudo analizar
+            </div>
+            <div style={{fontSize:12,color:C.textSec,lineHeight:1.5,marginBottom:16,maxWidth:260,margin:'0 auto 16px'}}>
+              {error}
+            </div>
+            <div style={{display:'flex',gap:8,justifyContent:'center'}}>
+              <button className="tap" onClick={() => {
+                setStatus('idle'); setError(''); setPreview(null);
+              }} style={{
+                padding:'12px 20px', borderRadius:16,
+                border:`1px solid ${C.border}`, background:C.surfaceAlt,
+                color:C.text, fontSize:13, fontWeight:600,
+                cursor:'pointer', fontFamily:F,
+              }}>
+                📷 Intentar de nuevo
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Input file oculto */}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleCapture}
+          style={{display:'none'}}
+        />
+      </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   ASISTENTE IA NUTRICIONAL — powered by Claude (via Edge Function)
+═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   WELCOME BACK — modal de retención al volver
+═══════════════════════════════════════════════════════ */
+function WelcomeBack({C, F, nombre, streak, daysAway, onClose}) {
+  const alive = streak.days > 0;
+  const msg = daysAway<=1?`¡Bienvenido, ${nombre}!`:daysAway<=3?`¡Te extrañamos, ${nombre}!`:`¡${nombre} volvió!`;
+  const sub = daysAway<=1?'Tu racha sigue viva. No la pierdas hoy.'
+    :daysAway<=3?`${daysAway} días sin registrar. Retomar es lo más difícil — ya lo hiciste.`
+    :daysAway<=14?'Una semana fuera no borra tu progreso. Empecemos de nuevo.'
+    :'Cada experto fue principiante. Hoy es día 1.';
+  return (
+    <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:80,background:'rgba(0,0,0,0.88)',display:'flex',alignItems:'center',justifyContent:'center',padding:20,fontFamily:F}}>
+      <div onClick={e=>e.stopPropagation()} style={{width:'100%',maxWidth:340,background:`linear-gradient(160deg, ${C.surface}, ${C.red}08)`,borderRadius:28,padding:'28px 22px',textAlign:'center',animation:'wbModalIn .5s cubic-bezier(.34,1.56,.64,1) both',border:`1px solid ${C.red}15`}}>
+        <div style={{marginBottom:18,animation:'wbLogoIn .7s cubic-bezier(.34,1.56,.64,1) .15s both'}}><Logo size={80}/></div>
+        <div style={{fontSize:22,fontWeight:800,color:C.text,lineHeight:1.3,marginBottom:6,letterSpacing:'-.5px'}}>{msg}</div>
+        <div style={{fontSize:13,color:C.textSec,lineHeight:1.6,marginBottom:22,maxWidth:280,margin:'0 auto 22px'}}>{sub}</div>
+        <div style={{display:'flex',gap:8,marginBottom:22}}>
+          {[{l:'Racha',v:alive?`${streak.days}`:'0',emoji:'🔥',c:C.amber},{l:'Días fuera',v:`${daysAway}`,emoji:'📅',c:C.red}].map(({l,v,emoji,c})=>(
+            <div key={l} style={{flex:1,background:`${c}0A`,borderRadius:16,padding:'12px 8px',border:`1px solid ${c}18`}}>
+              <div style={{fontSize:22,fontWeight:800,color:c}}>{emoji} {v}</div>
+              <div style={{fontSize:10,color:C.textMuted,marginTop:3,fontWeight:600}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <button className="tap" onClick={onClose} style={{width:'100%',padding:'15px',borderRadius:16,border:'none',background:`linear-gradient(135deg, ${C.red}, ${C.accentLight||C.red})`,color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,boxShadow:`0 8px 28px ${C.red}40`}}>
+          {daysAway<=1?'¡Seguir registrando!':'Empezar de nuevo 💪'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   MILESTONE CELEBRATION — celebración de logros
+═══════════════════════════════════════════════════════ */
+const MILESTONES = {
+  streak7:{emoji:'🔥',title:'¡7 días seguidos!',sub:'Una semana completa. Eso es disciplina real.',badge:'Semana Perfecta',ck:'amber'},
+  streak14:{emoji:'⚡',title:'¡14 días de racha!',sub:'Dos semanas. Ya es un hábito.',badge:'Imparable',ck:'amber'},
+  streak30:{emoji:'👑',title:'¡30 días!',sub:'Un mes completo. Eres parte del 5% que llega aquí.',badge:'Leyenda',ck:'red'},
+  streak60:{emoji:'💎',title:'¡60 días!',sub:'Esto ya es parte de tu vida.',badge:'Diamante',ck:'blue'},
+  first_scan:{emoji:'📸',title:'¡Primera foto IA!',sub:'Escaneaste tu primer plato. El futuro es ahora.',badge:'Explorador IA',ck:'green'},
+  foods_50:{emoji:'🍽️',title:'50 registros',sub:'Conoces tu cuerpo mejor que nunca.',badge:'Foodie',ck:'red'},
+  foods_200:{emoji:'🏆',title:'200 registros',sub:'Doscientas comidas. Eres un profesional.',badge:'Nutricionista',ck:'amber'},
+  goal_7:{emoji:'🎯',title:'7 días en meta',sub:'Una semana entera dentro de tu objetivo calórico.',badge:'Precisión',ck:'green'},
+};
+function MilestoneCelebration({C, F, milestone, onClose}) {
+  const m = MILESTONES[milestone]||MILESTONES.streak7;
+  const c = C[m.ck]||C.red;
+  return (
+    <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:90,background:'rgba(0,0,0,0.92)',display:'flex',alignItems:'center',justifyContent:'center',padding:20,fontFamily:F}}>
+      <div onClick={e=>e.stopPropagation()} style={{width:'100%',maxWidth:320,background:`linear-gradient(160deg, ${C.surface}, ${c}10)`,borderRadius:28,padding:'32px 24px',textAlign:'center',animation:'msIn .6s cubic-bezier(.34,1.56,.64,1) both',border:`1.5px solid ${c}20`,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',inset:0,background:`linear-gradient(105deg, transparent 40%, ${c}0A 50%, transparent 60%)`,animation:'msShimmer 2.5s ease infinite'}}/>
+        <div style={{display:'inline-flex',alignItems:'center',gap:6,padding:'5px 14px',borderRadius:20,background:`${c}15`,border:`1px solid ${c}25`,marginBottom:20,position:'relative'}}>
+          <div style={{width:7,height:7,borderRadius:'50%',background:c,boxShadow:`0 0 10px ${c}`}}/>
+          <span style={{fontSize:10,fontWeight:700,color:c,textTransform:'uppercase',letterSpacing:1}}>{m.badge}</span>
+        </div>
+        <div style={{fontSize:68,marginBottom:14,position:'relative',animation:'msEmoji .8s cubic-bezier(.34,1.56,.64,1) .2s both',filter:`drop-shadow(0 4px 18px ${c}35)`}}>{m.emoji}</div>
+        <div style={{fontSize:24,fontWeight:800,color:C.text,lineHeight:1.2,marginBottom:8,letterSpacing:'-1px',position:'relative'}}>{m.title}</div>
+        <div style={{fontSize:13,color:C.textSec,lineHeight:1.6,marginBottom:28,maxWidth:260,margin:'0 auto 28px',position:'relative'}}>{m.sub}</div>
+        <button className="tap" onClick={onClose} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:`linear-gradient(135deg, ${c}, ${c}CC)`,color:'white',fontSize:14,fontWeight:800,cursor:'pointer',fontFamily:F,boxShadow:`0 8px 24px ${c}35`,position:'relative'}}>¡Seguir así!</button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   DAILY CHALLENGE CARD — reto diario para retención
+═══════════════════════════════════════════════════════ */
+function DailyChallengeCard({C, F, log, agua}) {
+  const dark = C.surface !== '#FFFFFF';
+  const challenges = [
+    {emoji:'🥦',text:'Come 3 porciones de verduras hoy',reward:'+15 pts',c:C.green},
+    {emoji:'💧',text:'Toma 8 vasos de agua',reward:'+10 pts',c:'#D42020'},
+    {emoji:'🥩',text:'Llega a tu meta de proteína',reward:'+20 pts',c:C.red},
+    {emoji:'🚫',text:'Día sin azúcar añadida',reward:'+25 pts',c:C.amber},
+    {emoji:'📸',text:'Escanea tu almuerzo con IA',reward:'+15 pts',c:C.purple},
+    {emoji:'🥗',text:'Almuerza menos de 600 kcal',reward:'+20 pts',c:C.green},
+    {emoji:'🌅',text:'Registra las 4 comidas del día',reward:'+30 pts',c:C.amber},
+  ];
+  const ch = challenges[new Date().getDay()%challenges.length];
+  const [done, setDone] = useState(false);
+  return (
+    <div onClick={()=>setDone(!done)} style={{
+      background:`linear-gradient(135deg, ${ch.c}0A, transparent)`,
+      borderRadius:18,padding:'13px 14px',border:`1px solid ${ch.c}18`,
+      display:'flex',alignItems:'center',gap:12,fontFamily:F,
+      cursor:'pointer',transition:'opacity .3s',opacity:done?.55:1,marginBottom:10,
+    }}>
+      <div style={{width:42,height:42,borderRadius:14,background:done?`${C.green}18`:`${ch.c}12`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:done?20:22,flexShrink:0,border:`1.5px solid ${done?C.green:ch.c}25`,transition:'all .3s'}}>
+        {done?'✓':ch.emoji}
+      </div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:9,fontWeight:700,color:ch.c,textTransform:'uppercase',letterSpacing:.5,marginBottom:2}}>Reto del día</div>
+        <div style={{fontSize:13,fontWeight:700,color:C.text,textDecoration:done?'line-through':'none',lineHeight:1.3}}>{ch.text}</div>
+      </div>
+      <div style={{padding:'4px 9px',borderRadius:10,background:done?`${C.green}15`:`${ch.c}10`,border:`1px solid ${done?C.green:ch.c}20`}}>
+        <div style={{fontSize:10,fontWeight:800,color:done?C.green:ch.c}}>{done?'✓ Hecho':ch.reward}</div>
+      </div>
+    </div>
+  );
+}
+
+
 function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose}) {
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState('');
@@ -2956,18 +3617,12 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
     setMsgs(newMsgs);
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:1000,
-          system: systemPrompt,
-          messages: newMsgs.map(m=>({role:m.role, content:m.content})),
-        }),
+      const data = await callEdgeFn({
+        mode: 'chat',
+        system: systemPrompt,
+        messages: newMsgs.map(m=>({role:m.role, content:m.content})),
       });
-      const data = await res.json();
-      const reply = data.content?.[0]?.text || 'No pude responder. Intenta de nuevo.';
+      const reply = data.text || 'No pude responder. Intenta de nuevo.';
       setMsgs(prev=>[...prev, {role:'assistant', content:reply}]);
     } catch(e) {
       setMsgs(prev=>[...prev, {role:'assistant', content:'❌ Error de conexión. Verifica tu internet.'}]);
@@ -2988,7 +3643,7 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
       <div style={{...modalHeaderStyle(C), gap:12}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,display:'flex',alignItems:'center',gap:8}}>
-          <div style={{width:36,height:36,borderRadius:12,background:'linear-gradient(135deg,#007AFF,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>🤖</div>
+          <div style={{width:36,height:36,borderRadius:12,background:'linear-gradient(135deg,#D42020,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>🤖</div>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:C.text}}>Nutri IA</div>
             <div style={{fontSize:10,color:'#34C759',fontWeight:600}}>● En línea</div>
@@ -3001,11 +3656,11 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
         {msgs.map((m,i)=>(
           <div key={i} style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start'}}>
             {m.role==='assistant'&&(
-              <div style={{width:28,height:28,borderRadius:10,background:'linear-gradient(135deg,#007AFF,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0,marginRight:8,alignSelf:'flex-end'}}>🤖</div>
+              <div style={{width:28,height:28,borderRadius:10,background:'linear-gradient(135deg,#D42020,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0,marginRight:8,alignSelf:'flex-end'}}>🤖</div>
             )}
             <div style={{
               maxWidth:'80%',padding:'10px 14px',borderRadius:m.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px',
-              background:m.role==='user'?'#007AFF':C.surface,
+              background:m.role==='user'?'#D42020':C.surface,
               color:m.role==='user'?'white':C.text,
               fontSize:13,lineHeight:1.5,
               border:m.role==='assistant'?`1px solid ${C.border}`:'none',
@@ -3016,7 +3671,7 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
         ))}
         {loading&&(
           <div style={{display:'flex',gap:8,alignItems:'flex-end'}}>
-            <div style={{width:28,height:28,borderRadius:10,background:'linear-gradient(135deg,#007AFF,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🤖</div>
+            <div style={{width:28,height:28,borderRadius:10,background:'linear-gradient(135deg,#D42020,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🤖</div>
             <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:'18px 18px 18px 4px',padding:'12px 16px',display:'flex',gap:5}}>
               {[0,1,2].map(i=>(
                 <div key={i} style={{width:7,height:7,borderRadius:'50%',background:C.textMuted,animation:`bounce .8s ease ${i*0.15}s infinite`}}/>
@@ -3052,7 +3707,7 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
         />
         <button className="tap" onClick={()=>send()} disabled={!input.trim()||loading} style={{
           width:44,height:44,borderRadius:14,border:'none',
-          background:input.trim()&&!loading?'#007AFF':'#C7C7CC',
+          background:input.trim()&&!loading?'#D42020':'#C7C7CC',
           color:'white',fontSize:18,cursor:'pointer',flexShrink:0,
           display:'flex',alignItems:'center',justifyContent:'center',
         }}>↑</button>
@@ -3135,7 +3790,7 @@ function RestaurantEstimator({C,F,meal,onAdd,onClose}){
         {/* Size */}
         <div style={{display:'flex',gap:6,marginBottom:14}}>
           {[{k:'small',l:'S'},{k:'medium',l:'M'},{k:'large',l:'L'},{k:'xlarge',l:'XL'}].map(({k,l})=>(
-            <button key={k} className="tap" onClick={()=>setSize(k)} style={{flex:1,padding:'8px 4px',borderRadius:12,border:`1.5px solid ${size===k?'#007AFF':C.border}`,background:size===k?'#007AFF18':C.surfaceAlt,color:size===k?'#007AFF':C.textSec,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+            <button key={k} className="tap" onClick={()=>setSize(k)} style={{flex:1,padding:'8px 4px',borderRadius:12,border:`1.5px solid ${size===k?'#D42020':C.border}`,background:size===k?'#D4202018':C.surfaceAlt,color:size===k?'#D42020':C.textSec,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F}}>
               {l}
             </button>
           ))}
@@ -3143,7 +3798,7 @@ function RestaurantEstimator({C,F,meal,onAdd,onClose}){
         {/* Category tabs */}
         <div style={{display:'flex',gap:0,borderBottom:`1px solid ${C.border}`,marginBottom:12,overflowX:'auto',scrollbarWidth:'none'}}>
           {QUICK_ESTIMATES.map((cat,i)=>(
-            <button key={i} onClick={()=>setTab(i)} style={{flexShrink:0,padding:'7px 12px',border:'none',background:'none',cursor:'pointer',fontFamily:F,fontSize:11,fontWeight:700,color:tab===i?'#007AFF':C.textSec,borderBottom:`2px solid ${tab===i?'#007AFF':'transparent'}`,whiteSpace:'nowrap'}}>
+            <button key={i} onClick={()=>setTab(i)} style={{flexShrink:0,padding:'7px 12px',border:'none',background:'none',cursor:'pointer',fontFamily:F,fontSize:11,fontWeight:700,color:tab===i?accent:C.textSec,borderBottom:`2px solid ${tab===i?accent:'transparent'}`,whiteSpace:'nowrap'}}>
               {cat.cat}
             </button>
           ))}
@@ -3162,7 +3817,7 @@ function RestaurantEstimator({C,F,meal,onAdd,onClose}){
                   <div style={{fontSize:10,color:C.textMuted,marginTop:1}}>porción {size==='small'?'pequeña':size==='large'?'grande':size==='xlarge'?'extra grande':'normal'}</div>
                 </div>
                 <div style={{textAlign:'right',flexShrink:0}}>
-                  <div style={{fontSize:15,fontWeight:800,color:'#007AFF'}}>{cal}</div>
+                  <div style={{fontSize:15,fontWeight:800,color:'#D42020'}}>{cal}</div>
                   <div style={{fontSize:9,color:C.textMuted}}>kcal</div>
                 </div>
               </div>
@@ -3194,7 +3849,7 @@ function ManualEntry({C, F, barcode, onSave, onBack}) {
           <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.4,marginBottom:4}}>Nombre *</div>
           <input value={food.nombre} onChange={e=>setFood({...food,nombre:e.target.value})}
             placeholder="Ej: Galletas de avena"
-            style={{width:'100%',padding:'10px 12px',border:`1.5px solid ${food.nombre?'#007AFF':C.border}`,borderRadius:12,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
+            style={{width:'100%',padding:'10px 12px',border:`1.5px solid ${food.nombre?'#D42020':C.border}`,borderRadius:12,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
         </div>
         <div style={{gridColumn:'1/-1'}}>
           <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.4,marginBottom:4}}>Marca</div>
@@ -3218,7 +3873,7 @@ function ManualEntry({C, F, barcode, onSave, onBack}) {
               onChange={e=>setFood({...food,[k]:e.target.value})}
               onFocus={e=>e.target.select()}
               placeholder="0"
-              style={{width:'100%',padding:'10px 12px',border:`1.5px solid ${req&&!food[k]?C.border:food[k]?'#007AFF':C.border}`,borderRadius:12,fontSize:15,fontWeight:700,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
+              style={{width:'100%',padding:'10px 12px',border:`1.5px solid ${req&&!food[k]?C.border:food[k]?'#D42020':C.border}`,borderRadius:12,fontSize:15,fontWeight:700,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
           </div>
         ))}
       </div>
@@ -3237,7 +3892,7 @@ function ManualEntry({C, F, barcode, onSave, onBack}) {
             sodio:food.sodio!==''?+food.sodio:null,
             emoji:'📦', barcode,
           });
-        }} style={{flex:2,padding:'12px',borderRadius:16,border:'none',background:valid?'#007AFF':'#C7C7CC',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+        }} style={{flex:2,padding:'12px',borderRadius:16,border:'none',background:valid?'#D42020':'#C7C7CC',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
           ✅ Agregar al diario
         </button>
       </div>
@@ -3427,9 +4082,9 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
               {gramsPresets.map(g=>(
                 <button key={g} onClick={()=>setGrams(g)} style={{
                   flex:1,padding:'8px 4px',borderRadius:11,
-                  border:`1.5px solid ${grams===g?'#007AFF':C.border}`,
-                  background:grams===g?'#007AFF14':C.surfaceAlt,
-                  color:grams===g?'#007AFF':C.textSec,
+                  border:`1.5px solid ${grams===g?'#D42020':C.border}`,
+                  background:grams===g?'#D4202014':C.surfaceAlt,
+                  color:grams===g?'#D42020':C.textSec,
                   fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:F,
                   transition:'all .15s',textAlign:'center',
                 }}>{g}g</button>
@@ -3437,9 +4092,9 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
             </div>
             {/* Portion equivalence hint */}
             {getPortionHint(grams)&&(
-              <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8,padding:'6px 10px',background:'#007AFF10',borderRadius:10,border:'1px solid #007AFF20'}}>
+              <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8,padding:'6px 10px',background:'#D4202010',borderRadius:10,border:'1px solid #D4202020'}}>
                 <span style={{fontSize:14}}>⚖️</span>
-                <span style={{fontSize:12,color:'#007AFF',fontWeight:700}}>≈ {getPortionHint(grams)}</span>
+                <span style={{fontSize:12,color:'#D42020',fontWeight:700}}>≈ {getPortionHint(grams)}</span>
                 <span style={{fontSize:11,color:C.textMuted}}>en volumen</span>
               </div>
             )}
@@ -3449,8 +4104,8 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
               {PORTION_REFS.slice(0,8).map(r=>(
                 <button key={r.g} className="tap" onClick={()=>setGrams(r.g)} style={{
                   padding:'4px 9px',borderRadius:9,
-                  border:`1px solid ${Math.abs(grams-r.g)<=2?'#007AFF':C.border}`,
-                  background:Math.abs(grams-r.g)<=2?'#007AFF':C.surfaceAlt,
+                  border:`1px solid ${Math.abs(grams-r.g)<=2?'#D42020':C.border}`,
+                  background:Math.abs(grams-r.g)<=2?'#D42020':C.surfaceAlt,
                   color:Math.abs(grams-r.g)<=2?'white':C.textSec,
                   fontSize:10,fontWeight:600,cursor:'pointer',fontFamily:F,
                 }}>{r.l}</button>
@@ -3465,7 +4120,7 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
                   style={{width:'100%',padding:'11px 36px 11px 14px',border:`1.5px solid ${C.primary}`,borderRadius:13,fontSize:18,fontWeight:800,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,textAlign:'center'}}/>
                 <span style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',fontSize:13,color:C.textSec,fontWeight:600,pointerEvents:'none'}}>g</span>
               </div>
-              <button onClick={()=>setGrams(grams+5)} style={{width:38,height:38,borderRadius:11,border:'none',background:'#007AFF',fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:'white',flexShrink:0}}>+</button>
+              <button onClick={()=>setGrams(grams+5)} style={{width:38,height:38,borderRadius:11,border:'none',background:'#D42020',fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:'white',flexShrink:0}}>+</button>
             </div>
           </div>
         )}
@@ -3559,16 +4214,16 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
         </div>
 
         {/* Gram info banner with equivalences */}
-        <div style={{background:'#007AFF10',borderRadius:13,padding:'10px 14px',marginBottom:16,border:'1px solid #007AFF20'}}>
+        <div style={{background:'#D4202010',borderRadius:13,padding:'10px 14px',marginBottom:16,border:'1px solid #D4202020'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:getPortionHint(grams)?5:0}}>
             <span style={{fontSize:12,color:C.textSec,fontWeight:600}}>
               {mode==='porcion'?`1 porción = ${food.porcion||100}g`:`${grams}g seleccionados`}
             </span>
-            <span style={{fontSize:13,fontWeight:800,color:'#007AFF'}}>{v(food.cal)} kcal</span>
+            <span style={{fontSize:13,fontWeight:800,color:'#D42020'}}>{v(food.cal)} kcal</span>
           </div>
           {getPortionHint(grams)&&(
             <div style={{display:'flex',alignItems:'center',gap:6}}>
-              <span style={{fontSize:11,color:'#007AFF',fontWeight:700}}>≈ {getPortionHint(grams)}</span>
+              <span style={{fontSize:11,color:'#D42020',fontWeight:700}}>≈ {getPortionHint(grams)}</span>
               <span style={{fontSize:10,color:C.textMuted}}>en volumen</span>
             </div>
           )}
@@ -3576,7 +4231,7 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
 
         <button onClick={()=>{onAdd({...food, grams: mode==='gramos'?grams:null}); haptic('add');}} style={{
           width:'100%',padding:'16px',borderRadius:18,border:'none',
-          background:'#007AFF',
+          background:'#D42020',
           color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
         }}>Agregar {grams}g a {meal}</button>
       </div>
@@ -3771,7 +4426,7 @@ function AuthScreen({ onAuth }) {
               style={{width:'100%',padding:'14px',borderRadius:14,border:'1.5px solid #E5E5EA',fontSize:15,fontFamily:F,outline:'none',boxSizing:'border-box',color:'#1C1C1E',marginBottom:4}}/>
             {mode==='login'&&(
               <div style={{textAlign:'right',marginBottom:12}}>
-                <button onClick={()=>{setResetMode(true);setError('');setMsg('');}} style={{background:'none',border:'none',fontSize:12,color:'#007AFF',cursor:'pointer',fontFamily:F,fontWeight:500,padding:'4px 0'}}>
+                <button onClick={()=>{setResetMode(true);setError('');setMsg('');}} style={{background:'none',border:'none',fontSize:12,color:'#D42020',cursor:'pointer',fontFamily:F,fontWeight:500,padding:'4px 0'}}>
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
@@ -3813,7 +4468,7 @@ class ErrorBoundary extends React.Component {
         React.createElement('div',{style:{fontSize:52,marginBottom:16}},'\uD83D\uDE35'),
         React.createElement('div',{style:{fontSize:20,fontWeight:800,color:'#1C1C1E',marginBottom:8}},'Algo sali\u00F3 mal'),
         React.createElement('div',{style:{fontSize:13,color:'#6D6D72',marginBottom:24,lineHeight:1.5}},this.state.err?.message||'Error inesperado'),
-        React.createElement('button',{onClick:()=>window.location.reload(),style:{padding:'13px 28px',borderRadius:16,border:'none',background:'#007AFF',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',marginBottom:10}},'Recargar app'),
+        React.createElement('button',{onClick:()=>window.location.reload(),style:{padding:'13px 28px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',marginBottom:10}},'Recargar app'),
         React.createElement('button',{onClick:()=>{localStorage.clear();window.location.reload();},style:{padding:'11px 24px',borderRadius:14,border:'1px solid #E5E5EA',background:'white',color:'#FF3B30',fontSize:13,fontWeight:600,cursor:'pointer'}},'Borrar datos y reiniciar')
       );
     }
@@ -3831,7 +4486,7 @@ function AppCore() {
   const [isOnline, setIsOnline]           = useState(navigator.onLine);
   const syncTimer = useRef(null);
 
-  useEffect(()=>{if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}},[]);
+  /* Service Worker ya se registra en index.html — no duplicar aquí */
 
   /* ── Detector de conexión ── */
   useEffect(()=>{
@@ -3915,11 +4570,15 @@ function AppCore() {
   const [lastPct,setLastPct]       = useState(0);
   const [newAchiev,setNewAchiev]   = useState(null);
   const [showAI,setShowAI]         = useState(false);
+  const [showMilestone,setShowMilestone] = useState(null); // milestone key or null
+  const [showWelcomeBack,setShowWelcomeBack] = useState(false);
+  const [daysAway,setDaysAway] = useState(0);
   const [showRestaurant,setShowRestaurant] = useState(false);
   const [showChallenge,setShowChallenge]   = useState(false);
   const [showAllLogros,setShowAllLogros]   = useState(false);
   const [showCustom,setShowCustom] = useState(false);
   const [showScanner,setShowScanner] = useState(false);
+  const [showPhotoScanner,setShowPhotoScanner] = useState(false);
   const [showRecipe,setShowRecipe]   = useState(false);
   const [showPlanner,setShowPlanner] = useState(false);
   const [fastStart,setFastStart]   = useState(()=>LS.get('fastStart',null));
@@ -4001,14 +4660,24 @@ function AppCore() {
       /* ── Splash specific ── */
       @keyframes splashRingOut{from{opacity:.8;transform:scale(1)}to{opacity:0;transform:scale(2.8)}}
       @keyframes splashLogoIn{
-        0%{opacity:0;transform:scale(.2) rotate(-10deg)}
-        60%{opacity:1;transform:scale(1.12) rotate(3deg)}
-        80%{transform:scale(.97) rotate(-1deg)}
+        0%{opacity:0;transform:scale(.15) rotate(-12deg)}
+        55%{opacity:1;transform:scale(1.1) rotate(3deg)}
+        75%{transform:scale(.96) rotate(-1deg)}
         100%{transform:scale(1) rotate(0deg)}
       }
       @keyframes splashTextIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
       @keyframes splashBarFill{from{width:0}to{width:100%}}
       @keyframes splashFadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.04)}}
+      @keyframes ambientDrift{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(2deg) scale(1.04)}}
+      @keyframes glowPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+      @keyframes leafFloat{0%{transform:translate(0,0) rotate(0);opacity:0}15%{opacity:.6}85%{opacity:.6}100%{transform:translate(25px,-45px) rotate(40deg);opacity:0}}
+      @keyframes barFillAnim{0%{width:0}40%{width:45%}70%{width:80%}100%{width:100%}}
+      @keyframes tipFadeIn{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+      @keyframes wbModalIn{0%{opacity:0;transform:scale(.8) translateY(30px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+      @keyframes wbLogoIn{0%{opacity:0;transform:scale(.3) rotate(-10deg)}50%{transform:scale(1.1) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+      @keyframes msIn{0%{opacity:0;transform:scale(.5) rotate(-5deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+      @keyframes msEmoji{0%{opacity:0;transform:scale(0) rotate(-20deg)}55%{transform:scale(1.2) rotate(5deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+      @keyframes msShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
       /* ── Stagger helpers ── */
       @keyframes staggerUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
@@ -4239,9 +4908,8 @@ function AppCore() {
         const prevLog=LS.get('log_'+prevKey,[]);
         const prevProt=Math.round(sumLog(prevLog).prot);
         const prompt=`Eres un nutricionista chileno amigable. Genera UN SOLO insight motivacional personalizado para ${nombre} en máximo 2 oraciones. Datos de hoy: ${Math.round(tot.cal)} kcal consumidas de ${metas.cal} kcal meta, ${Math.round(tot.prot)}g proteína de ${metas.prot}g meta, racha de ${streak.days} días. ${prevProt>0?`Ayer consumió ${prevProt}g de proteína.`:''} Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}. Sé específico con sus números, usa emojis y un lenguaje cercano. Solo devuelve el insight, sin saludos ni explicaciones extra.`;
-        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:120,messages:[{role:'user',content:prompt}]})});
-        const d=await r.json();
-        const text=d.content?.[0]?.text||'';
+        const data = await callEdgeFn({ mode: 'insight', prompt });
+        const text=data.text||'';
         if(text){ setDailyInsight(text); LS.set(insightKey,text); }
       }catch(e){}
       setInsightLoading(false);
@@ -4362,6 +5030,43 @@ function AppCore() {
     };
   }, [currentDay]);
 
+  /* ── Welcome back detection ── */
+  useEffect(()=>{
+    const lastVisit = LS.get('lastVisit','');
+    const today = todayKey();
+    if(lastVisit && lastVisit !== today){
+      const last = new Date(lastVisit.replace(/-/g,'/'));
+      const now = new Date(today.replace(/-/g,'/'));
+      const diff = Math.round((now-last)/(1000*60*60*24));
+      if(diff >= 2){
+        setDaysAway(diff);
+        setShowWelcomeBack(true);
+      }
+    }
+    LS.set('lastVisit', today);
+  },[]);
+
+  /* ── Milestone detection ── */
+  useEffect(()=>{
+    const shown = LS.get('milestones_shown',{});
+    const check = (key) => {
+      if(!shown[key]){
+        setShowMilestone(key);
+        LS.set('milestones_shown',{...shown,[key]:true});
+        return true;
+      }
+      return false;
+    };
+    if(streak.days>=60) check('streak60');
+    else if(streak.days>=30) check('streak30');
+    else if(streak.days>=14) check('streak14');
+    else if(streak.days>=7)  check('streak7');
+    // Total food logs across all days
+    const totalLogs = log.length;
+    if(totalLogs>=200) check('foods_200');
+    else if(totalLogs>=50) check('foods_50');
+  },[streak.days, log.length]);
+
   /* ── toast auto-dismiss ── */
   useEffect(()=>{
     if(toast){const t=setTimeout(()=>setToast(''),3200);return ()=>clearTimeout(t);}
@@ -4377,7 +5082,7 @@ function AppCore() {
   const saludScore = calcSaludScore(tot, metas, agua, exercises, streak);
 
   const MACRO_DEFS = [
-    {key:'cal',    label:'Calorías',      icon:'🔥', color:'#007AFF',  meta:metas.cal,   unit:'kcal'},
+    {key:'cal',    label:'Calorías',      icon:'🔥', color:'#D42020',  meta:metas.cal,   unit:'kcal'},
     {key:'prot',   label:'Proteínas',     icon:'🥩', color:C.red,      meta:metas.prot,  unit:'g'},
     {key:'carbs',  label:'Carbohidratos', icon:'🍞', color:C.amber,    meta:metas.carbs, unit:'g'},
     {key:'grasas', label:'Grasas',        icon:'🥑', color:C.purple,   meta:metas.grasas,unit:'g'},
@@ -4528,7 +5233,7 @@ function AppCore() {
     <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
       <button onClick={onDec} style={{width:30,height:30,borderRadius:9,border:`1.5px solid ${C.border}`,background:C.surfaceAlt,color:C.textSec,fontSize:16,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
       <span style={{fontSize:14,fontWeight:800,color:C.text,minWidth:22,textAlign:'center'}}>{value}</span>
-      <button onClick={onInc} style={{width:30,height:30,borderRadius:9,border:'none',background:'#007AFF',color:'white',fontSize:16,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
+      <button onClick={onInc} style={{width:30,height:30,borderRadius:9,border:'none',background:'#D42020',color:'white',fontSize:16,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
     </div>
   );
 
@@ -4562,7 +5267,7 @@ function AppCore() {
       </div>
       <button onClick={()=>setIsOnline(navigator.onLine)} style={{
         padding:'12px 28px',borderRadius:16,border:'none',
-        background:'#007AFF',color:'white',
+        background:'#D42020',color:'white',
         fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F,
       }}>Reintentar</button>
     </div>
@@ -4575,7 +5280,7 @@ function AppCore() {
   if(restoringData) return (
     <div style={{
       position:'fixed',inset:0,
-      background:'linear-gradient(160deg,#1A0A0A 0%,#0D0505 55%,#1A0808 100%)',
+      background:'linear-gradient(160deg,#1A0A0A 0%,#0D0505 55%,#0A0205 100%)',
       display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
       gap:24,
     }}>
@@ -4591,7 +5296,7 @@ function AppCore() {
       <div style={{width:160,height:3,background:'rgba(255,255,255,0.1)',borderRadius:3,overflow:'hidden'}}>
         <div style={{
           height:'100%',width:'60%',borderRadius:3,
-          background:'linear-gradient(90deg,#D22B2B,#F4C430)',
+          background:'linear-gradient(90deg,#D42020,#F5C21A)',
           animation:'splashBarFill 1.5s ease infinite alternate',
         }}/>
       </div>
@@ -4643,17 +5348,17 @@ function AppCore() {
                 <div key={key} style={{marginBottom:8}}>
                   <div onClick={()=>setHistoryDay(isSel?null:key)} style={{
                     background:C.surface,borderRadius:18,padding:'14px 16px',
-                    border:`1px solid ${isSel?'#007AFF':C.border}`,cursor:'pointer',
+                    border:`1px solid ${isSel?'#D42020':C.border}`,cursor:'pointer',
                   }}>
                     <div style={{display:'flex',alignItems:'center',gap:12}}>
-                      <div style={{width:44,height:44,borderRadius:13,background:cal>0?'#007AFF18':'#F2F2F7',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                        <div style={{fontSize:14,fontWeight:800,color:cal>0?'#007AFF':C.textMuted}}>{d.getDate()}</div>
-                        <div style={{fontSize:8,color:cal>0?'#007AFF':C.textMuted,fontWeight:600,textTransform:'uppercase'}}>{d.toLocaleDateString('es-CL',{month:'short'})}</div>
+                      <div style={{width:44,height:44,borderRadius:13,background:cal>0?'#D4202018':'#F2F2F7',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                        <div style={{fontSize:14,fontWeight:800,color:cal>0?'#D42020':C.textMuted}}>{d.getDate()}</div>
+                        <div style={{fontSize:8,color:cal>0?'#D42020':C.textMuted,fontWeight:600,textTransform:'uppercase'}}>{d.toLocaleDateString('es-CL',{month:'short'})}</div>
                       </div>
                       <div style={{flex:1}}>
                         <div style={{fontSize:13,fontWeight:700,color:C.text,textTransform:'capitalize'}}>{d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'})}</div>
                         <div style={{display:'flex',gap:8,marginTop:4}}>
-                          {cal>0?<span style={{fontSize:11,fontWeight:700,color:'#007AFF'}}>{cal} kcal</span>:<span style={{fontSize:11,color:C.textMuted}}>Sin registro</span>}
+                          {cal>0?<span style={{fontSize:11,fontWeight:700,color:'#D42020'}}>{cal} kcal</span>:<span style={{fontSize:11,color:C.textMuted}}>Sin registro</span>}
                           {exs.length>0&&<span style={{fontSize:11,color:'#34C759',fontWeight:600}}>💪 {exs.length} ej.</span>}
                           {note&&<span style={{fontSize:11,color:C.textSec}}>📝</span>}
                         </div>
@@ -4684,7 +5389,7 @@ function AppCore() {
                           setShowHistory(false);
                           haptic('success');
                           setToast('📋 Comidas copiadas al día de hoy');
-                        }} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:14,border:'none',background:'#007AFF',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+                        }} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
                           📋 Copiar estas comidas a hoy
                         </button>
                       </div>
@@ -4717,6 +5422,8 @@ function AppCore() {
       )}
 
       {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} onClose={()=>setShowAI(false)}/>}
+      {showWelcomeBack&&<WelcomeBack C={C} F={F} nombre={nombre} streak={streak} daysAway={daysAway} onClose={()=>setShowWelcomeBack(false)}/>}
+      {showMilestone&&<MilestoneCelebration C={C} F={F} milestone={showMilestone} onClose={()=>setShowMilestone(null)}/>}
       {showLegal&&<LegalModal type={showLegal} onClose={()=>setShowLegal(null)}/>}
 
       {macroDetail&&<MacroDetailSheet macro={macroDetail} log={log} metas={metas} C={C} F={F} onClose={()=>setMacroDetail(null)}/>}
@@ -4768,8 +5475,8 @@ function AppCore() {
                       setTimeout(()=>setShowAvatarPicker(false),150);
                     }} style={{
                       width:46,height:46,borderRadius:14,
-                      border:`2px solid ${avatar===e?'#007AFF':C.border}`,
-                      background:avatar===e?'#007AFF18':C.surfaceAlt,
+                      border:`2px solid ${avatar===e?'#D42020':C.border}`,
+                      background:avatar===e?'#D4202018':C.surfaceAlt,
                       fontSize:24,cursor:'pointer',
                       display:'flex',alignItems:'center',justifyContent:'center',
                       transition:'all .15s',
@@ -4794,6 +5501,12 @@ function AppCore() {
                 // Small delay so camera stream stops before modal mounts
                 setTimeout(()=>setDetail(food), 200);
               }}/>}
+
+      {/* ══ PHOTO FOOD SCANNER ══ */}
+      {showPhotoScanner&&<FoodPhotoScanner C={C} F={F} nombre={nombre} meal={meal}
+        onAdd={(food)=>addFood(food)}
+        onClose={()=>setShowPhotoScanner(false)}
+      />}
 
       {/* ══ RECIPE BUILDER ══ */}
       {showRecipe&&<RecipeBuilder C={C} F={F} allFoods={allFoods} onClose={()=>setShowRecipe(false)} onSave={(r)=>{setCustomFoods([...customFoods,r]);setShowRecipe(false);}}/>}
@@ -4860,7 +5573,7 @@ function AppCore() {
             <div style={{display:'flex',gap:6}}>
               <button className="tap" onClick={()=>setShowAI(true)} style={{
                 width:34,height:34,borderRadius:11,border:`1px solid ${C.border}`,
-                background:'#007AFF18',color:'#007AFF',fontSize:16,cursor:'pointer',
+                background:'#D4202018',color:'#D42020',fontSize:16,cursor:'pointer',
                 fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
               }}>🤖</button>
               {/* Sync status */}
@@ -4880,14 +5593,14 @@ function AppCore() {
                   const nd=!dark; setDark(nd); LS.set('darkMode',nd);
                 }} style={{
                 width:34,height:34,borderRadius:10,
-                border:`1px solid ${autoTheme?'#007AFF':C.border}`,
-                background:autoTheme?'#007AFF18':C.surfaceAlt,color:C.text,
+                border:`1px solid ${autoTheme?'#D42020':C.border}`,
+                background:autoTheme?'#D4202018':C.surfaceAlt,color:C.text,
                 fontSize:15,cursor:'pointer',fontFamily:F,
                 display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
                 position:'relative',
               }}>
                 {dark?'☀️':'🌙'}
-                {autoTheme&&<div style={{position:'absolute',top:-2,right:-2,width:8,height:8,borderRadius:'50%',background:'#007AFF'}}/>}
+                {autoTheme&&<div style={{position:'absolute',top:-2,right:-2,width:8,height:8,borderRadius:'50%',background:'#D42020'}}/>}
               </button>
             </div>
           </div>
@@ -4946,7 +5659,7 @@ function AppCore() {
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginTop:12}}>
               {[
-                {l:'Cal',pts:(()=>{if(!metas.cal)return 0;const cp=tot.cal/metas.cal;return cp>=0.85&&cp<=1.08?30:cp>=0.65?18:cp>0?8:0;})(),max:30,c:'#007AFF'},
+                {l:'Cal',pts:(()=>{if(!metas.cal)return 0;const cp=tot.cal/metas.cal;return cp>=0.85&&cp<=1.08?30:cp>=0.65?18:cp>0?8:0;})(),max:30,c:'#D42020'},
                 {l:'Prot',pts:metas.prot>0?(tot.prot/metas.prot>=0.85?20:tot.prot/metas.prot>=0.6?12:tot.prot>0?5:0):0,max:20,c:C.red},
                 {l:'Agua',pts:agua>=8?15:agua>=5?9:agua>=2?4:0,max:15,c:'#5AC8FA'},
                 {l:'Ejerce',pts:(()=>{const b=exercises.reduce((s,e)=>s+e.burn,0);return b>=300?20:b>=150?13:b>0?6:0;})(),max:20,c:'#34C759'},
@@ -4967,6 +5680,9 @@ function AppCore() {
             )}
           </div>
 
+          {/* ── RETO DEL DÍA ── */}
+          <DailyChallengeCard C={C} F={F} log={log} agua={agua}/>
+
           {/* ── COMPARAR CON AYER ── */}
           {(()=>{
             const prev=new Date(); prev.setDate(prev.getDate()-1);
@@ -4978,7 +5694,7 @@ function AppCore() {
               <div style={{background:C.surface,borderRadius:18,padding:'12px 16px',marginBottom:12,border:`1px solid ${C.border}`}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
                   <div style={{fontSize:13,fontWeight:700,color:C.text}}>📊 Vs ayer</div>
-                  <button className="tap" onClick={()=>setShowHistory(true)} style={{fontSize:11,color:'#007AFF',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:600}}>Historial →</button>
+                  <button className="tap" onClick={()=>setShowHistory(true)} style={{fontSize:11,color:'#D42020',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:600}}>Historial →</button>
                 </div>
                 <div style={{display:'flex',gap:8,alignItems:'center'}}>
                   <div style={{flex:1,background:C.surfaceAlt,borderRadius:12,padding:'8px 10px'}}>
@@ -5092,7 +5808,7 @@ function AppCore() {
               </div>
               <button className="tap" onClick={()=>setTab(1)} style={{
                 flexShrink:0,padding:'9px 14px',borderRadius:14,border:'none',
-                background:'#007AFF',color:'white',
+                background:'#D42020',color:'white',
                 fontSize:12,fontWeight:800,cursor:'pointer',fontFamily:F,
                 boxShadow:'0 4px 12px rgba(0,122,255,0.3)',
               }}>Agregar</button>
@@ -5149,18 +5865,18 @@ function AppCore() {
                 </div>
               </div>
               <div style={{
-                background:'#007AFF18',borderRadius:12,padding:'5px 12px',
+                background:'#D4202018',borderRadius:12,padding:'5px 12px',
                 display:'flex',alignItems:'baseline',gap:2,
               }}>
-                <span style={{fontSize:20,fontWeight:800,color:'#007AFF'}}>{agua}</span>
-                <span style={{fontSize:11,color:'#007AFF',fontWeight:500,opacity:.6}}>/8</span>
+                <span style={{fontSize:20,fontWeight:800,color:'#D42020'}}>{agua}</span>
+                <span style={{fontSize:11,color:'#D42020',fontWeight:500,opacity:.6}}>/8</span>
               </div>
             </div>
             <div style={{display:'flex',gap:4}}>
               {Array.from({length:8}).map((_,i)=>(
                 <button key={i} className="tap" onClick={()=>{setAgua(i<agua?i:i+1);haptic('light');}} style={{
                   flex:1,height:36,borderRadius:8,border:'none',cursor:'pointer',
-                  background:i<agua?'#007AFF':'#007AFF18',
+                  background:i<agua?'#D42020':'#D4202018',
                   transition:'all .2s cubic-bezier(.25,.46,.45,.94)',
                   padding:0,
                 }}/>
@@ -5344,9 +6060,9 @@ function AppCore() {
           </div>
           <button className="tap" onClick={()=>setShowFilter(!showFilter)} style={{
             padding:'11px 14px',borderRadius:14,marginBottom:8,
-            border:`1.5px solid ${(searchSort!=='default'||searchMaxCal>0)?'#007AFF':C.border}`,
-            background:(searchSort!=='default'||searchMaxCal>0)?'#007AFF18':C.surfaceAlt,
-            color:(searchSort!=='default'||searchMaxCal>0)?'#007AFF':C.textSec,
+            border:`1.5px solid ${(searchSort!=='default'||searchMaxCal>0)?'#D42020':C.border}`,
+            background:(searchSort!=='default'||searchMaxCal>0)?'#D4202018':C.surfaceAlt,
+            color:(searchSort!=='default'||searchMaxCal>0)?'#D42020':C.textSec,
             fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F,
             display:'flex',alignItems:'center',gap:6,
           }}>⚙️ Filtros {searchSort!=='default'||searchMaxCal>0?'•':''}</button>
@@ -5355,13 +6071,13 @@ function AppCore() {
               <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Ordenar por</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
                 {[{v:'default',l:'Relevancia'},{v:'cal_asc',l:'Menos kcal'},{v:'cal_desc',l:'Más kcal'},{v:'prot_desc',l:'Más proteína'},{v:'name',l:'A-Z'}].map(({v,l})=>(
-                  <button key={v} className="tap" onClick={()=>setSearchSort(v)} style={{padding:'6px 12px',borderRadius:12,border:'none',background:searchSort===v?'#007AFF':C.surfaceAlt,color:searchSort===v?'white':C.textSec,fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:F}}>{l}</button>
+                  <button key={v} className="tap" onClick={()=>setSearchSort(v)} style={{padding:'6px 12px',borderRadius:12,border:'none',background:searchSort===v?'#D42020':C.surfaceAlt,color:searchSort===v?'white':C.textSec,fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:F}}>{l}</button>
                 ))}
               </div>
               <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Máx. calorías</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                 {[0,100,200,300,500].map(v=>(
-                  <button key={v} className="tap" onClick={()=>setSearchMaxCal(v)} style={{padding:'6px 12px',borderRadius:12,border:'none',background:searchMaxCal===v?'#007AFF':C.surfaceAlt,color:searchMaxCal===v?'white':C.textSec,fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:F}}>{v===0?'Sin límite':'≤'+v}</button>
+                  <button key={v} className="tap" onClick={()=>setSearchMaxCal(v)} style={{padding:'6px 12px',borderRadius:12,border:'none',background:searchMaxCal===v?'#D42020':C.surfaceAlt,color:searchMaxCal===v?'white':C.textSec,fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:F}}>{v===0?'Sin límite':'≤'+v}</button>
                 ))}
               </div>
             </div>
@@ -5373,7 +6089,7 @@ function AppCore() {
               <button key={c} className="tap" onClick={()=>setCat(c)} style={{
                 flexShrink:0,padding:'6px 14px',borderRadius:20,
                 border:cat===c?'none':`1px solid ${C.border}`,
-                background:cat===c?'#007AFF':C.surfaceAlt,
+                background:cat===c?'#D42020':C.surfaceAlt,
                 color:cat===c?'#FFFFFF':C.textSec,
                 fontSize:12,fontWeight:cat===c?700:500,
                 cursor:'pointer',fontFamily:F,
@@ -5409,7 +6125,7 @@ function AppCore() {
                   <button key={a.id} className="tap" onClick={()=>setDetail(a)} style={{flexShrink:0,background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:'10px 12px',textAlign:'center',cursor:'pointer',fontFamily:F,minWidth:72}}>
                     <div style={{fontSize:22,marginBottom:4}}>{a.emoji}</div>
                     <div style={{fontSize:9,fontWeight:700,color:C.text,lineHeight:1.2,maxWidth:68,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.nombre.split(' ').slice(0,2).join(' ')}</div>
-                    <div style={{fontSize:10,fontWeight:800,color:'#007AFF',marginTop:2}}>{a.cal}</div>
+                    <div style={{fontSize:10,fontWeight:800,color:'#D42020',marginTop:2}}>{a.cal}</div>
                   </button>
                 ))}
               </div>
@@ -5418,6 +6134,18 @@ function AppCore() {
 
           {/* Acciones rápidas */}
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
+            <button className="tap" onClick={()=>setShowPhotoScanner(true)} style={{
+              padding:'14px 12px',borderRadius:16,
+              border:'1.5px solid #D4202050',
+              background:dark?'rgba(0,122,255,0.12)':'rgba(0,122,255,0.06)',
+              color:'#D42020',fontSize:12,fontWeight:700,
+              cursor:'pointer',fontFamily:F,
+              display:'flex',alignItems:'center',justifyContent:'center',gap:7,
+              gridColumn:'1 / -1',
+            }}>
+              <span style={{fontSize:20}}>📸</span> Escanear plato con IA
+              <span style={{fontSize:9,fontWeight:700,background:'#D42020',color:'white',padding:'2px 6px',borderRadius:6,marginLeft:2}}>NUEVO</span>
+            </button>
             <button className="tap" onClick={()=>setShowRestaurant(true)} style={{
               padding:'12px',borderRadius:16,border:`1px solid ${C.border}`,
               background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,
@@ -5478,7 +6206,7 @@ function AppCore() {
                 <div style={{fontSize:12,color:C.textSec,marginBottom:14}}>Puedes escanearlo o crearlo manualmente</div>
                 <div style={{display:'flex',gap:8,justifyContent:'center'}}>
                   <button className="tap" onClick={()=>setShowScanner(true)} style={{padding:'10px 16px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>📷 Escanear</button>
-                  <button className="tap" onClick={()=>setShowCustom(true)} style={{padding:'10px 16px',borderRadius:14,border:'none',background:'#007AFF',color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Crear manualmente</button>
+                  <button className="tap" onClick={()=>setShowCustom(true)} style={{padding:'10px 16px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Crear manualmente</button>
                 </div>
               </div>
             )}
@@ -5514,7 +6242,7 @@ function AppCore() {
                   </div>
                   <div style={{
                     width:36,height:36,borderRadius:11,
-                    background:inLog?MC[meal]:'#007AFF',
+                    background:inLog?MC[meal]:'#D42020',
                     color:'white',
                     fontSize:20,fontWeight:700,
                     display:'flex',alignItems:'center',justifyContent:'center',
@@ -5610,7 +6338,7 @@ function AppCore() {
                 ))}
               </div>
               <button className="tap" onClick={()=>setTab(1)} style={{
-                background:'#007AFF',color:'white',border:'none',
+                background:'#D42020',color:'white',border:'none',
                 borderRadius:18,padding:'14px 32px',
                 fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,
                 boxShadow:'0 8px 20px rgba(0,122,255,0.35)',
@@ -5640,7 +6368,7 @@ function AppCore() {
                         <div style={{flex:1,minWidth:0}} onClick={()=>setEditingItem(editingItem===item.uid?null:item.uid)}>
                           <div style={{fontSize:12,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{item.nombre}</div>
                           <div style={{display:'flex',gap:5,marginTop:3,flexWrap:'wrap'}}>
-                            <span style={{fontSize:11,fontWeight:800,color:'#007AFF'}}>{Math.round(item.cal*itemRatio(item)*item.qty)} kcal</span>
+                            <span style={{fontSize:11,fontWeight:800,color:'#D42020'}}>{Math.round(item.cal*itemRatio(item)*item.qty)} kcal</span>
                             <span style={{fontSize:10,color:C.red,fontWeight:600}}>P:{Math.round(item.prot*itemRatio(item)*item.qty)}g</span>
                             <span style={{fontSize:10,color:C.amber,fontWeight:600}}>C:{Math.round(item.carbs*itemRatio(item)*item.qty)}g</span>
                             <span style={{fontSize:10,color:C.textMuted,fontWeight:500}}>{(item.grams||item.porcion||100)}g{getPortionHint(item.grams||item.porcion||100)?' · ≈'+getPortionHint(item.grams||item.porcion||100):''}</span>
@@ -5648,9 +6376,9 @@ function AppCore() {
                         </div>
                         <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0}}>
                           <button className="tap" onClick={()=>setEditingItem(editingItem===item.uid?null:item.uid)} style={{
-                            width:28,height:28,borderRadius:8,border:`1px solid ${editingItem===item.uid?'#007AFF':C.border}`,
-                            background:editingItem===item.uid?'#007AFF18':C.surfaceAlt,
-                            fontSize:13,cursor:'pointer',color:editingItem===item.uid?'#007AFF':C.textMuted,
+                            width:28,height:28,borderRadius:8,border:`1px solid ${editingItem===item.uid?'#D42020':C.border}`,
+                            background:editingItem===item.uid?'#D4202018':C.surfaceAlt,
+                            fontSize:13,cursor:'pointer',color:editingItem===item.uid?'#D42020':C.textMuted,
                             display:'flex',alignItems:'center',justifyContent:'center',
                           }}>✏️</button>
                           <Stepper value={item.qty} onDec={()=>adj(item.uid,-1)} onInc={()=>adj(item.uid,1)}/>
@@ -5666,8 +6394,8 @@ function AppCore() {
                                 <button onClick={()=>setItemGrams(item.uid,Math.max(1,(item.grams||item.porcion||100)-10))} style={{width:28,height:28,borderRadius:8,border:`1px solid ${C.border}`,background:C.surface,fontSize:14,cursor:'pointer',color:C.textSec,display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
                                 <input type="number" value={item.grams||item.porcion||100}
                                   onChange={e=>setItemGrams(item.uid,+e.target.value||1)}
-                                  style={{flex:1,padding:'6px 8px',border:`1.5px solid #007AFF`,borderRadius:10,fontSize:14,fontWeight:700,color:C.text,background:C.surface,outline:'none',fontFamily:F,textAlign:'center'}}/>
-                                <button onClick={()=>setItemGrams(item.uid,(item.grams||item.porcion||100)+10)} style={{width:28,height:28,borderRadius:8,border:'none',background:'#007AFF',fontSize:14,cursor:'pointer',color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
+                                  style={{flex:1,padding:'6px 8px',border:`1.5px solid #D42020`,borderRadius:10,fontSize:14,fontWeight:700,color:C.text,background:C.surface,outline:'none',fontFamily:F,textAlign:'center'}}/>
+                                <button onClick={()=>setItemGrams(item.uid,(item.grams||item.porcion||100)+10)} style={{width:28,height:28,borderRadius:8,border:'none',background:'#D42020',fontSize:14,cursor:'pointer',color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
                               </div>
                             </div>
                             <div>
@@ -5676,14 +6404,14 @@ function AppCore() {
                                 <button onClick={()=>setItemQty(item.uid,item.qty-1)} style={{width:28,height:28,borderRadius:8,border:`1px solid ${C.border}`,background:C.surface,fontSize:14,cursor:'pointer',color:C.textSec,display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
                                 <input type="number" value={item.qty}
                                   onChange={e=>setItemQty(item.uid,+e.target.value||0)}
-                                  style={{flex:1,padding:'6px 8px',border:`1.5px solid #007AFF`,borderRadius:10,fontSize:14,fontWeight:700,color:C.text,background:C.surface,outline:'none',fontFamily:F,textAlign:'center'}}/>
-                                <button onClick={()=>setItemQty(item.uid,item.qty+1)} style={{width:28,height:28,borderRadius:8,border:'none',background:'#007AFF',fontSize:14,cursor:'pointer',color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
+                                  style={{flex:1,padding:'6px 8px',border:`1.5px solid #D42020`,borderRadius:10,fontSize:14,fontWeight:700,color:C.text,background:C.surface,outline:'none',fontFamily:F,textAlign:'center'}}/>
+                                <button onClick={()=>setItemQty(item.uid,item.qty+1)} style={{width:28,height:28,borderRadius:8,border:'none',background:'#D42020',fontSize:14,cursor:'pointer',color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
                               </div>
                             </div>
                           </div>
                           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
                             <span style={{fontSize:12,color:C.textSec,fontWeight:500}}>
-                              Total: <strong style={{color:'#007AFF'}}>{Math.round(item.cal*itemRatio({...item,grams:item.grams||item.porcion||100})*item.qty)} kcal</strong>
+                              Total: <strong style={{color:'#D42020'}}>{Math.round(item.cal*itemRatio({...item,grams:item.grams||item.porcion||100})*item.qty)} kcal</strong>
                             </span>
                             <button className="tap" onClick={()=>{setLog(log.filter(r=>r.uid!==item.uid));setEditingItem(null);haptic('delete');}} style={{padding:'6px 12px',borderRadius:10,border:'none',background:'#FF3B3018',color:'#FF3B30',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>🗑️ Eliminar</button>
                           </div>
@@ -5731,7 +6459,7 @@ function AppCore() {
                 <button className="tap" onClick={()=>setShowAvatarPicker(true)} style={{
                   position:'absolute',bottom:-4,right:-4,
                   width:26,height:26,borderRadius:8,
-                  background:'#007AFF',border:'2px solid white',
+                  background:'#D42020',border:'2px solid white',
                   fontSize:12,cursor:'pointer',
                   display:'flex',alignItems:'center',justifyContent:'center',color:'white',
                   boxShadow:'0 2px 8px rgba(0,122,255,0.4)',
@@ -5742,13 +6470,13 @@ function AppCore() {
                   <div style={{display:'flex',gap:8}}>
                     <input value={tempName} onChange={e=>setTempName(e.target.value)}
                       autoFocus onFocus={e=>e.target.select()}
-                      style={{flex:1,padding:'8px 12px',border:`1.5px solid #007AFF`,borderRadius:12,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
-                    <button className="tap" onClick={()=>{if(tempName.trim()){setNombre(tempName.trim());}setEditName(false);haptic('success');}} style={{padding:'8px 14px',borderRadius:12,border:'none',background:'#007AFF',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>✓</button>
+                      style={{flex:1,padding:'8px 12px',border:`1.5px solid #D42020`,borderRadius:12,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+                    <button className="tap" onClick={()=>{if(tempName.trim()){setNombre(tempName.trim());}setEditName(false);haptic('success');}} style={{padding:'8px 14px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>✓</button>
                   </div>
                 ):(
                   <div>
                     <div style={{fontSize:18,fontWeight:800,color:C.text,letterSpacing:'-.3px'}}>{nombre}</div>
-                    <button className="tap" onClick={()=>{setTempName(nombre);setEditName(true);}} style={{background:'none',border:'none',fontSize:12,color:'#007AFF',cursor:'pointer',fontFamily:F,fontWeight:600,padding:'2px 0',marginTop:2}}>✏️ Editar nombre</button>
+                    <button className="tap" onClick={()=>{setTempName(nombre);setEditName(true);}} style={{background:'none',border:'none',fontSize:12,color:'#D42020',cursor:'pointer',fontFamily:F,fontWeight:600,padding:'2px 0',marginTop:2}}>✏️ Editar nombre</button>
                   </div>
                 )}
               </div>
@@ -5794,7 +6522,7 @@ function AppCore() {
                   if(idx>=0) setWeightHistory(weightHistory.map((e,i)=>i===idx?{...e,w}:e));
                   else setWeightHistory([...weightHistory,{date:today,w,label:lbl}].slice(-30));
                   haptic('success'); setToast(`⚖️ ${w} kg registrado`);
-                }} style={{padding:'6px 12px',borderRadius:12,border:'none',background:'#007AFF',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+                }} style={{padding:'6px 12px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>
                   + Registrar hoy
                 </button>
               </div>
@@ -5932,7 +6660,7 @@ function AppCore() {
                     <div style={{fontSize:12,fontWeight:700,color:C.text}}>Sin cuenta activa</div>
                     <div style={{fontSize:10,color:C.textMuted,marginTop:1}}>Tus datos solo existen en este celular</div>
                   </div>
-                  <button className="tap" onClick={()=>window.location.reload()} style={{padding:'6px 12px',borderRadius:10,border:'none',background:'#007AFF',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F,flexShrink:0}}>
+                  <button className="tap" onClick={()=>window.location.reload()} style={{padding:'6px 12px',borderRadius:10,border:'none',background:'#D42020',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F,flexShrink:0}}>
                     Iniciar sesión
                   </button>
                 </div>
@@ -5946,7 +6674,7 @@ function AppCore() {
                 <div style={{fontSize:11,color:C.textSec,marginTop:1}}>{autoTheme?'Oscuro 20:00–07:00 · Claro resto del día':'Toca para cambiar'}</div>
               </div>
               <div style={{display:'flex',gap:6}}>
-                <button className="tap" onClick={()=>{setAutoTheme(!autoTheme);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${autoTheme?'#007AFF':C.border}`,background:autoTheme?'#007AFF18':C.surfaceAlt,color:autoTheme?'#007AFF':C.textSec,fontSize:10,fontWeight:700,cursor:'pointer',fontFamily:F}}>Auto</button>
+                <button className="tap" onClick={()=>{setAutoTheme(!autoTheme);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${autoTheme?'#D42020':C.border}`,background:autoTheme?'#D4202018':C.surfaceAlt,color:autoTheme?'#D42020':C.textSec,fontSize:10,fontWeight:700,cursor:'pointer',fontFamily:F}}>Auto</button>
                 {!autoTheme&&<button className="tap" onClick={()=>{setDark(!dark);LS.set('darkMode',!dark);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textSec,fontSize:14,cursor:'pointer',fontFamily:F}}>{dark?'☀️':'🌙'}</button>}
               </div>
             </div>
@@ -5977,7 +6705,7 @@ function AppCore() {
             <div style={{display:'flex',gap:8,marginBottom:14}}>
               <input type="number" value={newWeight} onChange={e=>setNewWeight(e.target.value)} placeholder="Ej: 72.5"
                 style={{flex:1,padding:'12px 14px',border:`1.5px solid ${C.border}`,borderRadius:14,fontSize:16,fontFamily:F,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
-              <button className="tap" onClick={addWeight} style={{padding:'12px 18px',borderRadius:14,border:'none',background:'#007AFF',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F,whiteSpace:'nowrap'}}>Registrar</button>
+              <button className="tap" onClick={addWeight} style={{padding:'12px 18px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F,whiteSpace:'nowrap'}}>Registrar</button>
             </div>
             {weights.length>0?(
               <>
@@ -6018,7 +6746,7 @@ function AppCore() {
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
                 <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>Metas diarias</div>
                 <div style={{display:'flex',alignItems:'center',gap:8}}>
-                  {customMetas&&<span style={{fontSize:9,color:'#007AFF',fontWeight:700,background:'#007AFF14',padding:'2px 8px',borderRadius:8}}>Personalizadas</span>}
+                  {customMetas&&<span style={{fontSize:9,color:'#D42020',fontWeight:700,background:'#D4202014',padding:'2px 8px',borderRadius:8}}>Personalizadas</span>}
                   {customMetas&&<button className="tap" onClick={()=>{setCustomMetas(null);haptic('light');}} style={{fontSize:10,color:'#FF3B30',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:600}}>Auto</button>}
                 </div>
               </div>
@@ -6098,7 +6826,7 @@ function AppCore() {
                 Registra comidas durante al menos un día y aquí verás tus tendencias
               </div>
               <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="tap" onClick={()=>setTab(1)} style={{padding:'12px 22px',borderRadius:16,border:'none',background:'#007AFF',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F,boxShadow:'0 6px 16px rgba(0,122,255,0.3)'}}>➕ Registrar hoy</button>
+                <button className="tap" onClick={()=>setTab(1)} style={{padding:'12px 22px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F,boxShadow:'0 6px 16px rgba(0,122,255,0.3)'}}>➕ Registrar hoy</button>
                 <button className="tap" onClick={()=>setTab(4)} style={{padding:'12px 22px',borderRadius:16,border:`1px solid ${C.border}`,background:C.surface,color:C.textSec,fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>⚙️ Ver perfil</button>
               </div>
             </div>
@@ -6119,7 +6847,7 @@ function AppCore() {
             <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:14}}>📊 Esta semana</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
               {[
-                {l:'Días registrados',v:`${weekData.filter(d=>d.cal>0).length}/7`,c:'#007AFF'},
+                {l:'Días registrados',v:`${weekData.filter(d=>d.cal>0).length}/7`,c:'#D42020'},
                 {l:'Mejor día',v:`${Math.max(...weekData.map(d=>d.cal),0)} kcal`,c:'#34C759'},
                 {l:'Días en meta',v:`${weekData.filter(d=>d.cal>0&&d.cal<=metas.cal).length}`,c:'#FF9500'},
                 {l:'Racha actual',v:`${streak.days} día${streak.days!==1?'s':''}`,c:'#FF3B30'},
@@ -6135,7 +6863,7 @@ function AppCore() {
           {/* Acciones rápidas */}
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
             {[
-              {icon:'📅',l:'Historial',sub:'14 días',fn:()=>setShowHistory(true),col:'#007AFF'},
+              {icon:'📅',l:'Historial',sub:'14 días',fn:()=>setShowHistory(true),col:'#D42020'},
               {icon:'📊',l:'Esta semana',sub:'Resumen',fn:()=>setShowWeekly(true),col:'#34C759'},
               {icon:'🗓️',l:'Plan semanal',sub:'+ Compras',fn:()=>setShowPlanner(true),col:'#FF9500'},
               {icon:'📤',l:'Compartir',sub:'Mi progreso',fn:()=>setShowShare(true),col:'#AF52DE'},
