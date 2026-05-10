@@ -1,0 +1,10 @@
+﻿[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "cl.caloru.app",
+    "sha256_cert_fingerprints": [
+      "84:E1:5A:47:0F:0B:12:32:78:CB:06:BB:62:D2:DF:0A:3A:B2:8A:B0:D7:E7:22:B2:CE:E1:CF:91:F1:B7:44:D2"
+    ]
+  }
+}]
