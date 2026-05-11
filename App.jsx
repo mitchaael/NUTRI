@@ -4594,10 +4594,10 @@ function MicronutrientesModal({C, F, log, onClose}) {
 
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`,background:C.bg}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:16,cursor:'pointer',color:'#D42020',padding:0,fontWeight:700,fontFamily:'inherit'}}>‹ Volver</button>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📊 Micronutrientes <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:60}}/>
+        <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
         {log.length===0 ? (
@@ -4693,11 +4693,11 @@ Responde SOLO en este formato JSON exacto:
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0}}>‹</button>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🇨🇱 Recetas IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:40}}/>
+        <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
         <div style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${C.border}`}}>
@@ -4835,11 +4835,11 @@ Responde SOLO con este JSON:
   const toggleItem = (key) => setChecked(prev=>({...prev,[key]:!prev[key]}));
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0}}>‹</button>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🛒 Lista de Compras IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:40}}/>
+        <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
         <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
