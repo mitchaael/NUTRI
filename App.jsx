@@ -4477,16 +4477,96 @@ class ErrorBoundary extends React.Component {
 }
 
 
+function PaywallModal({C, F, dark, onClose, supabaseUser}) {
+  const [loading, setLoading] = useState(false);
+  const isAndroid = /android/i.test(navigator.userAgent) || window.matchMedia('(display-mode: standalone)').matches;
+
+  const handleSubscribe = async (plan) => {
+    if (!supabaseUser) { alert('Debes iniciar sesión para suscribirte.'); return; }
+    setLoading(true);
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ plan, user_email: supabaseUser.email, back_url: 'https://caloru.cl' }),
+      });
+      const data = await res.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert('Error al crear la suscripción. Intenta de nuevo.');
+      }
+    } catch(e) {
+      alert('Error de conexión. Intenta de nuevo.');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:9999,display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+      <div style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'28px 20px 40px',width:'100%',maxWidth:480,fontFamily:F}}>
+        <div style={{textAlign:'center',marginBottom:20}}>
+          <div style={{fontSize:40,marginBottom:8}}>⭐</div>
+          <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:6}}>Calorú Pro</div>
+          <div style={{fontSize:14,color:C.textSec}}>Desbloquea todas las funciones premium</div>
+        </div>
+        <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'14px 16px',marginBottom:20}}>
+          {['🤖 Asistente IA nutricional personalizado','📸 Escáner de platos con inteligencia artificial','📤 Exportar tus datos en CSV'].map((f,i)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<2?`1px solid ${C.border}`:'none'}}>
+              <span style={{fontSize:16}}>{f.split(' ')[0]}</span>
+              <span style={{fontSize:14,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+          <button onClick={()=>handleSubscribe('monthly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'transparent',color:'#D42020',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13}}>
+            <div style={{fontSize:18,marginBottom:2}}>📅</div>
+            <div>Mensual</div>
+            <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$3.500 CLP</div>
+            <div style={{fontSize:10,color:C.textSec,marginTop:1}}>/ mes</div>
+          </button>
+          <button onClick={()=>handleSubscribe('yearly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13,position:'relative'}}>
+            <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 30%</div>
+            <div style={{fontSize:18,marginBottom:2}}>🗓️</div>
+            <div>Anual</div>
+            <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$29.900 CLP</div>
+            <div style={{fontSize:10,opacity:0.8,marginTop:1}}>/ año</div>
+          </button>
+        </div>
+        <button onClick={onClose} style={{width:'100%',padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'transparent',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>
+          Ahora no
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AppCore() {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
   const [authChecked, setAuthChecked]  = useState(false);
   const [syncStatus, setSyncStatus]    = useState('idle');
   const [restoringData, setRestoringData] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [isOnline, setIsOnline]           = useState(navigator.onLine);
   const syncTimer = useRef(null);
 
   /* Service Worker ya se registra en index.html — no duplicar aquí */
+
+  /* ── Cargar estado de suscripción ── */
+  useEffect(()=>{
+    if(!supabaseUser) return;
+    supabase.from('profiles').select('subscription_status,subscription_expires_at').eq('id',supabaseUser.id).single()
+      .then(({data})=>{
+        if(data){
+          const active = data.subscription_status==='pro' && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
+          setIsPro(active);
+        }
+      });
+  },[supabaseUser?.id]);
 
   /* ── Detector de conexión ── */
   useEffect(()=>{
@@ -5422,6 +5502,7 @@ function AppCore() {
       )}
 
       {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} onClose={()=>setShowAI(false)}/>}
+      {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showWelcomeBack&&<WelcomeBack C={C} F={F} nombre={nombre} streak={streak} daysAway={daysAway} onClose={()=>setShowWelcomeBack(false)}/>}
       {showMilestone&&<MilestoneCelebration C={C} F={F} milestone={showMilestone} onClose={()=>setShowMilestone(null)}/>}
       {showLegal&&<LegalModal type={showLegal} onClose={()=>setShowLegal(null)}/>}
@@ -5571,11 +5652,12 @@ function AppCore() {
               </div>
             </div>
             <div style={{display:'flex',gap:6}}>
-              <button className="tap" onClick={()=>setShowAI(true)} style={{
+              <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }} style={{
                 width:34,height:34,borderRadius:11,border:`1px solid ${C.border}`,
                 background:'#D4202018',color:'#D42020',fontSize:16,cursor:'pointer',
                 fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
-              }}>🤖</button>
+                position:'relative',
+              }}>🤖{!isPro&&<span style={{position:'absolute',top:-4,right:-4,background:'#FFD700',borderRadius:'50%',width:12,height:12,fontSize:8,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,color:'#000'}}>⭐</span>}</button>
               {/* Sync status */}
               {supabaseUser&&(
                 <div title={syncStatus==='syncing'?'Sincronizando...':syncStatus==='done'?'Sincronizado':syncStatus==='error'?'Error de sync':'Conectado'} style={{
@@ -6134,7 +6216,7 @@ function AppCore() {
 
           {/* Acciones rápidas */}
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
-            <button className="tap" onClick={()=>setShowPhotoScanner(true)} style={{
+            <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); }} style={{
               padding:'14px 12px',borderRadius:16,
               border:'1.5px solid #D4202050',
               background:dark?'rgba(0,122,255,0.12)':'rgba(0,122,255,0.06)',
@@ -6905,7 +6987,7 @@ function AppCore() {
               {icon:'📊',l:'Esta semana',sub:'Resumen',fn:()=>setShowWeekly(true),col:'#34C759'},
               {icon:'🗓️',l:'Plan semanal',sub:'+ Compras',fn:()=>setShowPlanner(true),col:'#FF9500'},
               {icon:'📤',l:'Compartir',sub:'Mi progreso',fn:()=>setShowShare(true),col:'#AF52DE'},
-              {icon:'📊',l:'Exportar CSV',sub:'Últimos 30 días',fn:exportCSV,col:'#34C759'},
+              {icon:'📊',l:'Exportar CSV',sub:'Últimos 30 días',fn:()=>{ if(!isPro){setShowPaywall(true);return;} exportCSV(); },col:'#34C759'},
               {icon:'🏆',l:'Reto 21 días',sub:'Nuevo hábito',fn:()=>setShowChallenge(true),col:'#FF9500'},
             ].map(({icon,l,sub,fn,col})=>(
               <button key={l} className="tap" onClick={fn} style={{padding:'14px 12px',borderRadius:18,border:`1px solid ${C.border}`,background:C.surface,display:'flex',flexDirection:'column',alignItems:'center',gap:6,cursor:'pointer',fontFamily:F}}>
