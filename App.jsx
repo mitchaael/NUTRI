@@ -4593,47 +4593,50 @@ function MicronutrientesModal({C, F, log, onClose}) {
   ];
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0,marginRight:8}}>‹</button>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`,background:C.bg}}>
+        <button onClick={onClose} style={{background:'none',border:'none',fontSize:16,cursor:'pointer',color:'#D42020',padding:0,fontWeight:700,fontFamily:'inherit'}}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📊 Micronutrientes <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:40}}/>
+        <div style={{minWidth:60}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
-        <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:16,border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:13,color:C.textSec,marginBottom:4}}>Resumen de hoy vs metas recomendadas</div>
-          <div style={{fontSize:11,color:C.textMuted}}>Basado en valores diarios recomendados para adultos</div>
-        </div>
-        {items.map(({label,val,meta,unit,emoji,color})=>{
-          const pct = Math.min(100, Math.round((val/meta)*100));
-          const over = val > meta;
-          return (
-            <div key={label} style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:10,border:`1px solid ${C.border}`}}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
-                <div style={{display:'flex',alignItems:'center',gap:8}}>
-                  <span style={{fontSize:20}}>{emoji}</span>
-                  <div>
-                    <div style={{fontSize:14,fontWeight:700,color:C.text}}>{label}</div>
-                    <div style={{fontSize:11,color:C.textSec}}>Meta: {meta}{unit}</div>
-                  </div>
-                </div>
-                <div style={{textAlign:'right'}}>
-                  <div style={{fontSize:16,fontWeight:800,color:over?'#FF3B30':color}}>{Math.round(val)}{unit}</div>
-                  <div style={{fontSize:10,color:over?'#FF3B30':C.textSec,fontWeight:600}}>{pct}% {over?'⚠️ excedido':'completado'}</div>
-                </div>
-              </div>
-              <div style={{height:8,background:C.surfaceAlt,borderRadius:4,overflow:'hidden'}}>
-                <div style={{height:'100%',width:`${pct}%`,background:over?'#FF3B30':color,borderRadius:4,transition:'width .5s ease'}}/>
-              </div>
-            </div>
-          );
-        })}
-        {log.length===0&&(
-          <div style={{textAlign:'center',padding:'40px 20px',color:C.textSec}}>
-            <div style={{fontSize:40,marginBottom:12}}>📭</div>
-            <div style={{fontSize:15,fontWeight:600}}>Sin registros hoy</div>
+        {log.length===0 ? (
+          <div style={{textAlign:'center',padding:'60px 20px',color:C.textSec}}>
+            <div style={{fontSize:48,marginBottom:12}}>🥗</div>
+            <div style={{fontSize:15,fontWeight:600,color:C.text}}>Sin registros hoy</div>
             <div style={{fontSize:13,marginTop:6}}>Agrega comidas para ver tus micronutrientes</div>
           </div>
+        ) : (
+          <>
+            <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:16,border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:13,color:C.textSec,marginBottom:4}}>Resumen de hoy vs metas recomendadas</div>
+              <div style={{fontSize:11,color:C.textMuted}}>Basado en valores diarios recomendados para adultos</div>
+            </div>
+            {items.map(({label,val,meta,unit,emoji,color})=>{
+              const pct = Math.min(100, Math.round((val/meta)*100));
+              const over = val > meta;
+              return (
+                <div key={label} style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{fontSize:20}}>{emoji}</span>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:700,color:C.text}}>{label}</div>
+                        <div style={{fontSize:11,color:C.textSec}}>Meta: {meta}{unit}</div>
+                      </div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontSize:16,fontWeight:800,color:over?'#FF3B30':color}}>{Math.round(val)}{unit}</div>
+                      <div style={{fontSize:10,color:over?'#FF3B30':C.textSec,fontWeight:600}}>{pct}% {over?'⚠️ excedido':'completado'}</div>
+                    </div>
+                  </div>
+                  <div style={{height:8,background:C.surfaceAlt,borderRadius:4,overflow:'hidden'}}>
+                    <div style={{height:'100%',width:`${pct}%`,background:over?'#FF3B30':color,borderRadius:4,transition:'width .5s ease'}}/>
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
     </div>
