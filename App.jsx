@@ -4476,10 +4476,11 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-
+/* ══════════════════════════════════════════════
+   MICRONUTRIENTES PRO
+══════════════════════════════════════════════ */
 function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [loading, setLoading] = useState(false);
-  const isAndroid = /android/i.test(navigator.userAgent) || window.matchMedia('(display-mode: standalone)').matches;
 
   const handleSubscribe = async (plan) => {
     if (!supabaseUser) { alert('Debes iniciar sesión para suscribirte.'); return; }
@@ -4513,10 +4514,10 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
           <div style={{fontSize:14,color:C.textSec}}>Desbloquea todas las funciones premium</div>
         </div>
         <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'14px 16px',marginBottom:20}}>
-          {['🤖 Asistente IA nutricional personalizado','📸 Escáner de platos con inteligencia artificial','📤 Exportar tus datos en CSV'].map((f,i)=>(
-            <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<2?`1px solid ${C.border}`:'none'}}>
-              <span style={{fontSize:16}}>{f.split(' ')[0]}</span>
-              <span style={{fontSize:14,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
+          {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🛒 Lista de compras inteligente','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
+            <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<arr.length-1?`1px solid ${C.border}`:'none'}}>
+              <span style={{fontSize:15}}>{f.split(' ')[0]}</span>
+              <span style={{fontSize:13,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
             </div>
           ))}
         </div>
@@ -4543,16 +4544,323 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   );
 }
 
+function MicronutrientesModal({C, F, log, onClose}) {
+  const totals = log.reduce((acc, item) => {
+    const factor = (item.grams ? item.grams / (item.porcion || 100) : 1) * (item.qty || 1);
+    acc.fibra   += (item.fibra   || 0) * factor;
+    acc.azucar  += (item.azucar  || 0) * factor;
+    acc.sodio   += (item.sodio   || 0) * factor;
+    acc.prot    += (item.prot    || 0) * factor;
+    acc.grasas  += (item.grasas  || 0) * factor;
+    acc.carbs   += (item.carbs   || 0) * factor;
+    return acc;
+  }, {fibra:0, azucar:0, sodio:0, prot:0, grasas:0, carbs:0});
+
+  const metas = {fibra:25, azucar:50, sodio:2300, prot:50, grasas:65, carbs:300};
+  const items = [
+    {label:'Proteínas',    val:totals.prot,   meta:metas.prot,   unit:'g',  emoji:'💪', color:'#D42020'},
+    {label:'Carbohidratos',val:totals.carbs,  meta:metas.carbs,  unit:'g',  emoji:'🌾', color:'#FF9500'},
+    {label:'Grasas',       val:totals.grasas, meta:metas.grasas, unit:'g',  emoji:'🥑', color:'#FFD700'},
+    {label:'Fibra',        val:totals.fibra,  meta:metas.fibra,  unit:'g',  emoji:'🥦', color:'#34C759'},
+    {label:'Azúcar',       val:totals.azucar, meta:metas.azucar, unit:'g',  emoji:'🍬', color:'#FF2D55'},
+    {label:'Sodio',        val:totals.sodio,  meta:metas.sodio,  unit:'mg', emoji:'🧂', color:'#5856D6'},
+  ];
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
+        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0,marginRight:8}}>‹</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📊 Micronutrientes <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{minWidth:40}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
+        <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:16,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:13,color:C.textSec,marginBottom:4}}>Resumen de hoy vs metas recomendadas</div>
+          <div style={{fontSize:11,color:C.textMuted}}>Basado en valores diarios recomendados para adultos</div>
+        </div>
+        {items.map(({label,val,meta,unit,emoji,color})=>{
+          const pct = Math.min(100, Math.round((val/meta)*100));
+          const over = val > meta;
+          return (
+            <div key={label} style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  <span style={{fontSize:20}}>{emoji}</span>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:C.text}}>{label}</div>
+                    <div style={{fontSize:11,color:C.textSec}}>Meta: {meta}{unit}</div>
+                  </div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontSize:16,fontWeight:800,color:over?'#FF3B30':color}}>{Math.round(val)}{unit}</div>
+                  <div style={{fontSize:10,color:over?'#FF3B30':C.textSec,fontWeight:600}}>{pct}% {over?'⚠️ excedido':'completado'}</div>
+                </div>
+              </div>
+              <div style={{height:8,background:C.surfaceAlt,borderRadius:4,overflow:'hidden'}}>
+                <div style={{height:'100%',width:`${pct}%`,background:over?'#FF3B30':color,borderRadius:4,transition:'width .5s ease'}}/>
+              </div>
+            </div>
+          );
+        })}
+        {log.length===0&&(
+          <div style={{textAlign:'center',padding:'40px 20px',color:C.textSec}}>
+            <div style={{fontSize:40,marginBottom:12}}>📭</div>
+            <div style={{fontSize:15,fontWeight:600}}>Sin registros hoy</div>
+            <div style={{fontSize:13,marginTop:6}}>Agrega comidas para ver tus micronutrientes</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   RECETAS CHILENAS IA PRO
+══════════════════════════════════════════════ */
+function RecetasIAModal({C, F, dark, nombre, perfil, obj, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [receta, setReceta] = useState(null);
+  const [preferencia, setPreferencia] = useState('almuerzo');
+  const [restriccion, setRestriccion] = useState('ninguna');
+
+  const EDGE_FN_AI = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food';
+
+  const generarReceta = async () => {
+    setLoading(true);
+    setReceta(null);
+    try {
+      const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo'}[obj]||'mantener peso';
+      const prompt = `Genera una receta chilena saludable para ${preferencia} para una persona que quiere ${objTexto}. Restricción: ${restriccion}.
+Responde SOLO en este formato JSON exacto:
+{
+  "nombre": "nombre de la receta",
+  "emoji": "emoji representativo",
+  "tiempo": "tiempo de preparación",
+  "porciones": número,
+  "calorias": número por porción,
+  "ingredientes": ["ingrediente 1 con cantidad", "ingrediente 2 con cantidad"],
+  "pasos": ["paso 1", "paso 2", "paso 3"],
+  "tip": "tip nutricional chileno",
+  "macros": {"prot": número, "carbs": número, "grasas": número}
+}`;
+      const res = await fetch(EDGE_FN_AI, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          messages:[{role:'user',content:prompt}],
+          system:'Eres un chef nutricionista chileno experto. Genera recetas con ingredientes típicos de Chile (supermercados chilenos). Responde SOLO con JSON válido, sin texto adicional.',
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text || '';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setReceta(JSON.parse(clean));
+    } catch(e) {
+      setReceta({error: 'No se pudo generar la receta. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
+        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0}}>‹</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🇨🇱 Recetas IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{minWidth:40}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
+        <div style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>¿Qué quieres preparar?</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:12}}>
+            {['desayuno','almuerzo','once','cena','snack','merienda'].map(p=>(
+              <button key={p} onClick={()=>setPreferencia(p)} style={{padding:'8px 4px',borderRadius:12,border:`1.5px solid ${preferencia===p?'#D42020':C.border}`,background:preferencia===p?'#D4202018':C.surfaceAlt,color:preferencia===p?'#D42020':C.text,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F,textTransform:'capitalize'}}>
+                {p}
+              </button>
+            ))}
+          </div>
+          <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>Restricción alimentaria</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+            {['ninguna','vegetariana','vegana','sin gluten','sin lactosa','bajo en sodio'].map(r=>(
+              <button key={r} onClick={()=>setRestriccion(r)} style={{padding:'8px',borderRadius:12,border:`1.5px solid ${restriccion===r?'#D42020':C.border}`,background:restriccion===r?'#D4202018':C.surfaceAlt,color:restriccion===r?'#D42020':C.text,fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:F,textTransform:'capitalize'}}>
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button onClick={generarReceta} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:16,opacity:loading?0.7:1}}>
+          {loading?'🤖 Generando receta...':'🇨🇱 Generar receta chilena'}
+        </button>
+        {receta&&!receta.error&&(
+          <div style={{background:C.surface,borderRadius:18,padding:'18px',border:`1px solid ${C.border}`}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+              <span style={{fontSize:36}}>{receta.emoji}</span>
+              <div>
+                <div style={{fontSize:17,fontWeight:800,color:C.text}}>{receta.nombre}</div>
+                <div style={{fontSize:12,color:C.textSec,marginTop:2}}>⏱️ {receta.tiempo} · 🍽️ {receta.porciones} porciones · 🔥 {receta.calorias} kcal/porción</div>
+              </div>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:14}}>
+              {[['💪','Prot',receta.macros?.prot,'g'],['🌾','Carbs',receta.macros?.carbs,'g'],['🥑','Grasas',receta.macros?.grasas,'g']].map(([e,l,v,u])=>(
+                <div key={l} style={{background:C.surfaceAlt,borderRadius:12,padding:'10px 8px',textAlign:'center'}}>
+                  <div style={{fontSize:18}}>{e}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:C.text}}>{v}{u}</div>
+                  <div style={{fontSize:10,color:C.textSec}}>{l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>🛒 Ingredientes</div>
+              {receta.ingredientes?.map((ing,i)=>(
+                <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0',borderBottom:`1px solid ${C.border}`}}>
+                  <span style={{color:'#D42020',fontWeight:700,fontSize:12}}>•</span>
+                  <span style={{fontSize:13,color:C.text}}>{ing}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>👨‍🍳 Preparación</div>
+              {receta.pasos?.map((paso,i)=>(
+                <div key={i} style={{display:'flex',gap:10,marginBottom:8}}>
+                  <div style={{width:22,height:22,borderRadius:11,background:'#D42020',color:'white',fontSize:11,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{i+1}</div>
+                  <span style={{fontSize:13,color:C.text,lineHeight:1.5}}>{paso}</span>
+                </div>
+              ))}
+            </div>
+            {receta.tip&&(
+              <div style={{background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:14,padding:'12px',border:'1px solid rgba(52,199,89,0.3)'}}>
+                <div style={{fontSize:12,fontWeight:700,color:'#34C759',marginBottom:4}}>💡 Tip nutricional</div>
+                <div style={{fontSize:13,color:C.text}}>{receta.tip}</div>
+              </div>
+            )}
+          </div>
+        )}
+        {receta?.error&&(
+          <div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{receta.error}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   LISTA DE COMPRAS INTELIGENTE PRO
+══════════════════════════════════════════════ */
+function ListaComprasIAModal({C, F, dark, log, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [lista, setLista] = useState(null);
+  const [checked, setChecked] = useState({});
+  const EDGE_FN_AI = 'https://fywghvhdwltayylswnid.supabase.co/functions/v1/analyze-food';
+
+  const generarLista = async () => {
+    setLoading(true);
+    setLista(null);
+    setChecked({});
+    try {
+      const alimentos = log.map(it=>it.nombre).join(', ') || 'variado saludable';
+      const prompt = `Basado en estos alimentos que consume el usuario: ${alimentos}
+Genera una lista de compras saludable para una semana en Chile (supermercados chilenos como Jumbo, Lider, Santa Isabel).
+Responde SOLO con este JSON:
+{
+  "categorias": [
+    {
+      "nombre": "nombre categoría",
+      "emoji": "emoji",
+      "items": ["item 1 con cantidad", "item 2 con cantidad"]
+    }
+  ],
+  "presupuesto_estimado": "rango en CLP",
+  "tip": "consejo de compra"
+}`;
+      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          messages:[{role:'user',content:prompt}],
+          system:'Eres un nutricionista chileno. Genera listas de compras con productos disponibles en supermercados chilenos. Responde SOLO con JSON válido.',
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text || '';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setLista(JSON.parse(clean));
+    } catch(e) {
+      setLista({error:'No se pudo generar la lista. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  const toggleItem = (key) => setChecked(prev=>({...prev,[key]:!prev[key]}));
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
+        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0}}>‹</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🛒 Lista de Compras IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{minWidth:40}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
+        <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:13,color:C.textSec}}>Basada en tus alimentos del día y hábitos registrados. La IA genera una lista personalizada para supermercados chilenos.</div>
+        </div>
+        <button onClick={generarLista} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#34C759',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:16,opacity:loading?0.7:1}}>
+          {loading?'🤖 Generando lista...':'🛒 Generar lista inteligente'}
+        </button>
+        {lista&&!lista.error&&(
+          <>
+            {lista.presupuesto_estimado&&(
+              <div style={{background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:14,padding:'12px 14px',marginBottom:12,border:'1px solid rgba(52,199,89,0.3)',display:'flex',alignItems:'center',gap:10}}>
+                <span style={{fontSize:20}}>💰</span>
+                <div>
+                  <div style={{fontSize:11,color:'#34C759',fontWeight:700}}>Presupuesto estimado</div>
+                  <div style={{fontSize:14,fontWeight:800,color:C.text}}>{lista.presupuesto_estimado}</div>
+                </div>
+              </div>
+            )}
+            {lista.categorias?.map((cat,ci)=>(
+              <div key={ci} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:10}}>{cat.emoji} {cat.nombre}</div>
+                {cat.items?.map((item,ii)=>{
+                  const key=`${ci}-${ii}`;
+                  return (
+                    <div key={ii} onClick={()=>toggleItem(key)} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:ii<cat.items.length-1?`1px solid ${C.border}`:'none',cursor:'pointer'}}>
+                      <div style={{width:22,height:22,borderRadius:11,border:`2px solid ${checked[key]?'#34C759':'#D42020'}`,background:checked[key]?'#34C759':'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all .2s'}}>
+                        {checked[key]&&<span style={{color:'white',fontSize:12,fontWeight:800}}>✓</span>}
+                      </div>
+                      <span style={{fontSize:13,color:C.text,textDecoration:checked[key]?'line-through':'none',opacity:checked[key]?0.5:1,transition:'all .2s'}}>{item}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            {lista.tip&&(
+              <div style={{background:dark?'rgba(255,149,0,0.1)':'rgba(255,149,0,0.08)',borderRadius:14,padding:'12px',border:'1px solid rgba(255,149,0,0.3)',marginBottom:20}}>
+                <div style={{fontSize:12,fontWeight:700,color:'#FF9500',marginBottom:4}}>💡 Consejo de compra</div>
+                <div style={{fontSize:13,color:C.text}}>{lista.tip}</div>
+              </div>
+            )}
+          </>
+        )}
+        {lista?.error&&(
+          <div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{lista.error}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AppCore() {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
   const [authChecked, setAuthChecked]  = useState(false);
   const [syncStatus, setSyncStatus]    = useState('idle');
   const [restoringData, setRestoringData] = useState(false);
-  const [isPro, setIsPro] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
   const [isOnline, setIsOnline]           = useState(navigator.onLine);
   const syncTimer = useRef(null);
+  const [isPro, setIsPro] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [showMicronutrientes, setShowMicronutrientes] = useState(false);
+  const [showRecetasIA, setShowRecetasIA] = useState(false);
+  const [showListaComprasIA, setShowListaComprasIA] = useState(false);
 
   /* Service Worker ya se registra en index.html — no duplicar aquí */
 
@@ -5412,11 +5720,11 @@ function AppCore() {
         <div style={{position:'fixed',inset:0,background:C.bg,zIndex:80,display:'flex',flexDirection:'column',animation:'fadeUp .3s ease'}}>
           <div style={modalHeaderStyle(C)}>
             <button onClick={()=>setShowHistory(false)} style={backBtnStyle(C)}>‹ Volver</button>
-            <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📅 Historial</div>
+            <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📅 Historial {isPro?<span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,marginLeft:4,fontWeight:800}}>90 días ⭐</span>:<span style={{fontSize:10,color:C.textSec,fontWeight:500}}>14 días</span>}</div>
             <div style={{minWidth:80}}/>
           </div>
           <div style={{flex:1,overflowY:'auto',padding:'12px 16px'}}>
-            {Array.from({length:14},(_,i)=>{
+            {Array.from({length:isPro?90:14},(_,i)=>{
               const d=new Date(); d.setDate(d.getDate()-1-i);
               const key=dateToKey(d);
               const dayLog=LS.get('log_'+key,[]);
@@ -5503,6 +5811,9 @@ function AppCore() {
 
       {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} onClose={()=>setShowAI(false)}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
+      {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
+      {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} onClose={()=>setShowRecetasIA(false)}/>}
+      {showListaComprasIA&&<ListaComprasIAModal C={C} F={F} dark={dark} log={log} onClose={()=>setShowListaComprasIA(false)}/>}
       {showWelcomeBack&&<WelcomeBack C={C} F={F} nombre={nombre} streak={streak} daysAway={daysAway} onClose={()=>setShowWelcomeBack(false)}/>}
       {showMilestone&&<MilestoneCelebration C={C} F={F} milestone={showMilestone} onClose={()=>setShowMilestone(null)}/>}
       {showLegal&&<LegalModal type={showLegal} onClose={()=>setShowLegal(null)}/>}
@@ -5656,8 +5967,7 @@ function AppCore() {
                 width:34,height:34,borderRadius:11,border:`1px solid ${C.border}`,
                 background:'#D4202018',color:'#D42020',fontSize:16,cursor:'pointer',
                 fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
-                position:'relative',
-              }}>🤖{!isPro&&<span style={{position:'absolute',top:-4,right:-4,background:'#FFD700',borderRadius:'50%',width:12,height:12,fontSize:8,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,color:'#000'}}>⭐</span>}</button>
+              }}>🤖</button>
               {/* Sync status */}
               {supabaseUser&&(
                 <div title={syncStatus==='syncing'?'Sincronizando...':syncStatus==='done'?'Sincronizado':syncStatus==='error'?'Error de sync':'Conectado'} style={{
@@ -5930,6 +6240,24 @@ function AppCore() {
             })}
           </div>
 
+
+          {/* ── BOTÓN MICRONUTRIENTES PRO ── */}
+          <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowMicronutrientes(true); }} style={{
+            width:"100%",padding:"12px 16px",borderRadius:16,marginBottom:12,
+            border:`1.5px solid ${isPro?"#FFD700":"#D42020"}`,
+            background:isPro?"rgba(255,215,0,0.08)":"rgba(212,32,32,0.06)",
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            cursor:"pointer",fontFamily:F,
+          }}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:20}}>📊</span>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Análisis de Micronutrientes</div>
+                <div style={{fontSize:11,color:C.textSec}}>Fibra, sodio, azúcar y más</div>
+              </div>
+            </div>
+            {isPro?<span style={{fontSize:11,fontWeight:700,color:"#FFD700"}}>⭐ PRO</span>:<span style={{fontSize:11,fontWeight:700,color:"#D42020"}}>🔒 PRO</span>}
+          </button>
           {/* ── WATER TRACKER ── */}
           <div className="s3" style={{
             background:C.surface,borderRadius:20,padding:'14px 16px',marginBottom:12,
@@ -6988,6 +7316,8 @@ function AppCore() {
               {icon:'🗓️',l:'Plan semanal',sub:'+ Compras',fn:()=>setShowPlanner(true),col:'#FF9500'},
               {icon:'📤',l:'Compartir',sub:'Mi progreso',fn:()=>setShowShare(true),col:'#AF52DE'},
               {icon:'📊',l:'Exportar CSV',sub:'Últimos 30 días',fn:()=>{ if(!isPro){setShowPaywall(true);return;} exportCSV(); },col:'#34C759'},
+              {icon:'🇨🇱',l:'Recetas IA',sub:'Cocina chilena',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowRecetasIA(true); },col:'#D42020'},
+              {icon:'🛒',l:'Lista Compras',sub:'Inteligente IA',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowListaComprasIA(true); },col:'#34C759'},
               {icon:'🏆',l:'Reto 21 días',sub:'Nuevo hábito',fn:()=>setShowChallenge(true),col:'#FF9500'},
             ].map(({icon,l,sub,fn,col})=>(
               <button key={l} className="tap" onClick={fn} style={{padding:'14px 12px',borderRadius:18,border:`1px solid ${C.border}`,background:C.surface,display:'flex',flexDirection:'column',alignItems:'center',gap:6,cursor:'pointer',fontFamily:F}}>
