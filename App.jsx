@@ -6241,6 +6241,40 @@ function AppCore() {
           </div>
 
 
+          {/* ── BANNER PRO (solo para usuarios free) ── */}
+          {!isPro&&(
+            <button className="tap" onClick={()=>setShowPaywall(true)} style={{
+              width:'100%',marginBottom:12,padding:0,border:'none',background:'none',cursor:'pointer',fontFamily:F,
+            }}>
+              <div style={{
+                borderRadius:20,overflow:'hidden',
+                background:'linear-gradient(135deg, #D42020 0%, #FF6B35 50%, #FFD700 100%)',
+                padding:'18px 20px',
+                display:'flex',alignItems:'center',justifyContent:'space-between',
+                boxShadow:'0 4px 20px rgba(212,32,32,0.35)',
+                position:'relative',
+              }}>
+                <div style={{position:'absolute',top:-20,right:-20,fontSize:80,opacity:0.1}}>⭐</div>
+                <div style={{textAlign:'left',zIndex:1}}>
+                  <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.8)',letterSpacing:1,textTransform:'uppercase',marginBottom:4}}>Calorú Pro</div>
+                  <div style={{fontSize:17,fontWeight:800,color:'white',lineHeight:1.3,marginBottom:8}}>Hazte Pro y empieza a escanear tus platos 📸</div>
+                  <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                    {['🤖 IA','📸 Escáner','🇨🇱 Recetas','🛒 Lista'].map(f=>(
+                      <span key={f} style={{fontSize:10,fontWeight:700,background:'rgba(255,255,255,0.2)',color:'white',padding:'3px 8px',borderRadius:8}}>{f}</span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{zIndex:1,flexShrink:0,marginLeft:12}}>
+                  <div style={{background:'white',borderRadius:14,padding:'10px 14px',textAlign:'center',boxShadow:'0 2px 10px rgba(0,0,0,0.2)'}}>
+                    <div style={{fontSize:11,fontWeight:800,color:'#D42020'}}>desde</div>
+                    <div style={{fontSize:18,fontWeight:900,color:'#D42020',lineHeight:1}}>$3.500</div>
+                    <div style={{fontSize:9,fontWeight:700,color:'#D42020',opacity:0.7}}>CLP/mes</div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          )}
+
           {/* ── BOTÓN MICRONUTRIENTES PRO ── */}
           <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowMicronutrientes(true); }} style={{
             width:"100%",padding:"12px 16px",borderRadius:16,marginBottom:12,
