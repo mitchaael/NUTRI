@@ -3006,7 +3006,7 @@ const callEdgeFn = async (body, signal) => {
 /* ═══════════════════════════════════════════════════════
    FOOD PHOTO SCANNER — analiza foto de comida con IA
 ═══════════════════════════════════════════════════════ */
-function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose}) {
+function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[], veganMode=false}) {
   const dark = C.surface !== '#FFFFFF' && C.surface !== '#ffffff'; // derive from theme
   const [status, setStatus]     = useState('idle');    // idle | capturing | analyzing | results | error
   const [image, setImage]       = useState(null);      // base64 string
@@ -3051,6 +3051,8 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose}) {
         mode: 'photo',
         image: finalBase64,
         nombre,
+        userAllergens,
+        veganMode,
       });
 
       if (data.result?.error) {
@@ -3376,6 +3378,28 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose}) {
               </div>
             )}
 
+            {/* Advertencia alergias/vegano */}
+            {(userAllergens.length>0||veganMode)&&result?.alimentos&&(()=>{
+              const nombresPlato = result.alimentos.map(a=>a.nombre.toLowerCase()).join(' ');
+              const ALERGEN_KEYWORDS = {gluten:['trigo','harina','pan','pasta','gluten','cebada','centeno'],lactosa:['leche','queso','mantequilla','crema','yogurt','lácteo'],huevo:['huevo','mayonesa'],mariscos:['camarón','marisco','langosta','cangrejo','mejillón'],nueces:['nuez','almendra','maní','cacahuete','avellana'],soja:['soja','tofu','soya'],maní:['maní','cacahuete']};
+              const alertas = [];
+              userAllergens.forEach(al=>{
+                const kws = ALERGEN_KEYWORDS[al]||[al.toLowerCase()];
+                if(kws.some(k=>nombresPlato.includes(k))) alertas.push(`⚠️ Puede contener ${al}`);
+              });
+              if(veganMode){
+                const noVegan=['carne','pollo','cerdo','vacuno','pescado','atún','salmón','huevo','leche','queso','mantequilla','yogurt','miel','jamón','tocino'];
+                if(noVegan.some(k=>nombresPlato.includes(k))) alertas.push('🌱 Este plato puede no ser apto para veganos');
+              }
+              if(!alertas.length) return null;
+              return (
+                <div style={{background:'rgba(255,59,48,0.08)',borderRadius:14,padding:'12px 14px',marginBottom:14,border:'1px solid rgba(255,59,48,0.3)'}}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#FF3B30',marginBottom:6}}>⚠️ Alertas de tu perfil</div>
+                  {alertas.map((a,i)=><div key={i} style={{fontSize:12,color:'#FF3B30',marginBottom:2}}>{a}</div>)}
+                </div>
+              );
+            })()}
+
             {/* Disclaimer */}
             <div style={{
               fontSize:10, color:C.textMuted, textAlign:'center',
@@ -3565,7 +3589,7 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose}) {
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false}) {
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -3584,6 +3608,8 @@ Carbohidratos: ${Math.round(tot.carbs)}g / ${metas.carbs}g meta.
 Grasas: ${Math.round(tot.grasas)}g / ${metas.grasas}g meta.
 Comidas registradas hoy: ${log.length} items.
 Racha actual: ${streak.days} días.
+${veganMode?'IMPORTANTE: El usuario es VEGANO. No sugerir ningún producto de origen animal.':''}
+${userAllergens.length>0?`IMPORTANTE: El usuario tiene alergias/intolerancias a: ${userAllergens.join(', ')}. NUNCA sugerir alimentos con estos ingredientes.`:''}
 Responde siempre en español, de forma breve y amigable (máx 3 párrafos).
 Usa emojis con moderación. Sé específico con alimentos chilenos cuando puedas.
 Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
@@ -4617,7 +4643,7 @@ function MicronutrientesModal({C, F, log, onClose}) {
 /* ══════════════════════════════════════════════
    RECETAS CHILENAS IA PRO
 ══════════════════════════════════════════════ */
-function RecetasIAModal({C, F, dark, nombre, perfil, obj, onClose}) {
+function RecetasIAModal({C, F, dark, nombre, perfil, obj, onClose, userAllergens=[], veganMode=false}) {
   const [loading, setLoading] = useState(false);
   const [receta, setReceta] = useState(null);
   const [preferencia, setPreferencia] = useState('almuerzo');
@@ -4630,7 +4656,9 @@ function RecetasIAModal({C, F, dark, nombre, perfil, obj, onClose}) {
     setReceta(null);
     try {
       const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo'}[obj]||'mantener peso';
-      const prompt = `Genera una receta chilena saludable para ${preferencia} para una persona que quiere ${objTexto}. Restricción: ${restriccion}.
+      const alergiasTexto = userAllergens.length>0 ? `Alergias/intolerancias: ${userAllergens.join(', ')}.` : '';
+      const veganoTexto = veganMode ? 'La persona es VEGANA, no usar ningún producto animal.' : '';
+      const prompt = `Genera una receta chilena saludable para ${preferencia} para una persona que quiere ${objTexto}. Restricción elegida: ${restriccion}. ${alergiasTexto} ${veganoTexto}
 Responde SOLO en este formato JSON exacto:
 {
   "nombre": "nombre de la receta",
@@ -4687,9 +4715,17 @@ Responde SOLO en este formato JSON exacto:
             ))}
           </div>
         </div>
-        <button onClick={generarReceta} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:16,opacity:loading?0.7:1}}>
+        <button onClick={generarReceta} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:8,opacity:loading?0.7:1}}>
           {loading?'🤖 Generando receta...':'🇨🇱 Generar receta chilena'}
         </button>
+        {(userAllergens.length>0||veganMode)&&(
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:16,padding:'8px 12px',background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:12,border:'1px solid rgba(52,199,89,0.3)'}}>
+            <span style={{fontSize:14}}>✅</span>
+            <span style={{fontSize:11,color:'#34C759',fontWeight:600}}>
+              Receta adaptada a tu perfil: {[veganMode&&'vegano',...userAllergens].filter(Boolean).join(', ')}
+            </span>
+          </div>
+        )}
         {receta&&!receta.error&&(
           <div style={{background:C.surface,borderRadius:18,padding:'18px',border:`1px solid ${C.border}`}}>
             <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
@@ -4745,7 +4781,7 @@ Responde SOLO en este formato JSON exacto:
 /* ══════════════════════════════════════════════
    LISTA DE COMPRAS INTELIGENTE PRO
 ══════════════════════════════════════════════ */
-function ListaComprasIAModal({C, F, dark, log, onClose}) {
+function ListaComprasIAModal({C, F, dark, log, onClose, userAllergens=[], veganMode=false}) {
   const [loading, setLoading] = useState(false);
   const [lista, setLista] = useState(null);
   const [checked, setChecked] = useState({});
@@ -4757,7 +4793,11 @@ function ListaComprasIAModal({C, F, dark, log, onClose}) {
     setChecked({});
     try {
       const alimentos = log.map(it=>it.nombre).join(', ') || 'variado saludable';
+      const alergiasTexto = userAllergens.length>0 ? `IMPORTANTE: el usuario tiene alergias/intolerancias a: ${userAllergens.join(', ')}. Excluir estos ingredientes de la lista.` : '';
+      const veganoTexto = veganMode ? 'IMPORTANTE: el usuario es VEGANO. Incluir solo productos de origen vegetal, sin carnes, lácteos, huevos ni miel.' : '';
       const prompt = `Basado en estos alimentos que consume el usuario: ${alimentos}
+${alergiasTexto}
+${veganoTexto}
 Genera una lista de compras saludable para una semana en Chile (supermercados chilenos como Jumbo, Lider, Santa Isabel).
 Responde SOLO con este JSON:
 {
@@ -4802,9 +4842,17 @@ Responde SOLO con este JSON:
         <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
           <div style={{fontSize:13,color:C.textSec}}>Basada en tus alimentos del día y hábitos registrados. La IA genera una lista personalizada para supermercados chilenos.</div>
         </div>
-        <button onClick={generarLista} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#34C759',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:16,opacity:loading?0.7:1}}>
+        <button onClick={generarLista} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#34C759',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:8,opacity:loading?0.7:1}}>
           {loading?'🤖 Generando lista...':'🛒 Generar lista inteligente'}
         </button>
+        {(userAllergens.length>0||veganMode)&&(
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:16,padding:'8px 12px',background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:12,border:'1px solid rgba(52,199,89,0.3)'}}>
+            <span style={{fontSize:14}}>✅</span>
+            <span style={{fontSize:11,color:'#34C759',fontWeight:600}}>
+              Lista adaptada a tu perfil: {[veganMode&&'vegano',...userAllergens].filter(Boolean).join(', ')}
+            </span>
+          </div>
+        )}
         {lista&&!lista.error&&(
           <>
             {lista.presupuesto_estimado&&(
@@ -5809,11 +5857,11 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} onClose={()=>setShowAI(false)}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowAI(false)}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
-      {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} onClose={()=>setShowRecetasIA(false)}/>}
-      {showListaComprasIA&&<ListaComprasIAModal C={C} F={F} dark={dark} log={log} onClose={()=>setShowListaComprasIA(false)}/>}
+      {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
+      {showListaComprasIA&&<ListaComprasIAModal C={C} F={F} dark={dark} log={log} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowListaComprasIA(false)}/>}
       {showWelcomeBack&&<WelcomeBack C={C} F={F} nombre={nombre} streak={streak} daysAway={daysAway} onClose={()=>setShowWelcomeBack(false)}/>}
       {showMilestone&&<MilestoneCelebration C={C} F={F} milestone={showMilestone} onClose={()=>setShowMilestone(null)}/>}
       {showLegal&&<LegalModal type={showLegal} onClose={()=>setShowLegal(null)}/>}
@@ -5896,6 +5944,7 @@ function AppCore() {
 
       {/* ══ PHOTO FOOD SCANNER ══ */}
       {showPhotoScanner&&<FoodPhotoScanner C={C} F={F} nombre={nombre} meal={meal}
+        userAllergens={userAllergens} veganMode={veganMode}
         onAdd={(food)=>addFood(food)}
         onClose={()=>setShowPhotoScanner(false)}
       />}
