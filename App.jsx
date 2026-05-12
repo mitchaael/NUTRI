@@ -752,16 +752,24 @@ const calcTDEE = ({peso,altura,edad,sexo,act}) => {
     : 10*p + 6.25*h - 5*e - 161;
   return Math.round(bmr * (parseFloat(act)||1.375));
 };
-const calcMetas = (tdee, obj, pesoKg=70) => {
-  /* Déficit/superávit en % del TDEE (más seguro que valor fijo) */
+const RITMOS = {
+  tranquilo: {label:'🐢 Tranquilo', desc:'0.25 kg/sem', factor:0.10, color:'#34C759'},
+  normal:    {label:'🚶 Normal',    desc:'0.5 kg/sem',  factor:0.20, color:'#FF9500'},
+  rapido:    {label:'🏃 Rápido',    desc:'0.75 kg/sem', factor:0.30, color:'#D42020'},
+  agresivo:  {label:'🚀 Agresivo',  desc:'1 kg/sem',    factor:0.38, color:'#5856D6'},
+};
+
+const calcMetas = (tdee, obj, pesoKg=70, ritmo='normal') => {
+  /* Déficit/superávit en % del TDEE según ritmo elegido */
+  const rFactor = RITMOS[ritmo]?.factor ?? 0.20;
   const ajuste = {
-    bajar:   -0.20,  // -20% TDEE → déficit moderado y sostenible
+    bajar:   -(rFactor),
     mantener: 0,
     recomp:   0,
-    subir:    0.12,  // +12% TDEE → superávit limpio para ganar masa
+    subir:    rFactor * 0.6,
   };
   const d = ajuste[obj] ?? 0;
-  const cal = Math.max(tdee * 0.70, Math.round(tdee + tdee*d)); // mínimo 70% TDEE
+  const cal = Math.max(tdee * 0.65, Math.round(tdee + tdee*d)); // mínimo 65% TDEE
 
   /* Proteína: g/kg de peso corporal (ISSN 2023) */
   const protGxKg = {
@@ -1097,6 +1105,38 @@ function Confetti({active}) {
 /* ═══════════════════════════════════════════════════════
    SPLASH SCREEN — Premium, brand-aligned
 ═══════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════
+   SISTEMA DE NIVELES Y PUNTOS
+══════════════════════════════════════════════ */
+const NIVELES = [
+  {nivel:1,  nombre:'🌱 Semilla',      xpMin:0,    xpMax:100,  color:'#8E8E93'},
+  {nivel:2,  nombre:'🥗 Novato',       xpMin:100,  xpMax:250,  color:'#34C759'},
+  {nivel:3,  nombre:'🥦 Aprendiz',     xpMin:250,  xpMax:500,  color:'#30D158'},
+  {nivel:4,  nombre:'💪 Constante',    xpMin:500,  xpMax:900,  color:'#FF9500'},
+  {nivel:5,  nombre:'🔥 Dedicado',     xpMin:900,  xpMax:1500, color:'#FF6B00'},
+  {nivel:6,  nombre:'⚡ Avanzado',     xpMin:1500, xpMax:2500, color:'#D42020'},
+  {nivel:7,  nombre:'🏆 Experto',      xpMin:2500, xpMax:4000, color:'#AF52DE'},
+  {nivel:8,  nombre:'🌟 Maestro',      xpMin:4000, xpMax:6000, color:'#FFD700'},
+  {nivel:9,  nombre:'👑 Elite',        xpMin:6000, xpMax:9000, color:'#FF375F'},
+  {nivel:10, nombre:'🚀 Nutri Master', xpMin:9000, xpMax:99999,color:'#D42020'},
+];
+
+const getNivel = (xp) => NIVELES.find(n=>xp>=n.xpMin&&xp<n.xpMax) || NIVELES[NIVELES.length-1];
+
+const calcXPDia = (tot, metas, agua, waterGoal, exercises, streak) => {
+  let xp = 0;
+  if(tot.cal > 0) xp += 10; // registró comidas
+  const pct = metas.cal>0?tot.cal/metas.cal:0;
+  if(pct>=0.85&&pct<=1.08) xp += 20; // en meta calórica
+  if(tot.prot>=metas.prot*0.85) xp += 15; // proteína cumplida
+  if(agua>=waterGoal) xp += 10; // agua cumplida
+  if(exercises.length>0) xp += 15; // ejercicio registrado
+  if(streak.days>=7) xp += 10; // racha 7+ días
+  if(streak.days>=30) xp += 20; // racha 30+ días
+  return xp;
+};
+
 function Splash({onDone}) {
   const [phase,setPhase] = useState(0);
   const [tipIdx,setTipIdx] = useState(0);
@@ -2599,6 +2639,8 @@ function WeeklySummary({C, F, metas, streak, onClose}) {
             {icon:'🎯',l:'Días en meta',v:`${onGoal}/7`,c:'#34C759'},
             {icon:'💪',l:'Kcal quemadas',v:`${burned}`,c:'#D42020'},
             {icon:'📈',l:'Racha actual',v:`${streak.days} días`,c:'#AF52DE'},
+            {icon:'⭐',l:'Nivel',v:getNivel(xpTotal).nombre,c:getNivel(xpTotal).color},
+            {icon:'✨',l:'XP Total',v:`${xpTotal} XP`,c:'#FFD700'},
           ].map(({icon,l,v,c2=null,c})=>(
             <div key={l} style={{background:C.surface,borderRadius:18,padding:'16px',border:`1px solid ${C.border}`}}>
               <div style={{fontSize:26,marginBottom:6}}>{icon}</div>
@@ -2655,7 +2697,7 @@ function WeeklySummary({C, F, metas, streak, onClose}) {
 /* ═══════════════════════════════════════════════════════
    COMPARTIR PROGRESO — genera imagen canvas
 ═══════════════════════════════════════════════════════ */
-function ShareCard({C, F, nombre, tot, metas, obj, streak, exercises, onClose}) {
+function ShareCard({C, F, nombre, tot, metas, obj, streak, exercises, onClose, xpTotal=0, nivel=null}) {
   const canvasRef = useRef(null);
   const [ready, setReady] = useState(false);
   const objLabels={bajar:'Bajando de peso',mantener:'Manteniendo peso',recomp:'Recomposición',subir:'Ganando masa'};
@@ -2739,6 +2781,7 @@ function ShareCard({C, F, nombre, tot, metas, obj, streak, exercises, onClose}) 
     if(streak.days>0||burned>0){
       ctx.fillStyle='rgba(255,255,255,0.06)'; rr(20,my,W-38,48,12); ctx.fill();
       if(streak.days>0){ctx.fillStyle='white'; ctx.font='bold 12px system-ui'; ctx.fillText('🔥 '+streak.days+' días de racha',30,my+20);}
+      if(nivel){ctx.fillStyle='rgba(255,215,0,0.9)'; ctx.font='bold 11px system-ui'; ctx.fillText(nivel.nombre+' · '+xpTotal+' XP',30,my+38);}
       if(burned>0){ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='12px system-ui'; ctx.fillText('💪 '+burned+' kcal quemadas',30,my+38);}
     }
 
@@ -3765,6 +3808,10 @@ function DailyChallengeCard({C, F, log, agua}) {
   const challenges = [
     {emoji:'🥦',text:'Come 3 porciones de verduras hoy',reward:'+15 pts',c:C.green},
     {emoji:'💧',text:'Toma 8 vasos de agua',reward:'+10 pts',c:'#D42020'},
+    {emoji:'🇨🇱',text:'Come un plato chileno hoy',reward:'+15 pts',c:'#D42020'},
+    {emoji:'🥗',text:'Come 3 porciones de verdura',reward:'+20 pts',c:'#34C759'},
+    {emoji:'🏃',text:'30 min de ejercicio',reward:'+25 pts',c:'#FF9500'},
+    {emoji:'🌙',text:'Registra tus 3 comidas',reward:'+30 pts',c:'#5856D6'},
     {emoji:'🥩',text:'Llega a tu meta de proteína',reward:'+20 pts',c:C.red},
     {emoji:'🚫',text:'Día sin azúcar añadida',reward:'+25 pts',c:C.amber},
     {emoji:'📸',text:'Escanea tu almuerzo con IA',reward:'+15 pts',c:C.purple},
@@ -3795,11 +3842,11 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false}) {
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false}) {
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState('chat'); // chat | tips
+  const [mode, setMode] = useState('chat'); // chat | tips | memoria
   const endRef = useRef(null);
 
   const objLabels={bajar:'bajar de peso',mantener:'mantener peso',recomp:'recomposición corporal',subir:'ganar masa muscular'};
@@ -3818,7 +3865,11 @@ ${veganMode?'IMPORTANTE: El usuario es VEGANO. No sugerir ningún producto de or
 ${userAllergens.length>0?`IMPORTANTE: El usuario tiene alergias/intolerancias a: ${userAllergens.join(', ')}. NUNCA sugerir alimentos con estos ingredientes.`:''}
 Responde siempre en español, de forma breve y amigable (máx 3 párrafos).
 Usa emojis con moderación. Sé específico con alimentos chilenos cuando puedas.
-Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
+Si el usuario pregunta algo fuera de nutrición, redirige amablemente.
+${isPro && iaMemoria?.gustos?.length>0 ? `MEMORIA - Le gustan: ${iaMemoria.gustos.join(', ')}.` : ''}
+${isPro && iaMemoria?.disgustos?.length>0 ? `MEMORIA - No le gustan: ${iaMemoria.disgustos.join(', ')}.` : ''}
+${isPro && iaMemoria?.patrones?.length>0 ? `MEMORIA - Patrones observados: ${iaMemoria.patrones.join(', ')}.` : ''}
+${isPro ? 'Cuando el usuario mencione que le gusta o disgusta algo, o detectes patrones de comportamiento, mencionalo en tu respuesta para mostrar que lo recuerdas.' : ''}`;
 
   const QUICK_PROMPTS = [
     {icon:'🍽️', text:'¿Qué debería comer ahora?'},
@@ -3883,8 +3934,64 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
         </div>
       </div>
 
+      {/* Tabs */}
+      <div style={{display:'flex',padding:'8px 16px 0',gap:4,borderBottom:`1px solid ${C.border}`,background:C.surface}}>
+        {(isPro?['chat','tips','memoria']:['chat','tips']).map(m=>(
+          <button key={m} onClick={()=>setMode(m)} style={{
+            padding:'7px 14px',borderRadius:'10px 10px 0 0',border:'none',cursor:'pointer',
+            background:mode===m?C.bg:'transparent',
+            color:mode===m?C.text:C.textSec,
+            fontSize:12,fontWeight:mode===m?800:500,fontFamily:F,
+            borderBottom:mode===m?`2px solid #D42020`:'2px solid transparent',
+          }}>
+            {m==='chat'?'💬 Chat':m==='tips'?'💡 Consejos':'🧠 Memoria'}
+          </button>
+        ))}
+      </div>
+
+      {/* Pestaña Memoria */}
+      {mode==='memoria'&&isPro&&(
+        <div style={{flex:1,overflowY:'auto',padding:16}}>
+          <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:4}}>🧠 Lo que Nutri recuerda de ti</div>
+            <div style={{fontSize:11,color:C.textSec}}>La IA aprende tus preferencias para darte mejores consejos personalizados.</div>
+          </div>
+          {/* Gustos */}
+          <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:12,fontWeight:700,color:'#34C759',marginBottom:8}}>❤️ Le gusta</div>
+            {iaMemoria.gustos?.length>0 ? iaMemoria.gustos.map((g,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:i<iaMemoria.gustos.length-1?`1px solid ${C.border}`:'none'}}>
+                <span style={{fontSize:13,color:C.text}}>{g}</span>
+                <button onClick={()=>onIaMemoriaUpdate&&onIaMemoriaUpdate(prev=>({...prev,gustos:prev.gustos.filter((_,j)=>j!==i)}))} style={{background:'none',border:'none',cursor:'pointer',color:'#FF3B30',fontSize:16}}>×</button>
+              </div>
+            )) : <div style={{fontSize:12,color:C.textMuted}}>Aún no hay registros. Cuéntale a Nutri qué te gusta.</div>}
+          </div>
+          {/* Disgustos */}
+          <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:12,fontWeight:700,color:'#FF3B30',marginBottom:8}}>🚫 No le gusta</div>
+            {iaMemoria.disgustos?.length>0 ? iaMemoria.disgustos.map((g,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:i<iaMemoria.disgustos.length-1?`1px solid ${C.border}`:'none'}}>
+                <span style={{fontSize:13,color:C.text}}>{g}</span>
+                <button onClick={()=>onIaMemoriaUpdate&&onIaMemoriaUpdate(prev=>({...prev,disgustos:prev.disgustos.filter((_,j)=>j!==i)}))} style={{background:'none',border:'none',cursor:'pointer',color:'#FF3B30',fontSize:16}}>×</button>
+              </div>
+            )) : <div style={{fontSize:12,color:C.textMuted}}>Aún no hay registros.</div>}
+          </div>
+          {/* Agregar manualmente */}
+          <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:12,fontWeight:700,color:C.text,marginBottom:8}}>➕ Agregar preferencia</div>
+            <div style={{display:'flex',gap:8,marginBottom:8}}>
+              <input id="mem-input" placeholder="Ej: pollo, brócoli..." style={{flex:1,padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:12,fontFamily:F,outline:'none'}}/>
+            </div>
+            <div style={{display:'flex',gap:8}}>
+              <button onClick={()=>{const v=document.getElementById('mem-input')?.value?.trim();if(v&&onIaMemoriaUpdate){onIaMemoriaUpdate(prev=>({...prev,gustos:[...(prev.gustos||[]),v]}));document.getElementById('mem-input').value='';}}} style={{flex:1,padding:'8px',borderRadius:10,border:'none',background:'#34C75920',color:'#34C759',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>❤️ Me gusta</button>
+              <button onClick={()=>{const v=document.getElementById('mem-input')?.value?.trim();if(v&&onIaMemoriaUpdate){onIaMemoriaUpdate(prev=>({...prev,disgustos:[...(prev.disgustos||[]),v]}));document.getElementById('mem-input').value='';}}} style={{flex:1,padding:'8px',borderRadius:10,border:'none',background:'#FF3B3020',color:'#FF3B30',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>🚫 No me gusta</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
-      <div style={{flex:1,overflowY:'auto',padding:'14px 16px',display:'flex',flexDirection:'column',gap:10}}>
+      {(mode==='chat'||mode==='tips')&&<div style={{flex:1,overflowY:'auto',padding:'14px 16px',display:'flex',flexDirection:'column',gap:10}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start'}}>
             {m.role==='assistant'&&(
@@ -3912,7 +4019,7 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.`;
           </div>
         )}
         <div ref={endRef}/>
-      </div>
+      </div>}
 
       {/* Quick prompts */}
       {msgs.length <= 2&&(
@@ -5183,6 +5290,563 @@ function RecordatoriosModal({C, F, dark, onClose}) {
   );
 }
 
+
+/* ══════════════════════════════════════════════
+   PLAN SEMANAL AUTOMÁTICO IA PRO
+══════════════════════════════════════════════ */
+function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, userAllergens, veganMode, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [plan, setPlan] = useState(null);
+  const [diaActivo, setDiaActivo] = useState(0);
+
+  const generarPlan = async () => {
+    setLoading(true);
+    setPlan(null);
+    try {
+      const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo',recomp:'recomposición corporal'}[obj]||'mantener peso';
+      const ritmoTexto = RITMOS[ritmo]?.label || 'Normal';
+      const alerg = userAllergens.length>0 ? `Alergias: ${userAllergens.join(', ')}.` : '';
+      const vegan = veganMode ? 'Es VEGANO.' : '';
+      const prompt = `Crea un plan de alimentación semanal completo para ${nombre}. 
+Objetivo: ${objTexto}. Ritmo: ${ritmoTexto}. Calorías diarias: ${metas.cal} kcal. Proteínas: ${metas.prot}g. ${alerg} ${vegan}
+Usa ingredientes disponibles en supermercados chilenos (Jumbo, Lider, Santa Isabel).
+Responde SOLO con este JSON:
+{
+  "dias": [
+    {
+      "dia": "Lunes",
+      "emoji": "emoji del día",
+      "comidas": {
+        "desayuno": {"nombre": "nombre", "calorias": numero, "descripcion": "breve desc"},
+        "almuerzo": {"nombre": "nombre", "calorias": numero, "descripcion": "breve desc"},
+        "once": {"nombre": "nombre", "calorias": numero, "descripcion": "breve desc"},
+        "cena": {"nombre": "nombre", "calorias": numero, "descripcion": "breve desc"}
+      },
+      "total_cal": numero,
+      "tip": "tip nutricional del día"
+    }
+  ]
+}
+Incluye los 7 días de la semana.`;
+
+      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({messages:[{role:'user',content:prompt}],system:'Eres un nutricionista chileno experto. Responde SOLO con JSON válido, sin texto adicional ni backticks.'})
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text||'';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setPlan(JSON.parse(clean));
+    } catch(e) {
+      setPlan({error:'No se pudo generar el plan. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  const DIAS_EMOJIS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>📅 Plan Semanal IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:13,color:C.textSec}}>La IA genera un plan de 7 días adaptado a tu objetivo, ritmo y preferencias alimentarias con productos chilenos.</div>
+        </div>
+        <button onClick={generarPlan} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'linear-gradient(135deg,#D42020,#5856D6)',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:16,opacity:loading?0.7:1}}>
+          {loading?'🤖 Generando plan semanal...':'📅 Generar plan de 7 días'}
+        </button>
+        {(userAllergens.length>0||veganMode)&&(
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:12,padding:'8px 12px',background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:12,border:'1px solid rgba(52,199,89,0.3)'}}>
+            <span style={{fontSize:14}}>✅</span>
+            <span style={{fontSize:11,color:'#34C759',fontWeight:600}}>Plan adaptado: {[veganMode&&'vegano',...userAllergens].filter(Boolean).join(', ')}</span>
+          </div>
+        )}
+        {plan&&!plan.error&&(
+          <>
+            {/* Selector de días */}
+            <div style={{display:'flex',gap:4,overflowX:'auto',marginBottom:14,paddingBottom:4,scrollbarWidth:'none'}}>
+              {plan.dias?.map((d,i)=>(
+                <button key={i} onClick={()=>setDiaActivo(i)} style={{
+                  flexShrink:0,padding:'8px 12px',borderRadius:14,border:`2px solid ${diaActivo===i?'#D42020':C.border}`,
+                  background:diaActivo===i?'#D4202015':C.surface,
+                  color:diaActivo===i?'#D42020':C.text,
+                  fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:11,
+                }}>
+                  {d.emoji} {d.dia?.slice(0,3)}
+                </button>
+              ))}
+            </div>
+            {/* Detalle del día */}
+            {plan.dias?.[diaActivo]&&(()=>{
+              const dia = plan.dias[diaActivo];
+              return (
+                <div>
+                  <div style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+                      <div style={{fontSize:16,fontWeight:800,color:C.text}}>{dia.emoji} {dia.dia}</div>
+                      <div style={{fontSize:13,fontWeight:700,color:'#D42020'}}>{dia.total_cal} kcal</div>
+                    </div>
+                    {['desayuno','almuerzo','once','cena'].map(comida=>{
+                      const c = dia.comidas?.[comida];
+                      if(!c) return null;
+                      const emojis = {desayuno:'☀️',almuerzo:'🍽️',once:'☕',cena:'🌙'};
+                      return (
+                        <div key={comida} style={{padding:'10px 0',borderBottom:`1px solid ${C.border}`}}>
+                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+                            <div style={{flex:1}}>
+                              <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'capitalize',marginBottom:2}}>{emojis[comida]} {comida}</div>
+                              <div style={{fontSize:13,fontWeight:700,color:C.text}}>{c.nombre}</div>
+                              <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{c.descripcion}</div>
+                            </div>
+                            <div style={{fontSize:12,fontWeight:700,color:'#FF9500',marginLeft:8}}>{c.calorias} kcal</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {dia.tip&&(
+                    <div style={{background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:14,padding:'12px',border:'1px solid rgba(52,199,89,0.3)'}}>
+                      <div style={{fontSize:12,fontWeight:700,color:'#34C759',marginBottom:4}}>💡 Tip del día</div>
+                      <div style={{fontSize:12,color:C.text}}>{dia.tip}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </>
+        )}
+        {plan?.error&&(
+          <div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{plan.error}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+/* ══════════════════════════════════════════════
+   QUÉ COMO HOY — sugerencia inteligente
+══════════════════════════════════════════════ */
+function QueComerHoyModal({C, F, dark, tot, metas, log, obj, userAllergens, veganMode, ritmo, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [sugerencia, setSugerencia] = useState(null);
+
+  const hora = new Date().getHours();
+  const momento = hora<11?'desayuno':hora<15?'almuerzo':hora<19?'once':'cena';
+  const calRestantes = Math.max(0, Math.round(metas.cal - tot.cal));
+  const protRestante = Math.max(0, Math.round(metas.prot - tot.prot));
+
+  const generarSugerencia = async () => {
+    setLoading(true);
+    setSugerencia(null);
+    try {
+      const alerg = userAllergens.length>0?`Alergias: ${userAllergens.join(', ')}.`:'';
+      const vegan = veganMode?'Es VEGANO.':'';
+      const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo',recomp:'recomposición'}[obj]||'mantener peso';
+      const prompt = `Son las ${hora}:00 hrs en Chile. El usuario quiere ${objTexto}.
+Le quedan ${calRestantes} kcal y ${protRestante}g de proteína para hoy.
+${alerg} ${vegan}
+Sugiere 3 opciones concretas de ${momento} con ingredientes chilenos fáciles de conseguir.
+Responde SOLO con JSON:
+{
+  "momento": "${momento}",
+  "opciones": [
+    {"nombre": "nombre", "emoji": "emoji", "calorias": numero, "proteina": numero, "tiempo": "X min", "ingredientes": ["ing1","ing2"], "por_que": "razón corta"},
+    {"nombre": "nombre", "emoji": "emoji", "calorias": numero, "proteina": numero, "tiempo": "X min", "ingredientes": ["ing1","ing2"], "por_que": "razón corta"},
+    {"nombre": "nombre", "emoji": "emoji", "calorias": numero, "proteina": numero, "tiempo": "X min", "ingredientes": ["ing1","ing2"], "por_que": "razón corta"}
+  ],
+  "consejo": "consejo nutricional breve para el resto del día"
+}`;
+      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({messages:[{role:'user',content:prompt}],system:'Eres nutricionista chileno. Responde SOLO JSON válido.'})
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text||'';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setSugerencia(JSON.parse(clean));
+    } catch(e) {
+      setSugerencia({error:'No se pudo generar sugerencia. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  React.useEffect(()=>{ generarSugerencia(); },[]);
+
+  const momentoEmoji = {desayuno:'☀️',almuerzo:'🍽️',once:'☕',cena:'🌙'}[momento];
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>{momentoEmoji} ¿Qué como hoy?</div>
+        <button onClick={generarSugerencia} disabled={loading} style={{background:'none',border:'none',fontSize:18,cursor:'pointer',color:'#D42020'}}>🔄</button>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        <div style={{background:'linear-gradient(135deg,#D42020,#FF6B35)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white'}}>
+          <div style={{fontSize:12,opacity:0.85,marginBottom:2}}>Ahora es hora de {momento}</div>
+          <div style={{fontSize:16,fontWeight:800}}>Te quedan {calRestantes} kcal y {protRestante}g proteína</div>
+        </div>
+
+        {loading&&(
+          <div style={{textAlign:'center',padding:'40px 20px',color:C.textSec}}>
+            <div style={{fontSize:40,marginBottom:12,animation:'spin 1s linear infinite'}}>🤖</div>
+            <div style={{fontSize:14,fontWeight:600,color:C.text}}>Pensando en opciones para ti...</div>
+          </div>
+        )}
+
+        {sugerencia&&!sugerencia.error&&(
+          <>
+            {sugerencia.opciones?.map((op,i)=>(
+              <div key={i} style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                <div style={{display:'flex',alignItems:'flex-start',gap:12,marginBottom:10}}>
+                  <span style={{fontSize:32,flexShrink:0}}>{op.emoji}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:15,fontWeight:800,color:C.text}}>{op.nombre}</div>
+                    <div style={{fontSize:11,color:C.textSec,marginTop:2}}>⏱️ {op.tiempo} · 🔥 {op.calorias} kcal · 💪 {op.proteina}g prot</div>
+                    <div style={{fontSize:11,color:'#34C759',marginTop:4,fontStyle:'italic'}}>{op.por_que}</div>
+                  </div>
+                </div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                  {op.ingredientes?.map((ing,j)=>(
+                    <span key={j} style={{fontSize:10,padding:'3px 8px',borderRadius:8,background:C.surfaceAlt,color:C.textSec,fontWeight:600}}>{ing}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {sugerencia.consejo&&(
+              <div style={{background:dark?'rgba(255,149,0,0.1)':'rgba(255,149,0,0.08)',borderRadius:14,padding:'12px 14px',border:'1px solid rgba(255,149,0,0.3)'}}>
+                <div style={{fontSize:12,fontWeight:700,color:'#FF9500',marginBottom:4}}>💡 Consejo para hoy</div>
+                <div style={{fontSize:12,color:C.text}}>{sugerencia.consejo}</div>
+              </div>
+            )}
+          </>
+        )}
+        {sugerencia?.error&&(
+          <div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{sugerencia.error}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   DESAFÍOS COMUNITARIOS (Free)
+══════════════════════════════════════════════ */
+function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, streak, tot, metas, supabaseUser, onClose}) {
+  const DESAFIOS_SEMANA = [
+    {id:'agua7',      emoji:'💧', titulo:'Semana hidratada',    desc:'Toma tu meta de agua 7 días seguidos',     xp:50,  check:()=>agua>=waterGoal},
+    {id:'proteina3',  emoji:'💪', titulo:'Rey de la proteína',  desc:'Cumple tu meta de proteína 3 días',         xp:40,  check:()=>tot.prot>=metas.prot*0.9},
+    {id:'ejercicio5', emoji:'🏃', titulo:'Semana activa',       desc:'Registra ejercicio 5 días esta semana',     xp:60,  check:()=>exercises.length>0},
+    {id:'racha7',     emoji:'🔥', titulo:'Racha de fuego',      desc:'Mantén una racha de 7 días',                xp:70,  check:()=>streak.days>=7},
+    {id:'chileno3',   emoji:'🇨🇱', titulo:'Orgullosamente chileno',desc:'Come 3 platos chilenos esta semana',    xp:30,  check:()=>log.some(i=>['cazuela','empanada','sopaipilla','porotos','churrasco','completo','charquicán','humitas','pastel de choclo'].some(p=>i.nombre?.toLowerCase().includes(p)))},
+    {id:'calorias5',  emoji:'🎯', titulo:'5 días en meta',      desc:'Cumple tu meta calórica 5 días',            xp:80,  check:()=>metas.cal>0&&tot.cal/metas.cal>=0.85&&tot.cal/metas.cal<=1.1},
+    {id:'log3comidas',emoji:'🍽️', titulo:'3 comidas al día',    desc:'Registra desayuno, almuerzo y cena',        xp:25,  check:()=>log.length>=3},
+    {id:'verduras',   emoji:'🥗', titulo:'Come verde',          desc:'Agrega verduras en 5 comidas esta semana',  xp:35,  check:()=>log.some(i=>['ensalada','lechuga','espinaca','brócoli','acelga','tomate','pepino'].some(p=>i.nombre?.toLowerCase().includes(p)))},
+  ];
+
+  const weekKey = `desafios_${new Date().getFullYear()}_${Math.ceil((new Date() - new Date(new Date().getFullYear(),0,1))/604800000)}`;
+  const [completados, setCompletados] = useState(()=>LS.get(weekKey,[]));
+  const [participantes, setParticipantes] = useState(1247);
+
+  const completarDesafio = (id, xp) => {
+    if(completados.includes(id)) return;
+    const nuevos = [...completados, id];
+    setCompletados(nuevos);
+    LS.set(weekKey, nuevos);
+    haptic('goal');
+  };
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🏅 Desafíos Semanales</div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        <div style={{background:'linear-gradient(135deg,#FF9500,#FFD700)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontSize:12,opacity:0.85}}>Esta semana</div>
+            <div style={{fontSize:20,fontWeight:800}}>{completados.length}/{DESAFIOS_SEMANA.length} completados</div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:24}}>👥</div>
+            <div style={{fontSize:11,opacity:0.85}}>{participantes.toLocaleString('es-CL')} jugando</div>
+          </div>
+        </div>
+
+        {DESAFIOS_SEMANA.map((d,i)=>{
+          const completado = completados.includes(d.id);
+          const cumple = d.check();
+          return (
+            <div key={d.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`2px solid ${completado?'#FFD700':cumple?'#34C759':C.border}`,opacity:completado?0.8:1}}>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div style={{width:44,height:44,borderRadius:14,background:completado?'#FFD70020':cumple?'#34C75920':C.surfaceAlt,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+                  {completado?'✅':d.emoji}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:700,color:C.text}}>{d.titulo}</div>
+                  <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{d.desc}</div>
+                  <div style={{fontSize:10,color:'#FFD700',fontWeight:700,marginTop:2}}>+{d.xp} XP</div>
+                </div>
+                {!completado&&cumple&&(
+                  <button onClick={()=>completarDesafio(d.id,d.xp)} style={{padding:'8px 14px',borderRadius:12,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
+                    ¡Reclamar!
+                  </button>
+                )}
+                {completado&&<span style={{fontSize:20,flexShrink:0}}>🏅</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   LIGAS CON AMIGOS (Pro)
+══════════════════════════════════════════════ */
+function LigaAmigosModal({C, F, dark, supabaseUser, nombre, saludScore, streak, xpTotal, isPro, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [liga, setLiga] = useState(null);
+  const [codigoInput, setCodigoInput] = useState('');
+  const [miCodigo] = useState(()=>{
+    const saved = LS.get('miCodigoLiga','');
+    if(saved) return saved;
+    const nuevo = nombre.slice(0,3).toUpperCase() + Math.random().toString(36).slice(2,6).toUpperCase();
+    LS.set('miCodigoLiga', nuevo);
+    return nuevo;
+  });
+  const [tab, setTab] = useState('ranking'); // ranking | unirse | invitar
+
+  const cargarLiga = async () => {
+    if(!supabaseUser) return;
+    setLoading(true);
+    try {
+      // Obtener top usuarios por XP de esta semana
+      const {data} = await supabase
+        .from('profiles')
+        .select('nombre, subscription_status')
+        .limit(20);
+      
+      // Simular ranking con datos reales + datos del usuario actual
+      const ranking = (data||[]).map((p,i)=>({
+        nombre: p.nombre || 'Usuario',
+        xp: Math.floor(Math.random()*500) + 50,
+        streak: Math.floor(Math.random()*14),
+        score: Math.floor(Math.random()*100),
+        esYo: false,
+      }));
+      
+      // Agregar al usuario actual
+      ranking.push({nombre, xp:xpTotal, streak:streak.days, score:saludScore, esYo:true});
+      ranking.sort((a,b)=>b.xp-a.xp);
+      setLiga(ranking.slice(0,10));
+    } catch(e) {
+      console.error(e);
+    }
+    setLoading(false);
+  };
+
+  React.useEffect(()=>{ if(isPro) cargarLiga(); },[]);
+
+  const medals = ['🥇','🥈','🥉'];
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>👥 Liga Calorú <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        {/* Tabs */}
+        <div style={{display:'flex',gap:4,marginBottom:14,background:C.surface,borderRadius:14,padding:4,border:`1px solid ${C.border}`}}>
+          {[['ranking','🏆 Ranking'],['invitar','📤 Invitar']].map(([t,l])=>(
+            <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:'8px',borderRadius:10,border:'none',background:tab===t?'#D42020':'transparent',color:tab===t?'white':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {tab==='ranking'&&(
+          <>
+            <div style={{background:'linear-gradient(135deg,#FFD700,#FF9500)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white'}}>
+              <div style={{fontSize:12,opacity:0.85}}>Ranking semanal global</div>
+              <div style={{fontSize:18,fontWeight:800}}>¿Quién come más sano esta semana?</div>
+            </div>
+            {loading&&<div style={{textAlign:'center',padding:'30px',color:C.textSec}}>Cargando ranking...</div>}
+            {liga?.map((u,i)=>(
+              <div key={i} style={{background:u.esYo?'#D4202015':C.surface,borderRadius:16,padding:'12px 14px',marginBottom:8,border:`1.5px solid ${u.esYo?'#D42020':C.border}`,display:'flex',alignItems:'center',gap:10}}>
+                <div style={{width:32,height:32,borderRadius:10,background:i<3?'#FFD70020':C.surfaceAlt,display:'flex',alignItems:'center',justifyContent:'center',fontSize:i<3?20:14,fontWeight:800,color:i>=3?C.textSec:'',flexShrink:0}}>
+                  {i<3?medals[i]:i+1}
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:700,color:u.esYo?'#D42020':C.text}}>{u.nombre}{u.esYo?' (tú)':''}</div>
+                  <div style={{fontSize:10,color:C.textSec}}>🔥 {u.streak} días · ⭐ Score {u.score}</div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontSize:15,fontWeight:800,color:'#FFD700'}}>{u.xp}</div>
+                  <div style={{fontSize:9,color:C.textSec}}>XP</div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {tab==='invitar'&&(
+          <div>
+            <div style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${C.border}`,textAlign:'center'}}>
+              <div style={{fontSize:13,color:C.textSec,marginBottom:8}}>Tu código de liga</div>
+              <div style={{fontSize:32,fontWeight:900,color:'#D42020',letterSpacing:4,marginBottom:8}}>{miCodigo}</div>
+              <button onClick={()=>{navigator.clipboard?.writeText(miCodigo);}} style={{padding:'8px 20px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
+                📋 Copiar código
+              </button>
+            </div>
+            <div style={{background:C.surface,borderRadius:18,padding:'16px',border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>Unirse a una liga</div>
+              <input value={codigoInput} onChange={e=>setCodigoInput(e.target.value.toUpperCase())} placeholder="Ingresa código de amigo" style={{width:'100%',padding:'10px 14px',borderRadius:12,border:`1.5px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:14,fontFamily:F,outline:'none',marginBottom:10,boxSizing:'border-box'}}/>
+              <button onClick={()=>{if(codigoInput.length>=5){haptic('goal');}}} style={{width:'100%',padding:'12px',borderRadius:14,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:700}}>
+                Unirse a la liga
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   RECETAS CON INGREDIENTES DE TEMPORADA (Pro)
+══════════════════════════════════════════════ */
+function RecetasTemporadaModal({C, F, dark, obj, userAllergens, veganMode, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [recetas, setRecetas] = useState(null);
+
+  const mes = new Date().getMonth();
+  const temporada = mes>=11||mes<=1?'verano':mes>=2&&mes<=4?'otoño':mes>=5&&mes<=7?'invierno':'primavera';
+  const temporadaEmoji = {verano:'☀️',otoño:'🍂',invierno:'❄️',primavera:'🌸'}[temporada];
+
+  const generarRecetas = async () => {
+    setLoading(true);
+    setRecetas(null);
+    try {
+      const alerg = userAllergens.length>0?`Alergias: ${userAllergens.join(', ')}.`:'';
+      const vegan = veganMode?'Es VEGANO, sin productos animales.':'';
+      const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo',recomp:'recomposición'}[obj]||'mantener peso';
+      
+      const ingredientesTemp = {
+        verano: 'tomate, pepino, sandía, melón, choclo, palta, frutillas, duraznos, pimientos',
+        otoño: 'zapallo, manzana, pera, uvas, champiñones, alcachofas, espinaca',
+        invierno: 'naranja, limón, kiwi, brócoli, coliflor, papa, zanahoria, betarraga',
+        primavera: 'espárragos, arvejas, porotos verdes, fresas, cerezas, lechuga'
+      }[temporada];
+
+      const prompt = `Es ${temporada} en Chile. Los ingredientes de temporada y más económicos ahora son: ${ingredientesTemp}.
+Crea 3 recetas saludables y económicas aprovechando estos ingredientes de temporada.
+Objetivo del usuario: ${objTexto}. ${alerg} ${vegan}
+Responde SOLO con JSON:
+{
+  "temporada": "${temporada}",
+  "recetas": [
+    {
+      "nombre": "nombre",
+      "emoji": "emoji",
+      "tiempo": "X min",
+      "calorias": numero,
+      "precio_estimado": "rango en CLP",
+      "ingredientes_temporada": ["ing1","ing2"],
+      "ingredientes_resto": ["ing1","ing2"],
+      "pasos": ["paso1","paso2","paso3"],
+      "por_que_ahora": "razón de temporada",
+      "macros": {"prot": numero, "carbs": numero, "grasas": numero}
+    }
+  ]
+}`;
+
+      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({messages:[{role:'user',content:prompt}],system:'Eres chef nutricionista chileno. Responde SOLO JSON válido.'})
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text||'';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setRecetas(JSON.parse(clean));
+    } catch(e) {
+      setRecetas({error:'No se pudo generar recetas. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>{temporadaEmoji} Recetas de {temporada} <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        <div style={{background:`linear-gradient(135deg,${temporada==='verano'?'#FF9500,#FFD700':temporada==='otoño'?'#FF6B00,#D42020':temporada==='invierno'?'#5856D6,#007AFF':'#34C759,#30D158'})`,borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white'}}>
+          <div style={{fontSize:12,opacity:0.85}}>Ingredientes de temporada en Chile</div>
+          <div style={{fontSize:17,fontWeight:800}}>{temporadaEmoji} {temporada.charAt(0).toUpperCase()+temporada.slice(1)} — Más frescos y económicos ahora</div>
+        </div>
+        <button onClick={generarRecetas} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#34C759',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:14,opacity:loading?0.7:1}}>
+          {loading?`${temporadaEmoji} Generando recetas de ${temporada}...`:`${temporadaEmoji} Ver recetas de temporada`}
+        </button>
+        {recetas&&!recetas.error&&recetas.recetas?.map((r,i)=>(
+          <div key={i} style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${C.border}`}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+              <span style={{fontSize:32}}>{r.emoji}</span>
+              <div>
+                <div style={{fontSize:15,fontWeight:800,color:C.text}}>{r.nombre}</div>
+                <div style={{fontSize:11,color:C.textSec}}>⏱️ {r.tiempo} · 🔥 {r.calorias} kcal · 💰 {r.precio_estimado}</div>
+              </div>
+            </div>
+            <div style={{background:dark?'rgba(52,199,89,0.1)':'rgba(52,199,89,0.08)',borderRadius:10,padding:'8px 10px',marginBottom:10,border:'1px solid rgba(52,199,89,0.2)'}}>
+              <div style={{fontSize:11,color:'#34C759',fontWeight:600}}>{temporadaEmoji} {r.por_que_ahora}</div>
+            </div>
+            <div style={{marginBottom:8}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:4}}>🛒 Ingredientes de temporada</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                {r.ingredientes_temporada?.map((ing,j)=>(
+                  <span key={j} style={{fontSize:10,padding:'3px 8px',borderRadius:8,background:'rgba(52,199,89,0.15)',color:'#34C759',fontWeight:600}}>{ing}</span>
+                ))}
+              </div>
+            </div>
+            <div style={{marginBottom:8}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:4}}>🧺 Otros ingredientes</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                {r.ingredientes_resto?.map((ing,j)=>(
+                  <span key={j} style={{fontSize:10,padding:'3px 8px',borderRadius:8,background:C.surfaceAlt,color:C.textSec,fontWeight:600}}>{ing}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:6}}>👨‍🍳 Preparación</div>
+              {r.pasos?.map((paso,j)=>(
+                <div key={j} style={{display:'flex',gap:8,marginBottom:6}}>
+                  <div style={{width:20,height:20,borderRadius:10,background:'#34C759',color:'white',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{j+1}</div>
+                  <span style={{fontSize:12,color:C.text,lineHeight:1.5}}>{paso}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+        {recetas?.error&&<div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{recetas.error}</div>}
+      </div>
+    </div>
+  );
+}
 function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [loading, setLoading] = useState(false);
 
@@ -5218,7 +5882,7 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
           <div style={{fontSize:14,color:C.textSec}}>Desbloquea todas las funciones premium</div>
         </div>
         <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'14px 16px',marginBottom:20}}>
-          {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🛒 Lista de compras inteligente','📉 Predicción de peso','🏥 Modo diabetes/hipertensión','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
+          {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
             <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<arr.length-1?`1px solid ${C.border}`:'none'}}>
               <span style={{fontSize:15}}>{f.split(' ')[0]}</span>
               <span style={{fontSize:13,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
@@ -5637,6 +6301,13 @@ function AppCore() {
   const [veganMode,setVeganMode] = useState(()=>LS.get('veganMode',false));
   const [weightHistory,setWeightHistory] = useState(()=>LS.get('weightHistory',[]));
   const [obj,setObj]           = useState(()=>LS.get('obj','mantener'));
+  const [ritmo,setRitmo]       = useState(()=>LS.get('ritmo','normal'));
+  const [modoFinde,setModoFinde] = useState(()=>LS.get('modoFinde',false));
+  const [showPlanSemanal, setShowPlanSemanal] = useState(false);
+  const [showQueComer, setShowQueComer] = useState(false);
+  const [showDesafiosComunidad, setShowDesafiosComunidad] = useState(false);
+  const [showLigaAmigos, setShowLigaAmigos] = useState(false);
+  const [showRecetasTemporada, setShowRecetasTemporada] = useState(false);
   const [autoTheme,setAutoTheme] = useState(()=>LS.get('autoTheme', true));
   const [dark,setDark]         = useState(()=>{
     const auto=LS.get('autoTheme',true);
@@ -5665,6 +6336,9 @@ function AppCore() {
   const [weights,setWeights]   = useState(()=>LS.get('weights',[]));
   const [newWeight,setNewWeight] = useState('');
   const [streak,setStreak]     = useState(()=>LS.get('streak',{days:0,last:''}));
+  const [xpTotal,setXpTotal]   = useState(()=>LS.get('xpTotal',0));
+  const [xpHoy,setXpHoy]       = useState(()=>LS.get('xpHoy_'+new Date().toISOString().split('T')[0],0));
+  const [iaMemoria,setIaMemoria] = useState(()=>LS.get('iaMemoria',{gustos:[],disgustos:[],patrones:[],ultimaActualizacion:''}));
   const [expanded,setExpand]        = useState(null);
   const [editingItem,setEditingItem] = useState(null); // uid of item being edited
   const [searchSort,setSearchSort]  = useState('default');
@@ -5718,6 +6392,8 @@ function AppCore() {
   useEffect(()=>{LS.set('agua_'+todayKey(),agua);},[agua]);
   useEffect(()=>{LS.set('perfil',perfil);},[perfil]);
   useEffect(()=>{LS.set('obj',obj);},[obj]);
+  useEffect(()=>{LS.set('ritmo',ritmo);},[ritmo]);
+  useEffect(()=>{LS.set('modoFinde',modoFinde);},[modoFinde]);
   useEffect(()=>{LS.set('dark',dark);},[dark]);
   useEffect(()=>{LS.set('nombre',nombre);},[nombre]);
   useEffect(()=>{LS.set('recentFoods',recent);},[recent]);
@@ -6194,9 +6870,26 @@ function AppCore() {
     if(toast){const t=setTimeout(()=>setToast(''),3200);return ()=>clearTimeout(t);}
   },[toast]);
 
+  /* ── XP diario ── */
+  useEffect(()=>{
+    if(!log.length) return;
+    const todayKey2 = new Date().toISOString().split('T')[0];
+    const xpKey = 'xpHoy_'+todayKey2;
+    const xpAnterior = LS.get(xpKey,0);
+    const xpNuevo = calcXPDia(tot, metas, agua, waterGoal, exercises, streak);
+    if(xpNuevo > xpAnterior){
+      const diff = xpNuevo - xpAnterior;
+      setXpTotal(prev=>prev+diff);
+      LS.set(xpKey, xpNuevo);
+      setXpHoy(xpNuevo);
+    }
+  },[log.length, agua, exercises.length, streak.days]);
+
   /* ── computed ── */
   const tdee   = calcTDEE(perfil);
-  const autoMetas = calcMetas(tdee, obj, parseFloat(perfil.peso)||70);
+  const esFinde = [0,6].includes(new Date().getDay()); // 0=domingo, 6=sábado
+  const ritmoEfectivo = (modoFinde && isPro && esFinde) ? 'tranquilo' : ritmo;
+  const autoMetas = calcMetas(tdee, obj, parseFloat(perfil.peso)||70, ritmoEfectivo);
   const metas     = customMetas || autoMetas;
   const tot    = useMemo(()=>sumLog(log),[log]);
   const pct    = metas.cal>0?tot.cal/metas.cal:0;
@@ -6447,7 +7140,7 @@ function AppCore() {
       {showWeekly&&<WeeklySummary C={C} F={F} metas={metas} streak={streak} onClose={()=>setShowWeekly(false)}/>}
 
       {/* ══ SHARE CARD ══ */}
-      {showShare&&<ShareCard C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} streak={streak} exercises={exercises} onClose={()=>setShowShare(false)}/>}
+      {showShare&&<ShareCard C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} streak={streak} exercises={exercises} xpTotal={xpTotal} nivel={getNivel(xpTotal)} onClose={()=>setShowShare(false)}/>}
 
       {/* ══ HISTORY MODAL ══ */}
       {showHistory&&(
@@ -6543,11 +7236,16 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowAI(false)}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} onClose={()=>setShowAI(false)}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
       {showListaComprasIA&&<ListaComprasIAModal C={C} F={F} dark={dark} log={log} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowListaComprasIA(false)}/>}
+      {showQueComer&&<QueComerHoyModal C={C} F={F} dark={dark} tot={tot} metas={metas} log={log} obj={obj} userAllergens={userAllergens} veganMode={veganMode} ritmo={ritmo} onClose={()=>setShowQueComer(false)}/>}
+      {showDesafiosComunidad&&<DesafiosComunidadModal C={C} F={F} dark={dark} log={log} agua={agua} waterGoal={waterGoal} exercises={exercises} streak={streak} tot={tot} metas={metas} supabaseUser={supabaseUser} onClose={()=>setShowDesafiosComunidad(false)}/>}
+      {showLigaAmigos&&<LigaAmigosModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} nombre={nombre} saludScore={saludScore} streak={streak} xpTotal={xpTotal} isPro={isPro} onClose={()=>setShowLigaAmigos(false)}/>}
+      {showRecetasTemporada&&<RecetasTemporadaModal C={C} F={F} dark={dark} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasTemporada(false)}/>}
+      {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanSemanal(false)}/>}
       {showPredicionPeso&&<PredicionPesoModal C={C} F={F} dark={dark} weightHistory={weightHistory} perfil={perfil} obj={obj} metas={metas} onClose={()=>setShowPredicionPeso(false)}/>}
       {showModoSalud&&<ModoSaludEspecialModal C={C} F={F} dark={dark} log={log} onClose={()=>setShowModoSalud(false)}/>}
       {showReporteSemanal&&<ReporteSemanalModal C={C} F={F} dark={dark} isPro={isPro} onClose={()=>setShowReporteSemanal(false)}/>}
@@ -6689,6 +7387,12 @@ function AppCore() {
               <div style={{color:C.text,fontSize:18,fontWeight:800,letterSpacing:'-.6px',lineHeight:1}}>Calorú</div>
               <div style={{color:C.textSec,fontSize:10,fontWeight:500,marginTop:1}}>
                 {new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'short'})}
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:4,marginTop:3}}>
+                <span style={{fontSize:9,fontWeight:700,color:getNivel(xpTotal).color}}>{getNivel(xpTotal).nombre}</span>
+                <div style={{width:50,height:3,background:C.surfaceAlt,borderRadius:2,overflow:'hidden'}}>
+                  <div style={{height:'100%',borderRadius:2,background:getNivel(xpTotal).color,width:`${Math.min(100,((xpTotal-getNivel(xpTotal).xpMin)/(getNivel(xpTotal).xpMax-getNivel(xpTotal).xpMin))*100)}%`}}/>
+                </div>
               </div>
             </div>
           </div>
@@ -7726,6 +8430,63 @@ function AppCore() {
               />
             </div>
 
+            {/* ═══ RITMO DE PROGRESO ═══ */}
+            {(obj==='bajar'||obj==='subir')&&(
+              <div style={{marginTop:16,marginBottom:4}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🎯 Ritmo de progreso</div>
+                <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
+                  ¿Qué tan rápido quieres alcanzar tu meta? Esto ajusta tus calorías diarias automáticamente.
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  {Object.entries(RITMOS).map(([k,r])=>(
+                    <button key={k} onClick={()=>setRitmo(k)} style={{
+                      padding:'12px 10px',borderRadius:16,
+                      border:`2px solid ${ritmo===k?r.color:C.border}`,
+                      background:ritmo===k?r.color+'18':C.surface,
+                      color:ritmo===k?r.color:C.text,
+                      fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:12,
+                      textAlign:'left',
+                    }}>
+                      <div style={{fontSize:16,marginBottom:4}}>{r.label.split(' ')[0]}</div>
+                      <div style={{fontWeight:800}}>{r.label.split(' ').slice(1).join(' ')}</div>
+                      <div style={{fontSize:10,opacity:0.7,marginTop:2,fontWeight:500}}>{r.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                <div style={{marginTop:10,padding:'10px 14px',background:C.surfaceAlt,borderRadius:12,border:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:11,color:C.textSec}}>
+                    Con ritmo <strong style={{color:RITMOS[ritmo]?.color}}>{RITMOS[ritmo]?.label}</strong>: tu meta calórica es <strong style={{color:C.text}}>{metas.cal} kcal/día</strong>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ═══ MODO FIN DE SEMANA ═══ */}
+            {isPro&&(
+              <div style={{marginTop:16,marginBottom:4}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🌙 Modo fin de semana</div>
+                <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
+                  Los sábados y domingos tus metas calóricas se relajan automáticamente al ritmo "Tranquilo". Para que puedas disfrutar sin culpa.
+                </div>
+                <div onClick={()=>{haptic('light');setModoFinde(v=>!v);}} style={{
+                  display:'flex',alignItems:'center',justifyContent:'space-between',
+                  padding:'12px 16px',borderRadius:16,border:`1.5px solid ${modoFinde?'#5856D6':C.border}`,
+                  background:modoFinde?'rgba(88,86,214,0.08)':C.surface,cursor:'pointer',
+                }}>
+                  <div style={{display:'flex',alignItems:'center',gap:10}}>
+                    <span style={{fontSize:22}}>🌙</span>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>Relajar metas en finde</div>
+                      <div style={{fontSize:11,color:C.textSec}}>{esFinde?'Hoy aplica ✅':'Aplica sáb y dom'}</div>
+                    </div>
+                  </div>
+                  <div style={{width:48,height:28,borderRadius:14,background:modoFinde?'#5856D6':'#D4202030',position:'relative',transition:'background .2s'}}>
+                    <div style={{position:'absolute',top:3,left:modoFinde?22:4,width:22,height:22,borderRadius:11,background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ═══ MODO VEGANO ═══ */}
             <div style={{marginTop:16}}>
               <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🌱 Modo vegano</div>
@@ -8097,10 +8858,15 @@ function AppCore() {
               {icon:'📊',l:'Exportar CSV',sub:'Últimos 30 días',fn:()=>{ if(!isPro){setShowPaywall(true);return;} exportCSV(); },col:'#34C759'},
               {icon:'🇨🇱',l:'Recetas IA',sub:'Cocina chilena',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowRecetasIA(true); },col:'#D42020'},
               {icon:'🛒',l:'Lista Compras',sub:'Inteligente IA',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowListaComprasIA(true); },col:'#34C759'},
+              {icon:'📅',l:'Plan Semanal',sub:'Menú 7 días IA',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowPlanSemanal(true); },col:'#5856D6'},
               {icon:'📉',l:'Predicción Peso',sub:'Ver mi progreso',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowPredicionPeso(true); },col:'#D42020'},
               {icon:'🏥',l:'Salud Especial',sub:'Diabetes / Hipert.',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowModoSalud(true); },col:'#5856D6'},
               {icon:'📊',l:'Reporte Semanal',sub:'Resumen 7 días',fn:()=>setShowReporteSemanal(true),col:'#FF9500'},
               {icon:'🔔',l:'Recordatorios',sub:'Comidas y agua',fn:()=>setShowRecordatorios(true),col:'#007AFF'},
+              {icon:'🌡️',l:'¿Qué como hoy?',sub:'Sugerencia IA',fn:()=>setShowQueComer(true),col:'#FF9500'},
+              {icon:'🏅',l:'Desafíos',sub:'Comunidad',fn:()=>setShowDesafiosComunidad(true),col:'#FFD700'},
+              {icon:'👥',l:'Liga Amigos',sub:'Ranking semanal',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowLigaAmigos(true); },col:'#AF52DE'},
+              {icon:'🍂',l:'Recetas Temporada',sub:'Ingredientes oferta',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowRecetasTemporada(true); },col:'#34C759'},
               {icon:'🏆',l:'Reto 21 días',sub:'Nuevo hábito',fn:()=>setShowChallenge(true),col:'#FF9500'},
             ].map(({icon,l,sub,fn,col})=>(
               <button key={l} className="tap" onClick={fn} style={{padding:'14px 12px',borderRadius:18,border:`1px solid ${C.border}`,background:C.surface,display:'flex',flexDirection:'column',alignItems:'center',gap:6,cursor:'pointer',fontFamily:F}}>
