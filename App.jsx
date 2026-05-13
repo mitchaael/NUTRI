@@ -4891,7 +4891,7 @@ function PredicionPesoModal({C, F, dark, weightHistory, perfil, obj, metas, onCl
   });
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📉 Predicción de Peso <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -5055,7 +5055,7 @@ function ModoSaludEspecialModal({C, F, dark, log, onClose}) {
   const items = modo==='diabetes' ? itemsDiabetes : modo==='hipertension' ? itemsHiper : [...itemsDiabetes,...itemsHiper];
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>🏥 Salud Especial <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -5156,7 +5156,7 @@ function ReporteSemanalModal({C, F, dark, onClose, isPro}) {
   const maxCal = Math.max(...dias.map(d=>d.cal), 1);
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📊 Reporte Semanal</div>
@@ -5267,7 +5267,7 @@ function RecordatoriosModal({C, F, dark, onClose}) {
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🔔 Recordatorios</div>
@@ -5378,8 +5378,9 @@ Incluye los 7 días de la semana.`;
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      setPlan(JSON.parse(clean));
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      setPlan(JSON.parse(jsonMatch[0]));
     } catch(e) {
       console.error('PlanSemanal error:', e);
       setPlan({error:'No se pudo generar el plan. Intenta de nuevo.'});
@@ -5390,7 +5391,7 @@ Incluye los 7 días de la semana.`;
   const DIAS_EMOJIS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>📅 Plan Semanal IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -5511,8 +5512,9 @@ Responde SOLO con JSON:
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      const parsed = JSON.parse(clean);
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      const parsed = JSON.parse(jsonMatch[0]);
       setSugerencia(parsed);
     } catch(e) {
       console.error('QueComer error:', e);
@@ -5526,7 +5528,7 @@ Responde SOLO con JSON:
   const momentoEmoji = {desayuno:'☀️',almuerzo:'🍽️',once:'☕',cena:'🌙'}[momento];
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>{momentoEmoji} ¿Qué como hoy?</div>
@@ -5608,7 +5610,7 @@ function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, st
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🏅 Desafíos Semanales</div>
@@ -5705,7 +5707,7 @@ function LigaAmigosModal({C, F, dark, supabaseUser, nombre, saludScore, streak, 
   const medals = ['🥇','🥈','🥉'];
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>👥 Liga Calorú <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -5823,8 +5825,9 @@ Responde SOLO con JSON:
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      const parsed = JSON.parse(clean);
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      const parsed = JSON.parse(jsonMatch[0]);
       setRecetas(parsed);
     } catch(e) {
       console.error('RecetasTemp error:', e);
@@ -5834,7 +5837,7 @@ Responde SOLO con JSON:
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>{temporadaEmoji} {temporada.charAt(0).toUpperCase()+temporada.slice(1)} <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
@@ -5940,8 +5943,9 @@ Responde SOLO con JSON:
         messages:[{role:'user',content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      setPlan(JSON.parse(clean));
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      setPlan(JSON.parse(jsonMatch[0]));
     } catch(e) {
       setPlan({error:'No se pudo generar el plan. Intenta de nuevo.'});
     }
@@ -5952,7 +5956,7 @@ Responde SOLO con JSON:
   const estadoEmoji = {en_camino:'📊', necesita_ajuste:'⚠️', excelente:'🎯'};
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>🧬 Plan Adaptativo <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
@@ -6082,7 +6086,7 @@ function PlanFamiliarModal({C, F, dark, supabaseUser, isPro, onClose}) {
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener',subir:'Ganar músculo',recomp:'Recomposición'};
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>👨‍👩‍👧 Plan Familiar <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
@@ -6237,8 +6241,9 @@ Incluye solo la semana 1 detallada para mantener el JSON manejable.`;
         messages:[{role:'user',content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      setPlanGenerado(JSON.parse(clean));
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      setPlanGenerado(JSON.parse(jsonMatch[0]));
     } catch(e) {
       setPlanGenerado({error:'No se pudo generar el plan. Intenta de nuevo.'});
     }
@@ -6310,7 +6315,7 @@ Incluye solo la semana 1 detallada para mantener el JSON manejable.`;
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>📄 Planes Descargables <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
@@ -6382,7 +6387,7 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
   const [showAgendar, setShowAgendar] = useState(false);
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>🏥 Nutricionistas</div>
@@ -6554,7 +6559,7 @@ function MicronutrientesModal({C, F, log, onClose}) {
   ];
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📊 Micronutrientes <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -6639,8 +6644,9 @@ Responde SOLO en este formato JSON exacto:
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      setReceta(JSON.parse(clean));
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      setReceta(JSON.parse(jsonMatch[0]));
     } catch(e) {
       console.error('RecetaIA error:', e);
       setReceta({error: 'No se pudo generar la receta. Intenta de nuevo.'});
@@ -6649,7 +6655,7 @@ Responde SOLO en este formato JSON exacto:
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🇨🇱 Recetas IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -6774,8 +6780,9 @@ Responde SOLO con este JSON:
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
-      const clean = text.replace(/```json|```/g,'').trim();
-      setLista(JSON.parse(clean));
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(!jsonMatch) throw new Error('No JSON: ' + text.substring(0,100));
+      setLista(JSON.parse(jsonMatch[0]));
     } catch(e) {
       console.error('ListaCompras error:', e);
       setLista({error:'No se pudo generar la lista. Intenta de nuevo.'});
@@ -6786,7 +6793,7 @@ Responde SOLO con este JSON:
   const toggleItem = (key) => setChecked(prev=>({...prev,[key]:!prev[key]}));
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🛒 Lista de Compras IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
@@ -8902,7 +8909,7 @@ function AppCore() {
             {MEALS.map(m=>{
               const items=log.filter(r=>r.comida===m);
               if(!items.length) return null;
-              const mc=items.reduce((s,r)=>({cal:s.cal+r.cal*r.qty,prot:s.prot+r.prot*r.qty,carbs:s.carbs+r.carbs*r.qty,grasas:s.grasas+r.grasas*r.qty}),{cal:0,prot:0,carbs:0,grasas:0});
+              const mc=items.reduce((s,r)=>{const rt=itemRatio(r);return {cal:s.cal+r.cal*rt*r.qty,prot:s.prot+r.prot*rt*r.qty,carbs:s.carbs+r.carbs*rt*r.qty,grasas:s.grasas+r.grasas*rt*r.qty};},{cal:0,prot:0,carbs:0,grasas:0});
               return (
                 <div key={m} style={{marginBottom:16}}>
                   <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
