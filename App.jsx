@@ -429,76 +429,76 @@ const DB = [
   {id:327,nombre:"Leche semidescremada Colún",    marca:"Colún",        cat:"Lácteos",   porcion:200, cal:100, prot:6.4, carbs:9.6,  grasas:2.4, fibra:0,  azucar:9.6, sodio:90,  emoji:"🥛"},
   {id:328,nombre:"Leche descremada Colún",        marca:"Colún",        cat:"Lácteos",   porcion:200, cal:70,  prot:6.8, carbs:9.8,  grasas:0.2, fibra:0,  azucar:9.8, sodio:100, emoji:"🥛"},
   {id:329,nombre:"Leche entera Soprole",          marca:"Soprole",      cat:"Lácteos",   porcion:200, cal:130, prot:6.2, carbs:9.4,  grasas:5.4, fibra:0,  azucar:9.4, sodio:88,  emoji:"🥛"},
-  {id:330,nombre:"Leche larga vida Lider",        marca:"Lider",        cat:"Lácteos",   porcion:200, cal:120, prot:6.0, carbs:9.2,  grasas:4.8, fibra:0,  azucar:9.2, sodio:85,  emoji:"🥛"},
-  {id:331,nombre:"Yogurt natural Colún",          marca:"Colún",        cat:"Lácteos",   porcion:150, cal:90,  prot:5.5, carbs:9.0,  grasas:2.5, fibra:0,  azucar:9.0, sodio:70,  emoji:"🍶"},
-  {id:332,nombre:"Yogurt frutado Soprole",        marca:"Soprole",      cat:"Lácteos",   porcion:150, cal:130, prot:4.5, carbs:22.0, grasas:2.5, fibra:0,  azucar:20, sodio:65,  emoji:"🍶"},
-  {id:333,nombre:"Yogurt griego Nestlé",          marca:"Nestlé",       cat:"Lácteos",   porcion:150, cal:120, prot:8.0, carbs:10.0, grasas:4.0, fibra:0,  azucar:8.0, sodio:50,  emoji:"🍶"},
-  {id:334,nombre:"Queso mantecoso Colún",         marca:"Colún",        cat:"Lácteos",   porcion:30,  cal:100, prot:6.0, carbs:0.5,  grasas:8.5, fibra:0,  azucar:0.5, sodio:200, emoji:"🧀"},
-  {id:335,nombre:"Queso gauda Colún",             marca:"Colún",        cat:"Lácteos",   porcion:30,  cal:105, prot:7.0, carbs:0.5,  grasas:8.5, fibra:0,  azucar:0.5, sodio:210, emoji:"🧀"},
-  {id:336,nombre:"Quesillo",                      marca:"Genérico",     cat:"Lácteos",   porcion:50,  cal:90,  prot:7.0, carbs:1.0,  grasas:6.0, fibra:0,  azucar:1.0, sodio:150, emoji:"🧀"},
-  {id:337,nombre:"Queso crema Philadelphia",      marca:"Philadelphia", cat:"Lácteos",   porcion:30,  cal:90,  prot:2.0, carbs:1.5,  grasas:8.5, fibra:0,  azucar:1.5, sodio:130, emoji:"🧀"},
-  {id:338,nombre:"Mantequilla Colún",             marca:"Colún",        cat:"Lácteos",   porcion:10,  cal:72,  prot:0.1, carbs:0.0,  grasas:8.0, fibra:0,  azucar:0,   sodio:60,  emoji:"🧈"},
+  {id:516,nombre:"Leche larga vida Lider",        marca:"Lider",        cat:"Lácteos",   porcion:200, cal:120, prot:6.0, carbs:9.2,  grasas:4.8, fibra:0,  azucar:9.2, sodio:85,  emoji:"🥛"},
+  {id:517,nombre:"Yogurt natural Colún",          marca:"Colún",        cat:"Lácteos",   porcion:150, cal:90,  prot:5.5, carbs:9.0,  grasas:2.5, fibra:0,  azucar:9.0, sodio:70,  emoji:"🍶"},
+  {id:518,nombre:"Yogurt frutado Soprole",        marca:"Soprole",      cat:"Lácteos",   porcion:150, cal:130, prot:4.5, carbs:22.0, grasas:2.5, fibra:0,  azucar:20, sodio:65,  emoji:"🍶"},
+  {id:519,nombre:"Yogurt griego Nestlé",          marca:"Nestlé",       cat:"Lácteos",   porcion:150, cal:120, prot:8.0, carbs:10.0, grasas:4.0, fibra:0,  azucar:8.0, sodio:50,  emoji:"🍶"},
+  {id:520,nombre:"Queso mantecoso Colún",         marca:"Colún",        cat:"Lácteos",   porcion:30,  cal:100, prot:6.0, carbs:0.5,  grasas:8.5, fibra:0,  azucar:0.5, sodio:200, emoji:"🧀"},
+  {id:521,nombre:"Queso gauda Colún",             marca:"Colún",        cat:"Lácteos",   porcion:30,  cal:105, prot:7.0, carbs:0.5,  grasas:8.5, fibra:0,  azucar:0.5, sodio:210, emoji:"🧀"},
+  {id:522,nombre:"Quesillo",                      marca:"Genérico",     cat:"Lácteos",   porcion:50,  cal:90,  prot:7.0, carbs:1.0,  grasas:6.0, fibra:0,  azucar:1.0, sodio:150, emoji:"🧀"},
+  {id:523,nombre:"Queso crema Philadelphia",      marca:"Philadelphia", cat:"Lácteos",   porcion:30,  cal:90,  prot:2.0, carbs:1.5,  grasas:8.5, fibra:0,  azucar:1.5, sodio:130, emoji:"🧀"},
+  {id:524,nombre:"Mantequilla Colún",             marca:"Colún",        cat:"Lácteos",   porcion:10,  cal:72,  prot:0.1, carbs:0.0,  grasas:8.0, fibra:0,  azucar:0,   sodio:60,  emoji:"🧈"},
   {id:339,nombre:"Crema de leche Soprole",        marca:"Soprole",      cat:"Lácteos",   porcion:50,  cal:170, prot:1.5, carbs:2.5,  grasas:17,  fibra:0,  azucar:2.5, sodio:40,  emoji:"🍦"},
-  {id:340,nombre:"Leche condensada Nestlé",       marca:"Nestlé",       cat:"Lácteos",   porcion:40,  cal:130, prot:3.0, carbs:22.0, grasas:3.5, fibra:0,  azucar:22,  sodio:50,  emoji:"🥛"},
+  {id:525,nombre:"Leche condensada Nestlé",       marca:"Nestlé",       cat:"Lácteos",   porcion:40,  cal:130, prot:3.0, carbs:22.0, grasas:3.5, fibra:0,  azucar:22,  sodio:50,  emoji:"🥛"},
 
   /* ── PAN Y PANADERÍA CHILENA ── */
-  {id:341,nombre:"Pan marraqueta",                marca:"Genérico",     cat:"Cereales",  porcion:80,  cal:220, prot:7.0, carbs:44.0, grasas:1.5, fibra:1.5,azucar:1.0, sodio:400, emoji:"🍞"},
-  {id:342,nombre:"Pan hallulla",                  marca:"Genérico",     cat:"Cereales",  porcion:60,  cal:165, prot:5.0, carbs:33.0, grasas:1.5, fibra:1.0,azucar:1.0, sodio:320, emoji:"🍞"},
-  {id:343,nombre:"Pan de molde Ideal",            marca:"Ideal",        cat:"Cereales",  porcion:30,  cal:78,  prot:2.8, carbs:14.5, grasas:1.0, fibra:0.8,azucar:1.5, sodio:140, emoji:"🍞"},
+  {id:526,nombre:"Pan marraqueta",                marca:"Genérico",     cat:"Cereales",  porcion:80,  cal:220, prot:7.0, carbs:44.0, grasas:1.5, fibra:1.5,azucar:1.0, sodio:400, emoji:"🍞"},
+  {id:527,nombre:"Pan hallulla",                  marca:"Genérico",     cat:"Cereales",  porcion:60,  cal:165, prot:5.0, carbs:33.0, grasas:1.5, fibra:1.0,azucar:1.0, sodio:320, emoji:"🍞"},
+  {id:528,nombre:"Pan de molde Ideal",            marca:"Ideal",        cat:"Cereales",  porcion:30,  cal:78,  prot:2.8, carbs:14.5, grasas:1.0, fibra:0.8,azucar:1.5, sodio:140, emoji:"🍞"},
   {id:344,nombre:"Pan integral Ideal",            marca:"Ideal",        cat:"Cereales",  porcion:30,  cal:72,  prot:3.0, carbs:13.0, grasas:1.0, fibra:2.0,azucar:1.5, sodio:130, emoji:"🍞"},
-  {id:345,nombre:"Pan de centeno",                marca:"Genérico",     cat:"Cereales",  porcion:30,  cal:65,  prot:2.5, carbs:12.0, grasas:0.5, fibra:3.0,azucar:0.5, sodio:120, emoji:"🍞"},
-  {id:346,nombre:"Muffin inglés",                 marca:"Ideal",        cat:"Cereales",  porcion:57,  cal:135, prot:5.0, carbs:26.0, grasas:1.0, fibra:1.5,azucar:2.0, sodio:220, emoji:"🧁"},
-  {id:347,nombre:"Coliza",                        marca:"Genérico",     cat:"Cereales",  porcion:60,  cal:160, prot:5.0, carbs:32.0, grasas:1.5, fibra:1.0,azucar:1.0, sodio:300, emoji:"🍞"},
-  {id:348,nombre:"Tortilla de rescoldo",          marca:"Genérico",     cat:"Cereales",  porcion:60,  cal:180, prot:4.5, carbs:35.0, grasas:3.0, fibra:1.0,azucar:1.0, sodio:280, emoji:"🫓"},
+  {id:529,nombre:"Pan de centeno",                marca:"Genérico",     cat:"Cereales",  porcion:30,  cal:65,  prot:2.5, carbs:12.0, grasas:0.5, fibra:3.0,azucar:0.5, sodio:120, emoji:"🍞"},
+  {id:530,nombre:"Muffin inglés",                 marca:"Ideal",        cat:"Cereales",  porcion:57,  cal:135, prot:5.0, carbs:26.0, grasas:1.0, fibra:1.5,azucar:2.0, sodio:220, emoji:"🧁"},
+  {id:531,nombre:"Coliza",                        marca:"Genérico",     cat:"Cereales",  porcion:60,  cal:160, prot:5.0, carbs:32.0, grasas:1.5, fibra:1.0,azucar:1.0, sodio:300, emoji:"🍞"},
+  {id:532,nombre:"Tortilla de rescoldo",          marca:"Genérico",     cat:"Cereales",  porcion:60,  cal:180, prot:4.5, carbs:35.0, grasas:3.0, fibra:1.0,azucar:1.0, sodio:280, emoji:"🫓"},
 
   /* ── CECINAS Y EMBUTIDOS CHILENOS ── */
   {id:349,nombre:"Jamón de pierna Suprabesos",    marca:"Suprabesos",   cat:"Carnes",    porcion:50,  cal:65,  prot:11.0,carbs:1.0,  grasas:2.0, fibra:0,  azucar:0.5, sodio:550, emoji:"🥩"},
-  {id:350,nombre:"Vienesa Suprabesos",            marca:"Suprabesos",   cat:"Carnes",    porcion:50,  cal:145, prot:6.5, carbs:2.0,  grasas:12.5,fibra:0,  azucar:0.5, sodio:480, emoji:"🌭"},
-  {id:351,nombre:"Longaniza",                     marca:"Genérico",     cat:"Carnes",    porcion:80,  cal:250, prot:12.0,carbs:2.0,  grasas:22.0,fibra:0,  azucar:0.5, sodio:600, emoji:"🌭"},
-  {id:352,nombre:"Chorizo",                       marca:"Genérico",     cat:"Carnes",    porcion:80,  cal:270, prot:13.0,carbs:1.5,  grasas:24.0,fibra:0,  azucar:0.5, sodio:650, emoji:"🌭"},
-  {id:353,nombre:"Mortadela San Jorge",           marca:"San Jorge",    cat:"Carnes",    porcion:50,  cal:135, prot:7.0, carbs:2.5,  grasas:11.0,fibra:0,  azucar:1.0, sodio:500, emoji:"🥩"},
-  {id:354,nombre:"Paté de hígado",                marca:"Genérico",     cat:"Carnes",    porcion:30,  cal:95,  prot:4.5, carbs:1.5,  grasas:8.0, fibra:0,  azucar:0.5, sodio:350, emoji:"🥫"},
-  {id:355,nombre:"Tocino ahumado",                marca:"Genérico",     cat:"Carnes",    porcion:30,  cal:105, prot:7.0, carbs:0.5,  grasas:8.5, fibra:0,  azucar:0,   sodio:420, emoji:"🥓"},
-  {id:356,nombre:"Prieta (morcilla)",             marca:"Genérico",     cat:"Carnes",    porcion:80,  cal:200, prot:10.0,carbs:5.0,  grasas:16.0,fibra:0,  azucar:1.0, sodio:550, emoji:"🥩"},
+  {id:533,nombre:"Vienesa Suprabesos",            marca:"Suprabesos",   cat:"Carnes",    porcion:50,  cal:145, prot:6.5, carbs:2.0,  grasas:12.5,fibra:0,  azucar:0.5, sodio:480, emoji:"🌭"},
+  {id:534,nombre:"Longaniza",                     marca:"Genérico",     cat:"Carnes",    porcion:80,  cal:250, prot:12.0,carbs:2.0,  grasas:22.0,fibra:0,  azucar:0.5, sodio:600, emoji:"🌭"},
+  {id:535,nombre:"Chorizo",                       marca:"Genérico",     cat:"Carnes",    porcion:80,  cal:270, prot:13.0,carbs:1.5,  grasas:24.0,fibra:0,  azucar:0.5, sodio:650, emoji:"🌭"},
+  {id:536,nombre:"Mortadela San Jorge",           marca:"San Jorge",    cat:"Carnes",    porcion:50,  cal:135, prot:7.0, carbs:2.5,  grasas:11.0,fibra:0,  azucar:1.0, sodio:500, emoji:"🥩"},
+  {id:537,nombre:"Paté de hígado",                marca:"Genérico",     cat:"Carnes",    porcion:30,  cal:95,  prot:4.5, carbs:1.5,  grasas:8.0, fibra:0,  azucar:0.5, sodio:350, emoji:"🥫"},
+  {id:538,nombre:"Tocino ahumado",                marca:"Genérico",     cat:"Carnes",    porcion:30,  cal:105, prot:7.0, carbs:0.5,  grasas:8.5, fibra:0,  azucar:0,   sodio:420, emoji:"🥓"},
+  {id:539,nombre:"Prieta (morcilla)",             marca:"Genérico",     cat:"Carnes",    porcion:80,  cal:200, prot:10.0,carbs:5.0,  grasas:16.0,fibra:0,  azucar:1.0, sodio:550, emoji:"🥩"},
 
   /* ── COMIDA RÁPIDA CHILENA ── */
   {id:357,nombre:"Completo italiano",             marca:"Genérico",     cat:"Comida rápida",porcion:200,cal:480,prot:16.0,carbs:42.0,grasas:28.0,fibra:2.0,azucar:5.0, sodio:850, emoji:"🌭"},
   {id:358,nombre:"Completo dinámico",             marca:"Genérico",     cat:"Comida rápida",porcion:200,cal:450,prot:15.0,carbs:40.0,grasas:26.0,fibra:2.0,azucar:5.0, sodio:800, emoji:"🌭"},
   {id:359,nombre:"Churrasco italiano",            marca:"Genérico",     cat:"Comida rápida",porcion:250,cal:550,prot:28.0,carbs:38.0,grasas:32.0,fibra:2.0,azucar:4.0, sodio:900, emoji:"🥪"},
-  {id:360,nombre:"Empanada de pino",              marca:"Genérico",     cat:"Comida rápida",porcion:130,cal:320,prot:15.0,carbs:30.0,grasas:15.0,fibra:1.5,azucar:2.0, sodio:450, emoji:"🥟"},
-  {id:361,nombre:"Empanada de queso",             marca:"Genérico",     cat:"Comida rápida",porcion:120,cal:280,prot:10.0,carbs:30.0,grasas:13.0,fibra:1.0,azucar:1.5, sodio:380, emoji:"🥟"},
-  {id:362,nombre:"Sopaipilla",                    marca:"Genérico",     cat:"Comida rápida",porcion:60, cal:175, prot:3.0, carbs:25.0, grasas:7.0, fibra:1.5,azucar:0.5, sodio:200, emoji:"🫓"},
-  {id:363,nombre:"Sopaipilla pasada",             marca:"Genérico",     cat:"Comida rápida",porcion:100,cal:280, prot:3.5, carbs:52.0, grasas:7.0, fibra:1.5,azucar:25.0,sodio:220, emoji:"🫓"},
-  {id:364,nombre:"Hamburguesa McDonald's Big Mac",marca:"McDonald's",   cat:"Comida rápida",porcion:200,cal:550,prot:25.0,carbs:44.0,grasas:30.0,fibra:3.0,azucar:9.0, sodio:1010,emoji:"🍔"},
-  {id:365,nombre:"Papas fritas McDonald's",       marca:"McDonald's",   cat:"Comida rápida",porcion:117,cal:340,prot:4.0, carbs:44.0, grasas:16.0,fibra:4.0,azucar:0.5, sodio:400, emoji:"🍟"},
-  {id:366,nombre:"Pizza Domino's Pepperoni",      marca:"Domino's",     cat:"Comida rápida",porcion:130,cal:330,prot:14.0,carbs:38.0,grasas:13.0,fibra:2.0,azucar:4.0, sodio:750, emoji:"🍕"},
+  {id:540,nombre:"Empanada de pino",              marca:"Genérico",     cat:"Comida rápida",porcion:130,cal:320,prot:15.0,carbs:30.0,grasas:15.0,fibra:1.5,azucar:2.0, sodio:450, emoji:"🥟"},
+  {id:541,nombre:"Empanada de queso",             marca:"Genérico",     cat:"Comida rápida",porcion:120,cal:280,prot:10.0,carbs:30.0,grasas:13.0,fibra:1.0,azucar:1.5, sodio:380, emoji:"🥟"},
+  {id:542,nombre:"Sopaipilla",                    marca:"Genérico",     cat:"Comida rápida",porcion:60, cal:175, prot:3.0, carbs:25.0, grasas:7.0, fibra:1.5,azucar:0.5, sodio:200, emoji:"🫓"},
+  {id:543,nombre:"Sopaipilla pasada",             marca:"Genérico",     cat:"Comida rápida",porcion:100,cal:280, prot:3.5, carbs:52.0, grasas:7.0, fibra:1.5,azucar:25.0,sodio:220, emoji:"🫓"},
+  {id:544,nombre:"Hamburguesa McDonald's Big Mac",marca:"McDonald's",   cat:"Comida rápida",porcion:200,cal:550,prot:25.0,carbs:44.0,grasas:30.0,fibra:3.0,azucar:9.0, sodio:1010,emoji:"🍔"},
+  {id:545,nombre:"Papas fritas McDonald's",       marca:"McDonald's",   cat:"Comida rápida",porcion:117,cal:340,prot:4.0, carbs:44.0, grasas:16.0,fibra:4.0,azucar:0.5, sodio:400, emoji:"🍟"},
+  {id:546,nombre:"Pizza Domino's Pepperoni",      marca:"Domino's",     cat:"Comida rápida",porcion:130,cal:330,prot:14.0,carbs:38.0,grasas:13.0,fibra:2.0,azucar:4.0, sodio:750, emoji:"🍕"},
   {id:367,nombre:"Cazuela de vacuno",             marca:"Genérico",     cat:"Platos chilenos",porcion:350,cal:280,prot:20.0,carbs:25.0,grasas:8.0, fibra:4.0,azucar:3.0, sodio:600, emoji:"🍲"},
   {id:368,nombre:"Pastel de choclo",              marca:"Genérico",     cat:"Platos chilenos",porcion:300,cal:350,prot:18.0,carbs:38.0,grasas:14.0,fibra:3.0,azucar:8.0, sodio:500, emoji:"🌽"},
   {id:369,nombre:"Charquicán",                    marca:"Genérico",     cat:"Platos chilenos",porcion:300,cal:320,prot:18.0,carbs:32.0,grasas:12.0,fibra:5.0,azucar:4.0, sodio:550, emoji:"🍲"},
-  {id:370,nombre:"Porotos con riendas",           marca:"Genérico",     cat:"Platos chilenos",porcion:300,cal:380,prot:20.0,carbs:48.0,grasas:10.0,fibra:10.0,azucar:3.0,sodio:500, emoji:"🫘"},
-  {id:371,nombre:"Lentejas guisadas",             marca:"Genérico",     cat:"Platos chilenos",porcion:250,cal:280,prot:16.0,carbs:38.0,grasas:6.0, fibra:9.0,azucar:3.0, sodio:450, emoji:"🫘"},
-  {id:372,nombre:"Chupe de mariscos",             marca:"Genérico",     cat:"Platos chilenos",porcion:300,cal:320,prot:22.0,carbs:20.0,grasas:16.0,fibra:2.0,azucar:3.0, sodio:700, emoji:"🦐"},
-  {id:373,nombre:"Curanto",                       marca:"Genérico",     cat:"Platos chilenos",porcion:400,cal:450,prot:35.0,carbs:30.0,grasas:18.0,fibra:4.0,azucar:3.0, sodio:800, emoji:"🦪"},
+  {id:547,nombre:"Porotos con riendas",           marca:"Genérico",     cat:"Platos chilenos",porcion:300,cal:380,prot:20.0,carbs:48.0,grasas:10.0,fibra:10.0,azucar:3.0,sodio:500, emoji:"🫘"},
+  {id:548,nombre:"Lentejas guisadas",             marca:"Genérico",     cat:"Platos chilenos",porcion:250,cal:280,prot:16.0,carbs:38.0,grasas:6.0, fibra:9.0,azucar:3.0, sodio:450, emoji:"🫘"},
+  {id:549,nombre:"Chupe de mariscos",             marca:"Genérico",     cat:"Platos chilenos",porcion:300,cal:320,prot:22.0,carbs:20.0,grasas:16.0,fibra:2.0,azucar:3.0, sodio:700, emoji:"🦐"},
+  {id:550,nombre:"Curanto",                       marca:"Genérico",     cat:"Platos chilenos",porcion:400,cal:450,prot:35.0,carbs:30.0,grasas:18.0,fibra:4.0,azucar:3.0, sodio:800, emoji:"🦪"},
 
   /* ── BEBIDAS ── */
-  {id:374,nombre:"Coca-Cola lata 350ml",          marca:"Coca-Cola",    cat:"Bebidas",   porcion:350, cal:140, prot:0,   carbs:39.0, grasas:0,   fibra:0,  azucar:39,  sodio:45,  emoji:"🥤"},
+  {id:551,nombre:"Coca-Cola lata 350ml",          marca:"Coca-Cola",    cat:"Bebidas",   porcion:350, cal:140, prot:0,   carbs:39.0, grasas:0,   fibra:0,  azucar:39,  sodio:45,  emoji:"🥤"},
   {id:375,nombre:"Coca-Cola Zero 350ml",          marca:"Coca-Cola",    cat:"Bebidas",   porcion:350, cal:1,   prot:0,   carbs:0.5,  grasas:0,   fibra:0,  azucar:0,   sodio:50,  emoji:"🥤"},
   {id:376,nombre:"Pepsi lata 350ml",              marca:"Pepsi",        cat:"Bebidas",   porcion:350, cal:150, prot:0,   carbs:41.0, grasas:0,   fibra:0,  azucar:41,  sodio:40,  emoji:"🥤"},
   {id:377,nombre:"Sprite lata 350ml",             marca:"Sprite",       cat:"Bebidas",   porcion:350, cal:140, prot:0,   carbs:38.0, grasas:0,   fibra:0,  azucar:38,  sodio:65,  emoji:"🥤"},
   {id:378,nombre:"Agua Cachantun 500ml",          marca:"Cachantun",    cat:"Bebidas",   porcion:500, cal:0,   prot:0,   carbs:0,    grasas:0,   fibra:0,  azucar:0,   sodio:5,   emoji:"💧"},
   {id:379,nombre:"Agua Vital 500ml",              marca:"Vital",        cat:"Bebidas",   porcion:500, cal:0,   prot:0,   carbs:0,    grasas:0,   fibra:0,  azucar:0,   sodio:5,   emoji:"💧"},
-  {id:380,nombre:"Jugo Watts naranja 200ml",      marca:"Watts",        cat:"Bebidas",   porcion:200, cal:90,  prot:0.5, carbs:22.0, grasas:0,   fibra:0.5,azucar:20,  sodio:10,  emoji:"🍊"},
-  {id:381,nombre:"Néctar Andina durazno 200ml",   marca:"Andina",       cat:"Bebidas",   porcion:200, cal:95,  prot:0,   carbs:24.0, grasas:0,   fibra:0,  azucar:22,  sodio:15,  emoji:"🍑"},
-  {id:382,nombre:"Red Bull 250ml",                marca:"Red Bull",     cat:"Bebidas",   porcion:250, cal:113, prot:1.0, carbs:28.0, grasas:0,   fibra:0,  azucar:27,  sodio:100, emoji:"🔴"},
-  {id:383,nombre:"Monster Energy 355ml",          marca:"Monster",      cat:"Bebidas",   porcion:355, cal:160, prot:0,   carbs:40.0, grasas:0,   fibra:0,  azucar:38,  sodio:180, emoji:"🟢"},
-  {id:384,nombre:"Té helado Fuze 400ml",          marca:"Fuze Tea",     cat:"Bebidas",   porcion:400, cal:80,  prot:0,   carbs:20.0, grasas:0,   fibra:0,  azucar:18,  sodio:30,  emoji:"🍵"},
-  {id:385,nombre:"Clamato 355ml",                 marca:"Clamato",      cat:"Bebidas",   porcion:355, cal:110, prot:2.0, carbs:25.0, grasas:0,   fibra:0,  azucar:14,  sodio:950, emoji:"🥫"},
+  {id:552,nombre:"Jugo Watts naranja 200ml",      marca:"Watts",        cat:"Bebidas",   porcion:200, cal:90,  prot:0.5, carbs:22.0, grasas:0,   fibra:0.5,azucar:20,  sodio:10,  emoji:"🍊"},
+  {id:553,nombre:"Néctar Andina durazno 200ml",   marca:"Andina",       cat:"Bebidas",   porcion:200, cal:95,  prot:0,   carbs:24.0, grasas:0,   fibra:0,  azucar:22,  sodio:15,  emoji:"🍑"},
+  {id:554,nombre:"Red Bull 250ml",                marca:"Red Bull",     cat:"Bebidas",   porcion:250, cal:113, prot:1.0, carbs:28.0, grasas:0,   fibra:0,  azucar:27,  sodio:100, emoji:"🔴"},
+  {id:555,nombre:"Monster Energy 355ml",          marca:"Monster",      cat:"Bebidas",   porcion:355, cal:160, prot:0,   carbs:40.0, grasas:0,   fibra:0,  azucar:38,  sodio:180, emoji:"🟢"},
+  {id:556,nombre:"Té helado Fuze 400ml",          marca:"Fuze Tea",     cat:"Bebidas",   porcion:400, cal:80,  prot:0,   carbs:20.0, grasas:0,   fibra:0,  azucar:18,  sodio:30,  emoji:"🍵"},
+  {id:557,nombre:"Clamato 355ml",                 marca:"Clamato",      cat:"Bebidas",   porcion:355, cal:110, prot:2.0, carbs:25.0, grasas:0,   fibra:0,  azucar:14,  sodio:950, emoji:"🥫"},
 
   /* ── SNACKS Y GALLETAS ── */
-  {id:386,nombre:"Papas Lays clásicas",           marca:"Lays",         cat:"Snacks",    porcion:28,  cal:150, prot:2.0, carbs:16.0, grasas:9.0, fibra:1.0,azucar:0.5, sodio:170, emoji:"🥔"},
-  {id:387,nombre:"Papas Pringles",                marca:"Pringles",     cat:"Snacks",    porcion:28,  cal:150, prot:1.5, carbs:16.0, grasas:9.0, fibra:0.5,azucar:0.5, sodio:180, emoji:"🥔"},
-  {id:388,nombre:"Galletas Oreo",                 marca:"Oreo",         cat:"Snacks",    porcion:34,  cal:160, prot:1.5, carbs:25.0, grasas:7.0, fibra:1.0,azucar:14,  sodio:135, emoji:"🍪"},
-  {id:389,nombre:"Galletas Tritón",               marca:"Costa",        cat:"Snacks",    porcion:36,  cal:170, prot:2.0, carbs:26.0, grasas:7.0, fibra:0.5,azucar:12,  sodio:110, emoji:"🍪"},
+  {id:558,nombre:"Papas Lays clásicas",           marca:"Lays",         cat:"Snacks",    porcion:28,  cal:150, prot:2.0, carbs:16.0, grasas:9.0, fibra:1.0,azucar:0.5, sodio:170, emoji:"🥔"},
+  {id:559,nombre:"Papas Pringles",                marca:"Pringles",     cat:"Snacks",    porcion:28,  cal:150, prot:1.5, carbs:16.0, grasas:9.0, fibra:0.5,azucar:0.5, sodio:180, emoji:"🥔"},
+  {id:560,nombre:"Galletas Oreo",                 marca:"Oreo",         cat:"Snacks",    porcion:34,  cal:160, prot:1.5, carbs:25.0, grasas:7.0, fibra:1.0,azucar:14,  sodio:135, emoji:"🍪"},
+  {id:561,nombre:"Galletas Tritón",               marca:"Costa",        cat:"Snacks",    porcion:36,  cal:170, prot:2.0, carbs:26.0, grasas:7.0, fibra:0.5,azucar:12,  sodio:110, emoji:"🍪"},
   {id:390,nombre:"Galletas Soda Costa",           marca:"Costa",        cat:"Snacks",    porcion:30,  cal:130, prot:2.5, carbs:22.0, grasas:4.0, fibra:0.5,azucar:2.0, sodio:200, emoji:"🍪"},
   {id:391,nombre:"Barrita Nutri Grain",           marca:"Kellogg's",    cat:"Snacks",    porcion:37,  cal:130, prot:2.0, carbs:27.0, grasas:2.5, fibra:1.5,azucar:13,  sodio:100, emoji:"🍫"},
   {id:392,nombre:"Chocolate Sublime",             marca:"Costa",        cat:"Snacks",    porcion:40,  cal:215, prot:3.5, carbs:24.0, grasas:12.0,fibra:1.0,azucar:21,  sodio:30,  emoji:"🍫"},
@@ -511,33 +511,33 @@ const DB = [
   /* ── CEREALES Y DESAYUNO ── */
   {id:398,nombre:"Corn Flakes Kellogg's",         marca:"Kellogg's",    cat:"Cereales",  porcion:30,  cal:110, prot:2.5, carbs:25.0, grasas:0.5, fibra:1.0,azucar:2.5, sodio:200, emoji:"🥣"},
   {id:399,nombre:"Granola con miel",              marca:"Genérico",     cat:"Cereales",  porcion:45,  cal:200, prot:4.5, carbs:32.0, grasas:6.5, fibra:3.0,azucar:10,  sodio:50,  emoji:"🥣"},
-  {id:400,nombre:"Avena 3 Ositos",                marca:"3 Ositos",     cat:"Cereales",  porcion:40,  cal:150, prot:5.0, carbs:27.0, grasas:2.5, fibra:4.0,azucar:0.5, sodio:5,   emoji:"🥣"},
-  {id:401,nombre:"Muesli",                        marca:"Genérico",     cat:"Cereales",  porcion:45,  cal:175, prot:5.0, carbs:30.0, grasas:4.5, fibra:4.5,azucar:8.0, sodio:30,  emoji:"🥣"},
-  {id:402,nombre:"Quaker instantáneo",            marca:"Quaker",       cat:"Cereales",  porcion:40,  cal:150, prot:5.0, carbs:27.0, grasas:3.0, fibra:3.5,azucar:1.0, sodio:10,  emoji:"🥣"},
-  {id:403,nombre:"Special K Kellogg's",           marca:"Kellogg's",    cat:"Cereales",  porcion:31,  cal:115, prot:6.0, carbs:22.0, grasas:0.5, fibra:1.5,azucar:5.5, sodio:230, emoji:"🥣"},
+  {id:562,nombre:"Avena 3 Ositos",                marca:"3 Ositos",     cat:"Cereales",  porcion:40,  cal:150, prot:5.0, carbs:27.0, grasas:2.5, fibra:4.0,azucar:0.5, sodio:5,   emoji:"🥣"},
+  {id:563,nombre:"Muesli",                        marca:"Genérico",     cat:"Cereales",  porcion:45,  cal:175, prot:5.0, carbs:30.0, grasas:4.5, fibra:4.5,azucar:8.0, sodio:30,  emoji:"🥣"},
+  {id:564,nombre:"Quaker instantáneo",            marca:"Quaker",       cat:"Cereales",  porcion:40,  cal:150, prot:5.0, carbs:27.0, grasas:3.0, fibra:3.5,azucar:1.0, sodio:10,  emoji:"🥣"},
+  {id:565,nombre:"Special K Kellogg's",           marca:"Kellogg's",    cat:"Cereales",  porcion:31,  cal:115, prot:6.0, carbs:22.0, grasas:0.5, fibra:1.5,azucar:5.5, sodio:230, emoji:"🥣"},
 
   /* ── CONSERVAS Y ENLATADOS ── */
-  {id:404,nombre:"Atún en agua Compass",          marca:"Compass",      cat:"Pescados",  porcion:85,  cal:100, prot:22.0,carbs:0,    grasas:1.0, fibra:0,  azucar:0,   sodio:320, emoji:"🐟"},
-  {id:405,nombre:"Atún en aceite Compass",        marca:"Compass",      cat:"Pescados",  porcion:85,  cal:150, prot:22.0,carbs:0,    grasas:7.0, fibra:0,  azucar:0,   sodio:280, emoji:"🐟"},
-  {id:406,nombre:"Sardinas en salsa de tomate",   marca:"Genérico",     cat:"Pescados",  porcion:90,  cal:150, prot:17.0,carbs:3.0,  grasas:8.0, fibra:0.5,azucar:2.0, sodio:450, emoji:"🐟"},
-  {id:407,nombre:"Porotos negros en lata",        marca:"Genérico",     cat:"Legumbres", porcion:130, cal:110, prot:7.0, carbs:20.0, grasas:0.5, fibra:7.0,azucar:0.5, sodio:400, emoji:"🫘"},
-  {id:408,nombre:"Garbanzos en lata",             marca:"Genérico",     cat:"Legumbres", porcion:130, cal:120, prot:7.0, carbs:20.0, grasas:2.0, fibra:6.0,azucar:1.0, sodio:350, emoji:"🫘"},
-  {id:409,nombre:"Choclo en lata",                marca:"Genérico",     cat:"Verduras",  porcion:130, cal:90,  prot:3.0, carbs:19.0, grasas:1.0, fibra:2.5,azucar:5.0, sodio:250, emoji:"🌽"},
-  {id:410,nombre:"Tomate en cubos San Remo",      marca:"San Remo",     cat:"Verduras",  porcion:130, cal:30,  prot:1.5, carbs:6.0,  grasas:0.5, fibra:2.0,azucar:4.0, sodio:180, emoji:"🍅"},
+  {id:566,nombre:"Atún en agua Compass",          marca:"Compass",      cat:"Pescados",  porcion:85,  cal:100, prot:22.0,carbs:0,    grasas:1.0, fibra:0,  azucar:0,   sodio:320, emoji:"🐟"},
+  {id:567,nombre:"Atún en aceite Compass",        marca:"Compass",      cat:"Pescados",  porcion:85,  cal:150, prot:22.0,carbs:0,    grasas:7.0, fibra:0,  azucar:0,   sodio:280, emoji:"🐟"},
+  {id:568,nombre:"Sardinas en salsa de tomate",   marca:"Genérico",     cat:"Pescados",  porcion:90,  cal:150, prot:17.0,carbs:3.0,  grasas:8.0, fibra:0.5,azucar:2.0, sodio:450, emoji:"🐟"},
+  {id:569,nombre:"Porotos negros en lata",        marca:"Genérico",     cat:"Legumbres", porcion:130, cal:110, prot:7.0, carbs:20.0, grasas:0.5, fibra:7.0,azucar:0.5, sodio:400, emoji:"🫘"},
+  {id:570,nombre:"Garbanzos en lata",             marca:"Genérico",     cat:"Legumbres", porcion:130, cal:120, prot:7.0, carbs:20.0, grasas:2.0, fibra:6.0,azucar:1.0, sodio:350, emoji:"🫘"},
+  {id:571,nombre:"Choclo en lata",                marca:"Genérico",     cat:"Verduras",  porcion:130, cal:90,  prot:3.0, carbs:19.0, grasas:1.0, fibra:2.5,azucar:5.0, sodio:250, emoji:"🌽"},
+  {id:572,nombre:"Tomate en cubos San Remo",      marca:"San Remo",     cat:"Verduras",  porcion:130, cal:30,  prot:1.5, carbs:6.0,  grasas:0.5, fibra:2.0,azucar:4.0, sodio:180, emoji:"🍅"},
 
   /* ── SALSAS Y CONDIMENTOS ── */
-  {id:411,nombre:"Mayonesa Hellmann's",           marca:"Hellmann's",   cat:"Salsas",    porcion:15,  cal:100, prot:0.2, carbs:0.5,  grasas:11.0,fibra:0,  azucar:0.5, sodio:80,  emoji:"🫙"},
-  {id:412,nombre:"Mayonesa Light Hellmann's",     marca:"Hellmann's",   cat:"Salsas",    porcion:15,  cal:50,  prot:0.2, carbs:2.0,  grasas:4.5, fibra:0,  azucar:1.5, sodio:90,  emoji:"🫙"},
-  {id:413,nombre:"Ketchup Heinz",                 marca:"Heinz",        cat:"Salsas",    porcion:17,  cal:20,  prot:0.5, carbs:5.0,  grasas:0,   fibra:0.5,azucar:4.0, sodio:190, emoji:"🍅"},
-  {id:414,nombre:"Mostaza americana",             marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:10,  prot:0.5, carbs:1.0,  grasas:0.5, fibra:0.5,azucar:0.5, sodio:120, emoji:"🟡"},
-  {id:415,nombre:"Salsa de soja Kikkoman",        marca:"Kikkoman",     cat:"Salsas",    porcion:15,  cal:10,  prot:1.5, carbs:1.0,  grasas:0,   fibra:0,  azucar:0.5, sodio:920, emoji:"🫙"},
-  {id:416,nombre:"Aceite de oliva",               marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙"},
-  {id:417,nombre:"Aceite vegetal",                marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙"},
-  {id:418,nombre:"Mermelada frutilla Watts",      marca:"Watts",        cat:"Salsas",    porcion:20,  cal:50,  prot:0.2, carbs:13.0, grasas:0,   fibra:0.5,azucar:12,  sodio:5,   emoji:"🍓"},
-  {id:419,nombre:"Manjar",                        marca:"Genérico",     cat:"Salsas",    porcion:20,  cal:65,  prot:1.5, carbs:13.0, grasas:1.0, fibra:0,  azucar:13,  sodio:35,  emoji:"🍯"},
+  {id:573,nombre:"Mayonesa Hellmann's",           marca:"Hellmann's",   cat:"Salsas",    porcion:15,  cal:100, prot:0.2, carbs:0.5,  grasas:11.0,fibra:0,  azucar:0.5, sodio:80,  emoji:"🫙"},
+  {id:574,nombre:"Mayonesa Light Hellmann's",     marca:"Hellmann's",   cat:"Salsas",    porcion:15,  cal:50,  prot:0.2, carbs:2.0,  grasas:4.5, fibra:0,  azucar:1.5, sodio:90,  emoji:"🫙"},
+  {id:575,nombre:"Ketchup Heinz",                 marca:"Heinz",        cat:"Salsas",    porcion:17,  cal:20,  prot:0.5, carbs:5.0,  grasas:0,   fibra:0.5,azucar:4.0, sodio:190, emoji:"🍅"},
+  {id:576,nombre:"Mostaza americana",             marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:10,  prot:0.5, carbs:1.0,  grasas:0.5, fibra:0.5,azucar:0.5, sodio:120, emoji:"🟡"},
+  {id:577,nombre:"Salsa de soja Kikkoman",        marca:"Kikkoman",     cat:"Salsas",    porcion:15,  cal:10,  prot:1.5, carbs:1.0,  grasas:0,   fibra:0,  azucar:0.5, sodio:920, emoji:"🫙"},
+  {id:578,nombre:"Aceite de oliva",               marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙"},
+  {id:579,nombre:"Aceite vegetal",                marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙"},
+  {id:580,nombre:"Mermelada frutilla Watts",      marca:"Watts",        cat:"Salsas",    porcion:20,  cal:50,  prot:0.2, carbs:13.0, grasas:0,   fibra:0.5,azucar:12,  sodio:5,   emoji:"🍓"},
+  {id:581,nombre:"Manjar",                        marca:"Genérico",     cat:"Salsas",    porcion:20,  cal:65,  prot:1.5, carbs:13.0, grasas:1.0, fibra:0,  azucar:13,  sodio:35,  emoji:"🍯"},
 
   /* ── PASTAS Y ARROZ ── */
-  {id:420,nombre:"Fideos spaghetti Carozzi",      marca:"Carozzi",      cat:"Cereales",  porcion:85,  cal:300, prot:11.0,carbs:61.0, grasas:1.5, fibra:2.5,azucar:2.0, sodio:5,   emoji:"🍝"},
+  {id:582,nombre:"Fideos spaghetti Carozzi",      marca:"Carozzi",      cat:"Cereales",  porcion:85,  cal:300, prot:11.0,carbs:61.0, grasas:1.5, fibra:2.5,azucar:2.0, sodio:5,   emoji:"🍝"},
   {id:421,nombre:"Fideos pluma Carozzi",          marca:"Carozzi",      cat:"Cereales",  porcion:85,  cal:300, prot:11.0,carbs:61.0, grasas:1.5, fibra:2.5,azucar:2.0, sodio:5,   emoji:"🍝"},
   {id:422,nombre:"Arroz grado 1 Tucapel",         marca:"Tucapel",      cat:"Cereales",  porcion:50,  cal:175, prot:3.5, carbs:39.0, grasas:0.5, fibra:0.5,azucar:0,   sodio:2,   emoji:"🍚"},
   {id:423,nombre:"Arroz integral Tucapel",        marca:"Tucapel",      cat:"Cereales",  porcion:50,  cal:170, prot:4.0, carbs:36.0, grasas:1.0, fibra:2.5,azucar:0,   sodio:2,   emoji:"🍚"},
@@ -549,62 +549,62 @@ const DB = [
   {id:427,nombre:"Helado Savory vainilla",        marca:"Savory",       cat:"Postres",   porcion:100, cal:220, prot:3.5, carbs:26.0, grasas:11.0,fibra:0,  azucar:22,  sodio:70,  emoji:"🍦"},
   {id:428,nombre:"Kuchen de frambuesa",           marca:"Genérico",     cat:"Postres",   porcion:100, cal:280, prot:4.0, carbs:38.0, grasas:13.0,fibra:1.5,azucar:22,  sodio:120, emoji:"🍰"},
   {id:429,nombre:"Milhojas",                      marca:"Genérico",     cat:"Postres",   porcion:100, cal:350, prot:4.5, carbs:42.0, grasas:18.0,fibra:0.5,azucar:28,  sodio:150, emoji:"🍰"},
-  {id:430,nombre:"Leche nevada",                  marca:"Genérico",     cat:"Postres",   porcion:150, cal:220, prot:5.0, carbs:38.0, grasas:6.0, fibra:0,  azucar:35,  sodio:80,  emoji:"🍮"},
-  {id:431,nombre:"Alfajor",                       marca:"Genérico",     cat:"Postres",   porcion:50,  cal:190, prot:2.5, carbs:28.0, grasas:8.0, fibra:0.5,azucar:18,  sodio:80,  emoji:"🍪"},
+  {id:583,nombre:"Leche nevada",                  marca:"Genérico",     cat:"Postres",   porcion:150, cal:220, prot:5.0, carbs:38.0, grasas:6.0, fibra:0,  azucar:35,  sodio:80,  emoji:"🍮"},
+  {id:584,nombre:"Alfajor",                       marca:"Genérico",     cat:"Postres",   porcion:50,  cal:190, prot:2.5, carbs:28.0, grasas:8.0, fibra:0.5,azucar:18,  sodio:80,  emoji:"🍪"},
 
   /* ── FRUTAS CHILENAS ── */
-  {id:432,nombre:"Chirimoya",                     marca:"Genérico",     cat:"Frutas",    porcion:150, cal:120, prot:2.5, carbs:28.0, grasas:1.0, fibra:5.0,azucar:22,  sodio:5,   emoji:"🍈"},
-  {id:433,nombre:"Lúcuma",                        marca:"Genérico",     cat:"Frutas",    porcion:100, cal:99,  prot:1.5, carbs:23.0, grasas:0.5, fibra:3.5,azucar:12,  sodio:5,   emoji:"🟡"},
-  {id:434,nombre:"Frambuesa",                     marca:"Genérico",     cat:"Frutas",    porcion:100, cal:52,  prot:1.2, carbs:12.0, grasas:0.7, fibra:6.5,azucar:4.5, sodio:1,   emoji:"🫐"},
-  {id:435,nombre:"Murta",                         marca:"Genérico",     cat:"Frutas",    porcion:100, cal:45,  prot:0.8, carbs:10.5, grasas:0.5, fibra:4.0,azucar:7.0, sodio:2,   emoji:"🫐"},
-  {id:436,nombre:"Uva chilena",                   marca:"Genérico",     cat:"Frutas",    porcion:100, cal:69,  prot:0.7, carbs:18.0, grasas:0.2, fibra:0.9,azucar:16,  sodio:2,   emoji:"🍇"},
-  {id:437,nombre:"Tuna (higo chumbo)",            marca:"Genérico",     cat:"Frutas",    porcion:100, cal:41,  prot:0.7, carbs:9.5,  grasas:0.5, fibra:3.6,azucar:6.0, sodio:5,   emoji:"🌵"},
+  {id:585,nombre:"Chirimoya",                     marca:"Genérico",     cat:"Frutas",    porcion:150, cal:120, prot:2.5, carbs:28.0, grasas:1.0, fibra:5.0,azucar:22,  sodio:5,   emoji:"🍈"},
+  {id:586,nombre:"Lúcuma",                        marca:"Genérico",     cat:"Frutas",    porcion:100, cal:99,  prot:1.5, carbs:23.0, grasas:0.5, fibra:3.5,azucar:12,  sodio:5,   emoji:"🟡"},
+  {id:587,nombre:"Frambuesa",                     marca:"Genérico",     cat:"Frutas",    porcion:100, cal:52,  prot:1.2, carbs:12.0, grasas:0.7, fibra:6.5,azucar:4.5, sodio:1,   emoji:"🫐"},
+  {id:588,nombre:"Murta",                         marca:"Genérico",     cat:"Frutas",    porcion:100, cal:45,  prot:0.8, carbs:10.5, grasas:0.5, fibra:4.0,azucar:7.0, sodio:2,   emoji:"🫐"},
+  {id:589,nombre:"Uva chilena",                   marca:"Genérico",     cat:"Frutas",    porcion:100, cal:69,  prot:0.7, carbs:18.0, grasas:0.2, fibra:0.9,azucar:16,  sodio:2,   emoji:"🍇"},
+  {id:590,nombre:"Tuna (higo chumbo)",            marca:"Genérico",     cat:"Frutas",    porcion:100, cal:41,  prot:0.7, carbs:9.5,  grasas:0.5, fibra:3.6,azucar:6.0, sodio:5,   emoji:"🌵"},
 
   /* ── VERDURAS CHILENAS ── */
-  {id:438,nombre:"Poroto verde",                  marca:"Genérico",     cat:"Verduras",  porcion:100, cal:31,  prot:1.8, carbs:7.0,  grasas:0.1, fibra:2.7,azucar:3.3, sodio:6,   emoji:"🫘"},
-  {id:439,nombre:"Choclo desgranado",             marca:"Genérico",     cat:"Verduras",  porcion:100, cal:86,  prot:3.3, carbs:19.0, grasas:1.4, fibra:2.7,azucar:3.2, sodio:15,  emoji:"🌽"},
-  {id:440,nombre:"Zapallo camote",                marca:"Genérico",     cat:"Verduras",  porcion:100, cal:26,  prot:1.0, carbs:5.5,  grasas:0.1, fibra:0.5,azucar:2.8, sodio:1,   emoji:"🎃"},
-  {id:441,nombre:"Acelga",                        marca:"Genérico",     cat:"Verduras",  porcion:100, cal:20,  prot:1.8, carbs:3.7,  grasas:0.2, fibra:1.6,azucar:1.1, sodio:213, emoji:"🥬"},
-  {id:442,nombre:"Betarraga",                     marca:"Genérico",     cat:"Verduras",  porcion:100, cal:43,  prot:1.6, carbs:10.0, grasas:0.2, fibra:2.8,azucar:7.0, sodio:78,  emoji:"🟣"},
-  {id:443,nombre:"Repollo",                       marca:"Genérico",     cat:"Verduras",  porcion:100, cal:25,  prot:1.3, carbs:6.0,  grasas:0.1, fibra:2.5,azucar:3.2, sodio:18,  emoji:"🥬"},
-  {id:444,nombre:"Coliflor",                      marca:"Genérico",     cat:"Verduras",  porcion:100, cal:25,  prot:2.0, carbs:5.0,  grasas:0.3, fibra:2.0,azucar:1.9, sodio:30,  emoji:"🥦"},
-  {id:445,nombre:"Pimentón rojo",                 marca:"Genérico",     cat:"Verduras",  porcion:100, cal:31,  prot:1.0, carbs:6.0,  grasas:0.3, fibra:2.1,azucar:4.2, sodio:4,   emoji:"🫑"},
+  {id:591,nombre:"Poroto verde",                  marca:"Genérico",     cat:"Verduras",  porcion:100, cal:31,  prot:1.8, carbs:7.0,  grasas:0.1, fibra:2.7,azucar:3.3, sodio:6,   emoji:"🫘"},
+  {id:592,nombre:"Choclo desgranado",             marca:"Genérico",     cat:"Verduras",  porcion:100, cal:86,  prot:3.3, carbs:19.0, grasas:1.4, fibra:2.7,azucar:3.2, sodio:15,  emoji:"🌽"},
+  {id:593,nombre:"Zapallo camote",                marca:"Genérico",     cat:"Verduras",  porcion:100, cal:26,  prot:1.0, carbs:5.5,  grasas:0.1, fibra:0.5,azucar:2.8, sodio:1,   emoji:"🎃"},
+  {id:594,nombre:"Acelga",                        marca:"Genérico",     cat:"Verduras",  porcion:100, cal:20,  prot:1.8, carbs:3.7,  grasas:0.2, fibra:1.6,azucar:1.1, sodio:213, emoji:"🥬"},
+  {id:595,nombre:"Betarraga",                     marca:"Genérico",     cat:"Verduras",  porcion:100, cal:43,  prot:1.6, carbs:10.0, grasas:0.2, fibra:2.8,azucar:7.0, sodio:78,  emoji:"🟣"},
+  {id:596,nombre:"Repollo",                       marca:"Genérico",     cat:"Verduras",  porcion:100, cal:25,  prot:1.3, carbs:6.0,  grasas:0.1, fibra:2.5,azucar:3.2, sodio:18,  emoji:"🥬"},
+  {id:597,nombre:"Coliflor",                      marca:"Genérico",     cat:"Verduras",  porcion:100, cal:25,  prot:2.0, carbs:5.0,  grasas:0.3, fibra:2.0,azucar:1.9, sodio:30,  emoji:"🥦"},
+  {id:598,nombre:"Pimentón rojo",                 marca:"Genérico",     cat:"Verduras",  porcion:100, cal:31,  prot:1.0, carbs:6.0,  grasas:0.3, fibra:2.1,azucar:4.2, sodio:4,   emoji:"🫑"},
   {id:446,nombre:"Alcachofa",                     marca:"Genérico",     cat:"Verduras",  porcion:120, cal:48,  prot:3.3, carbs:11.0, grasas:0.2, fibra:5.4,azucar:1.0, sodio:94,  emoji:"🌿"},
 
   /* ── CARNES CHILENAS ── */
   {id:447,nombre:"Cazuela de pollo",              marca:"Genérico",     cat:"Carnes",    porcion:350, cal:260, prot:22.0,carbs:22.0, grasas:8.0, fibra:3.0,azucar:3.0, sodio:550, emoji:"🍗"},
   {id:448,nombre:"Pollo asado al horno",          marca:"Genérico",     cat:"Carnes",    porcion:150, cal:280, prot:28.0,carbs:0,    grasas:18.0,fibra:0,  azucar:0,   sodio:380, emoji:"🍗"},
   {id:449,nombre:"Lomo de cerdo",                 marca:"Genérico",     cat:"Carnes",    porcion:100, cal:190, prot:22.0,carbs:0,    grasas:11.0,fibra:0,  azucar:0,   sodio:60,  emoji:"🥩"},
-  {id:450,nombre:"Plateada vacuno",               marca:"Genérico",     cat:"Carnes",    porcion:100, cal:230, prot:20.0,carbs:0,    grasas:16.0,fibra:0,  azucar:0,   sodio:70,  emoji:"🥩"},
-  {id:451,nombre:"Asado de tira",                 marca:"Genérico",     cat:"Carnes",    porcion:100, cal:250, prot:19.0,carbs:0,    grasas:19.0,fibra:0,  azucar:0,   sodio:65,  emoji:"🥩"},
-  {id:452,nombre:"Entrañas",                      marca:"Genérico",     cat:"Carnes",    porcion:100, cal:215, prot:22.0,carbs:0,    grasas:14.0,fibra:0,  azucar:0,   sodio:70,  emoji:"🥩"},
+  {id:599,nombre:"Plateada vacuno",               marca:"Genérico",     cat:"Carnes",    porcion:100, cal:230, prot:20.0,carbs:0,    grasas:16.0,fibra:0,  azucar:0,   sodio:70,  emoji:"🥩"},
+  {id:600,nombre:"Asado de tira",                 marca:"Genérico",     cat:"Carnes",    porcion:100, cal:250, prot:19.0,carbs:0,    grasas:19.0,fibra:0,  azucar:0,   sodio:65,  emoji:"🥩"},
+  {id:601,nombre:"Entrañas",                      marca:"Genérico",     cat:"Carnes",    porcion:100, cal:215, prot:22.0,carbs:0,    grasas:14.0,fibra:0,  azucar:0,   sodio:70,  emoji:"🥩"},
 
   /* ── PESCADOS Y MARISCOS ── */
-  {id:453,nombre:"Reineta",                       marca:"Genérico",     cat:"Pescados",  porcion:150, cal:180, prot:25.0,carbs:0,    grasas:9.0, fibra:0,  azucar:0,   sodio:80,  emoji:"🐟"},
-  {id:454,nombre:"Congrio",                       marca:"Genérico",     cat:"Pescados",  porcion:150, cal:160, prot:26.0,carbs:0,    grasas:6.0, fibra:0,  azucar:0,   sodio:75,  emoji:"🐟"},
-  {id:455,nombre:"Corvina",                       marca:"Genérico",     cat:"Pescados",  porcion:150, cal:155, prot:27.0,carbs:0,    grasas:5.0, fibra:0,  azucar:0,   sodio:80,  emoji:"🐟"},
-  {id:456,nombre:"Machas",                        marca:"Genérico",     cat:"Pescados",  porcion:100, cal:65,  prot:12.0,carbs:3.0,  grasas:1.0, fibra:0,  azucar:0,   sodio:250, emoji:"🦪"},
+  {id:602,nombre:"Reineta",                       marca:"Genérico",     cat:"Pescados",  porcion:150, cal:180, prot:25.0,carbs:0,    grasas:9.0, fibra:0,  azucar:0,   sodio:80,  emoji:"🐟"},
+  {id:603,nombre:"Congrio",                       marca:"Genérico",     cat:"Pescados",  porcion:150, cal:160, prot:26.0,carbs:0,    grasas:6.0, fibra:0,  azucar:0,   sodio:75,  emoji:"🐟"},
+  {id:604,nombre:"Corvina",                       marca:"Genérico",     cat:"Pescados",  porcion:150, cal:155, prot:27.0,carbs:0,    grasas:5.0, fibra:0,  azucar:0,   sodio:80,  emoji:"🐟"},
+  {id:605,nombre:"Machas",                        marca:"Genérico",     cat:"Pescados",  porcion:100, cal:65,  prot:12.0,carbs:3.0,  grasas:1.0, fibra:0,  azucar:0,   sodio:250, emoji:"🦪"},
   {id:457,nombre:"Cholgas",                       marca:"Genérico",     cat:"Pescados",  porcion:100, cal:70,  prot:12.0,carbs:3.5,  grasas:1.5, fibra:0,  azucar:0,   sodio:280, emoji:"🦪"},
   {id:458,nombre:"Centolla",                      marca:"Genérico",     cat:"Pescados",  porcion:100, cal:90,  prot:18.0,carbs:0,    grasas:1.5, fibra:0,  azucar:0,   sodio:300, emoji:"🦀"},
   {id:459,nombre:"Jaiba",                         marca:"Genérico",     cat:"Pescados",  porcion:100, cal:82,  prot:17.0,carbs:0,    grasas:1.0, fibra:0,  azucar:0,   sodio:280, emoji:"🦀"},
 
   /* ── SUPERMERCADO MARCAS CHILENAS ── */
-  {id:460,nombre:"Salsa de tomate Malloa",        marca:"Malloa",       cat:"Salsas",    porcion:130, cal:70,  prot:2.5, carbs:14.0, grasas:1.0, fibra:2.0,azucar:10,  sodio:350, emoji:"🍅"},
-  {id:461,nombre:"Duraznos en almíbar Malloa",    marca:"Malloa",       cat:"Frutas",    porcion:130, cal:95,  prot:0.8, carbs:24.0, grasas:0.1, fibra:1.0,azucar:22,  sodio:10,  emoji:"🍑"},
-  {id:462,nombre:"Espárragos en lata Malloa",     marca:"Malloa",       cat:"Verduras",  porcion:130, cal:30,  prot:3.0, carbs:4.5,  grasas:0.3, fibra:2.5,azucar:2.0, sodio:400, emoji:"🌿"},
-  {id:463,nombre:"Leche en polvo Nido",           marca:"Nestlé",       cat:"Lácteos",   porcion:25,  cal:120, prot:5.5, carbs:12.0, grasas:6.0, fibra:0,  azucar:12,  sodio:90,  emoji:"🥛"},
-  {id:464,nombre:"Té Supremo bolsita",            marca:"Supremo",      cat:"Bebidas",   porcion:200, cal:2,   prot:0,   carbs:0.5,  grasas:0,   fibra:0,  azucar:0,   sodio:5,   emoji:"🍵"},
-  {id:465,nombre:"Café instantáneo Nescafé",      marca:"Nescafé",      cat:"Bebidas",   porcion:200, cal:5,   prot:0.3, carbs:0.8,  grasas:0,   fibra:0,  azucar:0,   sodio:5,   emoji:"☕"},
-  {id:466,nombre:"Néctar Kapo",                   marca:"Kapo",         cat:"Bebidas",   porcion:200, cal:80,  prot:0,   carbs:20.0, grasas:0,   fibra:0,  azucar:19,  sodio:10,  emoji:"🥤"},
+  {id:606,nombre:"Salsa de tomate Malloa",        marca:"Malloa",       cat:"Salsas",    porcion:130, cal:70,  prot:2.5, carbs:14.0, grasas:1.0, fibra:2.0,azucar:10,  sodio:350, emoji:"🍅"},
+  {id:607,nombre:"Duraznos en almíbar Malloa",    marca:"Malloa",       cat:"Frutas",    porcion:130, cal:95,  prot:0.8, carbs:24.0, grasas:0.1, fibra:1.0,azucar:22,  sodio:10,  emoji:"🍑"},
+  {id:608,nombre:"Espárragos en lata Malloa",     marca:"Malloa",       cat:"Verduras",  porcion:130, cal:30,  prot:3.0, carbs:4.5,  grasas:0.3, fibra:2.5,azucar:2.0, sodio:400, emoji:"🌿"},
+  {id:609,nombre:"Leche en polvo Nido",           marca:"Nestlé",       cat:"Lácteos",   porcion:25,  cal:120, prot:5.5, carbs:12.0, grasas:6.0, fibra:0,  azucar:12,  sodio:90,  emoji:"🥛"},
+  {id:610,nombre:"Té Supremo bolsita",            marca:"Supremo",      cat:"Bebidas",   porcion:200, cal:2,   prot:0,   carbs:0.5,  grasas:0,   fibra:0,  azucar:0,   sodio:5,   emoji:"🍵"},
+  {id:611,nombre:"Café instantáneo Nescafé",      marca:"Nescafé",      cat:"Bebidas",   porcion:200, cal:5,   prot:0.3, carbs:0.8,  grasas:0,   fibra:0,  azucar:0,   sodio:5,   emoji:"☕"},
+  {id:612,nombre:"Néctar Kapo",                   marca:"Kapo",         cat:"Bebidas",   porcion:200, cal:80,  prot:0,   carbs:20.0, grasas:0,   fibra:0,  azucar:19,  sodio:10,  emoji:"🥤"},
   {id:467,nombre:"Bebida Bilz",                   marca:"Bilz",         cat:"Bebidas",   porcion:350, cal:145, prot:0,   carbs:38.0, grasas:0,   fibra:0,  azucar:38,  sodio:45,  emoji:"🥤"},
   {id:468,nombre:"Bebida Pap",                    marca:"Pap",          cat:"Bebidas",   porcion:350, cal:140, prot:0,   carbs:36.0, grasas:0,   fibra:0,  azucar:36,  sodio:40,  emoji:"🥤"},
   {id:469,nombre:"Yogurt Chico Colún",            marca:"Colún",        cat:"Lácteos",   porcion:100, cal:80,  prot:3.5, carbs:12.0, grasas:2.0, fibra:0,  azucar:11,  sodio:50,  emoji:"🍶"},
-  {id:470,nombre:"Galletas Animalitos",           marca:"Costa",        cat:"Snacks",    porcion:30,  cal:130, prot:2.0, carbs:22.0, grasas:4.0, fibra:0.5,azucar:8.0, sodio:90,  emoji:"🍪"},
-  {id:471,nombre:"Galletas Amor",                 marca:"Costa",        cat:"Snacks",    porcion:30,  cal:125, prot:2.5, carbs:20.0, grasas:4.5, fibra:0.5,azucar:7.0, sodio:85,  emoji:"🍪"},
-  {id:472,nombre:"Pan de pascua",                 marca:"Genérico",     cat:"Postres",   porcion:80,  cal:280, prot:5.0, carbs:44.0, grasas:10.0,fibra:2.0,azucar:28,  sodio:150, emoji:"🎄"},
-  {id:473,nombre:"Humitas",                       marca:"Genérico",     cat:"Platos chilenos",porcion:200,cal:220,prot:5.0,carbs:40.0,grasas:5.0, fibra:3.0,azucar:2.0, sodio:300, emoji:"🌽"},
-  {id:474,nombre:"Pebre",                         marca:"Genérico",     cat:"Salsas",    porcion:50,  cal:20,  prot:0.8, carbs:4.0,  grasas:0.3, fibra:1.0,azucar:2.0, sodio:150, emoji:"🌶️"},
-  {id:475,nombre:"Chancho en piedra",             marca:"Genérico",     cat:"Salsas",    porcion:50,  cal:35,  prot:1.0, carbs:7.0,  grasas:0.5, fibra:1.5,azucar:4.0, sodio:200, emoji:"🍅"},
+  {id:613,nombre:"Galletas Animalitos",           marca:"Costa",        cat:"Snacks",    porcion:30,  cal:130, prot:2.0, carbs:22.0, grasas:4.0, fibra:0.5,azucar:8.0, sodio:90,  emoji:"🍪"},
+  {id:614,nombre:"Galletas Amor",                 marca:"Costa",        cat:"Snacks",    porcion:30,  cal:125, prot:2.5, carbs:20.0, grasas:4.5, fibra:0.5,azucar:7.0, sodio:85,  emoji:"🍪"},
+  {id:615,nombre:"Pan de pascua",                 marca:"Genérico",     cat:"Postres",   porcion:80,  cal:280, prot:5.0, carbs:44.0, grasas:10.0,fibra:2.0,azucar:28,  sodio:150, emoji:"🎄"},
+  {id:616,nombre:"Humitas",                       marca:"Genérico",     cat:"Platos chilenos",porcion:200,cal:220,prot:5.0,carbs:40.0,grasas:5.0, fibra:3.0,azucar:2.0, sodio:300, emoji:"🌽"},
+  {id:617,nombre:"Pebre",                         marca:"Genérico",     cat:"Salsas",    porcion:50,  cal:20,  prot:0.8, carbs:4.0,  grasas:0.3, fibra:1.0,azucar:2.0, sodio:150, emoji:"🌶️"},
+  {id:618,nombre:"Chancho en piedra",             marca:"Genérico",     cat:"Salsas",    porcion:50,  cal:35,  prot:1.0, carbs:7.0,  grasas:0.5, fibra:1.5,azucar:4.0, sodio:200, emoji:"🍅"},
 
   /* ── SUPLEMENTOS ── */
   {id:320,nombre:"Whey protein Gold Standard",    marca:"ON",           cat:"Suplementos",porcion:31,  cal:120, prot:24,  carbs:3,   grasas:2,   fibra:0, azucar:3, sodio:100,   emoji:"💪"},
@@ -737,7 +737,7 @@ const DIETAS = [
 /* ═══════════════════════════════════════════════════════
    CONSTANTS
 ═══════════════════════════════════════════════════════ */
-const CATS = ["Todas","Lácteos","Carnes","Cecinas","Panes","Cereales","Snacks","Bebidas","Frutas","Verduras","Legumbres","Granos","Pescados","Huevos","Comidas CL","Congelados","Comida rápida","Preparados","Aceites","Condimentos","Suplementos","Mis alimentos","Mis recetas","Escaneado"];
+const CATS = ["Todas","Lácteos","Carnes","Cecinas","Panes","Cereales","Snacks","Bebidas","Frutas","Verduras","Legumbres","Granos","Pescados","Huevos","Comidas CL","Platos chilenos","Congelados","Comida rápida","Preparados","Aceites","Condimentos","Salsas","Postres","Suplementos","Mis alimentos","Mis recetas","Escaneado"];
 const MEALS = ["Desayuno","Almuerzo","Once","Cena","Snack"];
 const MC = {Desayuno:"#FF9500",Almuerzo:"#FF3B30",Once:"#AF52DE",Cena:"#D42020",Snack:"#34C759"};
 const MI = {Desayuno:"🌅",Almuerzo:"☀️",Once:"☕",Cena:"🌙",Snack:"🍎"};
@@ -1845,6 +1845,8 @@ function BarcodeScanner({C, F, onFound, onClose}) {
           carbs:Math.round((n.carbohydrates_100g||0)*10)/10,
           grasas:Math.round((n.fat_100g||0)*10)/10,
           fibra:Math.round((n.fiber_100g||0)*10)/10,
+          azucar:Math.round((n['sugars_100g']||0)*10)/10,
+          sodio:Math.round((n.sodium_100g||0)*1000),
           emoji:'📦', barcode,
           // Campos veganos
           vegan: veganStatus,
@@ -3842,12 +3844,21 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false}) {
-  const [msgs, setMsgs] = useState([]);
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno'}) {
+  const chatKey = 'nutri_chat_' + new Date().toISOString().split('T')[0];
+  const [msgs, setMsgs] = useState(()=>{
+    const saved = LS.get(chatKey, []);
+    return saved.length > 0 ? saved : [];
+  });
+  const [showHistorialChat, setShowHistorialChat] = useState(false);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('chat'); // chat | tips | memoria
   const endRef = useRef(null);
+  
+  useEffect(()=>{
+    if(msgs.length > 0) LS.set(chatKey, msgs.slice(-20)); // guardar últimos 20 mensajes
+  },[msgs]);
 
   const objLabels={bajar:'bajar de peso',mantener:'mantener peso',recomp:'recomposición corporal',subir:'ganar masa muscular'};
   const pct = metas.cal>0?Math.round(tot.cal/metas.cal*100):0;
@@ -3869,7 +3880,11 @@ Si el usuario pregunta algo fuera de nutrición, redirige amablemente.
 ${isPro && iaMemoria?.gustos?.length>0 ? `MEMORIA - Le gustan: ${iaMemoria.gustos.join(', ')}.` : ''}
 ${isPro && iaMemoria?.disgustos?.length>0 ? `MEMORIA - No le gustan: ${iaMemoria.disgustos.join(', ')}.` : ''}
 ${isPro && iaMemoria?.patrones?.length>0 ? `MEMORIA - Patrones observados: ${iaMemoria.patrones.join(', ')}.` : ''}
-${isPro ? 'Cuando el usuario mencione que le gusta o disgusta algo, o detectes patrones de comportamiento, mencionalo en tu respuesta para mostrar que lo recuerdas.' : ''}`;
+${isPro ? 'Cuando el usuario mencione que le gusta o disgusta algo, o detectes patrones de comportamiento, mencionalo en tu respuesta para mostrar que lo recuerdas.' : ''}
+
+REGISTRO DE COMIDAS: Si el usuario menciona que comió, está comiendo, o quiere registrar algo (ej: "comí X", "me comí X", "registra X", "acabo de comer X"), debes responder con un JSON especial al INICIO de tu mensaje con este formato exacto (sin backticks):
+<<<REGISTER_FOOD:{"nombre":"nombre del alimento","cal":número,"prot":número,"carbs":número,"grasas":número,"fibra":número,"azucar":número,"sodio":número,"emoji":"emoji"}>>>
+Seguido de tu respuesta normal. Estima los valores nutricionales para una porción típica chilena si no los sabes exactamente. El campo "nombre" debe ser descriptivo (ej: "Subway 30cm pollo a la parrilla con vegetales").`;
 
   const QUICK_PROMPTS = [
     {icon:'🍽️', text:'¿Qué debería comer ahora?'},
@@ -3890,6 +3905,33 @@ ${isPro ? 'Cuando el usuario mencione que le gusta o disgusta algo, o detectes p
     endRef.current?.scrollIntoView({behavior:'smooth'});
   },[msgs]);
 
+  const parseAndRegisterFood = (reply) => {
+    const match = reply.match(/<<<REGISTER_FOOD:({[\s\S]*?})>>>/);
+    if(match && onAddFood) {
+      try {
+        const food = JSON.parse(match[1]);
+        onAddFood({
+          id: Math.abs([...(food.nombre||'')].reduce((h,c)=>Math.imul(31,h)+c.charCodeAt(0)|0,0))||Date.now(),
+          nombre: food.nombre || 'Alimento registrado',
+          marca: 'Nutri IA',
+          cat: 'Preparados',
+          porcion: 100,
+          cal: Number(food.cal) || 0,
+          prot: Number(food.prot) || 0,
+          carbs: Number(food.carbs) || 0,
+          grasas: Number(food.grasas) || 0,
+          fibra: Number(food.fibra) || 0,
+          azucar: Number(food.azucar) || 0,
+          sodio: Number(food.sodio) || 0,
+          emoji: food.emoji || '🍽️',
+          comida: meal,
+        });
+      } catch(err) { console.error('Error parsing food register:', err); }
+    }
+    // Remove the JSON tag from the displayed message
+    return reply.replace(/<<<REGISTER_FOOD:[\s\S]*?>>>\n?/g, '').trim();
+  };
+
   const send = async(text) => {
     const userText = text || input.trim();
     if(!userText || loading) return;
@@ -3905,7 +3947,8 @@ ${isPro ? 'Cuando el usuario mencione que le gusta o disgusta algo, o detectes p
         system: systemPrompt,
         messages: newMsgs.map(m=>({role:m.role, content:m.content})),
       });
-      const reply = data.text || 'No pude responder. Intenta de nuevo.';
+      const rawReply = data.text || 'No pude responder. Intenta de nuevo.';
+      const reply = parseAndRegisterFood(rawReply);
       setMsgs(prev=>[...prev, {role:'assistant', content:reply}]);
     } catch(e) {
       setMsgs(prev=>[...prev, {role:'assistant', content:'❌ Error de conexión. Verifica tu internet.'}]);
@@ -5097,8 +5140,8 @@ function ReporteSemanalModal({C, F, dark, onClose, isPro}) {
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const log = LS.get('log_'+key,[]);
     const s = log.reduce((a,it)=>{
-      const r=(it.grams?it.grams/(it.porcion||100):1)*(it.qty||1);
-      return {cal:a.cal+it.cal*r*it.qty,prot:a.prot+it.prot*r*it.qty,carbs:a.carbs+it.carbs*r*it.qty,grasas:a.grasas+it.grasas*r*it.qty};
+      const r=(it.grams?it.grams/(it.porcion||100):1);
+      return {cal:a.cal+it.cal*r*(it.qty||1),prot:a.prot+it.prot*r*(it.qty||1),carbs:a.carbs+it.carbs*r*(it.qty||1),grasas:a.grasas+it.grasas*r*(it.qty||1)};
     },{cal:0,prot:0,carbs:0,grasas:0});
     const agua = LS.get('agua_'+key,0);
     return {key,label:d.toLocaleDateString('es-CL',{weekday:'short',day:'numeric'}),cal:Math.round(s.cal),prot:Math.round(s.prot),carbs:Math.round(s.carbs),grasas:Math.round(s.grasas),agua,tiene:log.length>0};
@@ -5329,16 +5372,16 @@ Responde SOLO con este JSON:
 }
 Incluye los 7 días de la semana.`;
 
-      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({messages:[{role:'user',content:prompt}],system:'Eres un nutricionista chileno experto. Responde SOLO con JSON válido, sin texto adicional ni backticks.'})
+      const data = await callEdgeFn({
+        mode: 'chat',
+        system: 'Eres un nutricionista chileno experto. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
+        messages: [{role:'user', content:prompt}],
       });
-      const data = await res.json();
-      const text = data.content?.[0]?.text||'';
+      const text = data.text || data.content?.[0]?.text || '';
       const clean = text.replace(/```json|```/g,'').trim();
       setPlan(JSON.parse(clean));
     } catch(e) {
+      console.error('PlanSemanal error:', e);
       setPlan({error:'No se pudo generar el plan. Intenta de nuevo.'});
     }
     setLoading(false);
@@ -5462,16 +5505,17 @@ Responde SOLO con JSON:
   ],
   "consejo": "consejo nutricional breve para el resto del día"
 }`;
-      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({messages:[{role:'user',content:prompt}],system:'Eres nutricionista chileno. Responde SOLO JSON válido.'})
+      const data = await callEdgeFn({
+        mode: 'chat',
+        system: 'Eres nutricionista chileno. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
+        messages: [{role:'user', content:prompt}],
       });
-      const data = await res.json();
-      const text = data.content?.[0]?.text||'';
+      const text = data.text || data.content?.[0]?.text || '';
       const clean = text.replace(/```json|```/g,'').trim();
-      setSugerencia(JSON.parse(clean));
+      const parsed = JSON.parse(clean);
+      setSugerencia(parsed);
     } catch(e) {
+      console.error('QueComer error:', e);
       setSugerencia({error:'No se pudo generar sugerencia. Intenta de nuevo.'});
     }
     setLoading(false);
@@ -5773,16 +5817,17 @@ Responde SOLO con JSON:
   ]
 }`;
 
-      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({messages:[{role:'user',content:prompt}],system:'Eres chef nutricionista chileno. Responde SOLO JSON válido.'})
+      const data = await callEdgeFn({
+        mode: 'chat',
+        system: 'Eres chef nutricionista chileno. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
+        messages: [{role:'user', content:prompt}],
       });
-      const data = await res.json();
-      const text = data.content?.[0]?.text||'';
+      const text = data.text || data.content?.[0]?.text || '';
       const clean = text.replace(/```json|```/g,'').trim();
-      setRecetas(JSON.parse(clean));
+      const parsed = JSON.parse(clean);
+      setRecetas(parsed);
     } catch(e) {
+      console.error('RecetasTemp error:', e);
       setRecetas({error:'No se pudo generar recetas. Intenta de nuevo.'});
     }
     setLoading(false);
@@ -5792,7 +5837,7 @@ Responde SOLO con JSON:
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
-        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>{temporadaEmoji} Recetas de {temporada} <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>{temporadaEmoji} {temporada.charAt(0).toUpperCase()+temporada.slice(1)} <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
         <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:16}}>
@@ -5847,6 +5892,555 @@ Responde SOLO con JSON:
     </div>
   );
 }
+
+/* ══════════════════════════════════════════════
+   PLAN NUTRICIONAL ADAPTATIVO PRO
+══════════════════════════════════════════════ */
+function PlanAdaptativoModal({C, F, dark, nombre, perfil, obj, metas, ritmo, weightHistory, streak, tot, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [plan, setPlan] = useState(null);
+
+  const pesoActual = weightHistory.length>0 ? weightHistory[weightHistory.length-1].w : perfil.peso;
+  const pesoHaceUnaSemana = weightHistory.length>=7 ? weightHistory[weightHistory.length-7]?.w : null;
+  const cambioPeso = pesoHaceUnaSemana ? (pesoActual - pesoHaceUnaSemana).toFixed(1) : null;
+  const progresoEsperado = ritmo==='tranquilo'?-0.25:ritmo==='normal'?-0.5:ritmo==='rapido'?-0.75:-1;
+  const estaEnMeta = cambioPeso && Math.abs(parseFloat(cambioPeso)) >= Math.abs(progresoEsperado)*0.7;
+
+  const generarPlan = async () => {
+    setLoading(true);
+    setPlan(null);
+    try {
+      const progreso = cambioPeso
+        ? `Esta semana cambió ${cambioPeso}kg (meta: ${progresoEsperado}kg/semana). ${estaEnMeta?'Va bien.':'Necesita ajuste.'}`
+        : 'Sin suficiente historial de peso.';
+
+      const prompt = `Crea un plan nutricional adaptativo para ${nombre}.
+Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}.
+Peso actual: ${pesoActual}kg. Calorías actuales: ${metas.cal}kcal/día.
+Progreso esta semana: ${progreso}
+Racha actual: ${streak.days} días. Calorías consumidas hoy: ${Math.round(tot.cal)}kcal.
+Ritmo elegido: ${ritmo}.
+
+Basado en este progreso, genera un plan adaptado con ajustes específicos.
+Responde SOLO con JSON:
+{
+  "estado": "en_camino|necesita_ajuste|excelente",
+  "mensaje_motivacional": "mensaje personalizado",
+  "ajuste_calorias": numero (+ o - respecto a meta actual, puede ser 0),
+  "razon_ajuste": "explicación del ajuste",
+  "distribucion_macros": {"prot_g": numero, "carbs_g": numero, "grasas_g": numero},
+  "estrategias": ["estrategia 1", "estrategia 2", "estrategia 3"],
+  "alimentos_clave": [{"nombre": "alimento", "razon": "por qué incluirlo", "emoji": "emoji"}],
+  "proxima_revision": "en X días"
+}`;
+
+      const data = await callEdgeFn({
+        mode:'chat',
+        system:'Eres nutricionista deportivo chileno experto. Responde SOLO JSON válido.',
+        messages:[{role:'user',content:prompt}],
+      });
+      const text = data.text || data.content?.[0]?.text || '';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setPlan(JSON.parse(clean));
+    } catch(e) {
+      setPlan({error:'No se pudo generar el plan. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  const estadoColor = {en_camino:'#FF9500', necesita_ajuste:'#FF3B30', excelente:'#34C759'};
+  const estadoEmoji = {en_camino:'📊', necesita_ajuste:'⚠️', excelente:'🎯'};
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>🧬 Plan Adaptativo <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        {/* Resumen de progreso */}
+        <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>📊 Tu progreso esta semana</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {[
+              {label:'Peso actual',val:`${pesoActual}kg`,emoji:'⚖️',color:C.text},
+              {label:'Cambio',val:cambioPeso?`${cambioPeso>0?'+':''}${cambioPeso}kg`:'Sin datos',emoji:'📈',color:parseFloat(cambioPeso||0)<0&&obj==='bajar'?'#34C759':C.text},
+              {label:'Meta semanal',val:`${progresoEsperado}kg`,emoji:'🎯',color:'#FF9500'},
+              {label:'Racha',val:`${streak.days} días`,emoji:'🔥',color:'#D42020'},
+            ].map(({label,val,emoji,color})=>(
+              <div key={label} style={{background:C.surfaceAlt,borderRadius:14,padding:'10px',textAlign:'center'}}>
+                <div style={{fontSize:18,marginBottom:4}}>{emoji}</div>
+                <div style={{fontSize:14,fontWeight:800,color}}>{val}</div>
+                <div style={{fontSize:10,color:C.textSec,marginTop:2}}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button onClick={generarPlan} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'linear-gradient(135deg,#5856D6,#AF52DE)',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:14,opacity:loading?0.7:1}}>
+          {loading?'🧬 Analizando tu progreso...':'🧬 Generar plan adaptativo'}
+        </button>
+
+        {plan&&!plan.error&&(
+          <>
+            {/* Estado */}
+            <div style={{background:`${estadoColor[plan.estado]}18`,borderRadius:18,padding:'16px',marginBottom:12,border:`1.5px solid ${estadoColor[plan.estado]}40`}}>
+              <div style={{fontSize:20,marginBottom:6}}>{estadoEmoji[plan.estado]} <span style={{fontSize:14,fontWeight:800,color:estadoColor[plan.estado]}}>{plan.estado==='excelente'?'¡Excelente progreso!':plan.estado==='en_camino'?'Vas bien, ajuste fino':plan.estado==='necesita_ajuste'?'Necesita ajuste':'Analizando...'}</span></div>
+              <div style={{fontSize:13,color:C.text,lineHeight:1.5}}>{plan.mensaje_motivacional}</div>
+            </div>
+
+            {/* Ajuste de calorías */}
+            {plan.ajuste_calorias!==0&&(
+              <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:6}}>🎯 Ajuste recomendado</div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{fontSize:24,fontWeight:900,color:plan.ajuste_calorias>0?'#34C759':'#FF9500'}}>{plan.ajuste_calorias>0?'+':''}{plan.ajuste_calorias} kcal</div>
+                  <div style={{fontSize:12,color:C.textSec,flex:1}}>{plan.razon_ajuste}</div>
+                </div>
+                <div style={{marginTop:8,fontSize:12,color:C.textSec}}>Nueva meta: <strong style={{color:C.text}}>{metas.cal + plan.ajuste_calorias} kcal/día</strong></div>
+              </div>
+            )}
+
+            {/* Macros */}
+            <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10}}>🥗 Distribución óptima de macros</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+                {[['💪','Proteínas',plan.distribucion_macros?.prot_g,'g','#D42020'],['🌾','Carbos',plan.distribucion_macros?.carbs_g,'g','#FF9500'],['🥑','Grasas',plan.distribucion_macros?.grasas_g,'g','#FFD700']].map(([e,l,v,u,c])=>(
+                  <div key={l} style={{background:C.surfaceAlt,borderRadius:12,padding:'10px 8px',textAlign:'center'}}>
+                    <div style={{fontSize:18}}>{e}</div>
+                    <div style={{fontSize:15,fontWeight:800,color:c}}>{v}{u}</div>
+                    <div style={{fontSize:10,color:C.textSec}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Estrategias */}
+            <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>💡 Estrategias para esta semana</div>
+              {plan.estrategias?.map((e,i)=>(
+                <div key={i} style={{display:'flex',gap:8,marginBottom:6,padding:'8px 10px',background:C.surfaceAlt,borderRadius:10}}>
+                  <span style={{color:'#5856D6',fontWeight:700,fontSize:14}}>{i+1}.</span>
+                  <span style={{fontSize:12,color:C.text,lineHeight:1.5}}>{e}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Alimentos clave */}
+            {plan.alimentos_clave?.length>0&&(
+              <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>🛒 Alimentos clave esta semana</div>
+                {plan.alimentos_clave.map((a,i)=>(
+                  <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:i<plan.alimentos_clave.length-1?`1px solid ${C.border}`:'none'}}>
+                    <span style={{fontSize:22}}>{a.emoji}</span>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>{a.nombre}</div>
+                      <div style={{fontSize:11,color:C.textSec}}>{a.razon}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{background:dark?'rgba(88,86,214,0.1)':'rgba(88,86,214,0.06)',borderRadius:14,padding:'10px 14px',border:'1px solid rgba(88,86,214,0.2)'}}>
+              <div style={{fontSize:11,color:'#5856D6',fontWeight:600}}>🔄 Próxima revisión: {plan.proxima_revision}</div>
+            </div>
+          </>
+        )}
+        {plan?.error&&<div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{plan.error}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   PLAN FAMILIAR PRO
+══════════════════════════════════════════════ */
+function PlanFamiliarModal({C, F, dark, supabaseUser, isPro, onClose}) {
+  const [miembros, setMiembros] = useState(()=>LS.get('familia_miembros',[{id:1,nombre:'',edad:'',obj:'mantener',activo:true}]));
+  const [tab, setTab] = useState('miembros');
+
+  const agregarMiembro = () => {
+    if(miembros.length >= 5) return;
+    setMiembros([...miembros,{id:Date.now(),nombre:'',edad:'',obj:'mantener',activo:true}]);
+  };
+
+  const actualizarMiembro = (id, campo, valor) => {
+    const updated = miembros.map(m=>m.id===id?{...m,[campo]:valor}:m);
+    setMiembros(updated);
+    LS.set('familia_miembros', updated);
+  };
+
+  const eliminarMiembro = (id) => {
+    if(miembros.length<=1) return;
+    const updated = miembros.filter(m=>m.id!==id);
+    setMiembros(updated);
+    LS.set('familia_miembros', updated);
+  };
+
+  const objLabels = {bajar:'Bajar peso',mantener:'Mantener',subir:'Ganar músculo',recomp:'Recomposición'};
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>👨‍👩‍👧 Plan Familiar <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        {/* Tabs */}
+        <div style={{display:'flex',gap:4,marginBottom:14,background:C.surface,borderRadius:14,padding:4,border:`1px solid ${C.border}`}}>
+          {[['miembros','👥 Miembros'],['metas','🎯 Metas'],['comidas','🍽️ Plan']].map(([t,l])=>(
+            <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:'8px',borderRadius:10,border:'none',background:tab===t?'#D42020':'transparent',color:tab===t?'white':C.textSec,fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {tab==='miembros'&&(
+          <>
+            <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:12,color:C.textSec}}>Registra hasta 5 miembros de tu familia. Cada uno tendrá sus propias metas calóricas.</div>
+            </div>
+            {miembros.map((m,i)=>(
+              <div key={m.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                  <div style={{fontSize:13,fontWeight:700,color:C.text}}>👤 Miembro {i+1}{i===0?' (Tú)':''}</div>
+                  {i>0&&<button onClick={()=>eliminarMiembro(m.id)} style={{background:'none',border:'none',color:'#FF3B30',cursor:'pointer',fontSize:16}}>×</button>}
+                </div>
+                <input value={m.nombre} onChange={e=>actualizarMiembro(m.id,'nombre',e.target.value)} placeholder="Nombre" style={{width:'100%',padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontFamily:F,outline:'none',marginBottom:8,boxSizing:'border-box'}}/>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  <input value={m.edad} onChange={e=>actualizarMiembro(m.id,'edad',e.target.value)} placeholder="Edad" type="number" style={{padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontFamily:F,outline:'none'}}/>
+                  <select value={m.obj} onChange={e=>actualizarMiembro(m.id,'obj',e.target.value)} style={{padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontFamily:F,outline:'none'}}>
+                    {Object.entries(objLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+                  </select>
+                </div>
+              </div>
+            ))}
+            {miembros.length<5&&(
+              <button onClick={agregarMiembro} style={{width:'100%',padding:'12px',borderRadius:16,border:`2px dashed ${C.border}`,background:'transparent',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>
+                + Agregar miembro ({miembros.length}/5)
+              </button>
+            )}
+          </>
+        )}
+
+        {tab==='metas'&&(
+          <div>
+            {miembros.filter(m=>m.nombre).map((m,i)=>{
+              const calEstimadas = m.edad<12?1600:m.edad<18?2200:m.obj==='bajar'?1700:m.obj==='subir'?2800:2000;
+              return (
+                <div key={m.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:8}}>👤 {m.nombre} ({m.edad} años)</div>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                    <div>
+                      <div style={{fontSize:22,fontWeight:900,color:'#D42020'}}>{calEstimadas} kcal</div>
+                      <div style={{fontSize:11,color:C.textSec}}>Estimado diario · {objLabels[m.obj]}</div>
+                    </div>
+                    <div style={{fontSize:28}}>{m.edad<12?'🧒':m.edad<18?'👦':'👤'}</div>
+                  </div>
+                </div>
+              );
+            })}
+            {!miembros.some(m=>m.nombre)&&(
+              <div style={{textAlign:'center',padding:'40px',color:C.textSec}}>
+                <div style={{fontSize:40,marginBottom:12}}>👨‍👩‍👧</div>
+                <div style={{fontSize:14}}>Agrega miembros en la pestaña anterior</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab==='comidas'&&(
+          <div style={{background:C.surface,borderRadius:18,padding:'16px',border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>🍽️ Plan de comidas familiar</div>
+            <div style={{fontSize:12,color:C.textSec,marginBottom:12}}>Basado en los miembros registrados, aquí una sugerencia de menú familiar:</div>
+            {[
+              {comida:'☀️ Desayuno',sugerencia:'Avena con frutas + leche + huevos revueltos',cal_adulto:420,cal_nino:280},
+              {comida:'🍽️ Almuerzo',sugerencia:'Arroz + pollo al horno + ensalada + legumbres',cal_adulto:680,cal_nino:450},
+              {comida:'☕ Once',sugerencia:'Pan integral + palta + jugo natural',cal_adulto:320,cal_nino:250},
+              {comida:'🌙 Cena',sugerencia:'Sopa de verduras + pan + quesillo',cal_adulto:380,cal_nino:280},
+            ].map((c,i)=>(
+              <div key={i} style={{padding:'10px 0',borderBottom:i<3?`1px solid ${C.border}`:'none'}}>
+                <div style={{fontSize:12,fontWeight:700,color:C.text,marginBottom:4}}>{c.comida}</div>
+                <div style={{fontSize:12,color:C.textSec,marginBottom:4}}>{c.sugerencia}</div>
+                <div style={{display:'flex',gap:10,fontSize:10}}>
+                  <span style={{color:'#D42020',fontWeight:700}}>👤 {c.cal_adulto} kcal</span>
+                  <span style={{color:'#34C759',fontWeight:700}}>🧒 {c.cal_nino} kcal</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   PLANES DESCARGABLES PDF (Pro)
+══════════════════════════════════════════════ */
+function PlanesDescargablesModal({C, F, dark, nombre, perfil, obj, metas, ritmo, userAllergens, veganMode, onClose}) {
+  const [loading, setLoading] = useState(false);
+  const [planGenerado, setPlanGenerado] = useState(null);
+  const [planSeleccionado, setPlanSeleccionado] = useState('4semanas');
+
+  const PLANES = [
+    {id:'4semanas', titulo:'Plan 4 semanas', emoji:'📅', desc:'Menú completo día a día por 28 días', duracion:'28 días'},
+    {id:'perdida', titulo:'Plan Pérdida de Peso', emoji:'📉', desc:'Protocolo específico para bajar de peso de forma saludable', duracion:'21 días'},
+    {id:'volumen', titulo:'Plan Ganancia Muscular', emoji:'💪', desc:'Plan para maximizar la ganancia de masa muscular', duracion:'30 días'},
+    {id:'detox', titulo:'Plan Detox Chileno', emoji:'🥗', desc:'Reset nutricional con alimentos chilenos naturales', duracion:'7 días'},
+  ];
+
+  const generarPlan = async () => {
+    setLoading(true);
+    setPlanGenerado(null);
+    try {
+      const plan = PLANES.find(p=>p.id===planSeleccionado);
+      const alerg = userAllergens.length>0?`Alergias: ${userAllergens.join(', ')}.`:'';
+      const vegan = veganMode?'VEGANO.':'';
+      const objTexto = {bajar:'perder peso',mantener:'mantener peso',subir:'ganar músculo',recomp:'recomposición'}[obj];
+
+      const prompt = `Crea un ${plan.titulo} para ${nombre}. Objetivo: ${objTexto}. Calorías: ${metas.cal}kcal. ${alerg} ${vegan}
+Ingredientes de supermercados chilenos. Duración: ${plan.duracion}.
+Responde SOLO con JSON:
+{
+  "titulo": "${plan.titulo} - ${nombre}",
+  "duracion": "${plan.duracion}",
+  "objetivo": "${objTexto}",
+  "calorias_diarias": ${metas.cal},
+  "semanas": [
+    {
+      "semana": 1,
+      "enfoque": "descripción del enfoque",
+      "dias": [
+        {
+          "dia": "Lunes",
+          "desayuno": "nombre + descripción breve",
+          "almuerzo": "nombre + descripción breve",
+          "once": "nombre + descripción breve",
+          "cena": "nombre + descripción breve",
+          "cal_total": numero
+        }
+      ]
+    }
+  ],
+  "consejos_generales": ["consejo 1", "consejo 2", "consejo 3"],
+  "lista_compras_semanal": ["item 1", "item 2", "item 3"]
+}
+Incluye solo la semana 1 detallada para mantener el JSON manejable.`;
+
+      const data = await callEdgeFn({
+        mode:'chat',
+        system:'Eres nutricionista chileno experto. Responde SOLO JSON válido.',
+        messages:[{role:'user',content:prompt}],
+      });
+      const text = data.text || data.content?.[0]?.text || '';
+      const clean = text.replace(/```json|```/g,'').trim();
+      setPlanGenerado(JSON.parse(clean));
+    } catch(e) {
+      setPlanGenerado({error:'No se pudo generar el plan. Intenta de nuevo.'});
+    }
+    setLoading(false);
+  };
+
+  const descargarPlan = () => {
+    if(!planGenerado||planGenerado.error) return;
+    // Generar contenido del plan como texto
+    let contenido = `═══════════════════════════════════
+`;
+    contenido += `${planGenerado.titulo}
+`;
+    contenido += `═══════════════════════════════════
+
+`;
+    contenido += `Objetivo: ${planGenerado.objetivo}
+`;
+    contenido += `Duración: ${planGenerado.duracion}
+`;
+    contenido += `Calorías diarias: ${planGenerado.calorias_diarias} kcal
+
+`;
+    contenido += `─── SEMANA 1 ───
+
+`;
+    planGenerado.semanas?.[0]?.dias?.forEach(d=>{
+      contenido += `📅 ${d.dia}
+`;
+      contenido += `  ☀️ Desayuno: ${d.desayuno}
+`;
+      contenido += `  🍽️ Almuerzo: ${d.almuerzo}
+`;
+      contenido += `  ☕ Once: ${d.once}
+`;
+      contenido += `  🌙 Cena: ${d.cena}
+`;
+      contenido += `  Total: ~${d.cal_total} kcal
+
+`;
+    });
+    contenido += `─── LISTA DE COMPRAS ───
+
+`;
+    planGenerado.lista_compras_semanal?.forEach(i=>{ contenido += `• ${i}
+`; });
+    contenido += `
+─── CONSEJOS ───
+
+`;
+    planGenerado.consejos_generales?.forEach((c,i)=>{ contenido += `${i+1}. ${c}
+`; });
+    contenido += `
+─────────────────────────────────
+`;
+    contenido += `Generado por Calorú Pro 🇨🇱
+`;
+    contenido += `caloru.cl
+`;
+
+    // Descargar como .txt
+    const blob = new Blob([contenido], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${planGenerado.titulo.replace(/\s+/g,'_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>📄 Planes Descargables <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        <div style={{marginBottom:14}}>
+          {PLANES.map(p=>(
+            <div key={p.id} onClick={()=>setPlanSeleccionado(p.id)} style={{
+              background:C.surface,borderRadius:16,padding:'12px 14px',marginBottom:8,
+              border:`2px solid ${planSeleccionado===p.id?'#D42020':C.border}`,
+              cursor:'pointer',display:'flex',alignItems:'center',gap:12,
+            }}>
+              <span style={{fontSize:28,flexShrink:0}}>{p.emoji}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>{p.titulo}</div>
+                <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{p.desc}</div>
+                <div style={{fontSize:10,color:'#D42020',fontWeight:700,marginTop:2}}>📅 {p.duracion}</div>
+              </div>
+              <div style={{width:22,height:22,borderRadius:11,border:`2px solid ${planSeleccionado===p.id?'#D42020':C.border}`,background:planSeleccionado===p.id?'#D42020':'transparent',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                {planSeleccionado===p.id&&<span style={{color:'white',fontSize:12,fontWeight:800}}>✓</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={generarPlan} disabled={loading} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:10,opacity:loading?0.7:1}}>
+          {loading?'🤖 Generando tu plan personalizado...':'🤖 Generar plan con IA'}
+        </button>
+
+        {planGenerado&&!planGenerado.error&&(
+          <>
+            <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:4}}>✅ {planGenerado.titulo}</div>
+              <div style={{fontSize:11,color:C.textSec,marginBottom:10}}>{planGenerado.duracion} · {planGenerado.calorias_diarias} kcal/día</div>
+              {planGenerado.semanas?.[0]?.dias?.slice(0,3).map((d,i)=>(
+                <div key={i} style={{padding:'8px 0',borderBottom:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#D42020',marginBottom:4}}>{d.dia}</div>
+                  <div style={{fontSize:11,color:C.textSec}}>☀️ {d.desayuno?.split('+')[0]?.trim()}</div>
+                  <div style={{fontSize:11,color:C.textSec}}>🍽️ {d.almuerzo?.split('+')[0]?.trim()}</div>
+                </div>
+              ))}
+              <div style={{fontSize:11,color:C.textMuted,marginTop:6,textAlign:'center'}}>... y más días en el archivo descargado</div>
+            </div>
+            <button onClick={descargarPlan} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#34C759',color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+              📥 Descargar plan completo (.txt)
+            </button>
+          </>
+        )}
+        {planGenerado?.error&&<div style={{textAlign:'center',padding:'20px',color:'#FF3B30',fontSize:14}}>{planGenerado.error}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   MARKETPLACE NUTRICIONISTAS
+══════════════════════════════════════════════ */
+function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
+  const NUTRICIONISTAS = [
+    {id:1,nombre:'Catalina Morales',esp:'Nutrición deportiva',rating:4.9,reviews:127,precio:15000,disponible:true,emoji:'👩‍⚕️',tag:'🏆 Top rated'},
+    {id:2,nombre:'Diego Fuentes',esp:'Pérdida de peso',rating:4.8,reviews:89,precio:12000,disponible:true,emoji:'👨‍⚕️',tag:'🔥 Popular'},
+    {id:3,nombre:'Valentina Ríos',esp:'Nutrición vegana',rating:4.9,reviews:64,precio:13000,disponible:false,emoji:'👩‍⚕️',tag:'🌱 Vegana'},
+    {id:4,nombre:'Andrés Castillo',esp:'Diabetes y metabolismo',rating:4.7,reviews:112,precio:18000,disponible:true,emoji:'👨‍⚕️',tag:'🏥 Especialista'},
+    {id:5,nombre:'Isidora Parra',esp:'Nutrición pediátrica',rating:4.8,reviews:93,precio:14000,disponible:true,emoji:'👩‍⚕️',tag:'👶 Infantil'},
+  ];
+
+  const [seleccionado, setSeleccionado] = useState(null);
+  const [showAgendar, setShowAgendar] = useState(false);
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>🏥 Nutricionistas</div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        <div style={{background:'linear-gradient(135deg,#34C759,#30D158)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white'}}>
+          <div style={{fontSize:13,fontWeight:800,marginBottom:2}}>👩‍⚕️ Consulta con un profesional</div>
+          <div style={{fontSize:11,opacity:0.9}}>Nutricionistas chilenos certificados. Consulta online vía videollamada.</div>
+        </div>
+
+        {NUTRICIONISTAS.map(n=>(
+          <div key={n.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1.5px solid ${seleccionado===n.id?'#34C759':C.border}`,cursor:'pointer'}} onClick={()=>setSeleccionado(seleccionado===n.id?null:n.id)}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
+              <div style={{width:48,height:48,borderRadius:16,background:n.disponible?'#34C75920':'#D4202020',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}>{n.emoji}</div>
+              <div style={{flex:1}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
+                  <div style={{fontSize:14,fontWeight:700,color:C.text}}>{n.nombre}</div>
+                  <span style={{fontSize:9,fontWeight:700,background:n.disponible?'#34C75920':'#D4202020',color:n.disponible?'#34C759':'#D42020',padding:'2px 6px',borderRadius:6}}>{n.disponible?'Disponible':'Ocupado'}</span>
+                </div>
+                <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>{n.esp}</div>
+                <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                  <span style={{fontSize:11,color:'#FFD700',fontWeight:700}}>⭐ {n.rating}</span>
+                  <span style={{fontSize:10,color:C.textMuted}}>({n.reviews} reseñas)</span>
+                  <span style={{fontSize:11,fontWeight:800,color:'#34C759',marginLeft:'auto'}}>${n.precio.toLocaleString('es-CL')}</span>
+                </div>
+                <div style={{fontSize:9,color:C.textMuted,marginTop:1}}>por consulta (45 min)</div>
+              </div>
+            </div>
+            {n.tag&&<div style={{marginTop:6,display:'inline-block',fontSize:10,fontWeight:700,background:C.surfaceAlt,color:C.textSec,padding:'3px 8px',borderRadius:8}}>{n.tag}</div>}
+
+            {seleccionado===n.id&&(
+              <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${C.border}`}}>
+                <div style={{fontSize:12,color:C.textSec,marginBottom:10}}>Selecciona horario para agendar tu consulta online:</div>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
+                  {['Hoy 15:00','Hoy 17:00','Mañana 10:00','Mañana 14:00','Mañana 16:00'].map(h=>(
+                    <button key={h} style={{padding:'6px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:11,fontFamily:F,cursor:'pointer',fontWeight:600}}>{h}</button>
+                  ))}
+                </div>
+                <button onClick={()=>alert('¡Próximamente! Esta función estará disponible cuando lancemos el marketplace oficial.')} style={{width:'100%',padding:'11px',borderRadius:14,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
+                  📅 Agendar consulta — ${n.precio.toLocaleString('es-CL')}
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+
+        <div style={{background:dark?'rgba(52,199,89,0.08)':'rgba(52,199,89,0.05)',borderRadius:14,padding:'12px 14px',border:'1px solid rgba(52,199,89,0.2)'}}>
+          <div style={{fontSize:11,color:'#34C759',fontWeight:700,marginBottom:4}}>💡 ¿Eres nutricionista?</div>
+          <div style={{fontSize:11,color:C.textSec}}>Únete a nuestra red de profesionales y llega a miles de usuarios Calorú.</div>
+          <button onClick={()=>alert('Contáctanos en mitchaelerling@gmail.com para unirte como nutricionista.')} style={{marginTop:8,padding:'6px 14px',borderRadius:10,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
+            Registrarme como nutricionista
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [loading, setLoading] = useState(false);
 
@@ -5882,7 +6476,7 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
           <div style={{fontSize:14,color:C.textSec}}>Desbloquea todas las funciones premium</div>
         </div>
         <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'14px 16px',marginBottom:20}}>
-          {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
+          {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','🧬 Plan nutricional adaptativo','👨‍👩‍👧 Plan familiar (5 miembros)','📄 Planes descargables personalizados','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
             <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<arr.length-1?`1px solid ${C.border}`:'none'}}>
               <span style={{fontSize:15}}>{f.split(' ')[0]}</span>
               <span style={{fontSize:13,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
@@ -5936,10 +6530,10 @@ function MicronutrientesModal({C, F, log, onClose}) {
 
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`,background:C.bg}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:16,cursor:'pointer',color:'#D42020',padding:0,fontWeight:700,fontFamily:'inherit'}}>‹ Volver</button>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>📊 Micronutrientes <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:60}}/>
+        <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
         {log.length===0 ? (
@@ -5994,8 +6588,6 @@ function RecetasIAModal({C, F, dark, nombre, perfil, obj, onClose, userAllergens
   const [preferencia, setPreferencia] = useState('almuerzo');
   const [restriccion, setRestriccion] = useState('ninguna');
 
-  const EDGE_FN_AI = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food';
-
   const generarReceta = async () => {
     setLoading(true);
     setReceta(null);
@@ -6016,30 +6608,27 @@ Responde SOLO en este formato JSON exacto:
   "tip": "tip nutricional chileno",
   "macros": {"prot": número, "carbs": número, "grasas": número}
 }`;
-      const res = await fetch(EDGE_FN_AI, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          messages:[{role:'user',content:prompt}],
-          system:'Eres un chef nutricionista chileno experto. Genera recetas con ingredientes típicos de Chile (supermercados chilenos). Responde SOLO con JSON válido, sin texto adicional.',
-        })
+      const data = await callEdgeFn({
+        mode: 'chat',
+        system: 'Eres un chef nutricionista chileno experto. Genera recetas con ingredientes típicos de Chile (supermercados chilenos). Responde SOLO con JSON válido, sin texto adicional.',
+        messages: [{role:'user', content:prompt}],
       });
-      const data = await res.json();
-      const text = data.content?.[0]?.text || '';
+      const text = data.text || data.content?.[0]?.text || '';
       const clean = text.replace(/```json|```/g,'').trim();
       setReceta(JSON.parse(clean));
     } catch(e) {
+      console.error('RecetaIA error:', e);
       setReceta({error: 'No se pudo generar la receta. Intenta de nuevo.'});
     }
     setLoading(false);
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0}}>‹</button>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🇨🇱 Recetas IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:40}}/>
+        <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
         <div style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${C.border}`}}>
@@ -6130,8 +6719,6 @@ function ListaComprasIAModal({C, F, dark, log, onClose, userAllergens=[], veganM
   const [loading, setLoading] = useState(false);
   const [lista, setLista] = useState(null);
   const [checked, setChecked] = useState({});
-  const EDGE_FN_AI = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food';
-
   const generarLista = async () => {
     setLoading(true);
     setLista(null);
@@ -6156,19 +6743,16 @@ Responde SOLO con este JSON:
   "presupuesto_estimado": "rango en CLP",
   "tip": "consejo de compra"
 }`;
-      const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          messages:[{role:'user',content:prompt}],
-          system:'Eres un nutricionista chileno. Genera listas de compras con productos disponibles en supermercados chilenos. Responde SOLO con JSON válido.',
-        })
+      const data = await callEdgeFn({
+        mode: 'chat',
+        system: 'Eres un nutricionista chileno. Genera listas de compras con productos disponibles en supermercados chilenos. Responde SOLO con JSON válido.',
+        messages: [{role:'user', content:prompt}],
       });
-      const data = await res.json();
-      const text = data.content?.[0]?.text || '';
+      const text = data.text || data.content?.[0]?.text || '';
       const clean = text.replace(/```json|```/g,'').trim();
       setLista(JSON.parse(clean));
     } catch(e) {
+      console.error('ListaCompras error:', e);
       setLista({error:'No se pudo generar la lista. Intenta de nuevo.'});
     }
     setLoading(false);
@@ -6177,11 +6761,11 @@ Responde SOLO con este JSON:
   const toggleItem = (key) => setChecked(prev=>({...prev,[key]:!prev[key]}));
 
   return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',fontFamily:F}}>
-      <div style={{display:'flex',alignItems:'center',padding:'16px 16px 12px',borderBottom:`1px solid ${C.border}`}}>
-        <button onClick={onClose} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',color:C.text,padding:0}}>‹</button>
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🛒 Lista de Compras IA <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO ⭐</span></div>
-        <div style={{minWidth:40}}/>
+        <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
         <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
@@ -6308,6 +6892,10 @@ function AppCore() {
   const [showDesafiosComunidad, setShowDesafiosComunidad] = useState(false);
   const [showLigaAmigos, setShowLigaAmigos] = useState(false);
   const [showRecetasTemporada, setShowRecetasTemporada] = useState(false);
+  const [showPlanAdaptativo, setShowPlanAdaptativo] = useState(false);
+  const [showPlanFamiliar, setShowPlanFamiliar] = useState(false);
+  const [showPlanesDescargables, setShowPlanesDescargables] = useState(false);
+  const [showMarketplace, setShowMarketplace] = useState(false);
   const [autoTheme,setAutoTheme] = useState(()=>LS.get('autoTheme', true));
   const [dark,setDark]         = useState(()=>{
     const auto=LS.get('autoTheme',true);
@@ -6870,6 +7458,28 @@ function AppCore() {
     if(toast){const t=setTimeout(()=>setToast(''),3200);return ()=>clearTimeout(t);}
   },[toast]);
 
+  /* ── Detección de meseta ── */
+  const detectarMeseta = useMemo(()=>{
+    if(obj!=='bajar'&&obj!=='subir') return null;
+    if(weightHistory.length < 4) return null;
+    const ultimos = weightHistory.slice(-14);
+    if(ultimos.length < 4) return null;
+    const pesoInicio = ultimos[0].w;
+    const pesoFinal = ultimos[ultimos.length-1].w;
+    const cambio = Math.abs(pesoFinal - pesoInicio);
+    const diasTranscurridos = ultimos.length;
+    // Meseta: menos de 0.3kg de cambio en 2+ semanas
+    if(diasTranscurridos >= 10 && cambio < 0.3) {
+      return {
+        tipo: obj==='bajar' ? 'bajada' : 'subida',
+        diasEstancado: diasTranscurridos,
+        pesoActual: pesoFinal,
+        cambio: cambio.toFixed(1),
+      };
+    }
+    return null;
+  },[weightHistory, obj]);
+
   /* ── XP diario ── */
   useEffect(()=>{
     if(!log.length) return;
@@ -7236,7 +7846,7 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} onClose={()=>setShowAI(false)}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -7244,6 +7854,10 @@ function AppCore() {
       {showQueComer&&<QueComerHoyModal C={C} F={F} dark={dark} tot={tot} metas={metas} log={log} obj={obj} userAllergens={userAllergens} veganMode={veganMode} ritmo={ritmo} onClose={()=>setShowQueComer(false)}/>}
       {showDesafiosComunidad&&<DesafiosComunidadModal C={C} F={F} dark={dark} log={log} agua={agua} waterGoal={waterGoal} exercises={exercises} streak={streak} tot={tot} metas={metas} supabaseUser={supabaseUser} onClose={()=>setShowDesafiosComunidad(false)}/>}
       {showLigaAmigos&&<LigaAmigosModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} nombre={nombre} saludScore={saludScore} streak={streak} xpTotal={xpTotal} isPro={isPro} onClose={()=>setShowLigaAmigos(false)}/>}
+      {showPlanAdaptativo&&<PlanAdaptativoModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} weightHistory={weightHistory} streak={streak} tot={tot} onClose={()=>setShowPlanAdaptativo(false)}/>}
+      {showPlanFamiliar&&<PlanFamiliarModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} isPro={isPro} onClose={()=>setShowPlanFamiliar(false)}/>}
+      {showPlanesDescargables&&<PlanesDescargablesModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanesDescargables(false)}/>}
+      {showMarketplace&&<MarketplaceNutricionistasModal C={C} F={F} dark={dark} onClose={()=>setShowMarketplace(false)}/>}
       {showRecetasTemporada&&<RecetasTemporadaModal C={C} F={F} dark={dark} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasTemporada(false)}/>}
       {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanSemanal(false)}/>}
       {showPredicionPeso&&<PredicionPesoModal C={C} F={F} dark={dark} weightHistory={weightHistory} perfil={perfil} obj={obj} metas={metas} onClose={()=>setShowPredicionPeso(false)}/>}
@@ -7683,6 +8297,27 @@ function AppCore() {
             })}
           </div>
 
+
+          {/* ── ALERTA MESETA ── */}
+          {detectarMeseta&&(
+            <div style={{
+              background:'linear-gradient(135deg,#5856D6,#AF52DE)',
+              borderRadius:20,padding:'14px 16px',marginBottom:12,
+              color:'white',
+            }}>
+              <div style={{fontSize:13,fontWeight:800,marginBottom:4}}>
+                ⚠️ Llevas {detectarMeseta.diasEstancado} días en meseta
+              </div>
+              <div style={{fontSize:12,opacity:0.9,marginBottom:8}}>
+                Tu peso apenas ha cambiado ({detectarMeseta.cambio}kg). Es normal, ¡tu cuerpo se adaptó!
+              </div>
+              <div style={{fontSize:11,opacity:0.8}}>
+                💡 {detectarMeseta.tipo==='bajada'
+                  ? 'Prueba: aumentar proteína, cambiar el tipo de ejercicio o hacer una semana de recarga calórica.'
+                  : 'Prueba: aumentar calorías gradualmente o cambiar el tipo de entrenamiento.'}
+              </div>
+            </div>
+          )}
 
           {/* ── BANNER PRO (solo para usuarios free) ── */}
           {!isPro&&(
@@ -8806,6 +9441,7 @@ function AppCore() {
             TAB 4 — ESTADÍSTICAS
         ══════════════════════════════════ */}
         {tab===3&&<div className={tabAnim}>
+          {/* Estado vacío */}
           {weekData.filter(d=>d.cal>0).length===0?(
             <div style={{textAlign:'center',padding:'60px 20px'}}>
               <div style={{fontSize:56,marginBottom:14}}>📊</div>
@@ -8814,84 +9450,112 @@ function AppCore() {
                 Registra comidas durante al menos un día y aquí verás tus tendencias
               </div>
               <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="tap" onClick={()=>setTab(1)} style={{padding:'12px 22px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F,boxShadow:'0 6px 16px rgba(0,122,255,0.3)'}}>➕ Registrar hoy</button>
+                <button className="tap" onClick={()=>setTab(1)} style={{padding:'12px 22px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F,boxShadow:'0 6px 16px rgba(212,32,32,0.3)'}}>➕ Registrar hoy</button>
                 <button className="tap" onClick={()=>setTab(4)} style={{padding:'12px 22px',borderRadius:16,border:`1px solid ${C.border}`,background:C.surface,color:C.textSec,fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>⚙️ Ver perfil</button>
               </div>
             </div>
           ):(
           <>
 
-          {/* Gráfico semanal */}
-          <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,border:`1px solid ${C.border}`,boxShadow:dark?'none':'0 2px 12px rgba(0,0,0,0.05)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-              <div style={{fontSize:16,fontWeight:700,color:C.text,letterSpacing:'-.3px'}}>Calorías — 7 días</div>
-              <div style={{fontSize:11,color:C.textSec,background:C.surfaceAlt,padding:'4px 10px',borderRadius:10,fontWeight:600}}>Meta: {metas.cal} kcal</div>
+          {/* ── SECCIÓN 1: Resumen de hoy ── */}
+          <div style={{fontSize:11,fontWeight:600,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,padding:'0 4px',marginBottom:8}}>Resumen de hoy</div>
+          <div style={{background:C.surface,borderRadius:22,padding:'16px',marginBottom:14,border:`1px solid ${C.border}`,boxShadow:dark?'none':'0 2px 12px rgba(0,0,0,0.05)'}}>
+            <div style={{display:'flex',gap:16,alignItems:'center'}}>
+              <DonutChart prot={tot.prot} carbs={tot.carbs} grasas={tot.grasas} total={tot.cal} size={120} C2={{
+                border:dark?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.08)',
+                textMuted:dark?'rgba(255,255,255,0.4)':'rgba(0,0,0,0.35)',
+                text:dark?'#FFFFFF':'#000000',
+                red:C.red, amber:C.amber, purple:C.purple,
+              }}/>
+              <div style={{flex:1}}>
+                {[
+                  {l:'Proteínas',     v:Math.round(tot.prot),   m:metas.prot,  c:C.red},
+                  {l:'Carbohidratos', v:Math.round(tot.carbs),  m:metas.carbs, c:C.amber},
+                  {l:'Grasas',        v:Math.round(tot.grasas), m:metas.grasas,c:C.purple},
+                  {l:'Fibra',         v:Math.round(tot.fibra),  m:25,          c:C.green},
+                ].map(({l,v,m,c})=>(
+                  <div key={l} style={{marginBottom:8}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                      <span style={{fontSize:10,color:C.textSec,fontWeight:500}}>{l}</span>
+                      <span style={{fontSize:10,color:C.text,fontWeight:700}}>{v}<span style={{color:C.textMuted}}>/{m}g</span></span>
+                    </div>
+                    <div style={{height:3,background:C.border,borderRadius:3,overflow:'hidden'}}>
+                      <div style={{height:'100%',width:`${m>0?Math.min(v/m*100,100):0}%`,background:c,borderRadius:3,transition:'width .5s'}}/>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <WeekChart data={weekData} meta={metas.cal} C={C} F={F}/>
           </div>
 
-          {/* Esta semana */}
-          <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,border:`1px solid ${C.border}`}}>
-            <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:14}}>📊 Esta semana</div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {/* ── SECCIÓN 2: Esta semana ── */}
+          <div style={{fontSize:11,fontWeight:600,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,padding:'0 4px',marginBottom:8}}>Esta semana</div>
+          <div style={{background:C.surface,borderRadius:22,padding:'16px',marginBottom:14,border:`1px solid ${C.border}`}}>
+            <WeekChart data={weekData} meta={metas.cal} C={C} F={F}/>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:6,marginTop:12}}>
               {[
-                {l:'Días registrados',v:`${weekData.filter(d=>d.cal>0).length}/7`,c:'#D42020'},
-                {l:'Mejor día',v:`${Math.max(...weekData.map(d=>d.cal),0)} kcal`,c:'#34C759'},
-                {l:'Días en meta',v:`${weekData.filter(d=>d.cal>0&&d.cal<=metas.cal).length}`,c:'#FF9500'},
-                {l:'Racha actual',v:`${streak.days} día${streak.days!==1?'s':''}`,c:'#FF3B30'},
-              ].map(({l,v,c2=null,c})=>(
-                <div key={l} style={{background:C.surfaceAlt,borderRadius:16,padding:'14px',border:`1px solid ${C.border}`}}>
-                  <div style={{fontSize:20,fontWeight:800,color:c,letterSpacing:'-.5px',lineHeight:1}}>{v}</div>
-                  <div style={{fontSize:11,color:C.textSec,fontWeight:400,marginTop:4,lineHeight:1.3}}>{l}</div>
+                {l:'Días',    v:`${weekData.filter(d=>d.cal>0).length}/7`,          c:'#D42020'},
+                {l:'En meta', v:`${weekData.filter(d=>d.cal>0&&d.cal<=metas.cal).length}`,c:'#34C759'},
+                {l:'Racha',   v:`🔥${streak.days}`,                                  c:'#FF9500'},
+                {l:'Prom',    v:`${weekData.filter(d=>d.cal>0).length>0?Math.round(weekData.filter(d=>d.cal>0).reduce((s,d)=>s+d.cal,0)/weekData.filter(d=>d.cal>0).length):0}`,c:'#AF52DE'},
+              ].map(({l,v,c})=>(
+                <div key={l} style={{background:C.surfaceAlt,borderRadius:12,padding:'10px 8px',textAlign:'center',border:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:15,fontWeight:800,color:c,lineHeight:1}}>{v}</div>
+                  <div style={{fontSize:9,color:C.textSec,marginTop:3}}>{l}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Acciones rápidas */}
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
+          {/* ── SECCIÓN 3: Acceso rápido (Free) ── */}
+          <div style={{fontSize:11,fontWeight:600,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,padding:'0 4px',marginBottom:8}}>Acceso rápido</div>
+          <div style={{background:C.surface,borderRadius:22,padding:'12px',marginBottom:14,border:`1px solid ${C.border}`}}>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
+              {[
+                {icon:'📅',l:'Historial',    fn:()=>setShowHistory(true),         col:'#D42020'},
+                {icon:'📊',l:'Semana',       fn:()=>setShowWeekly(true),          col:'#34C759'},
+                {icon:'📤',l:'Compartir',    fn:()=>setShowShare(true),           col:'#AF52DE'},
+                {icon:'🔔',l:'Recordatorios',fn:()=>setShowRecordatorios(true),   col:'#FF9500'},
+                {icon:'🌡️',l:'¿Qué como?',  fn:()=>setShowQueComer(true),        col:'#007AFF'},
+                {icon:'🏅',l:'Desafíos',     fn:()=>setShowDesafiosComunidad(true),col:'#FFD700'},
+              ].map(({icon,l,fn,col})=>(
+                <button key={l} className="tap" onClick={fn} style={{background:C.surfaceAlt,border:`1px solid ${C.border}`,borderRadius:14,padding:'10px 6px',display:'flex',flexDirection:'column',alignItems:'center',gap:5,cursor:'pointer',fontFamily:F}}>
+                  <div style={{width:34,height:34,borderRadius:10,background:`${col}18`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>{icon}</div>
+                  <span style={{fontSize:10,fontWeight:600,color:C.text,textAlign:'center',lineHeight:1.2}}>{l}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── SECCIÓN 4: Herramientas Pro ── */}
+          <div style={{fontSize:11,fontWeight:600,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,padding:'0 4px',marginBottom:8}}>Herramientas Pro</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
             {[
-              {icon:'📅',l:'Historial',sub:'14 días',fn:()=>setShowHistory(true),col:'#D42020'},
-              {icon:'📊',l:'Esta semana',sub:'Resumen',fn:()=>setShowWeekly(true),col:'#34C759'},
-              {icon:'🗓️',l:'Plan semanal',sub:'+ Compras',fn:()=>setShowPlanner(true),col:'#FF9500'},
-              {icon:'📤',l:'Compartir',sub:'Mi progreso',fn:()=>setShowShare(true),col:'#AF52DE'},
-              {icon:'📊',l:'Exportar CSV',sub:'Últimos 30 días',fn:()=>{ if(!isPro){setShowPaywall(true);return;} exportCSV(); },col:'#34C759'},
-              {icon:'🇨🇱',l:'Recetas IA',sub:'Cocina chilena',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowRecetasIA(true); },col:'#D42020'},
-              {icon:'🛒',l:'Lista Compras',sub:'Inteligente IA',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowListaComprasIA(true); },col:'#34C759'},
-              {icon:'📅',l:'Plan Semanal',sub:'Menú 7 días IA',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowPlanSemanal(true); },col:'#5856D6'},
-              {icon:'📉',l:'Predicción Peso',sub:'Ver mi progreso',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowPredicionPeso(true); },col:'#D42020'},
-              {icon:'🏥',l:'Salud Especial',sub:'Diabetes / Hipert.',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowModoSalud(true); },col:'#5856D6'},
-              {icon:'📊',l:'Reporte Semanal',sub:'Resumen 7 días',fn:()=>setShowReporteSemanal(true),col:'#FF9500'},
-              {icon:'🔔',l:'Recordatorios',sub:'Comidas y agua',fn:()=>setShowRecordatorios(true),col:'#007AFF'},
-              {icon:'🌡️',l:'¿Qué como hoy?',sub:'Sugerencia IA',fn:()=>setShowQueComer(true),col:'#FF9500'},
-              {icon:'🏅',l:'Desafíos',sub:'Comunidad',fn:()=>setShowDesafiosComunidad(true),col:'#FFD700'},
-              {icon:'👥',l:'Liga Amigos',sub:'Ranking semanal',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowLigaAmigos(true); },col:'#AF52DE'},
-              {icon:'🍂',l:'Recetas Temporada',sub:'Ingredientes oferta',fn:()=>{ if(!isPro){setShowPaywall(true);return;} setShowRecetasTemporada(true); },col:'#34C759'},
-              {icon:'🏆',l:'Reto 21 días',sub:'Nuevo hábito',fn:()=>setShowChallenge(true),col:'#FF9500'},
-            ].map(({icon,l,sub,fn,col})=>(
-              <button key={l} className="tap" onClick={fn} style={{padding:'14px 12px',borderRadius:18,border:`1px solid ${C.border}`,background:C.surface,display:'flex',flexDirection:'column',alignItems:'center',gap:6,cursor:'pointer',fontFamily:F}}>
-                <div style={{width:44,height:44,borderRadius:14,background:`${col}14`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>{icon}</div>
-                <div style={{fontSize:12,fontWeight:700,color:C.text,textAlign:'center',lineHeight:1.2}}>{l}</div>
-                <div style={{fontSize:10,color:C.textSec,textAlign:'center'}}>{sub}</div>
+              {icon:'🇨🇱',l:'Recetas IA',      sub:'Cocina chilena',       fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowRecetasIA(true);},       col:'#D42020'},
+              {icon:'🛒',l:'Lista Compras',    sub:'Inteligente IA',       fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowListaComprasIA(true);},   col:'#34C759'},
+              {icon:'📅',l:'Plan Semanal',     sub:'Menú 7 días IA',       fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanSemanal(true);},      col:'#5856D6'},
+              {icon:'📉',l:'Predicción Peso',  sub:'Ver mi progreso',      fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPredicionPeso(true);},    col:'#D42020'},
+              {icon:'🧬',l:'Plan Adaptativo',  sub:'Ajuste semanal IA',    fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanAdaptativo(true);},   col:'#5856D6'},
+              {icon:'👨‍👩‍👧',l:'Plan Familiar',   sub:'Hasta 5 miembros',    fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanFamiliar(true);},     col:'#FF9500'},
+              {icon:'🏥',l:'Salud Especial',   sub:'Diabetes / Hipert.',   fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowModoSalud(true);},        col:'#5856D6'},
+              {icon:'📄',l:'Planes PDF',       sub:'Descarga tu plan',     fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanesDescargables(true);},col:'#D42020'},
+              {icon:'📊',l:'Exportar CSV',     sub:'Últimos 30 días',      fn:()=>{if(!isPro){setShowPaywall(true);return;}exportCSV();},                   col:'#34C759'},
+              {icon:'👥',l:'Liga Amigos',      sub:'Ranking semanal',      fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowLigaAmigos(true);},       col:'#AF52DE'},
+              {icon:'🍂',l:'Recetas Temp.',    sub:'Ingredientes oferta',  fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowRecetasTemporada(true);}, col:'#34C759'},
+              {icon:'🏆',l:'Reto 21 días',     sub:'Nuevo hábito',         fn:()=>setShowChallenge(true),                                                  col:'#FF9500', free:true},
+            ].map(({icon,l,sub,fn,col,free})=>(
+              <button key={l} className="tap" onClick={fn} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:18,padding:'14px 12px',display:'flex',flexDirection:'column',alignItems:'flex-start',gap:5,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                <div style={{display:'flex',justifyContent:'space-between',width:'100%',alignItems:'center'}}>
+                  <div style={{width:42,height:42,borderRadius:12,background:`${col}14`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>{icon}</div>
+                  {!free&&<span style={{fontSize:9,fontWeight:700,background:'#FFD700',color:'#5a3e00',padding:'2px 7px',borderRadius:6}}>PRO</span>}
+                </div>
+                <div style={{fontSize:12,fontWeight:700,color:C.text,lineHeight:1.2}}>{l}</div>
+                <div style={{fontSize:10,color:C.textSec}}>{sub}</div>
               </button>
             ))}
           </div>
 
-          {/* Planner + Shopping */}
-          <button className="tap" onClick={()=>setShowPlanner(true)} style={{
-            width:'100%',padding:'14px',borderRadius:18,marginBottom:12,
-            border:`1px solid ${C.border}`,background:C.surface,
-            display:'flex',alignItems:'center',gap:12,cursor:'pointer',fontFamily:F,
-          }}>
-            <span style={{fontSize:26}}>🗓️</span>
-            <div style={{flex:1,textAlign:'left'}}>
-              <div style={{fontSize:14,fontWeight:700,color:C.text}}>Planificador semanal</div>
-              <div style={{fontSize:11,color:C.textSec,marginTop:2}}>Organiza tus comidas · Lista de compras automática</div>
-            </div>
-            <span style={{fontSize:16,color:C.textMuted}}>›</span>
-          </button>
-
-          {/* Logros */}
+          {/* ── Logros ── */}
           {(()=>{
             const allLogros=[
               {icon:'🌱',l:'Primer registro',  desc:'Registra tu primera comida',  done:log.length>0},
@@ -8918,12 +9582,7 @@ function AppCore() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
                   {visible.map(({icon,l,desc,done})=>(
-                    <div key={l} style={{
-                      padding:'12px',borderRadius:16,
-                      background:done?'#34C75910':C.surfaceAlt,
-                      border:`1px solid ${done?'#34C75940':C.border}`,
-                      opacity:done?1:0.6,
-                    }}>
+                    <div key={l} style={{padding:'12px',borderRadius:16,background:done?'#34C75910':C.surfaceAlt,border:`1px solid ${done?'#34C75940':C.border}`,opacity:done?1:0.6}}>
                       <div style={{fontSize:22,marginBottom:4}}>{icon}</div>
                       <div style={{fontSize:12,fontWeight:700,color:done?C.text:C.textSec,lineHeight:1.2}}>{l}</div>
                       {done&&<div style={{fontSize:10,color:'#34C759',fontWeight:700,marginTop:4}}>✓ Completado</div>}
@@ -8931,12 +9590,8 @@ function AppCore() {
                     </div>
                   ))}
                 </div>
-                {allLogros.length > visible.length || showAllLogros?(
-                  <button className="tap" onClick={()=>setShowAllLogros(v=>!v)} style={{
-                    width:'100%',padding:'9px',borderRadius:12,marginTop:10,
-                    border:`1px solid ${C.border}`,background:'none',
-                    color:accent,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:F,
-                  }}>
+                {(allLogros.length > visible.length || showAllLogros)?(
+                  <button className="tap" onClick={()=>setShowAllLogros(v=>!v)} style={{width:'100%',padding:'9px',borderRadius:12,marginTop:10,border:`1px solid ${C.border}`,background:'none',color:accent,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:F}}>
                     {showAllLogros?'▲ Ver menos':'▼ Ver todos los logros ('+allLogros.length+')'}
                   </button>
                 ):null}
@@ -8944,13 +9599,12 @@ function AppCore() {
             );
           })()}
 
-          {/* Mis alimentos — separado en secciones */}
+          {/* ── Mis alimentos guardados ── */}
           {customFoods.length>0&&(()=>{
             const scanned=customFoods.filter(f=>f.origen==='escaneado'||f.cat==='Escaneado'||f.barcode);
             const created=customFoods.filter(f=>f.origen!=='escaneado'&&f.cat!=='Escaneado'&&!f.barcode);
             const Row=({f})=>(
-              <div key={f.id} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 0',borderBottom:`1px solid ${C.border}`,cursor:'pointer'}}
-                onClick={()=>setDetail(f)}>
+              <div key={f.id} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 0',borderBottom:`1px solid ${C.border}`,cursor:'pointer'}} onClick={()=>setDetail(f)}>
                 <span style={{fontSize:22,flexShrink:0}}>{f.emoji||'📦'}</span>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:600,color:C.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{f.nombre}</div>
@@ -8959,8 +9613,7 @@ function AppCore() {
                     {(f.origen==='escaneado'||f.barcode)&&<span style={{fontSize:9,fontWeight:700,color:'#34C759',background:'#34C75918',padding:'1px 6px',borderRadius:6}}>📷 escaneado</span>}
                   </div>
                 </div>
-                <button onClick={e=>{e.stopPropagation();setCustomFoods(customFoods.filter(x=>x.id!==f.id));haptic('light');}}
-                  style={{background:'none',border:'none',color:C.textMuted,fontSize:16,cursor:'pointer',padding:4,flexShrink:0}}>✕</button>
+                <button onClick={e=>{e.stopPropagation();setCustomFoods(customFoods.filter(x=>x.id!==f.id));haptic('light');}} style={{background:'none',border:'none',color:C.textMuted,fontSize:16,cursor:'pointer',padding:4,flexShrink:0}}>✕</button>
               </div>
             );
             return(
@@ -8989,7 +9642,7 @@ function AppCore() {
 
           </>
           )}
-        </div>}
+        </div>}        </div>}
 
       {/* ══ TOAST ══ */}
       {toast&&(
