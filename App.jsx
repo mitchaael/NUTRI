@@ -9642,7 +9642,7 @@ function AppCore() {
 
           </>
           )}
-        </div>}        </div>}
+        </div>}
 
       {/* ══ TOAST ══ */}
       {toast&&(
