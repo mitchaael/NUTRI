@@ -6468,39 +6468,64 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   };
 
   return (
-    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:9999,display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
-      <div style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'28px 20px 40px',width:'100%',maxWidth:480,fontFamily:F}}>
-        <div style={{textAlign:'center',marginBottom:20}}>
-          <div style={{fontSize:40,marginBottom:8}}>⭐</div>
-          <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:6}}>Calorú Pro</div>
-          <div style={{fontSize:14,color:C.textSec}}>Desbloquea todas las funciones premium</div>
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:9999,display:'flex',alignItems:'flex-end',justifyContent:'center'}}
+      onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{
+        background:C.surface,
+        borderRadius:'24px 24px 0 0',
+        width:'100%',
+        maxWidth:480,
+        fontFamily:F,
+        maxHeight:'88vh',
+        display:'flex',
+        flexDirection:'column',
+        paddingBottom:'env(safe-area-inset-bottom)',
+      }}>
+        {/* Handle bar */}
+        <div style={{display:'flex',justifyContent:'center',padding:'12px 0 4px'}}>
+          <div style={{width:36,height:4,borderRadius:2,background:dark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'}}/>
         </div>
-        <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'14px 16px',marginBottom:20}}>
-          {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','🧬 Plan nutricional adaptativo','👨‍👩‍👧 Plan familiar (5 miembros)','📄 Planes descargables personalizados','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
-            <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<arr.length-1?`1px solid ${C.border}`:'none'}}>
-              <span style={{fontSize:15}}>{f.split(' ')[0]}</span>
-              <span style={{fontSize:13,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
-            </div>
-          ))}
+
+        {/* Cabecera fija */}
+        <div style={{textAlign:'center',padding:'8px 20px 14px'}}>
+          <div style={{fontSize:38,marginBottom:6}}>⭐</div>
+          <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:4}}>Calorú Pro</div>
+          <div style={{fontSize:13,color:C.textSec}}>Desbloquea todas las funciones premium</div>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
-          <button onClick={()=>handleSubscribe('monthly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'transparent',color:'#D42020',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13}}>
-            <div style={{fontSize:18,marginBottom:2}}>📅</div>
-            <div>Mensual</div>
-            <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$3.500 CLP</div>
-            <div style={{fontSize:10,color:C.textSec,marginTop:1}}>/ mes</div>
+
+        {/* Lista scrolleable */}
+        <div style={{flex:1,overflowY:'auto',padding:'0 20px',WebkitOverflowScrolling:'touch'}}>
+          <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'10px 14px',marginBottom:16}}>
+            {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','🧬 Plan nutricional adaptativo','👨‍👩‍👧 Plan familiar (5 miembros)','📄 Planes descargables personalizados','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
+              <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<arr.length-1?`1px solid ${C.border}`:'none'}}>
+                <span style={{fontSize:15}}>{f.split(' ')[0]}</span>
+                <span style={{fontSize:13,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Botones fijos abajo */}
+        <div style={{padding:'12px 20px 16px',borderTop:`1px solid ${C.border}`}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
+            <button onClick={()=>handleSubscribe('monthly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'transparent',color:'#D42020',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13}}>
+              <div style={{fontSize:18,marginBottom:2}}>📅</div>
+              <div>Mensual</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$3.500 CLP</div>
+              <div style={{fontSize:10,color:C.textSec,marginTop:1}}>/ mes</div>
+            </button>
+            <button onClick={()=>handleSubscribe('yearly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13,position:'relative'}}>
+              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 30%</div>
+              <div style={{fontSize:18,marginBottom:2}}>🗓️</div>
+              <div>Anual</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$29.900 CLP</div>
+              <div style={{fontSize:10,opacity:0.8,marginTop:1}}>/ año</div>
+            </button>
+          </div>
+          <button onClick={onClose} style={{width:'100%',padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'transparent',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>
+            Ahora no
           </button>
-          <button onClick={()=>handleSubscribe('yearly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13,position:'relative'}}>
-            <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 30%</div>
-            <div style={{fontSize:18,marginBottom:2}}>🗓️</div>
-            <div>Anual</div>
-            <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$29.900 CLP</div>
-            <div style={{fontSize:10,opacity:0.8,marginTop:1}}>/ año</div>
-          </button>
         </div>
-        <button onClick={onClose} style={{width:'100%',padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'transparent',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>
-          Ahora no
-        </button>
       </div>
     </div>
   );
