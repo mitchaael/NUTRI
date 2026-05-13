@@ -1326,28 +1326,48 @@ function Onboarding({onDone}) {
   const totalSteps=4;
 
   const steps=[
-    // Step 0: Bienvenida + nombre
-    <div key={0} style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'40px 28px',gap:24,textAlign:'center'}}>
-      <Logo size={100}/>
-      <div>
-        <div style={{fontSize:28,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-1px',lineHeight:1.2}}>Bienvenido a Calor<span style={{color:'#D22B2B'}}>ú</span></div>
-        <div style={{fontSize:15,color:C.textSec,fontFamily:F,fontWeight:500,marginTop:8,lineHeight:1.5}}>Tu app de nutrición con productos chilenos reales. ¿Cómo te llamas?</div>
+    // Step 0: Pantalla de impacto — diferenciadores
+    <div key={0} style={{display:'flex',flexDirection:'column',minHeight:'100vh',background:'#0D0D0D',padding:'40px 24px 32px',gap:0}}>
+      <div style={{display:'flex',justifyContent:'center',marginBottom:24}}>
+        <Logo size={80}/>
       </div>
-      <input value={nombre} onChange={e=>setNombre(e.target.value)}
-        placeholder="Tu nombre..."
-        style={{
-          width:'100%',padding:'16px 20px',borderRadius:18,
-          border:`2px solid ${nombre?C.primary:C.border}`,
-          fontSize:18,fontFamily:F,fontWeight:700,color:C.text,
-          background:C.surfaceAlt,outline:'none',textAlign:'center',
-          transition:'border-color .2s',
-        }}/>
-      <button onClick={()=>nombre.trim()&&setStep(1)} style={{
-        width:'100%',padding:'16px',borderRadius:18,border:'none',
-        background:nombre.trim()?'#D42020':'#C7C7CC',color:'white',
-        fontSize:16,fontWeight:800,fontFamily:F,cursor:nombre.trim()?'pointer':'default',
-        transition:'background .2s',
-      }}>Continuar →</button>
+      <div style={{textAlign:'center',marginBottom:28}}>
+        <div style={{fontSize:11,color:'#D42020',fontWeight:700,letterSpacing:1.5,marginBottom:10,textTransform:'uppercase'}}>La app de nutrición</div>
+        <div style={{fontSize:30,fontWeight:800,color:'white',lineHeight:1.15,letterSpacing:'-1px',marginBottom:10}}>Hecha para<br/>los <span style={{color:'#D42020'}}>chilenos</span></div>
+        <div style={{fontSize:13,color:'rgba(255,255,255,0.45)',lineHeight:1.6}}>Cazuela, marraqueta, sopaipilla.<br/>Tu comida real, tus macros exactos.</div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:28}}>
+        {[
+          {icon:'🇨🇱', title:'475+ productos chilenos reales', sub:'Lo que ninguna app internacional tiene'},
+          {icon:'🤖', title:'IA que registra por ti', sub:'"Me comí un completo con todo" — listo'},
+          {icon:'💰', title:'Pro desde $3.500/mes', sub:'La competencia cobra hasta $20.000/mes'},
+        ].map(({icon,title,sub})=>(
+          <div key={title} style={{display:'flex',alignItems:'center',gap:12,background:'rgba(255,255,255,0.07)',borderRadius:14,padding:'12px 14px'}}>
+            <span style={{fontSize:22,flexShrink:0}}>{icon}</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:'white',lineHeight:1.2}}>{title}</div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',marginTop:2}}>{sub}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:'auto'}}>
+        <input value={nombre} onChange={e=>setNombre(e.target.value)}
+          placeholder="¿Cómo te llamas?"
+          style={{
+            width:'100%',padding:'16px 20px',borderRadius:18,marginBottom:10,
+            border:`2px solid ${nombre?'#D42020':'rgba(255,255,255,0.15)'}`,
+            fontSize:17,fontFamily:F,fontWeight:700,color:'white',
+            background:'rgba(255,255,255,0.08)',outline:'none',textAlign:'center',
+            transition:'border-color .2s',
+          }}/>
+        <button onClick={()=>nombre.trim()&&setStep(1)} style={{
+          width:'100%',padding:'16px',borderRadius:18,border:'none',
+          background:nombre.trim()?'#D42020':'rgba(255,255,255,0.15)',color:'white',
+          fontSize:16,fontWeight:800,fontFamily:F,cursor:nombre.trim()?'pointer':'default',
+          transition:'background .2s',
+        }}>Empezar gratis →</button>
+      </div>
     </div>,
 
     // Step 1: Perfil físico
@@ -1511,31 +1531,44 @@ function Onboarding({onDone}) {
               <div style={{fontSize:11,color:'rgba(255,255,255,.4)',marginTop:3}}>siguiendo tu plan de {mP.cal} kcal/día</div>
             </div>
           </div>
-          {/* Compromiso */}
-          <div style={{background:'#F8F8F8',borderRadius:20,padding:'16px'}}>
-            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:10,fontFamily:F}}>Calorú te ayuda a lograrlo con:</div>
-            {['📊 Seguimiento diario de tus macros','🔥 Racha para que no pierdas el hábito','🤖 Consejos personalizados con IA','⚖️ Historial de peso para ver tu progreso'].map((t,i)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,fontSize:12,color:C.text,fontFamily:F}}>{t}</div>
+          {/* Features destacadas */}
+          <div style={{background:'#F8F8F8',borderRadius:20,padding:'14px 16px'}}>
+            <div style={{fontSize:12,fontWeight:700,color:C.textSec,marginBottom:10,textTransform:'uppercase',letterSpacing:.5}}>Lo que te espera</div>
+            {[
+              {icon:'📸',title:'Escáner de platos con IA',sub:'Foto → calorías en segundos',pro:true},
+              {icon:'🤖',title:'Nutri IA',sub:'Registra hablando naturalmente',pro:true},
+              {icon:'🔥',title:'Racha diaria',sub:'Construye el hábito — gratis',pro:false},
+              {icon:'🇨🇱',title:'475+ productos chilenos',sub:'Cazuela, marraqueta, completo...',pro:false},
+              {icon:'📊',title:'Escáner de código de barras',sub:'Cualquier producto empaquetado',pro:false},
+            ].map(({icon,title,sub,pro})=>(
+              <div key={title} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 0',borderBottom:`1px solid ${C.border}`}}>
+                <div style={{width:36,height:36,borderRadius:10,background:pro?'#D4202012':'#34C75912',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{icon}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:12,fontWeight:700,color:C.text}}>{title}</div>
+                  <div style={{fontSize:10,color:C.textSec,marginTop:1}}>{sub}</div>
+                </div>
+                <span style={{fontSize:9,fontWeight:700,padding:'2px 7px',borderRadius:6,background:pro?'#D42020':'#34C759',color:'white',flexShrink:0}}>{pro?'PRO':'GRATIS'}</span>
+              </div>
             ))}
           </div>
           <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj})} style={{
             padding:'17px',borderRadius:18,border:'none',
-            background:'#1C1C1E',color:'white',
+            background:'#D42020',color:'white',
             fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
-            boxShadow:'0 8px 24px rgba(0,0,0,0.3)',
-          }}>¡Empezar mi transformación! 🚀</button>
+            boxShadow:'0 8px 24px rgba(212,32,32,0.3)',
+          }}>¡Comenzar ahora! 🚀</button>
         </div>
       );
     })(),
   ];
 
   return (
-    <div style={{minHeight:'100vh',background:C.bg,fontFamily:F,overflowY:'auto'}}>
+    <div style={{minHeight:'100vh',background:step===0?'#0D0D0D':C.bg,fontFamily:F,overflowY:'auto',transition:'background .3s'}}>
       {/* Safe area + progress bar */}
-      <div style={{paddingTop:'env(safe-area-inset-top, 0px)',background:C.bg}}>
-        <div style={{height:3,background:C.border}}>
-          <div style={{height:'100%',width:`${(step+1)/totalSteps*100}%`,background:'#1C1C1E',transition:'width .4s ease'}}/>
-        </div>
+      <div style={{paddingTop:'env(safe-area-inset-top, 0px)',background:step===0?'#0D0D0D':C.bg}}>
+        {step>0&&<div style={{height:3,background:C.border}}>
+          <div style={{height:'100%',width:`${step/(totalSteps-1)*100}%`,background:'#D42020',transition:'width .4s ease'}}/>
+        </div>}
         {step>0&&(
           <button onClick={()=>setStep(step-1)} style={{
             margin:'4px 12px 0',background:'none',border:'none',
@@ -1547,6 +1580,7 @@ function Onboarding({onDone}) {
             ‹ Atrás
           </button>
         )}
+        {step===0&&<div style={{minHeight:44}}/>}
       </div>
       <div style={{animation:'fadeUp .3s ease'}}>
         {steps[step]}
