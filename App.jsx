@@ -8377,6 +8377,8 @@ function AppCore() {
             })()}
           </div>
           ):(
+          <>
+
           <div style={{
             background:C.surface,borderRadius:24,padding:'18px 20px',marginBottom:12,
             border:`1px solid ${C.border}`,
@@ -8468,6 +8470,7 @@ function AppCore() {
             );
           })()}
 
+          </>
           )}
 
           {/* ── TIPS NUTRICIONALES ── */}
