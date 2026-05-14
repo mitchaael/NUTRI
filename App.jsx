@@ -6650,7 +6650,7 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
       const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ plan, user_email: supabaseUser.email, back_url: 'https://caloru.cl', test_mode: window.location.hostname === 'localhost' || supabaseUser.email === 'mitchaelerling@gmail.com' }),
+        body: JSON.stringify({ plan, user_email: supabaseUser.email, back_url: 'https://caloru.cl' }),
       });
       const data = await res.json();
       if (data.init_point) {
