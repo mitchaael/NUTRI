@@ -5265,6 +5265,37 @@ function ReporteSemanalModal({C, F, dark, onClose, isPro}) {
 /* ══════════════════════════════════════════════
    RECORDATORIOS DE COMIDA
 ══════════════════════════════════════════════ */
+// Envía el schedule de notificaciones al Service Worker
+const sendScheduleToSW = (reminders) => {
+  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+  const now = new Date();
+  const notifications = [];
+
+  reminders.filter(r=>r.activo).forEach(r=>{
+    const [hh, mm] = r.hora.split(':').map(Number);
+    const target = new Date(now);
+    target.setHours(hh, mm, 0, 0);
+    // Si ya pasó hoy, programar para mañana
+    if(target <= now) target.setDate(target.getDate() + 1);
+    const delay = target.getTime() - now.getTime();
+    const labels = {
+      desayuno: {title:'🌅 Hora del desayuno', body:'¡Empieza el día registrando tu desayuno en Calorú!'},
+      almuerzo: {title:'☀️ Hora del almuerzo', body:'¿Ya almorzaste? Regístralo para no perder tu racha.'},
+      once:     {title:'☕ Hora de la once',    body:'Registra tu once y mantén el control de tu día.'},
+      cena:     {title:'🌙 Hora de la cena',    body:'Cierra el día registrando tu cena en Calorú.'},
+      agua:     {title:'💧 Recuerda hidratarte', body:'¿Cuántos vasos de agua llevas hoy?'},
+      peso:     {title:'⚖️ Registro de peso',   body:'Momento de registrar tu peso de hoy.'},
+    };
+    const label = labels[r.id] || {title:`${r.emoji} ${r.label}`, body:'Recordatorio de Calorú'};
+    notifications.push({ delay, title: label.title, body: label.body, tag: `caloru-${r.id}`, icon:'/icon-192.png' });
+  });
+
+  navigator.serviceWorker.controller.postMessage({
+    type: 'SCHEDULE_NOTIFICATIONS',
+    notifications,
+  });
+};
+
 function RecordatoriosModal({C, F, dark, onClose}) {
   const defaultReminders = [
     {id:'desayuno', label:'Desayuno',    emoji:'☀️',  hora:'08:00', activo:false},
@@ -5282,22 +5313,30 @@ function RecordatoriosModal({C, F, dark, onClose}) {
     const result = await Notification.requestPermission();
     setPermiso(result);
     LS.set('notifPermiso', result);
+    if(result === 'granted') sendScheduleToSW(reminders);
   };
 
   React.useEffect(()=>{
     if('Notification' in window) setPermiso(Notification.permission);
   },[]);
 
+  // Re-enviar schedule al SW cada vez que se abra el modal (por si se reinició el SW)
+  React.useEffect(()=>{
+    if(Notification.permission === 'granted') sendScheduleToSW(reminders);
+  },[]);
+
   const toggleReminder = (id) => {
     const updated = reminders.map(r=>r.id===id?{...r,activo:!r.activo}:r);
     setReminders(updated);
     LS.set('reminders', updated);
+    if(Notification.permission === 'granted') sendScheduleToSW(updated);
   };
 
   const updateHora = (id, hora) => {
     const updated = reminders.map(r=>r.id===id?{...r,hora}:r);
     setReminders(updated);
     LS.set('reminders', updated);
+    if(Notification.permission === 'granted') sendScheduleToSW(updated);
   };
 
   return (
@@ -7172,11 +7211,13 @@ function AppCore() {
   useEffect(()=>{
     if(!notifEnabled) return;
     const check=()=>{
-      const h=new Date().getHours(),m=new Date().getMinutes();
+      const now=new Date();
+      const h=now.getHours(),m=now.getMinutes();
       const key='notif_'+todayKey();
       const sent=LS.get(key,{});
       const curPct=metas.cal>0?sumLog(log).cal/metas.cal:0;
       const primerNombreN=nombre.split(' ')[0]||'';
+
       // 08:30 — si no registró desayuno
       if(h===8&&m>=30&&m<55&&!sent.d&&log.filter(r=>r.comida==='Desayuno').length===0){
         setToast(`🌅 Buenos días${primerNombreN?' '+primerNombreN:''}! ¿Qué desayunaste hoy?`);
@@ -7197,6 +7238,43 @@ function AppCore() {
       if(h===21&&m<30&&!sent.n&&log.length>0&&curPct<0.7){
         setToast(`🌙 Llevas ${Math.round(curPct*100)}% de tu meta. ¿Olvidaste registrar algo?`);
         LS.set(key,{...sent,n:true});
+      }
+
+      // LUNES 09:00 — resumen semanal motivacional
+      if(now.getDay()===1&&h===9&&m<30&&!sent.lunes){
+        const dias=[];
+        for(let i=1;i<=7;i++){
+          const d=new Date(now);
+          d.setDate(d.getDate()-i);
+          const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+          const l=LS.get('log_'+k,[]);
+          if(l.length>0) dias.push({fecha:d,cal:sumLog(l).cal});
+        }
+        const diasBien=dias.filter(d=>d.cal>=metas.cal*0.8&&d.cal<=metas.cal*1.2).length;
+        const mejorDia=dias.sort((a,b)=>Math.abs(a.cal-metas.cal)-Math.abs(b.cal-metas.cal))[0];
+        const diasSemana=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+        if(dias.length>0){
+          const msg=diasBien>=5
+            ? `💪 ¡Semana increíble${primerNombreN?' '+primerNombreN:''}! Cumpliste tu meta ${diasBien} de 7 días. ¡Sigue así!`
+            : diasBien>=3
+            ? `📊 La semana pasada comiste bien ${diasBien} de 7 días${mejorDia?`. Tu mejor día fue el ${diasSemana[mejorDia.fecha.getDay()]} 🏆`:''}.`
+            : `🌱 Esta semana es nueva${primerNombreN?' '+primerNombreN:''}. ¡Cada día cuenta, puedes lograrlo!`;
+          setToast(msg);
+          LS.set(key,{...sent,lunes:true});
+          // También enviar push si la app está cerrada
+          if('serviceWorker' in navigator&&navigator.serviceWorker.controller){
+            navigator.serviceWorker.controller.postMessage({
+              type:'SCHEDULE_NOTIFICATIONS',
+              notifications:[{
+                delay:0,
+                title: diasBien>=5?'💪 ¡Semana increíble!':'📊 Resumen semanal',
+                body: msg,
+                tag:'caloru-lunes',
+                icon:'/icon-192.png',
+              }],
+            });
+          }
+        }
       }
     };
     const ti=setInterval(check,60000); check();
