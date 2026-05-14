@@ -4040,6 +4040,31 @@ function NuevoPlanModal({C, F, dark, supabaseUser, onClose, onCreated}) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   LOGRO DESBLOQUEADO — diferenciador visual
+═══════════════════════════════════════════════════════ */
+function LogroUnlockModal({C, F, logro, onClose}) {
+  React.useEffect(()=>{
+    const t = setTimeout(onClose, 6000);
+    return ()=>clearTimeout(t);
+  },[]);
+  return(
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:99999,display:'flex',alignItems:'center',justifyContent:'center',padding:24}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#1C1C1E',borderRadius:28,padding:'32px 28px',maxWidth:320,width:'100%',textAlign:'center',border:'1px solid rgba(255,255,255,0.1)'}}>
+        <div style={{fontSize:56,marginBottom:12,lineHeight:1}}>{logro.icon}</div>
+        <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.5)',marginBottom:6,textTransform:'uppercase',letterSpacing:1}}>¡Logro desbloqueado!</div>
+        <div style={{fontSize:22,fontWeight:800,color:'#FFD700',marginBottom:10,lineHeight:1.2}}>{logro.titulo}</div>
+        <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',lineHeight:1.5,marginBottom:16}}>{logro.desc}</div>
+        <div style={{background:'rgba(255,215,0,0.1)',borderRadius:14,padding:'10px 16px',marginBottom:20,display:'inline-block'}}>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginBottom:2}}>XP ganado</div>
+          <div style={{fontSize:26,fontWeight:800,color:'#FFD700'}}>+{logro.xp} XP</div>
+        </div>
+        <button onClick={onClose} style={{width:'100%',padding:'13px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>¡Genial! 🚀</button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
    WELCOME BACK — modal de retención al volver
 ═══════════════════════════════════════════════════════ */
 function WelcomeBack({C, F, nombre, streak, daysAway, onClose}) {
@@ -7489,6 +7514,9 @@ function AppCore() {
   const [showAvatarPicker,setShowAvatarPicker] = useState(false);
   const [photoUrl,setPhotoUrl]         = useState(()=>LS.get('photoUrl',''));
   const [uploadingPhoto,setUploadingPhoto] = useState(false);
+  const [bannerIdx,setBannerIdx]         = useState(0);
+  const [logrosVis,setLogrosVis]         = useState(()=>LS.get('logrosVis',{}));
+  const [showLogroUnlock,setShowLogroUnlock] = useState(null); // {icon,titulo,desc,xp}
   const [showLegal,setShowLegal]               = useState(null);
   const [editName,setEditName]       = useState(false);
   const [tempName,setTempName]       = useState('');
@@ -7781,6 +7809,12 @@ function AppCore() {
   useEffect(()=>{LS.set('sinCalorias',sinCalorias);},[sinCalorias]);
   useEffect(()=>{LS.set('accountType',accountType);},[accountType]);
   useEffect(()=>{LS.set('photoUrl',photoUrl);},[photoUrl]);
+  useEffect(()=>{LS.set('logrosVis',logrosVis);},[logrosVis]);
+  // Banner rotativo
+  useEffect(()=>{
+    const t = setInterval(()=>setBannerIdx(i=>(i+1)%4),5000);
+    return ()=>clearInterval(t);
+  },[]);
   useEffect(()=>{LS.set('nutriPlan',nutriPlan);},[nutriPlan]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
@@ -8445,6 +8479,20 @@ function AppCore() {
                           setLog(dayLog.map(it=>({...it,uid:Date.now()+Math.random()})));
                           setShowHistory(false);
                           haptic('success');
+    // Check logros de diferenciadores
+    const logrosVisNow = LS.get('logrosVis',{});
+    if(a.marca==='Nutri IA' && !logrosVisNow.nutri_ia) {
+      setShowLogroUnlock({icon:'🤖',titulo:'¡Registraste con Nutri IA!',desc:'Dijiste qué comiste y la IA lo registró automáticamente. Ninguna app hace esto como Calorú.',xp:100});
+      LS.set('logrosVis',{...logrosVisNow, nutri_ia:true});
+    }
+    if(a.origen==='foto' && !logrosVisNow.foto_ia) {
+      setShowLogroUnlock({icon:'📸',titulo:'¡Primer plato escaneado!',desc:'Sacaste una foto y la IA detectó los macros. La nutrición del futuro, hoy en Chile.',xp:150});
+      LS.set('logrosVis',{...logrosVisNow, foto_ia:true});
+    }
+    if(a.barcode && !logrosVisNow.barcode) {
+      setShowLogroUnlock({icon:'📷',titulo:'🇨🇱 Chileno de corazón',desc:'Escaneaste un producto. Calorú tiene 475+ productos chilenos reales — lo que ninguna app internacional tiene.',xp:50});
+      LS.set('logrosVis',{...logrosVisNow, barcode:true});
+    }
                           setToast('📋 Comidas copiadas al día de hoy');
                         }} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
                           📋 Copiar estas comidas a hoy
@@ -8725,6 +8773,34 @@ function AppCore() {
               <span style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>›</span>
             </button>
           )}
+
+          {/* Banner rotativo diferenciadores */}
+          {(()=>{
+            const banners = [
+              {bg:'linear-gradient(135deg,#D42020,#FF6B35)', tag:'SOLO EN CALORÚ 🇨🇱', titulo:'Escanea tu plato con IA', sub:'Foto → calorías en segundos, sin escribir nada', btn:'📸 Probar', action:()=>setShowPhotoScanner(true)},
+              {bg:'linear-gradient(135deg,#1D3557,#2E6DA4)', tag:'INTELIGENCIA ARTIFICIAL', titulo:'Registra hablando naturalmente', sub:'"Me comí un completo con todo" — y listo', btn:'🤖 Hablar con Nutri', action:()=>setShowAI(true)},
+              {bg:'linear-gradient(135deg,#28B044,#1a7a36)', tag:'475+ PRODUCTOS CHILENOS', titulo:'Tu comida real, tus macros exactos', sub:'Cazuela, marraqueta, sopaipilla y mucho más', btn:'🇨🇱 Buscar alimento', action:()=>setTab(1)},
+              {bg:'linear-gradient(135deg,#5856D6,#AF52DE)', tag:'PLAN NUTRICIONAL', titulo:'Tu nutricionista en el bolsillo', sub:'Vincula tu plan profesional y sigue tus metas', btn:'👩‍⚕️ Ver plan', action:()=>setTab(4)},
+            ];
+            const b = banners[bannerIdx];
+            return(
+              <div style={{background:b.bg,borderRadius:20,padding:'14px 16px',marginBottom:12,position:'relative',overflow:'hidden'}}>
+                <div style={{fontSize:9,color:'rgba(255,255,255,0.7)',fontWeight:700,letterSpacing:1.2,marginBottom:4,textTransform:'uppercase'}}>{b.tag}</div>
+                <div style={{fontSize:15,fontWeight:800,color:'white',lineHeight:1.2,marginBottom:4}}>{b.titulo}</div>
+                <div style={{fontSize:11,color:'rgba(255,255,255,0.75)',marginBottom:10,lineHeight:1.4}}>{b.sub}</div>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                  <button className="tap" onClick={b.action} style={{background:'rgba(255,255,255,0.2)',border:'1px solid rgba(255,255,255,0.3)',borderRadius:10,padding:'6px 14px',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
+                    {b.btn}
+                  </button>
+                  <div style={{display:'flex',gap:4}}>
+                    {banners.map((_,i)=>(
+                      <div key={i} onClick={()=>setBannerIdx(i)} style={{width:i===bannerIdx?16:5,height:5,borderRadius:3,background:i===bannerIdx?'white':'rgba(255,255,255,0.4)',transition:'all .3s',cursor:'pointer'}}/>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Card plan del nutricionista */}
           {nutriPlan&&accountType==='personal'&&(
@@ -9646,6 +9722,13 @@ function AppCore() {
                         <span style={{fontSize:22,flexShrink:0}}>{item.emoji}</span>
                         <div style={{flex:1,minWidth:0}} onClick={()=>setEditingItem(editingItem===item.uid?null:item.uid)}>
                           <div style={{fontSize:12,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{item.nombre}</div>
+                          {(item.marca==='Nutri IA'||item.origen==='foto'||item.barcode)&&(
+                            <div style={{display:'flex',gap:3,marginTop:2,flexWrap:'wrap'}}>
+                              {item.marca==='Nutri IA'&&<span style={{fontSize:8,fontWeight:700,padding:'1px 5px',borderRadius:5,background:'#D4202018',color:'#A32D2D'}}>🤖 IA</span>}
+                              {item.origen==='foto'&&<span style={{fontSize:8,fontWeight:700,padding:'1px 5px',borderRadius:5,background:'#5856D618',color:'#3a3895'}}>📸 Foto</span>}
+                              {item.barcode&&<span style={{fontSize:8,fontWeight:700,padding:'1px 5px',borderRadius:5,background:'#34C75918',color:'#1a7a36'}}>📷 🇨🇱</span>}
+                            </div>
+                          )}
                           <div style={{display:'flex',gap:5,marginTop:3,flexWrap:'wrap'}}>
                             <span style={{fontSize:11,fontWeight:800,color:'#D42020'}}>{Math.round(item.cal*itemRatio(item)*item.qty)} kcal</span>
                             <span style={{fontSize:10,color:C.red,fontWeight:600}}>P:{Math.round(item.prot*itemRatio(item)*item.qty)}g</span>
@@ -10541,6 +10624,9 @@ function AppCore() {
           </>
           )}
         </div>}
+
+      {/* ══ LOGRO DESBLOQUEADO ══ */}
+      {showLogroUnlock&&<LogroUnlockModal C={C} F={F} logro={showLogroUnlock} onClose={()=>setShowLogroUnlock(null)}/>}
 
       {/* ══ TOAST ══ */}
       {toast&&(
