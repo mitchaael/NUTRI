@@ -9922,6 +9922,24 @@ function AppCore() {
                   </button>
                 </div>
 
+                {/* Tipo de cuenta */}
+                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${accountType==='professional'?'#1D3557':C.border}`}}>
+                  <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>{accountType==='professional'?'👩‍⚕️ Cuenta profesional':'👤 Cuenta personal'}</div>
+                  <div style={{fontSize:11,color:C.textSec,marginBottom:10}}>{accountType==='professional'?'Panel de nutricionista activo':'Cambia a profesional si eres nutricionista o coach'}</div>
+                  <div style={{display:'flex',gap:8}}>
+                    {[{k:'personal',l:'👤 Personal'},{k:'professional',l:'👩‍⚕️ Profesional'}].map(({k,l})=>(
+                      <button key={k} onClick={()=>{
+                        setAccountType(k);
+                        LS.set('accountType',k);
+                        if(supabaseUser) supabase.from('profiles').upsert({id:supabaseUser.id,account_type:k},{onConflict:'id'}).then(()=>{});
+                        haptic('light');
+                      }} style={{flex:1,padding:'9px',borderRadius:12,border:`1.5px solid ${accountType===k?'#1D3557':C.border}`,background:accountType===k?'#1D355715':'transparent',color:accountType===k?'#1D3557':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Vincular con nutricionista */}
                 <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${nutriPlan?'#1D3557':C.border}`}}>
                   <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:nutriPlan?10:0}}>
