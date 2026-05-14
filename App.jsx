@@ -6987,7 +6987,8 @@ function AppCore() {
   const [perfil,setPerfil]     = useState(()=>LS.get('perfil',{peso:70,altura:170,edad:25,sexo:'M',act:'1.55'}));
   const [customMetas,setCustomMetas] = useState(()=>LS.get('customMetas',null));
   const [userAllergens,setUserAllergens] = useState(()=>LS.get('allergens',[]));
-  const [veganMode,setVeganMode] = useState(()=>LS.get('veganMode',false));
+  const [veganMode,setVeganMode]       = useState(()=>LS.get('veganMode',false));
+  const [sinCalorias,setSinCalorias]   = useState(()=>LS.get('sinCalorias',false));
   const [weightHistory,setWeightHistory] = useState(()=>LS.get('weightHistory',[]));
   const [obj,setObj]           = useState(()=>LS.get('obj','mantener'));
   const [ritmo,setRitmo]       = useState(()=>LS.get('ritmo','normal'));
@@ -7305,6 +7306,7 @@ function AppCore() {
   useEffect(()=>{LS.set('customMetas',customMetas);},[customMetas]);
   useEffect(()=>{LS.set('allergens',userAllergens);},[userAllergens]);
   useEffect(()=>{LS.set('veganMode',veganMode);},[veganMode]);
+  useEffect(()=>{LS.set('sinCalorias',sinCalorias);},[sinCalorias]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
   /* ── Sync bidireccional al hacer login ── */
@@ -8156,12 +8158,18 @@ function AppCore() {
           </div>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
             <div style={{textAlign:'right'}}>
-              <div style={{color:C.text,fontSize:15,fontWeight:800,lineHeight:1}}>
-                {Math.round(tot.cal)}<span style={{fontSize:11,color:C.textSec,fontWeight:500}}> / {metas.cal} kcal</span>
-              </div>
-              <div style={{color:tot.cal>metas.cal?C.red:C.textSec,fontSize:10,fontWeight:600,marginTop:1}}>
+              {sinCalorias?(
+                <div style={{color:pct>1?'#FF3B30':pct>0.7?'#FF9500':'#34C759',fontSize:13,fontWeight:800,lineHeight:1}}>
+                  {pct>1?'¡Objetivo cumplido! ✅':pct>0.7?'¡Vas muy bien! 💪':pct>0.4?'Buen inicio 🌱':'Empezando el día ☀️'}
+                </div>
+              ):(
+                <div style={{color:C.text,fontSize:15,fontWeight:800,lineHeight:1}}>
+                  {Math.round(tot.cal)}<span style={{fontSize:11,color:C.textSec,fontWeight:500}}> / {metas.cal} kcal</span>
+                </div>
+              )}
+              {!sinCalorias&&<div style={{color:tot.cal>metas.cal?C.red:C.textSec,fontSize:10,fontWeight:600,marginTop:1}}>
                 {tot.cal>metas.cal?`+${sobre} excedido`:`${reste} restantes`}
-              </div>
+              </div>}
             </div>
             <div style={{display:'flex',gap:6}}>
               <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }} style={{
@@ -8216,6 +8224,40 @@ function AppCore() {
         ══════════════════════════════════ */}
         {tab===0&&<div className={tabAnim}>
 
+          {/* ── HERO: SALUD SCORE / SIN CALORÍAS ── */}
+          {sinCalorias?(
+          <div style={{background:C.surface,borderRadius:24,padding:'18px 20px',marginBottom:12,border:`1px solid ${C.border}`}}>
+            {(()=>{
+              const emoji = pct>1?'🟢':pct>0.7?'🟡':pct>0.3?'🟠':'🔴';
+              const msg   = pct>1?'¡Objetivo cumplido!':pct>0.7?'Buen progreso':pct>0.3?'Vas en camino':'Empieza a registrar';
+              const col   = pct>1?'#34C759':pct>0.7?'#FF9500':pct>0.3?'#FF6B00':'#FF3B30';
+              const macroStatus=(val,meta)=>val/meta>0.9?{label:'Bien',bg:'#34C75918',col:'#1a7a36'}:val/meta>0.6?{label:'Ok',bg:'#FF950018',col:'#a05e00'}:{label:'Bajo',bg:'#FF3B3018',col:'#a01a1a'};
+              const pSt=macroStatus(tot.prot,  metas.prot);
+              const cSt=macroStatus(tot.carbs, metas.carbs);
+              const gSt=macroStatus(tot.grasas,metas.grasas);
+              return(<>
+                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14}}>
+                  <div style={{fontSize:44,lineHeight:1}}>{emoji}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:18,fontWeight:800,color:col,lineHeight:1.1}}>{msg}</div>
+                    <div style={{height:5,background:C.border,borderRadius:3,overflow:'hidden',marginTop:8}}>
+                      <div style={{height:'100%',width:`${Math.min(pct*100,100)}%`,background:col,borderRadius:3,transition:'width .5s'}}/>
+                    </div>
+                  </div>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-around'}}>
+                  {[{icon:'💪',label:'Proteína',st:pSt},{icon:'⚡',label:'Energía',st:cSt},{icon:'🥑',label:'Grasas',st:gSt}].map(({icon,label,st})=>(
+                    <div key={label} style={{textAlign:'center'}}>
+                      <div style={{fontSize:22,marginBottom:3}}>{icon}</div>
+                      <div style={{fontSize:9,color:C.textSec,marginBottom:3}}>{label}</div>
+                      <div style={{fontSize:9,fontWeight:700,padding:'2px 8px',borderRadius:10,background:st.bg,color:st.col}}>{st.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </>);
+            })()}
+          </div>
+          ):(
           {/* ── HERO: SALUD SCORE ── */}
           <div style={{
             background:C.surface,borderRadius:24,padding:'18px 20px',marginBottom:12,
@@ -8307,6 +8349,8 @@ function AppCore() {
               </div>
             );
           })()}
+
+          )}
 
           {/* ── TIPS NUTRICIONALES ── */}
           {tips.length>0&&(
@@ -9028,9 +9072,21 @@ function AppCore() {
                     <div style={{width:38,height:38,borderRadius:12,background:`linear-gradient(135deg,${MC[m]},${MC[m]}BB)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,boxShadow:`0 3px 10px ${MC[m]}40`}}>{MI[m]}</div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:14,fontWeight:800,color:C.text}}>{m}</div>
-                      <div style={{fontSize:10,color:C.textSec,fontWeight:600,marginTop:1}}>{Math.round(mc.cal)} kcal · P:{Math.round(mc.prot)}g C:{Math.round(mc.carbs)}g G:{Math.round(mc.grasas)}g</div>
+                      {sinCalorias?(
+                        <div style={{display:'flex',gap:4,marginTop:3}}>
+                          {[{icon:'💪',v:mc.prot,m:metas.prot},{icon:'⚡',v:mc.carbs,m:metas.carbs},{icon:'🥑',v:mc.grasas,m:metas.grasas}].map(({icon,v,m})=>(
+                            <div key={icon} style={{fontSize:9,padding:'1px 5px',borderRadius:8,background:v/m>0.35?'#34C75918':'#F2F2F7',color:v/m>0.35?'#1a7a36':C.textSec}}>{icon}</div>
+                          ))}
+                        </div>
+                      ):(
+                        <div style={{fontSize:10,color:C.textSec,fontWeight:600,marginTop:1}}>{Math.round(mc.cal)} kcal · P:{Math.round(mc.prot)}g C:{Math.round(mc.carbs)}g G:{Math.round(mc.grasas)}g</div>
+                      )}
                     </div>
-                    <span style={{fontSize:12,fontWeight:800,color:MC[m]}}>{Math.round(mc.cal)} kcal</span>
+                    {sinCalorias?(
+                      <div style={{width:12,height:12,borderRadius:6,background:mc.cal/metas.cal>0.45?'#FF9500':mc.cal/metas.cal>0.2?'#34C759':'#C7C7CC',flexShrink:0}}/>
+                    ):(
+                      <span style={{fontSize:12,fontWeight:800,color:MC[m]}}>{Math.round(mc.cal)} kcal</span>
+                    )}
                   </div>
                   {items.map(item=>(
                     <div key={item.uid} style={{background:C.surface,borderRadius:17,marginBottom:6,boxShadow:`0 2px 8px rgba(0,0,0,${dark?.1:.05})`,borderLeft:`3px solid ${MC[m]}`,overflow:'hidden'}}>
@@ -9317,6 +9373,21 @@ function AppCore() {
                 </div>
               )}
             </div>
+
+                {/* Modo sin calorías */}
+                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${sinCalorias?'#34C759':C.border}`,display:'flex',alignItems:'center',gap:12}}>
+                  <div style={{fontSize:28,flexShrink:0}}>🎯</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{sinCalorias?'Modo sin calorías activo':'Modo sin calorías'}</div>
+                    <div style={{fontSize:11,color:C.textSec,marginTop:2}}>Semáforos y frases en vez de números</div>
+                  </div>
+                  <button className="tap" onClick={()=>{haptic('light');setSinCalorias(v=>!v);}}
+                    style={{width:44,height:26,borderRadius:13,border:'none',cursor:'pointer',padding:0,
+                      background:sinCalorias?'#34C759':C.border,position:'relative',transition:'background .2s',flexShrink:0}}>
+                    <div style={{position:'absolute',top:3,left:sinCalorias?20:3,width:20,height:20,borderRadius:10,
+                      background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
+                  </button>
+                </div>
 
             {/* ═══ ALERGIAS E INTOLERANCIAS ═══ */}
             <div style={{marginTop:16}}>
