@@ -1322,8 +1322,9 @@ function Onboarding({onDone}) {
   const [nombre,setNombre]=useState('');
   const [perfil,setPerfil]=useState({peso:70,altura:170,edad:25,sexo:'M',act:'1.55'});
   const [obj,setObj]=useState('mantener');
+  const [accountType,setAccountType]=useState('personal');
   const C=LIGHT;
-  const totalSteps=4;
+  const totalSteps=5;
 
   const steps=[
     // Step 0: Pantalla de impacto — diferenciadores
@@ -1370,7 +1371,49 @@ function Onboarding({onDone}) {
       </div>
     </div>,
 
-    // Step 1: Perfil físico
+    // Step 1: Tipo de cuenta
+    <div key={1} style={{padding:'32px 24px',display:'flex',flexDirection:'column',gap:20}}>
+      <div style={{textAlign:'center'}}>
+        <div style={{fontSize:48,marginBottom:12}}>👤</div>
+        <div style={{fontSize:22,fontWeight:800,color:C.text,letterSpacing:'-.5px',fontFamily:F}}>¿Cómo usarás Calorú?</div>
+        <div style={{fontSize:13,color:C.textSec,marginTop:6,fontFamily:F}}>Puedes cambiar esto después en tu perfil</div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:12}}>
+        {[
+          {k:'personal', icon:'👤', title:'Para mí', sub:'Registro personal de nutrición, hábitos y metas', color:'#D42020'},
+          {k:'professional', icon:'👩‍⚕️', title:'Soy profesional de salud', sub:'Nutricionista, coach o médico — gestiona pacientes', color:'#1D3557'},
+        ].map(({k,icon,title,sub,color})=>(
+          <button key={k} onClick={()=>setAccountType(k)} style={{
+            padding:'18px',borderRadius:20,textAlign:'left',
+            border:`2px solid ${accountType===k?color:C.border}`,
+            background:accountType===k?`${color}10`:C.surfaceAlt,
+            cursor:'pointer',fontFamily:F,transition:'all .2s',
+            display:'flex',alignItems:'center',gap:14,
+          }}>
+            <div style={{width:52,height:52,borderRadius:16,background:accountType===k?`${color}20`:C.border,display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}>{icon}</div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:15,fontWeight:800,color:accountType===k?color:C.text}}>{title}</div>
+              <div style={{fontSize:12,color:C.textSec,fontWeight:500,marginTop:3,lineHeight:1.4}}>{sub}</div>
+            </div>
+            {accountType===k&&<div style={{color,fontSize:22,flexShrink:0}}>✓</div>}
+          </button>
+        ))}
+      </div>
+      {accountType==='professional'&&(
+        <div style={{background:'#1D355710',borderRadius:16,padding:'14px 16px',border:'1px solid #1D355730'}}>
+          <div style={{fontSize:12,fontWeight:700,color:'#1D3557',marginBottom:4}}>👩‍⚕️ Plan Profesional</div>
+          <div style={{fontSize:11,color:C.textSec,lineHeight:1.5}}>Tendrás acceso a un panel para gestionar pacientes, asignar planes nutricionales y ver estadísticas de seguimiento. También puedes usar Calorú para tu propia nutrición.</div>
+        </div>
+      )}
+      <button onClick={()=>setStep(2)} style={{
+        padding:'16px',borderRadius:18,border:'none',
+        background:'#D42020',color:'white',
+        fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
+        boxShadow:'0 6px 20px rgba(212,32,32,0.25)',
+      }}>Continuar →</button>
+    </div>,
+
+    // Step 2: Perfil físico
     <div key={1} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
       <div>
         <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>Tu perfil, {nombre} 💪</div>
@@ -1414,11 +1457,11 @@ function Onboarding({onDone}) {
           ))}
         </div>
       </div>
-      <button onClick={()=>setStep(2)} style={{padding:'16px',borderRadius:18,border:'none',background:'#D42020',color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer'}}>Continuar →</button>
+      <button onClick={()=>setStep(3)} style={{padding:'16px',borderRadius:18,border:'none',background:'#D42020',color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer'}}>Continuar →</button>
     </div>,
 
-    // Step 2: Objetivo
-    <div key={2} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
+    // Step 4: Objetivo (was 2) (was 2)
+    <div key={3} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
       <div>
         <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>¿Cuál es tu objetivo?</div>
         <div style={{fontSize:13,color:C.textSec,fontFamily:F,fontWeight:500,marginTop:4}}>Ajustaremos tus metas diarias según esto</div>
@@ -1474,7 +1517,7 @@ function Onboarding({onDone}) {
           </div>
         );
       })()}
-      <button onClick={()=>setStep(3)} style={{
+      <button onClick={()=>setStep(4)} style={{
         padding:'16px',borderRadius:18,border:'none',
         background:'#D42020',
         color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
@@ -1501,7 +1544,7 @@ function Onboarding({onDone}) {
         recomp:'Cambiarás grasa por músculo en 8–12 semanas',
       };
       return(
-        <div key={3} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:20}}>
+        <div key={4} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:20}}>
           <div style={{textAlign:'center'}}>
             <div style={{fontSize:52,marginBottom:8}}>🔮</div>
             <div style={{fontSize:22,fontWeight:800,color:C.text,letterSpacing:'-.5px',fontFamily:F}}>Tu transformación</div>
@@ -1551,7 +1594,7 @@ function Onboarding({onDone}) {
               </div>
             ))}
           </div>
-          <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj})} style={{
+          <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj,accountType})} style={{
             padding:'17px',borderRadius:18,border:'none',
             background:'#D42020',color:'white',
             fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
@@ -3771,6 +3814,231 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
 /* ═══════════════════════════════════════════════════════
    ASISTENTE IA NUTRICIONAL — powered by Claude (via Edge Function)
 ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   PANEL PROFESIONAL — nutricionista
+═══════════════════════════════════════════════════════ */
+function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) {
+  const [pacientes, setPacientes] = React.useState([]);
+  const [loading, setLoading]     = React.useState(false);
+  const [showNuevoPlan, setShowNuevoPlan] = React.useState(false);
+  const [selectedPaciente, setSelectedPaciente] = React.useState(null);
+  const [codigoPro] = React.useState(()=>{
+    const saved = LS.get('professional_code','');
+    if(saved) return saved;
+    const code = 'NUT-' + Math.random().toString(36).substring(2,7).toUpperCase();
+    LS.set('professional_code', code);
+    return code;
+  });
+
+  React.useEffect(()=>{
+    if(!supabaseUser) return;
+    setLoading(true);
+    supabase.from('nutrition_plans')
+      .select('*, paciente:paciente_id(id,nombre:raw_user_meta_data->nombre)')
+      .eq('nutricionista_id', supabaseUser.id)
+      .then(({data})=>{
+        setPacientes(data||[]);
+        setLoading(false);
+      });
+  },[supabaseUser]);
+
+  const hoy = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+
+  const getStatusColor = (plan) => {
+    if(!plan.ultima_actividad) return '#C7C7CC';
+    const diff = (Date.now() - new Date(plan.ultima_actividad).getTime()) / 86400000;
+    if(diff < 1) return '#34C759';
+    if(diff < 2) return '#FF9500';
+    return '#FF3B30';
+  };
+
+  return (
+    <div style={{minHeight:'100vh',background:dark?'#0D0D0D':'#F2F2F7',fontFamily:F,paddingBottom:100}}>
+      {/* Header profesional */}
+      <div style={{background:'#1D3557',paddingTop:'env(safe-area-inset-top, 20px)',paddingBottom:0}}>
+        <div style={{padding:'12px 16px 0',display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:38,height:38,borderRadius:12,background:'#D42020',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:800,color:'white',flexShrink:0}}>
+            {nombre.substring(0,2).toUpperCase()}
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:14,fontWeight:700,color:'white'}}>{nombre}</div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.5)'}}>{pacientes.length} paciente{pacientes.length!==1?'s':''} activo{pacientes.length!==1?'s':''}</div>
+          </div>
+          <div style={{background:'#D42020',borderRadius:8,padding:'3px 10px'}}>
+            <span style={{fontSize:9,fontWeight:800,color:'white'}}>PRO</span>
+          </div>
+        </div>
+        {/* Switch profesional/personal */}
+        <div style={{display:'flex',gap:3,margin:'10px 16px 0',background:'rgba(255,255,255,0.1)',borderRadius:14,padding:3}}>
+          <div style={{flex:1,padding:'7px',borderRadius:11,background:'#D42020',textAlign:'center'}}>
+            <span style={{fontSize:11,fontWeight:700,color:'white'}}>👩‍⚕️ Profesional</span>
+          </div>
+          <button onClick={onSwitchPersonal} style={{flex:1,padding:'7px',borderRadius:11,background:'transparent',border:'none',cursor:'pointer',fontFamily:F}}>
+            <span style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.5)'}}>👤 Personal</span>
+          </button>
+        </div>
+        {/* Stats rápidas */}
+        <div style={{display:'flex',gap:1,padding:'10px 16px 14px'}}>
+          {[
+            {l:'Al día',   v:pacientes.filter(p=>getStatusColor(p)==='#34C759').length, c:'#34C759'},
+            {l:'Alerta',   v:pacientes.filter(p=>getStatusColor(p)==='#FF9500').length, c:'#FF9500'},
+            {l:'Inactivos',v:pacientes.filter(p=>getStatusColor(p)==='#FF3B30'||getStatusColor(p)==='#C7C7CC').length, c:'#FF3B30'},
+          ].map(({l,v,c})=>(
+            <div key={l} style={{flex:1,textAlign:'center'}}>
+              <div style={{fontSize:22,fontWeight:800,color:c,lineHeight:1}}>{v}</div>
+              <div style={{fontSize:9,color:'rgba(255,255,255,0.5)',marginTop:2}}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{padding:'14px 16px'}}>
+        {/* Código de invitación */}
+        <div style={{background:dark?'#1C1C1E':'white',borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)'}`}}>
+          <div style={{fontSize:11,color:dark?'rgba(255,255,255,0.5)':'#8E8E93',marginBottom:6,fontWeight:600}}>Tu código para pacientes</div>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <div style={{fontSize:22,fontWeight:800,color:'#D42020',letterSpacing:2,flex:1}}>{codigoPro}</div>
+            <button onClick={()=>{navigator.clipboard?.writeText(codigoPro);haptic('light');}} style={{background:'#D4202018',border:'none',borderRadius:10,padding:'8px 12px',cursor:'pointer',fontFamily:F,fontSize:11,fontWeight:700,color:'#D42020'}}>
+              Copiar
+            </button>
+          </div>
+          <div style={{fontSize:10,color:dark?'rgba(255,255,255,0.3)':'#C7C7CC',marginTop:4}}>El paciente ingresa este código en su perfil para vincularse contigo</div>
+        </div>
+
+        {/* Lista de pacientes */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <div style={{fontSize:13,fontWeight:700,color:dark?'white':'#1C1C1E'}}>Mis pacientes</div>
+          <button onClick={()=>setShowNuevoPlan(true)} style={{background:'#D42020',border:'none',borderRadius:10,padding:'6px 14px',cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,color:'white'}}>
+            + Nuevo plan
+          </button>
+        </div>
+
+        {loading&&<div style={{textAlign:'center',padding:30,color:dark?'rgba(255,255,255,0.4)':'#C7C7CC',fontSize:13}}>Cargando pacientes...</div>}
+
+        {!loading&&pacientes.length===0&&(
+          <div style={{textAlign:'center',padding:'40px 20px',background:dark?'#1C1C1E':'white',borderRadius:20,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}`}}>
+            <div style={{fontSize:44,marginBottom:12}}>👥</div>
+            <div style={{fontSize:15,fontWeight:700,color:dark?'white':'#1C1C1E',marginBottom:8}}>Sin pacientes aún</div>
+            <div style={{fontSize:12,color:dark?'rgba(255,255,255,0.4)':'#8E8E93',lineHeight:1.5,marginBottom:20}}>Comparte tu código <strong style={{color:'#D42020'}}>{codigoPro}</strong> con tus pacientes para que se vinculen a ti</div>
+            <button onClick={()=>setShowNuevoPlan(true)} style={{background:'#D42020',border:'none',borderRadius:14,padding:'12px 24px',cursor:'pointer',fontFamily:F,fontSize:13,fontWeight:700,color:'white'}}>
+              Crear primer plan
+            </button>
+          </div>
+        )}
+
+        {!loading&&pacientes.map((plan)=>{
+          const statusColor = getStatusColor(plan);
+          const nombrePaciente = plan.paciente?.nombre || 'Paciente';
+          return(
+            <div key={plan.id} onClick={()=>setSelectedPaciente(plan)} style={{background:dark?'#1C1C1E':'white',borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1.5px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}`,cursor:'pointer'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div style={{width:10,height:10,borderRadius:5,background:statusColor,flexShrink:0}}/>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:700,color:dark?'white':'#1C1C1E'}}>{nombrePaciente}</div>
+                  <div style={{fontSize:11,color:dark?'rgba(255,255,255,0.4)':'#8E8E93',marginTop:2}}>{plan.nombre} · {plan.calorias_meta} kcal/día</div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontSize:10,color:statusColor,fontWeight:700}}>{statusColor==='#34C759'?'Al día':statusColor==='#FF9500'?'Ayer':statusColor==='#FF3B30'?'Inactivo':'Sin datos'}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Sección de hoy */}
+        <div style={{fontSize:10,color:dark?'rgba(255,255,255,0.3)':'#C7C7CC',textAlign:'center',marginTop:16,fontWeight:600,textTransform:'uppercase',letterSpacing:.5}}>
+          {hoy}
+        </div>
+      </div>
+
+      {/* Modal Nuevo Plan */}
+      {showNuevoPlan&&<NuevoPlanModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} onClose={()=>setShowNuevoPlan(false)} onCreated={(plan)=>{setPacientes(prev=>[...prev,plan]);setShowNuevoPlan(false);}}/>}
+    </div>
+  );
+}
+
+/* ─── Modal Nuevo Plan Nutricional ─── */
+function NuevoPlanModal({C, F, dark, supabaseUser, onClose, onCreated}) {
+  const [nombre, setNombre] = React.useState('');
+  const [email,  setEmail]  = React.useState('');
+  const [cal,    setCal]    = React.useState('1800');
+  const [obj,    setObj]    = React.useState('bajar');
+  const [msg,    setMsg]    = React.useState('');
+  const [recs,   setRecs]   = React.useState([{tipo:'fruta',porcion:'2 porciones/día'},{tipo:'verdura',porcion:'3 porciones/día'},{tipo:'agua',porcion:'8 vasos/día'}]);
+  const [loading,setLoading]= React.useState(false);
+
+  const guardar = async () => {
+    if(!nombre.trim()) return;
+    setLoading(true);
+    const {data, error} = await supabase.from('nutrition_plans').insert({
+      nutricionista_id: supabaseUser.id,
+      nombre: nombre.trim(),
+      objetivo: obj,
+      calorias_meta: parseInt(cal)||1800,
+      mensaje: msg.trim(),
+      recomendaciones: recs,
+    }).select().single();
+    if(!error && data) onCreated(data);
+    setLoading(false);
+  };
+
+  return(
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:9999,display:'flex',alignItems:'flex-end'}}>
+      <div style={{background:dark?'#1C1C1E':C.surface,borderRadius:'24px 24px 0 0',width:'100%',maxHeight:'85vh',overflow:'auto',padding:'20px 20px 40px',paddingBottom:'calc(40px + env(safe-area-inset-bottom))'}}>
+        <div style={{display:'flex',justifyContent:'center',marginBottom:12}}>
+          <div style={{width:36,height:4,borderRadius:2,background:dark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'}}/>
+        </div>
+        <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:16}}>Nuevo plan nutricional</div>
+        {[
+          {label:'Nombre del paciente',val:nombre,set:setNombre,ph:'Ej: María González',type:'text'},
+          {label:'Calorías meta/día',val:cal,set:setCal,ph:'1800',type:'number'},
+        ].map(({label,val,set,ph,type})=>(
+          <div key={label} style={{marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>{label}</div>
+            <input value={val} onChange={e=>set(e.target.value)} placeholder={ph} type={type}
+              style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+          </div>
+        ))}
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Objetivo</div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {[{k:'bajar',l:'Bajar peso'},{k:'mantener',l:'Mantener'},{k:'subir',l:'Ganar músculo'},{k:'salud',l:'Salud general'}].map(({k,l})=>(
+              <button key={k} onClick={()=>setObj(k)} style={{padding:'8px 14px',borderRadius:10,border:`1.5px solid ${obj===k?'#D42020':C.border}`,background:obj===k?'#D4202012':'transparent',color:obj===k?'#D42020':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Mensaje para el paciente</div>
+          <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Recuerda aumentar las porciones de fruta esta semana..."
+            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:13,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,minHeight:80,resize:'none'}}/>
+        </div>
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Recomendaciones (grupos alimenticios)</div>
+          {recs.map((r,i)=>(
+            <div key={i} style={{display:'flex',gap:8,marginBottom:6}}>
+              <input value={r.tipo} onChange={e=>{const n=[...recs];n[i]={...n[i],tipo:e.target.value};setRecs(n);}} placeholder="Alimento"
+                style={{flex:1,padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,fontSize:12,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+              <input value={r.porcion} onChange={e=>{const n=[...recs];n[i]={...n[i],porcion:e.target.value};setRecs(n);}} placeholder="Porción"
+                style={{flex:1,padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,fontSize:12,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+            </div>
+          ))}
+          <button onClick={()=>setRecs([...recs,{tipo:'',porcion:''}])} style={{fontSize:11,color:'#D42020',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>
+            + Agregar grupo
+          </button>
+        </div>
+        <div style={{display:'flex',gap:10}}>
+          <button onClick={onClose} style={{flex:1,padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'none',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>Cancelar</button>
+          <button onClick={guardar} disabled={loading||!nombre.trim()} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:nombre.trim()?'#D42020':'#C7C7CC',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
+            {loading?'Guardando...':'Crear plan ✓'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════
    WELCOME BACK — modal de retención al volver
 ═══════════════════════════════════════════════════════ */
@@ -7157,6 +7425,10 @@ function AppCore() {
   const [userAllergens,setUserAllergens] = useState(()=>LS.get('allergens',[]));
   const [veganMode,setVeganMode]       = useState(()=>LS.get('veganMode',false));
   const [sinCalorias,setSinCalorias]   = useState(()=>LS.get('sinCalorias',false));
+  const [accountType,setAccountType]   = useState(()=>LS.get('accountType','personal'));
+  const [proMode,setProMode]           = useState('professional'); // 'professional' | 'personal' — switch del profesional
+  const [pacientes,setPacientes]       = useState([]);
+  const [loadingPacientes,setLoadingPacientes] = useState(false);
   const [weightHistory,setWeightHistory] = useState(()=>LS.get('weightHistory',[]));
   const [obj,setObj]           = useState(()=>LS.get('obj','mantener'));
   const [ritmo,setRitmo]       = useState(()=>LS.get('ritmo','normal'));
@@ -7475,6 +7747,7 @@ function AppCore() {
   useEffect(()=>{LS.set('allergens',userAllergens);},[userAllergens]);
   useEffect(()=>{LS.set('veganMode',veganMode);},[veganMode]);
   useEffect(()=>{LS.set('sinCalorias',sinCalorias);},[sinCalorias]);
+  useEffect(()=>{LS.set('accountType',accountType);},[accountType]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
   /* ── Sync bidireccional al hacer login ── */
@@ -8042,11 +8315,22 @@ function AppCore() {
     </div>
   );
 
-  if(!onboarded) return <Onboarding onDone={({nombre:n,perfil:p,obj:o})=>{
+  if(!onboarded) return <Onboarding onDone={({nombre:n,perfil:p,obj:o,accountType:at})=>{
     setNombre(n); setPerfil(p); setObj(o);
+    setAccountType(at||'personal');
     setOnboarded(true); LS.set('onboarded',true);
     LS.set('nombre',n); LS.set('perfil',p); LS.set('obj',o);
+    LS.set('accountType',at||'personal');
+    // Save to Supabase if logged in
+    if(supabaseUser) {
+      supabase.from('profiles').upsert({id:supabaseUser.id, account_type:at||'personal'},{onConflict:'id'}).then(()=>{});
+    }
   }}/>;
+
+  // Si es profesional y está en modo profesional → mostrar panel profesional
+  if(accountType==='professional' && proMode==='professional') {
+    return <PanelProfesional C={C} F={F} dark={dark} nombre={nombre} supabaseUser={supabaseUser} onSwitchPersonal={()=>setProMode('personal')}/>;
+  }
 
   return (
     <div style={{fontFamily:F,minHeight:'100vh',background:C.bg,paddingBottom:'calc(88px + env(safe-area-inset-bottom, 34px))',transition:'background .3s'}}>
@@ -8391,6 +8675,22 @@ function AppCore() {
             TAB 0 — INICIO
         ══════════════════════════════════ */}
         {tab===0&&<div className={tabAnim}>
+
+          {/* Switch profesional → volver al panel */}
+          {accountType==='professional'&&(
+            <button className="tap" onClick={()=>setProMode('professional')} style={{
+              width:'100%',marginBottom:10,padding:'10px 16px',
+              background:'#1D3557',borderRadius:16,border:'none',
+              display:'flex',alignItems:'center',gap:10,cursor:'pointer',fontFamily:F,
+            }}>
+              <span style={{fontSize:18}}>👩‍⚕️</span>
+              <div style={{flex:1,textAlign:'left'}}>
+                <div style={{fontSize:12,fontWeight:700,color:'white'}}>Modo personal activo</div>
+                <div style={{fontSize:10,color:'rgba(255,255,255,0.5)'}}>Toca para volver al panel profesional</div>
+              </div>
+              <span style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>›</span>
+            </button>
+          )}
 
           {/* ── HERO: SALUD SCORE / SIN CALORÍAS ── */}
           {sinCalorias?(
