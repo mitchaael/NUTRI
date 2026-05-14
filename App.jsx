@@ -5658,21 +5658,23 @@ Responde SOLO con JSON:
 /* ══════════════════════════════════════════════
    DESAFÍOS COMUNITARIOS (Free)
 ══════════════════════════════════════════════ */
-function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, streak, tot, metas, supabaseUser, onClose}) {
-  const DESAFIOS_SEMANA = [
-    {id:'agua7',      emoji:'💧', titulo:'Semana hidratada',    desc:'Toma tu meta de agua 7 días seguidos',     xp:50,  check:()=>agua>=waterGoal},
-    {id:'proteina3',  emoji:'💪', titulo:'Rey de la proteína',  desc:'Cumple tu meta de proteína 3 días',         xp:40,  check:()=>tot.prot>=metas.prot*0.9},
-    {id:'ejercicio5', emoji:'🏃', titulo:'Semana activa',       desc:'Registra ejercicio 5 días esta semana',     xp:60,  check:()=>exercises.length>0},
-    {id:'racha7',     emoji:'🔥', titulo:'Racha de fuego',      desc:'Mantén una racha de 7 días',                xp:70,  check:()=>streak.days>=7},
-    {id:'chileno3',   emoji:'🇨🇱', titulo:'Orgullosamente chileno',desc:'Come 3 platos chilenos esta semana',    xp:30,  check:()=>log.some(i=>['cazuela','empanada','sopaipilla','porotos','churrasco','completo','charquicán','humitas','pastel de choclo'].some(p=>i.nombre?.toLowerCase().includes(p)))},
-    {id:'calorias5',  emoji:'🎯', titulo:'5 días en meta',      desc:'Cumple tu meta calórica 5 días',            xp:80,  check:()=>metas.cal>0&&tot.cal/metas.cal>=0.85&&tot.cal/metas.cal<=1.1},
-    {id:'log3comidas',emoji:'🍽️', titulo:'3 comidas al día',    desc:'Registra desayuno, almuerzo y cena',        xp:25,  check:()=>log.length>=3},
-    {id:'verduras',   emoji:'🥗', titulo:'Come verde',          desc:'Agrega verduras en 5 comidas esta semana',  xp:35,  check:()=>log.some(i=>['ensalada','lechuga','espinaca','brócoli','acelga','tomate','pepino'].some(p=>i.nombre?.toLowerCase().includes(p)))},
+function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, streak, tot, metas, supabaseUser, nombre, obj, onClose}) {
+  const DESAFIOS_BASE = [
+    {id:'agua7',      emoji:'💧', titulo:'Semana hidratada',       desc:'Toma tu meta de agua hoy',                  xp:50,  check:()=>agua>=waterGoal},
+    {id:'proteina3',  emoji:'💪', titulo:'Rey de la proteína',     desc:'Cumple tu meta de proteína hoy',             xp:40,  check:()=>tot.prot>=metas.prot*0.9},
+    {id:'ejercicio5', emoji:'🏃', titulo:'Semana activa',          desc:'Registra un ejercicio hoy',                  xp:60,  check:()=>exercises.length>0},
+    {id:'racha7',     emoji:'🔥', titulo:'Racha de fuego',         desc:'Mantén tu racha activa',                     xp:70,  check:()=>streak.days>=7},
+    {id:'chileno3',   emoji:'🇨🇱', titulo:'Orgullosamente chileno', desc:'Come un plato chileno hoy',                  xp:30,  check:()=>log.some(i=>['cazuela','empanada','sopaipilla','porotos','churrasco','completo','charquicán','humitas','pastel de choclo'].some(p=>i.nombre?.toLowerCase().includes(p)))},
+    {id:'calorias5',  emoji:'🎯', titulo:'En tu meta',             desc:'Cumple tu meta calórica hoy',                xp:80,  check:()=>metas.cal>0&&tot.cal/metas.cal>=0.85&&tot.cal/metas.cal<=1.1},
+    {id:'log3comidas',emoji:'🍽️', titulo:'3 comidas al día',       desc:'Registra desayuno, almuerzo y cena',         xp:25,  check:()=>log.length>=3},
+    {id:'verduras',   emoji:'🥗', titulo:'Come verde',             desc:'Agrega verduras en tus comidas',             xp:35,  check:()=>log.some(i=>['ensalada','lechuga','espinaca','brócoli','acelga','tomate','pepino'].some(p=>i.nombre?.toLowerCase().includes(p)))},
   ];
 
   const weekKey = `desafios_${new Date().getFullYear()}_${Math.ceil((new Date() - new Date(new Date().getFullYear(),0,1))/604800000)}`;
-  const [completados, setCompletados] = useState(()=>LS.get(weekKey,[]));
-  const [participantes, setParticipantes] = useState(1247);
+  const [completados, setCompletados]   = useState(()=>LS.get(weekKey,[]));
+  const [desafiosIA,  setDesafiosIA]    = useState(()=>LS.get(weekKey+'_ia',null));
+  const [loadingIA,   setLoadingIA]     = useState(false);
+  const [tab, setTab]                   = useState('semana'); // semana | personalizados
 
   const completarDesafio = (id, xp) => {
     if(completados.includes(id)) return;
@@ -5682,49 +5684,145 @@ function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, st
     haptic('goal');
   };
 
+  const generarDesafiosIA = async () => {
+    setLoadingIA(true);
+    try {
+      const alimentos = log.slice(0,8).map(i=>i.nombre).join(', ') || 'variado';
+      const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo'}[obj]||'mantener peso';
+      const prompt = `El usuario ${nombre} quiere ${objTexto}. Racha: ${streak.days} días. Come: ${alimentos}. Proteína hoy: ${Math.round(tot.prot)}/${metas.prot}g.
+Genera 3 desafíos semanales personalizados y motivadores en formato JSON:
+{"desafios":[{"id":"d1","emoji":"emoji","titulo":"título corto","desc":"descripción motivadora específica para este usuario","xp":número entre 30 y 100,"tipo":"nutricion|ejercicio|habito"}]}
+Solo JSON, sin texto adicional.`;
+      const data = await callEdgeFn({mode:'chat', system:'Eres un coach nutricional. Genera desafíos personalizados. Solo JSON válido.', messages:[{role:'user',content:prompt}]});
+      const text = data.text || '';
+      const match = text.match(/\{[\s\S]*\}/);
+      if(match){
+        const parsed = JSON.parse(match[0]);
+        setDesafiosIA(parsed.desafios);
+        LS.set(weekKey+'_ia', parsed.desafios);
+      }
+    } catch(e){ console.error('DesafiosIA error:',e); }
+    setLoadingIA(false);
+  };
+
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
-        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🏅 Desafíos Semanales</div>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>🏅 Desafíos</div>
         <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:16}}>
-        <div style={{background:'linear-gradient(135deg,#FF9500,#FFD700)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <div>
-            <div style={{fontSize:12,opacity:0.85}}>Esta semana</div>
-            <div style={{fontSize:20,fontWeight:800}}>{completados.length}/{DESAFIOS_SEMANA.length} completados</div>
-          </div>
-          <div style={{textAlign:'right'}}>
-            <div style={{fontSize:24}}>👥</div>
-            <div style={{fontSize:11,opacity:0.85}}>{participantes.toLocaleString('es-CL')} jugando</div>
-          </div>
+
+        {/* Tabs */}
+        <div style={{display:'flex',gap:4,marginBottom:14,background:C.surface,borderRadius:14,padding:4,border:`1px solid ${C.border}`}}>
+          {[['semana','🏆 Semanales'],['personalizados','🤖 Para ti']].map(([t,l])=>(
+            <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:'8px',borderRadius:10,border:'none',background:tab===t?'#D42020':'transparent',color:tab===t?'white':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
+              {l}
+            </button>
+          ))}
         </div>
 
-        {DESAFIOS_SEMANA.map((d,i)=>{
-          const completado = completados.includes(d.id);
-          const cumple = d.check();
-          return (
-            <div key={d.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`2px solid ${completado?'#FFD700':cumple?'#34C759':C.border}`,opacity:completado?0.8:1}}>
-              <div style={{display:'flex',alignItems:'center',gap:12}}>
-                <div style={{width:44,height:44,borderRadius:14,background:completado?'#FFD70020':cumple?'#34C75920':C.surfaceAlt,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
-                  {completado?'✅':d.emoji}
-                </div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:700,color:C.text}}>{d.titulo}</div>
-                  <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{d.desc}</div>
-                  <div style={{fontSize:10,color:'#FFD700',fontWeight:700,marginTop:2}}>+{d.xp} XP</div>
-                </div>
-                {!completado&&cumple&&(
-                  <button onClick={()=>completarDesafio(d.id,d.xp)} style={{padding:'8px 14px',borderRadius:12,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
-                    ¡Reclamar!
-                  </button>
-                )}
-                {completado&&<span style={{fontSize:20,flexShrink:0}}>🏅</span>}
+        {tab==='semana'&&(
+          <>
+            <div style={{background:'linear-gradient(135deg,#FF9500,#FFD700)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div>
+                <div style={{fontSize:12,opacity:0.85}}>Esta semana</div>
+                <div style={{fontSize:20,fontWeight:800}}>{completados.filter(id=>DESAFIOS_BASE.some(d=>d.id===id)).length}/{DESAFIOS_BASE.length} completados</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:24}}>🔥</div>
+                <div style={{fontSize:11,opacity:0.85}}>Racha: {streak.days} días</div>
               </div>
             </div>
-          );
-        })}
+            {DESAFIOS_BASE.map((d)=>{
+              const completado = completados.includes(d.id);
+              const cumple = d.check();
+              return (
+                <div key={d.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`2px solid ${completado?'#FFD700':cumple?'#34C759':C.border}`,opacity:completado?0.8:1}}>
+                  <div style={{display:'flex',alignItems:'center',gap:12}}>
+                    <div style={{width:44,height:44,borderRadius:14,background:completado?'#FFD70020':cumple?'#34C75920':C.surfaceAlt,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+                      {completado?'✅':d.emoji}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>{d.titulo}</div>
+                      <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{d.desc}</div>
+                      <div style={{fontSize:10,color:'#FFD700',fontWeight:700,marginTop:2}}>+{d.xp} XP</div>
+                    </div>
+                    {!completado&&cumple&&(
+                      <button onClick={()=>completarDesafio(d.id,d.xp)} style={{padding:'8px 14px',borderRadius:12,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
+                        ¡Reclamar!
+                      </button>
+                    )}
+                    {completado&&<span style={{fontSize:20,flexShrink:0}}>🏅</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
+
+        {tab==='personalizados'&&(
+          <>
+            <div style={{background:'linear-gradient(135deg,#D42020,#FF6B35)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white'}}>
+              <div style={{fontSize:12,opacity:0.85,marginBottom:4}}>🤖 Generados por IA para ti</div>
+              <div style={{fontSize:16,fontWeight:800}}>Desafíos según tus hábitos</div>
+              <div style={{fontSize:11,opacity:0.75,marginTop:2}}>Basados en tu racha, objetivos y comidas recientes</div>
+            </div>
+
+            {!desafiosIA&&!loadingIA&&(
+              <div style={{textAlign:'center',padding:'30px 20px'}}>
+                <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+                <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:8}}>Desafíos personalizados para {nombre.split(' ')[0]}</div>
+                <div style={{fontSize:12,color:C.textSec,marginBottom:20,lineHeight:1.5}}>La IA analiza tu racha, objetivos y hábitos para crear desafíos hechos solo para ti</div>
+                <button onClick={generarDesafiosIA} style={{padding:'14px 28px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800,boxShadow:'0 6px 16px rgba(212,32,32,0.3)'}}>
+                  🤖 Generar mis desafíos
+                </button>
+              </div>
+            )}
+
+            {loadingIA&&(
+              <div style={{textAlign:'center',padding:'40px 20px'}}>
+                <div style={{fontSize:40,marginBottom:12}}>🤖</div>
+                <div style={{fontSize:14,color:C.textSec}}>Analizando tus hábitos...</div>
+              </div>
+            )}
+
+            {desafiosIA&&desafiosIA.map((d,i)=>{
+              const id = d.id || `ia_${i}`;
+              const completado = completados.includes(id);
+              return (
+                <div key={id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`2px solid ${completado?'#FFD700':'#D4202030'}`,position:'relative',overflow:'hidden'}}>
+                  <div style={{position:'absolute',top:0,right:0,background:'#D42020',borderRadius:'0 0 0 12px',padding:'3px 10px'}}>
+                    <span style={{fontSize:9,fontWeight:800,color:'white'}}>IA</span>
+                  </div>
+                  <div style={{display:'flex',alignItems:'center',gap:12}}>
+                    <div style={{width:44,height:44,borderRadius:14,background:completado?'#FFD70020':'#D4202012',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+                      {completado?'✅':d.emoji}
+                    </div>
+                    <div style={{flex:1,paddingRight:20}}>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>{d.titulo}</div>
+                      <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{d.desc}</div>
+                      <div style={{fontSize:10,color:'#FFD700',fontWeight:700,marginTop:2}}>+{d.xp} XP</div>
+                    </div>
+                    {!completado&&(
+                      <button onClick={()=>completarDesafio(id,d.xp)} style={{padding:'8px 14px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
+                        Completar
+                      </button>
+                    )}
+                    {completado&&<span style={{fontSize:20,flexShrink:0}}>🏅</span>}
+                  </div>
+                </div>
+              );
+            })}
+
+            {desafiosIA&&(
+              <button onClick={generarDesafiosIA} style={{width:'100%',padding:'12px',borderRadius:14,border:`1px solid ${C.border}`,background:'none',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:600,marginTop:4}}>
+                🔄 Regenerar desafíos
+              </button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -5798,26 +5896,47 @@ function LigaAmigosModal({C, F, dark, supabaseUser, nombre, saludScore, streak, 
 
         {tab==='ranking'&&(
           <>
-            <div style={{background:'linear-gradient(135deg,#FFD700,#FF9500)',borderRadius:18,padding:'14px 16px',marginBottom:14,color:'white'}}>
+            <div style={{background:'linear-gradient(135deg,#FFD700,#FF9500)',borderRadius:18,padding:'14px 16px',marginBottom:10,color:'white'}}>
               <div style={{fontSize:12,opacity:0.85}}>Ranking semanal global</div>
               <div style={{fontSize:18,fontWeight:800}}>¿Quién come más sano esta semana?</div>
             </div>
+            {/* Racha del usuario destacada */}
+            <div style={{background:C.surface,borderRadius:16,padding:'12px 16px',marginBottom:14,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
+              <div style={{fontSize:32}}>🔥</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:12,color:C.textSec}}>Tu racha actual</div>
+                <div style={{fontSize:22,fontWeight:800,color:streak.days>=7?'#FF9500':streak.days>=3?'#FFD700':'#C7C7CC',lineHeight:1}}>{streak.days} días</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:11,color:C.textSec}}>Meta</div>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>🏆 14 días</div>
+              </div>
+            </div>
             {loading&&<div style={{textAlign:'center',padding:'30px',color:C.textSec}}>Cargando ranking...</div>}
-            {liga?.map((u,i)=>(
+            {liga?.map((u,i)=>{
+              const streakColor = u.streak>=14?'#FF6B00':u.streak>=7?'#FF9500':u.streak>=3?'#FFD700':'#C7C7CC';
+              return(
               <div key={i} style={{background:u.esYo?'#D4202015':C.surface,borderRadius:16,padding:'12px 14px',marginBottom:8,border:`1.5px solid ${u.esYo?'#D42020':C.border}`,display:'flex',alignItems:'center',gap:10}}>
                 <div style={{width:32,height:32,borderRadius:10,background:i<3?'#FFD70020':C.surfaceAlt,display:'flex',alignItems:'center',justifyContent:'center',fontSize:i<3?20:14,fontWeight:800,color:i>=3?C.textSec:'',flexShrink:0}}>
                   {i<3?medals[i]:i+1}
                 </div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:700,color:u.esYo?'#D42020':C.text}}>{u.nombre}{u.esYo?' (tú)':''}</div>
-                  <div style={{fontSize:10,color:C.textSec}}>🔥 {u.streak} días · ⭐ Score {u.score}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,fontWeight:700,color:u.esYo?'#D42020':C.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{u.nombre}{u.esYo?' (tú)':''}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:6,marginTop:2}}>
+                    <div style={{display:'flex',alignItems:'center',gap:3,background:`${streakColor}18`,borderRadius:8,padding:'2px 7px'}}>
+                      <span style={{fontSize:11}}>🔥</span>
+                      <span style={{fontSize:11,fontWeight:800,color:streakColor}}>{u.streak}</span>
+                    </div>
+                    <span style={{fontSize:10,color:C.textSec}}>⭐ {u.score} pts</span>
+                  </div>
                 </div>
-                <div style={{textAlign:'right'}}>
+                <div style={{textAlign:'right',flexShrink:0}}>
                   <div style={{fontSize:15,fontWeight:800,color:'#FFD700'}}>{u.xp}</div>
-                  <div style={{fontSize:9,color:C.textSec}}>XP</div>
+                  <div style={{fontSize:9,color:C.textSec}}>XP sem.</div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </>
         )}
 
@@ -7998,7 +8117,7 @@ function AppCore() {
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
       {showListaComprasIA&&<ListaComprasIAModal C={C} F={F} dark={dark} log={log} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowListaComprasIA(false)}/>}
       {showQueComer&&<QueComerHoyModal C={C} F={F} dark={dark} tot={tot} metas={metas} log={log} obj={obj} userAllergens={userAllergens} veganMode={veganMode} ritmo={ritmo} onClose={()=>setShowQueComer(false)}/>}
-      {showDesafiosComunidad&&<DesafiosComunidadModal C={C} F={F} dark={dark} log={log} agua={agua} waterGoal={waterGoal} exercises={exercises} streak={streak} tot={tot} metas={metas} supabaseUser={supabaseUser} onClose={()=>setShowDesafiosComunidad(false)}/>}
+      {showDesafiosComunidad&&<DesafiosComunidadModal C={C} F={F} dark={dark} log={log} agua={agua} waterGoal={waterGoal} exercises={exercises} streak={streak} tot={tot} metas={metas} supabaseUser={supabaseUser} nombre={nombre} obj={obj} onClose={()=>setShowDesafiosComunidad(false)}/>}
       {showLigaAmigos&&<LigaAmigosModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} nombre={nombre} saludScore={saludScore} streak={streak} xpTotal={xpTotal} isPro={isPro} onClose={()=>setShowLigaAmigos(false)}/>}
       {showPlanAdaptativo&&<PlanAdaptativoModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} weightHistory={weightHistory} streak={streak} tot={tot} onClose={()=>setShowPlanAdaptativo(false)}/>}
       {showPlanFamiliar&&<PlanFamiliarModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} isPro={isPro} onClose={()=>setShowPlanFamiliar(false)}/>}
