@@ -7487,6 +7487,8 @@ function AppCore() {
   const [showShare,setShowShare]     = useState(false);
   const [avatar,setAvatar]           = useState(()=>LS.get('avatar','🧑'));
   const [showAvatarPicker,setShowAvatarPicker] = useState(false);
+  const [photoUrl,setPhotoUrl]         = useState(()=>LS.get('photoUrl',''));
+  const [uploadingPhoto,setUploadingPhoto] = useState(false);
   const [showLegal,setShowLegal]               = useState(null);
   const [editName,setEditName]       = useState(false);
   const [tempName,setTempName]       = useState('');
@@ -7778,6 +7780,7 @@ function AppCore() {
   useEffect(()=>{LS.set('veganMode',veganMode);},[veganMode]);
   useEffect(()=>{LS.set('sinCalorias',sinCalorias);},[sinCalorias]);
   useEffect(()=>{LS.set('accountType',accountType);},[accountType]);
+  useEffect(()=>{LS.set('photoUrl',photoUrl);},[photoUrl]);
   useEffect(()=>{LS.set('nutriPlan',nutriPlan);},[nutriPlan]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
@@ -8743,13 +8746,28 @@ function AppCore() {
                 <div>
                   <div style={{fontSize:10,fontWeight:700,color:'#1D3557',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>Tus recomendaciones esta semana</div>
                   <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-                    {(nutriPlan.recomendaciones||[]).map((r,i)=>(
+                    {(nutriPlan.recomendaciones||[]).filter(r=>{
+                      // Filtrar recomendaciones que contradigan alergias
+                      const tipo = (r.tipo||'').toLowerCase();
+                      if(userAllergens.includes('gluten') && (tipo.includes('pan')||tipo.includes('trigo')||tipo.includes('cereal'))) return false;
+                      if(userAllergens.includes('lacteos') && (tipo.includes('leche')||tipo.includes('queso')||tipo.includes('yogur')||tipo.includes('lácteo'))) return false;
+                      if(userAllergens.includes('mariscos') && (tipo.includes('marisco')||tipo.includes('camarón')||tipo.includes('pescado'))) return false;
+                      if(userAllergens.includes('huevo') && tipo.includes('huevo')) return false;
+                      if(userAllergens.includes('frutos_secos') && (tipo.includes('nuez')||tipo.includes('almendra')||tipo.includes('fruto seco'))) return false;
+                      if(veganMode && (tipo.includes('carne')||tipo.includes('pollo')||tipo.includes('pescado')||tipo.includes('lácteo')||tipo.includes('leche')||tipo.includes('huevo'))) return false;
+                      return true;
+                    }).map((r,i)=>(
                       <div key={i} style={{background:'white',borderRadius:10,padding:'5px 10px',border:'1px solid #1D355720'}}>
                         <div style={{fontSize:11,fontWeight:700,color:'#1D3557'}}>{r.tipo}</div>
                         <div style={{fontSize:9,color:C.textSec}}>{r.porcion}</div>
                       </div>
                     ))}
                   </div>
+                  {userAllergens.length>0&&(
+                    <div style={{fontSize:9,color:C.textSec,marginTop:6,fontStyle:'italic'}}>
+                      ✓ Filtrado según tus alergias e intolerancias
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -9709,22 +9727,75 @@ function AppCore() {
             {/* Avatar + nombre */}
             <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}>
               <div style={{position:'relative'}}>
+                {/* Foto o avatar emoji */}
                 <div style={{
-                  width:72,height:72,borderRadius:22,
+                  width:72,height:72,borderRadius:22,overflow:'hidden',
                   background:`linear-gradient(135deg,${C.surfaceAlt},${C.border})`,
                   display:'flex',alignItems:'center',justifyContent:'center',
-                  fontSize:38,border:`2px solid ${C.border}`,
+                  fontSize:38,border:`2px solid ${C.border}`,flexShrink:0,
                 }}>
-                  {avatar}
+                  {photoUrl
+                    ? <img src={photoUrl} alt="foto" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                    : avatar
+                  }
                 </div>
-                <button className="tap" onClick={()=>setShowAvatarPicker(true)} style={{
+                {/* Botón editar foto */}
+                <label style={{
                   position:'absolute',bottom:-4,right:-4,
                   width:26,height:26,borderRadius:8,
                   background:'#D42020',border:'2px solid white',
                   fontSize:12,cursor:'pointer',
                   display:'flex',alignItems:'center',justifyContent:'center',color:'white',
-                  boxShadow:'0 2px 8px rgba(0,122,255,0.4)',
-                }}>✏️</button>
+                  boxShadow:'0 2px 8px rgba(212,32,32,0.4)',
+                }}>
+                  {uploadingPhoto?'⏳':'📷'}
+                  <input type="file" accept="image/*" style={{display:'none'}} onChange={async(e)=>{
+                    const file = e.target.files?.[0];
+                    if(!file) return;
+                    setUploadingPhoto(true);
+                    // Read as base64 and store locally
+                    const reader = new FileReader();
+                    reader.onload = (ev)=>{
+                      const url = ev.target.result;
+                      setPhotoUrl(url);
+                      LS.set('photoUrl', url);
+                      // Upload to Supabase Storage if logged in
+                      if(supabaseUser) {
+                        const fileName = `avatars/${supabaseUser.id}.jpg`;
+                        supabase.storage.from('avatars').upload(fileName, file, {upsert:true})
+                          .then(({data})=>{
+                            if(data) {
+                              const {data:pub} = supabase.storage.from('avatars').getPublicUrl(fileName);
+                              if(pub?.publicUrl) {
+                                setPhotoUrl(pub.publicUrl);
+                                LS.set('photoUrl', pub.publicUrl);
+                                supabase.from('profiles').upsert({id:supabaseUser.id, avatar_url:pub.publicUrl},{onConflict:'id'}).then(()=>{});
+                              }
+                            }
+                          });
+                      }
+                      setUploadingPhoto(false);
+                      haptic('success');
+                    };
+                    reader.readAsDataURL(file);
+                  }}/>
+                </label>
+                {/* Botón cambiar emoji avatar (si no hay foto) */}
+                {!photoUrl&&<button className="tap" onClick={()=>setShowAvatarPicker(true)} style={{
+                  position:'absolute',bottom:-4,left:-4,
+                  width:26,height:26,borderRadius:8,
+                  background:C.surfaceAlt,border:`2px solid ${C.border}`,
+                  fontSize:12,cursor:'pointer',
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                }}>😊</button>}
+                {/* Botón borrar foto */}
+                {photoUrl&&<button className="tap" onClick={()=>{setPhotoUrl('');LS.set('photoUrl','');haptic('light');}} style={{
+                  position:'absolute',bottom:-4,left:-4,
+                  width:26,height:26,borderRadius:8,
+                  background:C.surfaceAlt,border:`2px solid ${C.border}`,
+                  fontSize:11,cursor:'pointer',
+                  display:'flex',alignItems:'center',justifyContent:'center',color:C.textMuted,
+                }}>✕</button>}
               </div>
               <div style={{flex:1}}>
                 {editName?(
@@ -10485,7 +10556,7 @@ function AppCore() {
 
       {/* ══ BOTTOM NAV ══ */}
       <div style={{position:'fixed',bottom:0,left:0,right:0,zIndex:30,background:C.navBg,backdropFilter:'blur(16px)',borderTop:`1px solid ${C.border}`,padding:'8px 8px calc(18px + env(safe-area-inset-bottom))',display:'flex',transition:'background .3s'}}>
-        {[{icon:'🏠',lbl:'Inicio'},{icon:'➕',lbl:'Agregar'},{icon:'📋',lbl:'Mi Día'},{icon:'📊',lbl:'Stats'},{icon:'🎯',lbl:'Perfil'}].map(({icon,lbl},i)=>(
+        {[{icon:'🏠',lbl:'Inicio'},{icon:'➕',lbl:'Agregar'},{icon:'📋',lbl:'Mi Día'},{icon:'📊',lbl:'Stats'},{icon:'👤',lbl:'Perfil'}].map(({icon,lbl},i)=>(
           <button key={i} className="nav-btn tap" onClick={()=>goTab(i)} style={{
             flex:1,border:'none',background:'none',cursor:'pointer',fontFamily:F,
             display:'flex',flexDirection:'column',alignItems:'center',gap:3,padding:'5px 0',
