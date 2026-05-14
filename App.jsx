@@ -7429,6 +7429,9 @@ function AppCore() {
   const [proMode,setProMode]           = useState('professional'); // 'professional' | 'personal' — switch del profesional
   const [pacientes,setPacientes]       = useState([]);
   const [loadingPacientes,setLoadingPacientes] = useState(false);
+  const [nutriPlan,setNutriPlan]       = useState(()=>LS.get('nutriPlan',null));
+  const [nutriCode,setNutriCode]       = useState('');
+  const [loadingNutriCode,setLoadingNutriCode] = useState(false);
   const [weightHistory,setWeightHistory] = useState(()=>LS.get('weightHistory',[]));
   const [obj,setObj]           = useState(()=>LS.get('obj','mantener'));
   const [ritmo,setRitmo]       = useState(()=>LS.get('ritmo','normal'));
@@ -7681,7 +7684,34 @@ function AppCore() {
         LS.set(key,{...sent,n:true});
       }
 
-      // LUNES 09:00 — resumen semanal motivacional
+      // Recordatorios inteligentes del plan del nutricionista
+      if(nutriPlan?.recomendaciones?.length>0) {
+        const recsKey = 'nutri_recs_'+todayKey();
+        const sentRecs = LS.get(recsKey, {});
+        const hora = h*60+m;
+        nutriPlan.recomendaciones.forEach((rec, idx) => {
+          const recKey = `rec_${idx}`;
+          if(sentRecs[recKey]) return;
+          // Distribuir recordatorios: fruta→11:30, verdura→13:30, agua→10:00, otros→random entre 10-17h
+          const tipo = (rec.tipo||'').toLowerCase();
+          let targetMin = 600; // 10:00 default
+          if(tipo.includes('fruta'))   targetMin = 11*60+30;
+          if(tipo.includes('verdura')) targetMin = 13*60+30;
+          if(tipo.includes('agua'))    targetMin = 10*60;
+          if(tipo.includes('legumbre'))targetMin = 12*60;
+          if(hora>=targetMin && hora<targetMin+30) {
+            const msgs = [
+              `🌿 Tu nutricionista recomienda: ${rec.porcion} de ${rec.tipo} hoy`,
+              `💡 Recuerda tu meta de ${rec.tipo} — ${rec.porcion}`,
+              `👩‍⚕️ ¿Ya cumpliste tu porción de ${rec.tipo}? Meta: ${rec.porcion}`,
+            ];
+            setToast(msgs[idx % msgs.length]);
+            LS.set(recsKey, {...sentRecs, [recKey]:true});
+          }
+        });
+      }
+
+            // LUNES 09:00 — resumen semanal motivacional
       if(now.getDay()===1&&h===9&&m<30&&!sent.lunes){
         const dias=[];
         for(let i=1;i<=7;i++){
@@ -7748,6 +7778,7 @@ function AppCore() {
   useEffect(()=>{LS.set('veganMode',veganMode);},[veganMode]);
   useEffect(()=>{LS.set('sinCalorias',sinCalorias);},[sinCalorias]);
   useEffect(()=>{LS.set('accountType',accountType);},[accountType]);
+  useEffect(()=>{LS.set('nutriPlan',nutriPlan);},[nutriPlan]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
   /* ── Sync bidireccional al hacer login ── */
@@ -8690,6 +8721,38 @@ function AppCore() {
               </div>
               <span style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>›</span>
             </button>
+          )}
+
+          {/* Card plan del nutricionista */}
+          {nutriPlan&&accountType==='personal'&&(
+            <div style={{background:'#1D355710',borderRadius:20,padding:'14px 16px',marginBottom:12,border:'1px solid #1D355730'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                <div style={{width:36,height:36,borderRadius:10,background:'#1D355720',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>👩‍⚕️</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#1D3557'}}>Tu nutricionista</div>
+                  <div style={{fontSize:10,color:C.textSec,marginTop:1}}>Plan activo · {nutriPlan.nombre}</div>
+                </div>
+                <div style={{fontSize:11,fontWeight:700,color:'#1D3557'}}>{nutriPlan.calorias_meta} kcal/día</div>
+              </div>
+              {nutriPlan.mensaje&&(
+                <div style={{background:'white',borderRadius:12,padding:'10px 12px',marginBottom:10,border:'1px solid #1D355720'}}>
+                  <div style={{fontSize:11,color:'#1D3557',lineHeight:1.5,fontStyle:'italic'}}>"{nutriPlan.mensaje}"</div>
+                </div>
+              )}
+              {nutriPlan.recomendaciones?.length>0&&(
+                <div>
+                  <div style={{fontSize:10,fontWeight:700,color:'#1D3557',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>Tus recomendaciones esta semana</div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                    {(nutriPlan.recomendaciones||[]).map((r,i)=>(
+                      <div key={i} style={{background:'white',borderRadius:10,padding:'5px 10px',border:'1px solid #1D355720'}}>
+                        <div style={{fontSize:11,fontWeight:700,color:'#1D3557'}}>{r.tipo}</div>
+                        <div style={{fontSize:9,color:C.textSec}}>{r.porcion}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {/* ── HERO: SALUD SCORE / SIN CALORÍAS ── */}
@@ -9857,6 +9920,67 @@ function AppCore() {
                     <div style={{position:'absolute',top:3,left:sinCalorias?20:3,width:20,height:20,borderRadius:10,
                       background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
                   </button>
+                </div>
+
+                {/* Vincular con nutricionista */}
+                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${nutriPlan?'#1D3557':C.border}`}}>
+                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:nutriPlan?10:0}}>
+                    <div style={{fontSize:28,flexShrink:0}}>👩‍⚕️</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{nutriPlan?`Vinculado con ${nutriPlan.nutricionista_nombre||'tu nutricionista'}`:'Vincular con nutricionista'}</div>
+                      <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{nutriPlan?'Tu plan nutricional está activo':'Ingresa el código que te dio tu nutricionista'}</div>
+                    </div>
+                    {nutriPlan&&<button onClick={()=>{setNutriPlan(null);LS.set('nutriPlan',null);}} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}
+                  </div>
+                  {!nutriPlan&&(
+                    <div style={{display:'flex',gap:8,marginTop:10}}>
+                      <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase())}
+                        placeholder="NUT-XXXXX"
+                        style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
+                      <button onClick={async()=>{
+                        if(!nutriCode.trim()||loadingNutriCode) return;
+                        setLoadingNutriCode(true);
+                        // Buscar plan con ese código
+                        const {data} = await supabase.from('nutrition_plans')
+                          .select('*, nutricionista:nutricionista_id(id)')
+                          .ilike('nombre', `%${nutriCode.trim()}%`)
+                          .limit(1);
+                        // Buscar por código del profesional en profiles
+                        const {data:profData} = await supabase.from('profiles')
+                          .select('id,professional_code')
+                          .eq('professional_code', nutriCode.trim())
+                          .single();
+                        if(profData) {
+                          // Buscar plan de este nutricionista para este usuario
+                          const {data:planData} = await supabase.from('nutrition_plans')
+                            .select('*')
+                            .eq('nutricionista_id', profData.id)
+                            .order('created_at',{ascending:false})
+                            .limit(1)
+                            .single();
+                          if(planData){
+                            const plan = {...planData, nutricionista_nombre: profData.professional_code};
+                            setNutriPlan(plan);
+                            LS.set('nutriPlan', plan);
+                            // Actualizar paciente_id en el plan
+                            if(supabaseUser) {
+                              await supabase.from('nutrition_plans').update({paciente_id:supabaseUser.id}).eq('id',planData.id);
+                            }
+                            haptic('success');
+                          } else {
+                            haptic('error');
+                            alert('No se encontró un plan asignado para este código.');
+                          }
+                        } else {
+                          haptic('error');
+                          alert('Código no encontrado. Verifica con tu nutricionista.');
+                        }
+                        setLoadingNutriCode(false);
+                      }} disabled={loadingNutriCode} style={{padding:'10px 14px',borderRadius:12,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
+                        {loadingNutriCode?'...':'Vincular'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
             {/* ═══ ALERGIAS E INTOLERANCIAS ═══ */}
