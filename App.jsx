@@ -6641,10 +6641,59 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
 function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [loading, setLoading] = useState(false);
 
+  // Detectar si estamos dentro de un TWA (Android app)
+  const isTWA = document.referrer.includes('android-app://') ||
+    window.matchMedia('(display-mode: standalone)').matches && /android/i.test(navigator.userAgent);
+
+  // Google Play Billing via Digital Goods API
+  const handleGooglePlayBilling = async (plan) => {
+    const skuMap = {
+      monthly: 'caloru_pro_monthly',
+      yearly:  'caloru_pro_yearly',
+    };
+    const sku = skuMap[plan];
+    try {
+      // Verificar que Digital Goods API esté disponible (TWA con Play Billing)
+      if (!window.getDigitalGoodsService) throw new Error('Digital Goods API no disponible');
+      const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+      const details = await service.getDetails([sku]);
+      if (!details || details.length === 0) throw new Error('Producto no encontrado en Play Store');
+      const item = details[0];
+      // Iniciar el flujo de pago de Play Store
+      const paymentRequest = new PaymentRequest(
+        [{ supportedMethods: 'https://play.google.com/billing', data: { sku: item.itemId } }],
+        { total: { label: item.title, amount: { currency: item.price.currency, value: '0' } } }
+      );
+      const paymentResponse = await paymentRequest.show();
+      const purchaseToken = paymentResponse.details.purchaseToken;
+      // Verificar y activar Pro en Supabase via Edge Function
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ purchaseToken, sku, user_email: supabaseUser.email, plan }),
+      });
+      await paymentResponse.complete('success');
+      alert('✅ ¡Suscripción activada! Recarga la app para disfrutar Calorú Pro.');
+      onClose();
+    } catch(e) {
+      console.error('Play Billing error:', e);
+      alert('Error al procesar el pago. Intenta de nuevo.');
+    }
+  };
+
   const handleSubscribe = async (plan) => {
     if (!supabaseUser) { alert('Debes iniciar sesión para suscribirte.'); return; }
     setLoading(true);
     try {
+      // En Android TWA → Google Play Billing
+      if (isTWA && window.getDigitalGoodsService) {
+        await handleGooglePlayBilling(plan);
+        setLoading(false);
+        return;
+      }
+      // En web/iOS → Mercado Pago
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
       const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription', {
