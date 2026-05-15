@@ -1,9 +1,30 @@
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const MP_ACCESS_TOKEN = Deno.env.get("MP_ACCESS_TOKEN");
+const MP_WEBHOOK_SECRET = Deno.env.get("MP_WEBHOOK_SECRET");
+
+async function verifyMPSignature(req: Request, resourceId: string): Promise<boolean> {
+  const xSignature = req.headers.get("x-signature");
+  const xRequestId = req.headers.get("x-request-id");
+  if (!xSignature || !MP_WEBHOOK_SECRET) return false;
+
+  const parts = Object.fromEntries(xSignature.split(",").map(p => p.split("=")));
+  const ts = parts["ts"];
+  const v1 = parts["v1"];
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${resourceId};request-id:${xRequestId};ts:${ts};`;
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(MP_WEBHOOK_SECRET),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
+  const computed = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
+  return computed === v1;
+}
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://caloru.cl",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-signature, x-request-id",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -21,7 +42,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    console.log("MP Webhook received:", JSON.stringify(body));
+    console.log("MP Webhook received: type=" + (body.type || body.topic || "unknown"));
 
     // MP envía distintos tipos de eventos — solo nos interesan preapproval
     const topic = body.type || body.topic;
@@ -29,6 +50,16 @@ Deno.serve(async (req) => {
 
     if (!topic || !resourceId) {
       return new Response(JSON.stringify({ ok: true, msg: "ignored - no topic/id" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Verificar firma HMAC-SHA256 de Mercado Pago
+    const signatureValid = await verifyMPSignature(req, String(resourceId));
+    if (!signatureValid) {
+      console.error("MP Webhook: firma inválida rechazada");
+      return new Response(JSON.stringify({ error: "Firma inválida" }), {
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -54,7 +85,7 @@ Deno.serve(async (req) => {
     }
 
     const subscription = await mpRes.json();
-    console.log("MP subscription:", JSON.stringify(subscription));
+    console.log("MP subscription status:", subscription.status, "plan:", subscription.reason?.split(" ").slice(-1)[0]);
 
     const status = subscription.status;           // authorized | paused | cancelled
     const payerEmail = subscription.payer_email;

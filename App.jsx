@@ -905,9 +905,18 @@ const F = "'Sora','Nunito',sans-serif";
 /* ═══════════════════════════════════════════════════════
    LOCALSTORAGE
 ═══════════════════════════════════════════════════════ */
+/* Claves con datos de salud — se guardan en sessionStorage (se limpian al cerrar el navegador)
+   El resto va a localStorage para persistencia normal entre sesiones */
+const _SENSITIVE_KEYS = new Set(['perfil','allergens','customMetas']);
 const LS = {
-  get:(k,d)=>{try{const v=localStorage.getItem('caloru_'+k);return v!=null?JSON.parse(v):d;}catch{return d;}},
-  set:(k,v)=>{try{localStorage.setItem('caloru_'+k,JSON.stringify(v));}catch{}},
+  get:(k,d)=>{
+    const store = _SENSITIVE_KEYS.has(k) ? sessionStorage : localStorage;
+    try{const v=store.getItem('caloru_'+k);return v!=null?JSON.parse(v):d;}catch{return d;}
+  },
+  set:(k,v)=>{
+    const store = _SENSITIVE_KEYS.has(k) ? sessionStorage : localStorage;
+    try{store.setItem('caloru_'+k,JSON.stringify(v));}catch{}
+  },
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -3336,14 +3345,33 @@ const getPortionHints = (grams) => {
 ═══════════════════════════════════════════════════════ */
 const EDGE_FN_URL = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food';
 
-/* Helper: llamar a la edge function con retry */
+/* Rate limiter: máx 20 llamadas/hora y 2s de cooldown entre llamadas */
+const _aiCallLog = [];
+const AI_MAX_PER_HOUR = 20;
+const AI_COOLDOWN_MS  = 2000;
+
+/* Helper: llamar a la edge function con auth + rate limiting */
 const callEdgeFn = async (body, signal) => {
+  const now = Date.now();
+  _aiCallLog.splice(0, _aiCallLog.length, ..._aiCallLog.filter(t => now - t < 3_600_000));
+  if (_aiCallLog.length >= AI_MAX_PER_HOUR)
+    throw new Error('Límite de consultas de IA alcanzado. Espera unos minutos.');
+  const last = _aiCallLog[_aiCallLog.length - 1] ?? 0;
+  if (now - last < AI_COOLDOWN_MS)
+    throw new Error('Demasiado rápido. Espera un momento.');
+  _aiCallLog.push(now);
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const authHeader = session?.access_token
+    ? { 'Authorization': `Bearer ${session.access_token}` }
+    : {};
+
   const ctrl = signal ? null : new AbortController();
   const tid  = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
   try {
     const res = await fetch(EDGE_FN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeader },
       body: JSON.stringify(body),
       signal: signal || ctrl?.signal,
     });
@@ -4265,19 +4293,20 @@ Seguido de tu respuesta normal. Estima los valores nutricionales para una porci�
     if(match && onAddFood) {
       try {
         const food = JSON.parse(match[1]);
+        const clamp = (v, min, max) => Math.min(max, Math.max(min, Number(v) || 0));
         onAddFood({
           id: Math.abs([...(food.nombre||'')].reduce((h,c)=>Math.imul(31,h)+c.charCodeAt(0)|0,0))||Date.now(),
-          nombre: food.nombre || 'Alimento registrado',
+          nombre: String(food.nombre || 'Alimento registrado').slice(0, 120),
           marca: 'Nutri IA',
           cat: 'Preparados',
           porcion: 100,
-          cal: Number(food.cal) || 0,
-          prot: Number(food.prot) || 0,
-          carbs: Number(food.carbs) || 0,
-          grasas: Number(food.grasas) || 0,
-          fibra: Number(food.fibra) || 0,
-          azucar: Number(food.azucar) || 0,
-          sodio: Number(food.sodio) || 0,
+          cal:    clamp(food.cal,    0, 5000),
+          prot:   clamp(food.prot,   0,  500),
+          carbs:  clamp(food.carbs,  0,  500),
+          grasas: clamp(food.grasas, 0,  300),
+          fibra:  clamp(food.fibra,  0,  100),
+          azucar: clamp(food.azucar, 0,  300),
+          sodio:  clamp(food.sodio,  0, 5000),
           emoji: food.emoji || '🍽️',
           comida: meal,
         });
@@ -10664,18 +10693,16 @@ function AppCore() {
 export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [showAuth, setShowAuth]   = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
 
   useEffect(()=>{
-    // Chequeo inicial de sesión
     supabase.auth.getSession().then(({ data: { session } }) => {
-      const skipAuth = localStorage.getItem('caloru_skipAuth');
-      if (!session && !skipAuth) setShowAuth(true);
+      if (!session && !guestMode) setShowAuth(true);
       setAuthReady(true);
     });
-    // Escucha cambios de auth — navega automáticamente al entrar/salir
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        setShowAuth(false);   // entró → mostrar app
+        setShowAuth(false);
         setAuthReady(true);
       }
     });
@@ -10683,7 +10710,7 @@ export default function App() {
   }, []);
 
   const handleAuth = (user) => {
-    if (!user) localStorage.setItem('caloru_skipAuth', '1');
+    if (!user) setGuestMode(true);
     setShowAuth(false);
   };
 

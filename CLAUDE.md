@@ -53,11 +53,20 @@ contenido concreto para hacer crecer la app en Chile y LATAM.
 - Roadmap de marketing trimestral
 - Métricas y KPIs a seguir
 
+### 🔐 security-auditor → Audita la seguridad de la app
+Úsalo cuando el usuario pida:
+- Revisar vulnerabilidades de seguridad en el código
+- Auditar autenticación, sesiones o manejo de datos sensibles
+- Verificar seguridad antes de un release importante
+- Revisar configuración de Supabase RLS o Edge Functions
+- Analizar riesgos de XSS, inyección o exposición de datos
+
 ## Reglas de delegación
 1. Si el usuario pide "analiza", "investiga" o "compara" → delegar a `analyst`
 2. Si el usuario pide "post", "contenido", "redes" o "copy" → delegar a `content-creator`
 3. Si el usuario pide "estrategia", "plan", "cómo crecer" o "ideas" → delegar a `strategist`
-4. Para tareas complejas, puedes usar múltiples agentes en secuencia
+4. Si el usuario pide "seguridad", "vulnerabilidades", "audit" o "revisar datos" → delegar a `security-auditor`
+5. Para tareas complejas, puedes usar múltiples agentes en secuencia
 
 ## Al comenzar una sesión
 Siempre pregunta:
