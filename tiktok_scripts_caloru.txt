@@ -1,0 +1,618 @@
+=========================================================
+  CALORÚ — 5 SCRIPTS TIKTOK LISTOS PARA GRABAR
+  Targeting: usuarios frustrados con Fitia / apps foraneas
+  Fecha: Mayo 2026
+=========================================================
+
+
+---------------------------------------------------------
+SCRIPT 1 — "EL PAYWALL TRAMPA"
+Duración estimada: 45 segundos
+---------------------------------------------------------
+
+CONCEPTO:
+Recrear en tiempo real el momento exacto en que el usuario
+termina un quiz de onboarding de 5 minutos y descubre que
+tiene que pagar 56.000 CLP para acceder a todo. El contraste
+con Calorú es el remate.
+
+-- HOOK (0:00 - 0:03) --
+
+[CAMARA] Selfie frontal, cara cerca del telefono.
+Expresion de confusion genuina mirando la pantalla.
+
+[TEXTO EN PANTALLA] "POV: terminaste el quiz de 5 minutos
+y ahora te piden esto"
+
+[ACCION] Gira el telefono hacia la camara para mostrar
+una pantalla de paywall (puede ser captura editada o
+pantalla real). El numero "56.000 CLP" debe ser visible
+y grande.
+
+[AUDIO] Silencio total los primeros 2 segundos.
+Luego entra musica tipo "waiting/loading" o sonido
+de notificacion de cobro — el silencio previo hace
+que el golpe sea mayor.
+
+-- DESARROLLO (0:03 - 0:28) --
+
+[CAMARA] Camara fija, selfie. El creador habla directo
+a camara, tono calmado y empatico, no enojado.
+
+GUION HABLADO:
+"Mira, lo entiendo. Hiciste todo el quiz. Te preguntaron
+tu peso, tu altura, tus metas, cuanto duermes, si tienes
+estres... cinco minutos de tu vida, poh. Y al final te
+dicen que el 'plan personalizado' que te prometieron
+esta detras de un cobro de cincuenta y seis lucas al ano."
+
+[TEXTO EN PANTALLA — aparece mientras habla]
+"5 minutos de quiz"
+"Tu peso. Tu altura. Tus metas. Tu estres."
+[pausa dramatica]
+"...56.000 CLP/ano"
+"Prueba gratis: 3 dias"
+
+[ACCION] Subir los hombros con expresion de "que le
+vamos a hacer", gesto tipico chileno.
+
+GUION HABLADO (continua):
+"Y la prueba gratis son tres dias. Tres. Despues de eso,
+cero acceso."
+
+-- RESOLUCION (0:28 - 0:42) --
+
+[CAMARA] Misma camara fija. Tono cambia a positivo,
+natural, no exagerado.
+
+GUION HABLADO:
+"Por eso hicimos Calorú. App chilena, con los productos
+que uno realmente come en Chile. Sin quiz trampa, sin
+sorpresas al final. Lo que ves es lo que tienes."
+
+[TEXTO EN PANTALLA]
+"Calorú"
+"Hecha en Chile. Para chilenos."
+"Sin paywall trampa."
+
+-- CTA FINAL (0:42 - 0:45) --
+
+[CAMARA] Acerca la camara un poco, tono directo.
+
+GUION HABLADO:
+"Descargala gratis en caloru.cl"
+
+[TEXTO EN PANTALLA]
+"caloru.cl"
+"Descarga gratis"
+
+[AUDIO] Musica sube un poco al final, fade out.
+
+HASHTAGS:
+#nutricionchile #appnutricion #Chile #caloriaschile
+#Calorú #fitnesschile #comidasana #saludchile
+
+MEJOR HORARIO DE PUBLICACION:
+Martes o miercoles, 20:00 - 22:00 hrs Chile continental.
+(horario post-once, cuando la gente esta en el sofa
+con el telefono)
+
+NOTA DE PRODUCCION:
+Muy facil de grabar. Solo necesitas:
+- Un celular con camara frontal decente
+- Buena iluminacion (luz de ventana o un aro led barato)
+- Una pantalla editada o real del paywall de referencia
+- 1 toma, max 2 intentos
+Tiempo de grabacion estimado: 20 minutos.
+Edicion: cortes simples, texto animado en CapCut o
+herramienta similar. No necesitas camara adicional.
+
+
+---------------------------------------------------------
+SCRIPT 2 — "LA HALLULLA NO EXISTE"
+Duración estimada: 40 segundos
+---------------------------------------------------------
+
+CONCEPTO:
+El usuario busca "hallulla" en una app de nutricion
+(sin nombrar cual) y no encuentra nada util — resultados
+en ingles, datos de Peru, o cero resultados. Luego abre
+Calorú y aparece exacto, con datos reales.
+El humor viene de lo absurdo de la situacion, no de
+atacar a la competencia.
+
+-- HOOK (0:00 - 0:03) --
+
+[CAMARA] Pantalla del telefono grabada desde arriba
+(overhead shot), con una hallulla real al lado del
+telefono sobre una mesa o mesón. Mano escribe
+"hallulla" en el buscador de una app.
+
+[TEXTO EN PANTALLA] "Buscando hallulla en una app
+de nutricion famosa..."
+
+[AUDIO] Musica curiosa, tipo "lo-fi investigation"
+o simplemente el sonido ambiental de la cocina.
+
+-- DESARROLLO (0:03 - 0:22) --
+
+[CAMARA] Pantalla del telefono. Se ven resultados
+que no tienen sentido — puede mostrar:
+- "No se encontraron resultados"
+- Resultados en ingles ("white bread roll")
+- Datos de un pan que no se parece en nada
+
+[ACCION] La mano hace scroll hacia abajo lentamente,
+como buscando algo que no llega.
+
+[TEXTO EN PANTALLA — sincronizado con los resultados]
+"Hallulla... hmm"
+"White bread? No poh."
+"Pan Frances (Peru)? Tampoco."
+"0 resultados exactos."
+
+[CAMARA] Corte a cara del creador. Expresion de
+"en serio?" mirando el telefono. Clasico gesto de
+levantar la ceja.
+
+GUION HABLADO (breve, 5-7 segundos):
+"La hallulla es el pan mas chileno que hay, poh.
+Si una app de nutricion no la tiene... para quien
+la hicieron?"
+
+[AUDIO] Musica se detiene un segundo en este momento.
+
+-- RESOLUCION (0:22 - 0:37) --
+
+[CAMARA] De vuelta a pantalla overhead. Ahora abre
+Calorú. Escribe "hallulla". Aparece al tiro, con
+datos correctos: calorias, carbohidratos, proteinas.
+
+[TEXTO EN PANTALLA]
+"Calorú"
+[mientras aparece el resultado]
+"Hallulla Lider — 150 kcal"
+"Hallulla artesanal — 165 kcal"
+"Con datos reales."
+
+[ACCION] El dedo selecciona la hallulla correcta
+con naturalidad. Sin dramatismo.
+
+GUION HABLADO:
+"Calorú tiene mas de 400 productos chilenos reales.
+Hallulla, marraqueta, Colun, cecinas, todo lo que
+realmente comes en Chile."
+
+-- CTA FINAL (0:37 - 0:40) --
+
+[TEXTO EN PANTALLA]
+"caloru.cl — descarga gratis"
+
+[AUDIO] Musica vuelve suave, fade out rapido.
+
+GUION HABLADO:
+"La encuentras en caloru.cl"
+
+HASHTAGS:
+#comidachilena #hallulla #nutricionchile #Calorú
+#calorias #Chile #alimentacionchilena #saludchile
+
+MEJOR HORARIO DE PUBLICACION:
+Lunes o martes, 12:00 - 13:30 hrs.
+(horario de almuerzo, cuando la gente piensa en comida)
+
+NOTA DE PRODUCCION:
+Necesitas:
+- Una hallulla real (costo: 200 pesos)
+- Un telefono para grabar la pantalla de frente
+  (o grabar la pantalla directamente con screen recording
+  y hacer voiceover encima)
+- Mesa limpia de fondo, luz natural
+Consejo: el efecto mas poderoso es mostrar pantallas
+reales lado a lado. Usa CapCut para el split-screen si
+quieres hacerlo mas visual. Grabacion: 30 minutos.
+
+
+---------------------------------------------------------
+SCRIPT 3 — "HECHA EN PERU, USADA EN CHILE"
+Duración estimada: 55 segundos
+---------------------------------------------------------
+
+CONCEPTO:
+Formato educativo pero con ritmo rapido. Tono de
+"dato curioso que no sabias". Sin atacar a nadie
+directamente — el frame es "tiene sentido que no
+funcionen bien para nosotros, no las hicieron para
+nosotros". El orgullo local es el cierre.
+
+-- HOOK (0:00 - 0:03) --
+
+[CAMARA] Selfie frontal, cara de quien va a contar
+un dato importante. Tono casual, no formal.
+
+[TEXTO EN PANTALLA] "Por que las apps de nutricion
+no funcionan bien en Chile..."
+
+[AUDIO] Audio de tendencia en TikTok Chile — idealmente
+un sonido de "revelacion" o simplemente lo-fi neutro
+que no distraiga. Revisar trending audios la semana
+de publicacion.
+
+-- DESARROLLO (0:03 - 0:40) --
+
+[CAMARA] Camara fija, selfie. El creador habla
+con ritmo, como contando algo a un amigo.
+
+GUION HABLADO:
+"La mayoria de las apps de nutricion que usamos en
+Chile — las famosas, las que salen en los anuncios —
+fueron hechas en Estados Unidos o en Peru.
+Sus bases de datos se construyeron con los alimentos
+de esos paises."
+
+[TEXTO EN PANTALLA]
+"App A — fundada en Lima"
+"App B — fundada en San Francisco"
+"Sus datos: alimentos de alla."
+
+GUION HABLADO (continua):
+"Entonces cuando tu buscas una hallulla, una marraqueta,
+un Bilz, unas papas fritas de La Granja, una colacion
+de Lider... no esta, o esta con datos que no cuadran."
+
+[CAMARA] Corte rapido a pantalla mostrando busquedas
+fallidas o datos extraños para productos chilenos.
+Solo 3-4 segundos, luego vuelve a cara.
+
+[TEXTO EN PANTALLA]
+"Hallulla? No encontrado."
+"Mote con huesillo? Datos de Peru."
+"Bilz? Resultado en ingles."
+
+GUION HABLADO (continua):
+"No es que sean malas apps necesariamente.
+Es que no te conocen. No saben como comes tu.
+Como comemos los chilenos."
+
+[TEXTO EN PANTALLA]
+"No te conocen."
+
+-- RESOLUCION (0:40 - 0:52) --
+
+[CAMARA] Tono cambia a orgulloso, relajado.
+
+GUION HABLADO:
+"Por eso existe Calorú. Hecha en Chile, para chilenos.
+Mas de 400 productos que realmente comemos aca —
+desde la once hasta la colacion de las tres.
+Con datos reales, sin inventar."
+
+[TEXTO EN PANTALLA]
+"Calorú"
+"400+ productos chilenos reales"
+"La hallulla. La marraqueta. El Bilz."
+"Hecha en Chile. Para ti."
+
+-- CTA FINAL (0:52 - 0:55) --
+
+[TEXTO EN PANTALLA]
+"caloru.cl"
+
+GUION HABLADO:
+"Descargala en caloru.cl, es gratis."
+
+[AUDIO] Fade out suave.
+
+HASHTAGS:
+#Chile #nutricionchile #comidachilena #Calorú
+#appchilena #alimentacionchilena #calorias #fitnesschile
+
+MEJOR HORARIO DE PUBLICACION:
+Jueves, 19:00 - 21:00 hrs.
+(inicio de fin de semana, gente receptiva a contenido
+de bienestar para "empezar bien el lunes")
+
+NOTA DE PRODUCCION:
+El mas facil de los cinco de grabar.
+Solo necesitas:
+- Tu cara y un fondo limpio (pared blanca o cocina)
+- Buena iluminacion
+- Opcionalmente: 3-4 capturas de pantalla preparadas
+  con anticipacion para el segmento de ejemplos
+Edicion: cortes limpios, texto animado simple.
+Sin efectos especiales. El contenido hace el trabajo.
+Tiempo estimado: 25 minutos grabacion + 20 edicion.
+
+
+---------------------------------------------------------
+SCRIPT 4 — "LOS ERRORES QUE TE HACEN DESINSTALAR"
+Duración estimada: 50 segundos
+---------------------------------------------------------
+
+CONCEPTO:
+Recrear la frustracion acumulada de usar una app
+buggeada — pero con humor, no con rabia. El tono es
+"todos hemos pasado por esto" no "esa app es una
+porqueria". Empatia primero, solucion despues.
+El humor viene de reconocerse en la situacion.
+
+-- HOOK (0:00 - 0:03) --
+
+[CAMARA] Selfie frontal. El creador mira el telefono
+con expresion de paciencia agotada. Suspiro audible.
+
+[TEXTO EN PANTALLA] "La cara que pones cuando intentas
+registrar el almuerzo por quinta vez"
+
+[AUDIO] Silencio, solo el suspiro. Luego entra musica
+suave y un poco ironicamente "relajante" — contraste
+con la frustracion.
+
+-- DESARROLLO (0:03 - 0:35) --
+
+[CAMARA] Se alterna entre cara (reacciones) y pantalla
+del telefono. Puedes grabar la pantalla con screen
+recording si prefieres no mostrar el nombre de la app.
+
+[ACCION 1 — el error de registro]
+Muestra (o describe) intentar agregar una comida
+al registro. La app carga, carga, da error.
+
+GUION HABLADO:
+"Intentas registrar el almuerzo. Error. Lo intentas
+de nuevo. Error. Cierras la app, la abres. Error."
+
+[TEXTO EN PANTALLA]
+"Intento 1: Error"
+"Intento 2: Error"
+"Intento 3..."
+
+[ACCION 2 — los macros que cambian solos]
+[CAMARA] Cara de confusion total.
+
+GUION HABLADO:
+"Cuando por fin entra, los macros de la receta que
+guardaste la semana pasada cambiaron solos.
+No sabes por que. La app tampoco."
+
+[TEXTO EN PANTALLA]
+"Receta guardada: 450 kcal"
+[fecha anterior]
+"Hoy: 312 kcal"
+"...por que?"
+
+[ACCION 3 — el escaner]
+[CAMARA] Pantalla mostrando el escaner de codigo
+de barras girando sin resultado.
+
+GUION HABLADO:
+"Y el escaner de codigos de barras... mejor ni
+hablar. Actualiza la app y el escaner simplemente
+dejo de funcionar."
+
+[TEXTO EN PANTALLA]
+"Escaneando..."
+"Escaneando..."
+"Producto no encontrado"
+"[el producto esta en tu mano]"
+
+[CAMARA] Vuelve a cara. Expresion de alguien que
+tomo una decision. No enojado — liberado.
+
+GUION HABLADO:
+"Mira, en algun momento dices 'no, no es para tanto
+el esfuerzo'."
+
+-- RESOLUCION (0:35 - 0:47) --
+
+[CAMARA] Tono positivo, solucion practica.
+
+GUION HABLADO:
+"Calorú funciona. Punto. Registras, guarda, los
+macros quedan donde los dejaste. Y tiene los productos
+chilenos que realmente usas — sin tener que inventar
+ni buscar el equivalente gringo."
+
+[TEXTO EN PANTALLA]
+"Calorú: funciona."
+"Sin bugs raros."
+"Con tus productos chilenos."
+
+-- CTA FINAL (0:47 - 0:50) --
+
+GUION HABLADO:
+"caloru.cl — gratis, sin drama."
+
+[TEXTO EN PANTALLA]
+"caloru.cl"
+"Sin drama."
+
+[AUDIO] Musica sube levemente, fade out limpio.
+
+HASHTAGS:
+#nutricionchile #appnutricion #Chile #Calorú
+#calorias #saludchile #fitnesschile #comidachilena
+
+MEJOR HORARIO DE PUBLICACION:
+Lunes, 12:00 - 14:00 hrs.
+(inicio de semana, cuando la gente decide "esta semana
+si me cuido" y esta buscando apps)
+
+NOTA DE PRODUCCION:
+Requiere un poco mas de preparacion:
+- Tener capturas de pantalla o screen recordings
+  de los errores preparados (pueden ser recreaciones)
+- Grabar las reacciones de cara por separado y editar
+  intercalado con las pantallas
+- Opcionalmente: grabar una sola toma corrida con
+  el telefono adicional mostrando la pantalla
+Herramienta util: DU Recorder o la grabacion de
+pantalla nativa para capturar los bugs.
+Tiempo estimado: 45 minutos grabacion + 30 edicion.
+Es el mas complejo de los cinco pero el mas relatable.
+
+
+---------------------------------------------------------
+SCRIPT 5 — "LA ONCE CUENTA"
+Duración estimada: 45 segundos
+---------------------------------------------------------
+
+CONCEPTO:
+El unico script 100% positivo de los cinco. Sin
+comparaciones, sin frustracion. Celebrar la once
+chilena — ese momento cultural unico — y mostrar
+que merece ser registrada con dignidad y precision.
+Tono: orgulloso, calido, un poco poetico pero sin
+cursileria. La once no es "cheat meal". Es cultura.
+
+-- HOOK (0:00 - 0:03) --
+
+[CAMARA] Overhead shot de una mesa de once chilena.
+Pan (hallulla o marraqueta), palta, queso, te, quizas
+una marraqueta a punto de ser untada. La toma tiene
+que ser bonita — buena luz natural, colores reales,
+nada de filtros exagerados.
+
+[TEXTO EN PANTALLA] "La once merece ser registrada
+bien."
+
+[AUDIO] Musica calida, tipo lo-fi chileno o simplemente
+musica acustica suave. Sin letra al principio para
+no distraer del visual.
+
+-- DESARROLLO (0:03 - 0:28) --
+
+[CAMARA] Mezcla de overhead de la mesa y selfie
+frontal. El creador habla con calma y orgullo,
+como alguien compartiendo algo que le importa.
+
+GUION HABLADO:
+"La once es sagrada, poh. Son las seis de la tarde,
+tomas asiento, hay pan, hay palta, quizas queso,
+el te... y alguien que cuenta como fue el dia."
+
+[CAMARA] Plano de la mano untando palta en la hallulla.
+Toma de 3-4 segundos, lenta, bonita.
+
+GUION HABLADO (continua):
+"El problema es que cuando intentas registrar esa
+once en una app de nutricion, buscas hallulla y
+no aparece. Buscas palta y sale 'avocado'.
+El queso Colun no existe en el sistema."
+
+[TEXTO EN PANTALLA]
+"Hallulla: no encontrada"
+"Palta: 'avocado'"
+"Queso Colun: no existe"
+
+[CAMARA] Vuelve a la mesa de once. Toma linda.
+El creador mira la camara.
+
+GUION HABLADO:
+"Como si nuestra comida no contara. Como si hubiera
+que avergonzarse de como comemos."
+
+-- RESOLUCION (0:28 - 0:42) --
+
+[CAMARA] Abre Calorú en el telefono. Muestra como
+busca "hallulla" y aparece al tiro. Luego "palta".
+Luego "queso Colun". Todo aparece con datos reales.
+Toma breve de cada uno, 2-3 segundos cada busqueda.
+
+[TEXTO EN PANTALLA — aparece con cada busqueda]
+"Hallulla: 150 kcal"
+"Palta mediana: 120 kcal"
+"Queso Colun: 90 kcal"
+"Tu once: registrada."
+
+GUION HABLADO:
+"Calorú tiene tus productos. Los chilenos de verdad.
+Porque la once cuenta. Tu comida cuenta.
+Y no tienes que cambiarla por alimentos que no son
+los tuyos para cuidarte."
+
+[AUDIO] La musica sube un poco, calida, al llegar
+al mensaje positivo.
+
+-- CTA FINAL (0:42 - 0:45) --
+
+[CAMARA] Toma final de la mesa de once, bonita.
+Texto en pantalla limpio.
+
+[TEXTO EN PANTALLA]
+"Calorú — Tu nutricion, a tu ritmo."
+"caloru.cl"
+
+[AUDIO] Fade out suave de la musica.
+
+(Opcional, si queda bien con el tono):
+GUION HABLADO:
+"caloru.cl — hecha en Chile, para los que comemos
+como chilenos."
+
+HASHTAGS:
+#once #comidachilena #Chile #nutricionchile #Calorú
+#hallulla #palta #alimentacionchilena
+
+MEJOR HORARIO DE PUBLICACION:
+Miercoles o jueves, 17:30 - 18:30 hrs.
+(hora exacta de la once, maximo contexto cultural)
+
+NOTA DE PRODUCCION:
+El mas cuidado visualmente de los cinco pero no
+requiere equipamiento especial:
+- Prepara una mesa de once real (hallulla, palta,
+  queso, te) — autentica, no perfecta
+- Luz natural de ventana es suficiente y es mejor
+  que la artificial para comida
+- Graba los planos de la mesa por separado de los
+  planos de cara
+- El overhead shot: apoya el telefono en algo alto
+  o pide a alguien que lo sostenga 30 segundos
+- Total de ingredientes en escena: menos de 3.000 pesos
+Tiempo estimado: 40 minutos grabacion + 25 edicion.
+Este video tiene el mayor potencial de viralidad
+organica porque activa orgullo cultural, no solo
+frustracion con una app.
+
+
+=========================================================
+  NOTAS GENERALES DE PRODUCCION — LOS 5 SCRIPTS
+=========================================================
+
+EQUIPAMIENTO MINIMO RECOMENDADO:
+- iPhone o Android moderno (camara trasera para pantallas,
+  frontal para selfies)
+- Aro de luz LED (opcional pero suma mucho, desde 15.000 CLP)
+- CapCut para edicion — es gratis y tiene todo lo que
+  necesitas para texto animado y cortes
+- Microfono de solapa con cable (desde 8.000 CLP en
+  Mercado Libre Chile) para audio limpio en exteriores
+
+ORDEN RECOMENDADO DE PUBLICACION:
+Semana 1 — Script 5 (La once cuenta): empezar con
+el positivo para presentar Calorú con calidez
+Semana 2 — Script 2 (La hallulla no existe): el mas
+relatable para usuarios que han vivido exactamente eso
+Semana 3 — Script 1 (El paywall trampa): para la
+gente que ya considera pagar por una app de nutricion
+Semana 4 — Script 4 (Los errores): para usuarios
+que ya usan apps pero estan frustrados
+Semana 5 — Script 3 (Hecha en Peru): el educativo,
+para construir autoridad y contexto de mercado
+
+METRICAS A SEGUIR POR VIDEO:
+- Watch rate hasta 50% del video (indica que el hook funciono)
+- Watch rate completo (indica que el contenido engancha)
+- Comentarios con "yo tambien" o identificacion propia
+- Clicks a caloru.cl desde el perfil
+- Shares (el Script 5 deberia tener el mayor share rate)
+
+VARIACIONES A TESTEAR:
+Cada script puede grabarse con dos hooks diferentes
+y publicarse en dias distintos para ver cual performa
+mejor antes de invertir en pauta.
+
+=========================================================
+  FIN DEL DOCUMENTO
+=========================================================

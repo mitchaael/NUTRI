@@ -613,6 +613,27 @@ const DB = [
   {id:323,nombre:"Creatina monohidratada",        marca:"Genérico",     cat:"Suplementos",porcion:5,   cal:0,   prot:0,   carbs:0,   grasas:0,   fibra:0, azucar:3, sodio:100,   emoji:"⚗️"},
   {id:324,nombre:"BCAA polvo",                    marca:"Genérico",     cat:"Suplementos",porcion:10,  cal:35,  prot:8,   carbs:0,   grasas:0,   fibra:0, azucar:3, sodio:100,   emoji:"💊"},
   {id:325,nombre:"Colágeno hidrolizado",          marca:"Genérico",     cat:"Suplementos",porcion:10,  cal:35,  prot:9,   carbs:0,   grasas:0,   fibra:0, azucar:3, sodio:100,   emoji:"✨"},
+  /* ── PRODUCTOS FALTANTES CLAVE ── */
+  {id:496, nombre:"Salmón fresco",              marca:"Natural",     cat:"Pescados",   porcion:150, cal:311, prot:31,  carbs:0,   grasas:19,  fibra:0,   azucar:0,  sodio:75,  emoji:"🐟"},
+  {id:497, nombre:"Palta / Aguacate",           marca:"Natural",     cat:"Frutas",     porcion:100, cal:160, prot:2,   carbs:9,   grasas:15,  fibra:6.7, azucar:0.7,sodio:7,   emoji:"🥑"},
+  {id:498, nombre:"Quínoa cocida",              marca:"Natural",     cat:"Granos",     porcion:185, cal:222, prot:8,   carbs:39,  grasas:3.5, fibra:5,   azucar:1.6,sodio:13,  emoji:"🌾"},
+  {id:499, nombre:"Leche de avena",             marca:"Genérico",    cat:"Bebidas",    porcion:250, cal:130, prot:3,   carbs:23,  grasas:3,   fibra:1.5, azucar:10, sodio:100, emoji:"🥛"},
+  {id:500, nombre:"Leche de almendras sin azúcar", marca:"Genérico", cat:"Bebidas",    porcion:250, cal:40,  prot:1.5, carbs:3,   grasas:3,   fibra:0.5, azucar:0,  sodio:150, emoji:"🥛"},
+  {id:501, nombre:"Tofu firme",                 marca:"Genérico",    cat:"Legumbres",  porcion:100, cal:76,  prot:8,   carbs:2,   grasas:4.5, fibra:0.3, azucar:0.5,sodio:7,   emoji:"🫘"},
+  {id:502, nombre:"Hummus",                     marca:"Genérico",    cat:"Legumbres",  porcion:30,  cal:66,  prot:2,   carbs:6,   grasas:4,   fibra:2,   azucar:0.5,sodio:78,  emoji:"🫘"},
+  {id:503, nombre:"Proteína whey vainilla",     marca:"Genérico",    cat:"Suplementos",porcion:30,  cal:120, prot:24,  carbs:4,   grasas:2,   fibra:0,   azucar:3,  sodio:130, emoji:"🥤"},
+  {id:504, nombre:"Proteína whey chocolate",    marca:"Genérico",    cat:"Suplementos",porcion:30,  cal:122, prot:24,  carbs:5,   grasas:2,   fibra:0,   azucar:4,  sodio:130, emoji:"🥤"},
+  {id:505,nombre:"Reineta al horno",            marca:"Natural",     cat:"Pescados",   porcion:150, cal:180, prot:25,  carbs:0,   grasas:8,   fibra:0,   azucar:0,  sodio:90,  emoji:"🐟"},
+  {id:506,nombre:"Congrio colorado",            marca:"Natural",     cat:"Pescados",   porcion:150, cal:195, prot:28,  carbs:0,   grasas:9,   fibra:0,   azucar:0,  sodio:85,  emoji:"🐟"},
+  {id:507,nombre:"Plateada de vacuno",          marca:"Natural",     cat:"Carnes",     porcion:150, cal:320, prot:25,  carbs:0,   grasas:24,  fibra:0,   azucar:0,  sodio:65,  emoji:"🥩"},
+  {id:508,nombre:"Osobuco de vacuno",           marca:"Natural",     cat:"Carnes",     porcion:200, cal:280, prot:30,  carbs:0,   grasas:17,  fibra:0,   azucar:0,  sodio:70,  emoji:"🥩"},
+  {id:509,nombre:"Chuleta de cerdo",            marca:"Natural",     cat:"Carnes",     porcion:120, cal:195, prot:26,  carbs:0,   grasas:10,  fibra:0,   azucar:0,  sodio:60,  emoji:"🥩"},
+  {id:510,nombre:"Atún al natural lata",        marca:"Genérico",    cat:"Pescados",   porcion:85,  cal:100, prot:22,  carbs:0,   grasas:1,   fibra:0,   azucar:0,  sodio:310, emoji:"🐟"},
+  {id:511,nombre:"Edamame cocido",              marca:"Natural",     cat:"Legumbres",  porcion:100, cal:121, prot:11,  carbs:10,  grasas:5,   fibra:5,   azucar:2,  sodio:6,   emoji:"🫘"},
+  {id:512,nombre:"Granola sin azúcar",          marca:"Genérico",    cat:"Cereales",   porcion:45,  cal:180, prot:5,   carbs:25,  grasas:7,   fibra:4,   azucar:2,  sodio:15,  emoji:"🌾"},
+  {id:513,nombre:"Arroz integral cocido",       marca:"Genérico",    cat:"Granos",     porcion:200, cal:216, prot:5,   carbs:45,  grasas:1.8, fibra:3.5, azucar:0,  sodio:10,  emoji:"🍚"},
+  {id:514,nombre:"Batata / Camote cocido",      marca:"Natural",     cat:"Verduras",   porcion:130, cal:112, prot:2,   carbs:26,  grasas:0.1, fibra:3.8, azucar:5.4,sodio:72,  emoji:"🍠"},
+  {id:515,nombre:"Kéfir natural",               marca:"Genérico",    cat:"Lácteos",    porcion:250, cal:150, prot:10,  carbs:12,  grasas:5,   fibra:0,   azucar:8,  sodio:90,  emoji:"🥛"},
 ];
 
 
@@ -4461,28 +4482,6 @@ const QUICK_ESTIMATES = [
     {n:'Cerveza lata 350ml',cal:150,prot:1.5,carbs:14,grasas:0},
     {n:'Bebida cola lata 350ml',cal:148,prot:0,carbs:37,grasas:0},
   ]},
-  /* ── PRODUCTOS FALTANTES CLAVE ── */
-  {id:496, nombre:"Salmón fresco",              marca:"Natural",     cat:"Pescados",   porcion:150, cal:311, prot:31,  carbs:0,   grasas:19,  fibra:0,   azucar:0,  sodio:75,  emoji:"🐟"},
-  {id:497, nombre:"Palta / Aguacate",           marca:"Natural",     cat:"Frutas",     porcion:100, cal:160, prot:2,   carbs:9,   grasas:15,  fibra:6.7, azucar:0.7,sodio:7,   emoji:"🥑"},
-  {id:498, nombre:"Quínoa cocida",              marca:"Natural",     cat:"Granos",     porcion:185, cal:222, prot:8,   carbs:39,  grasas:3.5, fibra:5,   azucar:1.6,sodio:13,  emoji:"🌾"},
-  {id:499, nombre:"Leche de avena",             marca:"Genérico",    cat:"Bebidas",    porcion:250, cal:130, prot:3,   carbs:23,  grasas:3,   fibra:1.5, azucar:10, sodio:100, emoji:"🥛"},
-  {id:500, nombre:"Leche de almendras sin azúcar", marca:"Genérico", cat:"Bebidas",    porcion:250, cal:40,  prot:1.5, carbs:3,   grasas:3,   fibra:0.5, azucar:0,  sodio:150, emoji:"🥛"},
-  {id:501, nombre:"Tofu firme",                 marca:"Genérico",    cat:"Legumbres",  porcion:100, cal:76,  prot:8,   carbs:2,   grasas:4.5, fibra:0.3, azucar:0.5,sodio:7,   emoji:"🫘"},
-  {id:502, nombre:"Hummus",                     marca:"Genérico",    cat:"Legumbres",  porcion:30,  cal:66,  prot:2,   carbs:6,   grasas:4,   fibra:2,   azucar:0.5,sodio:78,  emoji:"🫘"},
-  {id:503, nombre:"Proteína whey vainilla",     marca:"Genérico",    cat:"Suplementos",porcion:30,  cal:120, prot:24,  carbs:4,   grasas:2,   fibra:0,   azucar:3,  sodio:130, emoji:"🥤"},
-  {id:504, nombre:"Proteína whey chocolate",    marca:"Genérico",    cat:"Suplementos",porcion:30,  cal:122, prot:24,  carbs:5,   grasas:2,   fibra:0,   azucar:4,  sodio:130, emoji:"🥤"},
-  {id:505,nombre:"Reineta al horno",           marca:"Natural",     cat:"Pescados",   porcion:150, cal:180, prot:25,  carbs:0,   grasas:8,   fibra:0,   azucar:0,  sodio:90,  emoji:"🐟"},
-  {id:506,nombre:"Congrio colorado",           marca:"Natural",     cat:"Pescados",   porcion:150, cal:195, prot:28,  carbs:0,   grasas:9,   fibra:0,   azucar:0,  sodio:85,  emoji:"🐟"},
-  {id:507,nombre:"Plateada de vacuno",         marca:"Natural",     cat:"Carnes",     porcion:150, cal:320, prot:25,  carbs:0,   grasas:24,  fibra:0,   azucar:0,  sodio:65,  emoji:"🥩"},
-  {id:508,nombre:"Osobuco de vacuno",          marca:"Natural",     cat:"Carnes",     porcion:200, cal:280, prot:30,  carbs:0,   grasas:17,  fibra:0,   azucar:0,  sodio:70,  emoji:"🥩"},
-  {id:509,nombre:"Chuleta de cerdo",           marca:"Natural",     cat:"Carnes",     porcion:120, cal:195, prot:26,  carbs:0,   grasas:10,  fibra:0,   azucar:0,  sodio:60,  emoji:"🥩"},
-  {id:510,nombre:"Atún al natural lata",       marca:"Genérico",    cat:"Pescados",   porcion:85,  cal:100, prot:22,  carbs:0,   grasas:1,   fibra:0,   azucar:0,  sodio:310, emoji:"🐟"},
-  {id:511,nombre:"Edamame cocido",             marca:"Natural",     cat:"Legumbres",  porcion:100, cal:121, prot:11,  carbs:10,  grasas:5,   fibra:5,   azucar:2,  sodio:6,   emoji:"🫘"},
-  {id:512,nombre:"Granola sin azúcar",         marca:"Genérico",    cat:"Cereales",   porcion:45,  cal:180, prot:5,   carbs:25,  grasas:7,   fibra:4,   azucar:2,  sodio:15,  emoji:"🌾"},
-  {id:513,nombre:"Arroz integral cocido",      marca:"Genérico",    cat:"Granos",     porcion:200, cal:216, prot:5,   carbs:45,  grasas:1.8, fibra:3.5, azucar:0,  sodio:10,  emoji:"🍚"},
-  {id:514,nombre:"Batata / Camote cocido",     marca:"Natural",     cat:"Verduras",   porcion:130, cal:112, prot:2,   carbs:26,  grasas:0.1, fibra:3.8, azucar:5.4,sodio:72,  emoji:"🍠"},
-  {id:515,nombre:"Kéfir natural",              marca:"Genérico",    cat:"Lácteos",    porcion:250, cal:150, prot:10,  carbs:12,  grasas:5,   fibra:0,   azucar:8,  sodio:90,  emoji:"🥛"},
-
 ];
 
 function RestaurantEstimator({C,F,meal,onAdd,onClose}){
@@ -7499,7 +7498,7 @@ function AppCore() {
   const [newWeight,setNewWeight] = useState('');
   const [streak,setStreak]     = useState(()=>LS.get('streak',{days:0,last:''}));
   const [xpTotal,setXpTotal]   = useState(()=>LS.get('xpTotal',0));
-  const [xpHoy,setXpHoy]       = useState(()=>LS.get('xpHoy_'+new Date().toISOString().split('T')[0],0));
+  const [xpHoy,setXpHoy]       = useState(()=>LS.get('xpHoy_'+todayKey(),0));
   const [iaMemoria,setIaMemoria] = useState(()=>LS.get('iaMemoria',{gustos:[],disgustos:[],patrones:[],ultimaActualizacion:''}));
   const [expanded,setExpand]        = useState(null);
   const [editingItem,setEditingItem] = useState(null); // uid of item being edited
@@ -8013,7 +8012,8 @@ function AppCore() {
       if(yHadLog){
         // Yesterday was logged → continue or start streak
         const lastDate = prevStreak.last;
-        const dayBefore = new Date(today);
+        const [_y,_m,_d] = today.split('-').map(Number);
+        const dayBefore = new Date(_y, _m-1, _d);
         dayBefore.setDate(dayBefore.getDate()-1);
         const dayBeforeKey = dateToKey(dayBefore);
         if(lastDate === dayBeforeKey){
@@ -8138,8 +8138,7 @@ function AppCore() {
   /* ── XP diario ── */
   useEffect(()=>{
     if(!log.length) return;
-    const todayKey2 = new Date().toISOString().split('T')[0];
-    const xpKey = 'xpHoy_'+todayKey2;
+    const xpKey = 'xpHoy_'+todayKey();
     const xpAnterior = LS.get(xpKey,0);
     const xpNuevo = calcXPDia(tot, metas, agua, waterGoal, exercises, streak);
     if(xpNuevo > xpAnterior){
@@ -9323,7 +9322,7 @@ function AppCore() {
             <div style={{display:'flex',flexDirection:'column',gap:8}}>
               {MEALS.map(m=>{
                 const items=log.filter(r=>r.comida===m);
-                const cal=items.reduce((s,r)=>s+r.cal*r.qty,0);
+                const cal=items.reduce((s,r)=>s+r.cal*itemRatio(r)*r.qty,0);
                 const p2=metas.cal>0?Math.min(cal/metas.cal*100,100):0;
                 const has=items.length>0;
                 return (
@@ -9346,7 +9345,7 @@ function AppCore() {
                       <div style={{background:C.surface,padding:'8px 14px 10px'}}>
                         <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
                           <span style={{fontSize:10,color:C.textSec,fontWeight:600}}>{Math.round(p2)}% de tu meta diaria</span>
-                          <span style={{fontSize:10,color:C.textSec,fontWeight:600}}>P:{Math.round(items.reduce((s,r)=>s+r.prot*r.qty,0))}g C:{Math.round(items.reduce((s,r)=>s+r.carbs*r.qty,0))}g</span>
+                          <span style={{fontSize:10,color:C.textSec,fontWeight:600}}>P:{Math.round(items.reduce((s,r)=>s+r.prot*itemRatio(r)*r.qty,0))}g C:{Math.round(items.reduce((s,r)=>s+r.carbs*itemRatio(r)*r.qty,0))}g</span>
                         </div>
                         <div style={{height:4,background:C.surfaceAlt,borderRadius:4,overflow:'hidden'}}>
                           <div style={{height:'100%',width:`${p2}%`,background:`linear-gradient(90deg,${MC[m]}99,${MC[m]})`,borderRadius:4,transition:'width .5s'}}/>
@@ -9837,30 +9836,29 @@ function AppCore() {
                     if(!file) return;
                     setUploadingPhoto(true);
                     // Read as base64 and store locally
-                    const reader = new FileReader();
-                    reader.onload = (ev)=>{
-                      const url = ev.target.result;
-                      setPhotoUrl(url);
-                      LS.set('photoUrl', url);
-                      // Upload to Supabase Storage if logged in
-                      if(supabaseUser) {
-                        const fileName = `avatars/${supabaseUser.id}.jpg`;
-                        supabase.storage.from('avatars').upload(fileName, file, {upsert:true})
-                          .then(({data})=>{
-                            if(data) {
-                              const {data:pub} = supabase.storage.from('avatars').getPublicUrl(fileName);
-                              if(pub?.publicUrl) {
-                                setPhotoUrl(pub.publicUrl);
-                                LS.set('photoUrl', pub.publicUrl);
-                                supabase.from('profiles').upsert({id:supabaseUser.id, avatar_url:pub.publicUrl},{onConflict:'id'}).then(()=>{});
-                              }
+                    // Show a local object URL for immediate display (never persisted)
+                    const objectUrl = URL.createObjectURL(file);
+                    setPhotoUrl(objectUrl);
+                    if(supabaseUser) {
+                      // Upload to Supabase and persist the public URL (not base64)
+                      const fileName = `avatars/${supabaseUser.id}.jpg`;
+                      supabase.storage.from('avatars').upload(fileName, file, {upsert:true})
+                        .then(({data})=>{
+                          if(data) {
+                            const {data:pub} = supabase.storage.from('avatars').getPublicUrl(fileName);
+                            if(pub?.publicUrl) {
+                              setPhotoUrl(pub.publicUrl);
+                              LS.set('photoUrl', pub.publicUrl);
+                              supabase.from('profiles').upsert({id:supabaseUser.id, avatar_url:pub.publicUrl},{onConflict:'id'}).then(()=>{});
                             }
-                          });
-                      }
-                      setUploadingPhoto(false);
-                      haptic('success');
-                    };
-                    reader.readAsDataURL(file);
+                          }
+                        });
+                    } else {
+                      // Offline user — store in IndexedDB to avoid localStorage quota issues
+                      PhotoDB.save('avatar', file).catch(()=>{});
+                    }
+                    setUploadingPhoto(false);
+                    haptic('success');
                   }}/>
                 </label>
                 {/* Botón cambiar emoji avatar (si no hay foto) */}
