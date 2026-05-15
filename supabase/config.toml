@@ -1,13 +1,4 @@
 
-[functions.analyze-food]
-verify_jwt = true
-
-[functions.delete-account]
-verify_jwt = true
-
-[functions.mp-webhook]
-verify_jwt = false
-
 [functions.create-subscription]
 enabled = true
 verify_jwt = true
