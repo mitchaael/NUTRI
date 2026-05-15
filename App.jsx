@@ -1878,87 +1878,82 @@ function BarcodeScanner({C, F, onFound, onClose}) {
   };
 
   /* ── Lookup en Open Food Facts ── */
+  /* ── Construir objeto producto desde respuesta OFF ── */
+  const buildProduct = (p, barcode) => {
+    const n = p.nutriments||{};
+    const offLabels = (p.labels_tags||[]).map(l=>l.toLowerCase());
+    const offIngred = (p.ingredients_text_es||p.ingredients_text||'').toLowerCase();
+    const offCats   = (p.categories_tags||[]).join(' ').toLowerCase();
+    const offAllergenTags = [...(p.allergens_tags||[]),...(p.traces_tags||[])].map(t=>t.toLowerCase());
+    const detectedAllergens = [...new Set(offAllergenTags.map(t=>OFF_ALLERGEN_MAP[t]).filter(Boolean))];
+    const allergensFromIngredients = detectedAllergens.length===0 ? detectAllergensFromIngredients(offIngred) : [];
+    const NON_VEGAN_INGR = ['leche','lácteos','mantequilla','crema','queso','yogur','nata','suero','caseína','lactosa','lactosuero','proteína de leche','huevo','huevos','yema','clara de huevo','carne','pollo','vacuno','cerdo','pavo','cordero','salmón','atún','pescado','jamón','tocino','bacon','chorizo','longaniza','cecina','anchoa','miel','gelatina','colágeno','milk','egg','eggs','meat','chicken','beef','pork','fish','tuna','salmon','honey','gelatin','whey','casein','lactose','butter','cream','cheese','lard','anchovy','prawn','shrimp'];
+    let veganStatus = null;
+    if(offLabels.includes('en:vegan')||offLabels.includes('en:vegan-status-vegan')) veganStatus=true;
+    else if(offLabels.some(l=>l.includes('non-vegan')||l.includes('no-vegan'))) veganStatus=false;
+    else if(offIngred.length>10) veganStatus=NON_VEGAN_INGR.some(kw=>offIngred.includes(kw))||offCats.match(/dairi|meat|seafood|egg|poultry|fish|pork|beef|chicken|milk/)?false:true;
+    else if(offCats.match(/dairi|meat|seafood|egg|poultry|fish|pork|beef|chicken|milk/)) veganStatus=false;
+    return {
+      id:Date.now()+Math.random(),
+      nombre:p.product_name_es||p.product_name||'Producto escaneado',
+      marca:(p.brands||'').split(',')[0].trim()||'Desconocido',
+      cat:'Escaneado', porcion:parseInt(p.serving_size_g)||parseInt(p.serving_size)||100,
+      cal:Math.round(n['energy-kcal_100g']||0),
+      prot:Math.round((n.proteins_100g||0)*10)/10,
+      carbs:Math.round((n.carbohydrates_100g||0)*10)/10,
+      grasas:Math.round((n.fat_100g||0)*10)/10,
+      fibra:Math.round((n.fiber_100g||0)*10)/10,
+      azucar:Math.round((n['sugars_100g']||0)*10)/10,
+      sodio:Math.round((n.sodium_100g||0)*1000),
+      emoji:'📦', barcode, vegan:veganStatus,
+      ingredients:offIngred.slice(0,300)||null,
+      offLabels:offLabels.slice(0,10),
+      detectedAllergens:detectedAllergens.length>0?detectedAllergens:allergensFromIngredients,
+      traceAllergens:[...new Set((p.traces_tags||[]).map(t=>OFF_ALLERGEN_MAP[t.toLowerCase()]).filter(Boolean))],
+    };
+  };
+
+  /* ── Consultar un endpoint OFF con timeout ── */
+  const fetchOFF = async(barcode, host) => {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(()=>ctrl.abort(), 7000);
+    try {
+      const res  = await fetch(`https://${host}/api/v0/product/${barcode}.json`, {signal:ctrl.signal});
+      clearTimeout(tid);
+      if(!res.ok) return null;
+      const data = await res.json();
+      return data.status===1 ? data.product : null;
+    } catch { clearTimeout(tid); return null; }
+  };
+
+  /* ── Cadena de búsqueda: CL → World → DB local → manual ── */
   const lookup = async(barcode) => {
     setStatus('looking');
+    setErrMsg('');
     try {
-      const res  = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-      const data = await res.json();
-      if(data.status===1){
-        const p=data.product, n=p.nutriments||{};
-        /* ── Variables OFF (deben declararse ANTES de usarse) ── */
-        const offLabels   = (p.labels_tags||[]).map(l=>l.toLowerCase());
-        const offIngred   = (p.ingredients_text_es||p.ingredients_text||'').toLowerCase();
-        const offCats     = (p.categories_tags||[]).join(' ').toLowerCase();
-        /* ── Detectar alérgenos desde OpenFoodFacts ── */
-        const offAllergenTags = [
-          ...(p.allergens_tags||[]),
-          ...(p.traces_tags||[]),
-        ].map(t=>t.toLowerCase());
-        // Mapear tags OFF → claves internas
-        const detectedAllergens = [...new Set(
-          offAllergenTags
-            .map(t => OFF_ALLERGEN_MAP[t])
-            .filter(Boolean)
-        )];
-        // Si OFF no tiene allergens_tags, detectar por ingredientes
-        const allergensFromIngredients = detectedAllergens.length === 0
-          ? detectAllergensFromIngredients(offIngred)
-          : [];
-        const NON_VEGAN_INGR = [
-          'leche','lácteos','mantequilla','crema','queso','yogur','nata','suero',
-          'caseína','lactosa','lactosuero','proteína de leche',
-          'huevo','huevos','yema','clara de huevo',
-          'carne','pollo','vacuno','cerdo','pavo','cordero','salmón','atún',
-          'pescado','jamón','tocino','bacon','chorizo','longaniza','cecina','anchoa',
-          'miel','gelatina','colágeno',
-          'milk','egg','eggs','meat','chicken','beef','pork','fish','tuna','salmon',
-          'honey','gelatin','whey','casein','lactose','butter','cream','cheese',
-          'lard','anchovy','prawn','shrimp',
-        ];
-        let veganStatus = null; // null = sin datos suficientes
-        if(offLabels.includes('en:vegan')||offLabels.includes('en:vegan-status-vegan')) {
-          veganStatus = true;
-        } else if(offLabels.some(l=>l.includes('non-vegan')||l.includes('no-vegan'))) {
-          veganStatus = false;
-        } else if(offIngred.length > 10) {
-          // Tenemos ingredientes — buscar palabras clave
-          if(NON_VEGAN_INGR.some(kw=>offIngred.includes(kw))) {
-            veganStatus = false;
-          } else if(offCats.match(/dairi|meat|seafood|egg|poultry|fish|pork|beef|chicken|milk/)) {
-            veganStatus = false;
-          } else {
-            veganStatus = true; // ingredientes presentes, sin señales animales
-          }
-        } else if(offCats.match(/dairi|meat|seafood|egg|poultry|fish|pork|beef|chicken|milk/)) {
-          veganStatus = false;
-        }
-        setFound({
-          id:Date.now()+Math.random(),
-          nombre:p.product_name_es||p.product_name||'Producto escaneado',
-          marca:(p.brands||'').split(',')[0].trim()||'Desconocido',
-          cat:'Escaneado',
-          porcion:parseInt(p.serving_size_g)||parseInt(p.serving_size)||100,
-          cal:Math.round(n['energy-kcal_100g']||0),
-          prot:Math.round((n.proteins_100g||0)*10)/10,
-          carbs:Math.round((n.carbohydrates_100g||0)*10)/10,
-          grasas:Math.round((n.fat_100g||0)*10)/10,
-          fibra:Math.round((n.fiber_100g||0)*10)/10,
-          azucar:Math.round((n['sugars_100g']||0)*10)/10,
-          sodio:Math.round((n.sodium_100g||0)*1000),
-          emoji:'📦', barcode,
-          // Campos veganos
-          vegan: veganStatus,
-          ingredients: offIngred.slice(0,300)||null,
-          offLabels: offLabels.slice(0,10),
-          // Alérgenos detectados
-          detectedAllergens: detectedAllergens.length > 0 ? detectedAllergens : allergensFromIngredients,
-          traceAllergens: [...new Set((p.traces_tags||[]).map(t=>OFF_ALLERGEN_MAP[t.toLowerCase()]).filter(Boolean))],
-        });
+      // 1️⃣ Open Food Facts Chile
+      let p = await fetchOFF(barcode, 'cl.openfoodfacts.org');
+      // 2️⃣ Open Food Facts Mundial
+      if(!p) p = await fetchOFF(barcode, 'world.openfoodfacts.org');
+
+      if(p) {
+        setFound(buildProduct(p, barcode));
         setStatus('found');
-      } else {
-        setStatus('error');
-        setErrMsg(`Código ${barcode} no encontrado. Prueba con otro producto.`);
+        return;
       }
+
+      // 3️⃣ Buscar en DB local por nombre aproximado (EAN-13 chilenos empiezan con 789)
+      const localMatch = DB.find(item =>
+        String(item.barcode) === String(barcode)
+      );
+      if(localMatch) {
+        setFound({...localMatch, id:Date.now()+Math.random(), barcode, cat:'Escaneado'});
+        setStatus('found');
+        return;
+      }
+
+      // 4️⃣ No encontrado — mostrar opciones
+      setStatus('notfound');
     } catch {
       setStatus('error');
       setErrMsg('Sin conexión. Verifica tu internet e intenta de nuevo.');
@@ -2122,12 +2117,48 @@ function BarcodeScanner({C, F, onFound, onClose}) {
           </div>
         )}
 
-        {/* Error */}
+        {/* No encontrado — opciones */}
+        {status==='notfound'&&(()=>{
+          const [q,setQ]=React.useState('');
+          const results=q.length>1?DB.filter(f=>f.nombre.toLowerCase().includes(q.toLowerCase())||f.marca?.toLowerCase().includes(q.toLowerCase())).slice(0,6):[];
+          return(
+            <div style={{padding:'8px 0',animation:'fadeUp .25s ease'}}>
+              <div style={{textAlign:'center',marginBottom:14}}>
+                <div style={{fontSize:32,marginBottom:6}}>🔍</div>
+                <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:4}}>Producto no encontrado</div>
+                <div style={{fontSize:12,color:C.textSec,lineHeight:1.4,marginBottom:12}}>No está en Open Food Facts Chile ni mundial. Búscalo en nuestra base o ingrésalo manual.</div>
+              </div>
+              {/* Buscador en DB local */}
+              <input
+                placeholder="🔍 Buscar en base Calorú (ej: marraqueta, Colun...)"
+                value={q} onChange={e=>setQ(e.target.value)} autoFocus
+                style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${C.border}`,borderRadius:14,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',marginBottom:8}}
+              />
+              {results.map(f=>(
+                <button key={f.id} className="tap" onClick={()=>{onFound({...f,id:Date.now()+Math.random(),barcode,cat:'Escaneado',origen:'escaneado'}); haptic('success');}}
+                  style={{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:13,border:`1px solid ${C.border}`,background:C.surfaceAlt,marginBottom:6,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                  <span style={{fontSize:22}}>{f.emoji}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:700,color:C.text}}>{f.nombre}</div>
+                    <div style={{fontSize:11,color:C.textSec}}>{f.marca} · {f.cal} kcal / {f.porcion}g</div>
+                  </div>
+                </button>
+              ))}
+              {q.length>1&&results.length===0&&<div style={{fontSize:12,color:C.textSec,textAlign:'center',padding:'8px 0 4px'}}>Sin resultados en la base local.</div>}
+              <div style={{display:'flex',gap:8,marginTop:8}}>
+                <button className="tap" onClick={retry} style={{flex:1,padding:'11px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>🔄 Reintentar</button>
+                <button className="tap" onClick={()=>setStatus('manual')} style={{flex:1,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Ingresar manual</button>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Error de red */}
         {status==='error'&&(
           <div style={{padding:'8px 0 8px',animation:'fadeUp .25s ease'}}>
             <div style={{textAlign:'center',marginBottom:14}}>
               <div style={{fontSize:36,marginBottom:8}}>😕</div>
-              <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:4}}>No se encontró el producto</div>
+              <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:4}}>Error de conexión</div>
               <div style={{fontSize:12,color:C.textSec,lineHeight:1.5,marginBottom:14}}>{errMsg}</div>
             </div>
             <div style={{display:'flex',gap:8}}>
@@ -2137,7 +2168,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
           </div>
         )}
         {status==='manual'&&(
-          <ManualEntry C={C} F={F} barcode={barcode} onBack={()=>setStatus('error')}
+          <ManualEntry C={C} F={F} barcode={barcode} onBack={()=>setStatus('notfound')}
             onSave={(food)=>{onFound({...food,origen:'escaneado'}); haptic('success');}}/>
         )}
       </div>
