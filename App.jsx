@@ -1435,7 +1435,7 @@ function Onboarding({onDone}) {
     </div>,
 
     // Step 2: Perfil físico
-    <div key={1} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
+    <div key={2} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
       <div>
         <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>Tu perfil, {nombre} 💪</div>
         <div style={{fontSize:13,color:C.textSec,fontFamily:F,fontWeight:500,marginTop:4}}>Necesitamos esto para calcular tus calorías exactas</div>
@@ -2664,7 +2664,7 @@ function MacroDetailSheet({macro, log, metas, C, F, onClose}) {
   );
 }
 
-function WeeklySummary({C, F, metas, streak, onClose}) {
+function WeeklySummary({C, F, metas, streak, xpTotal, onClose}) {
   const days = Array.from({length:7},(_,i)=>{
     const d=new Date(); d.setDate(d.getDate()-6+i);
     const key=dateToKey(d);
@@ -3338,17 +3338,23 @@ const EDGE_FN_URL = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analy
 
 /* Helper: llamar a la edge function con retry */
 const callEdgeFn = async (body, signal) => {
-  const res = await fetch(EDGE_FN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    signal,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Error ${res.status}`);
+  const ctrl = signal ? null : new AbortController();
+  const tid  = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
+  try {
+    const res = await fetch(EDGE_FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: signal || ctrl?.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Error ${res.status}`);
+    }
+    return res.json();
+  } finally {
+    if (tid) clearTimeout(tid);
   }
-  return res.json();
 };
 
 
@@ -4169,9 +4175,10 @@ function DailyChallengeCard({C, F, log, agua}) {
     {emoji:'🌅',text:'Registra las 4 comidas del día',reward:'+30 pts',c:C.amber},
   ];
   const ch = challenges[new Date().getDay()%challenges.length];
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(()=>LS.get('challenge_done_'+todayKey(), false));
+  const toggleDone = () => { const v = !done; setDone(v); LS.set('challenge_done_'+todayKey(), v); };
   return (
-    <div onClick={()=>setDone(!done)} style={{
+    <div onClick={toggleDone} style={{
       background:`linear-gradient(135deg, ${ch.c}0A, transparent)`,
       borderRadius:18,padding:'13px 14px',border:`1px solid ${ch.c}18`,
       display:'flex',alignItems:'center',gap:12,fontFamily:F,
@@ -4484,7 +4491,7 @@ const QUICK_ESTIMATES = [
   ]},
 ];
 
-function RestaurantEstimator({C,F,meal,onAdd,onClose}){
+function RestaurantEstimator({C,F,meal,onAdd,onClose,accent}){
   const [tab,setTab]   = useState(0);
   const [size,setSize] = useState('medium');
   const mult = {small:.65,medium:1,large:1.4,xlarge:1.8}[size];
@@ -7580,7 +7587,7 @@ function AppCore() {
         setStreak(s); LS.set('streak',s);
       }
     }
-  },[log]);
+  },[log, streak]);
 
   /* ── font + styles ── */
   useEffect(()=>{
@@ -8412,7 +8419,7 @@ function AppCore() {
 
       {/* ══ CONFETTI ══ */}
       {/* ══ WEEKLY SUMMARY ══ */}
-      {showWeekly&&<WeeklySummary C={C} F={F} metas={metas} streak={streak} onClose={()=>setShowWeekly(false)}/>}
+      {showWeekly&&<WeeklySummary C={C} F={F} metas={metas} streak={streak} xpTotal={xpTotal} onClose={()=>setShowWeekly(false)}/>}
 
       {/* ══ SHARE CARD ══ */}
       {showShare&&<ShareCard C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} streak={streak} exercises={exercises} xpTotal={xpTotal} nivel={getNivel(xpTotal)} onClose={()=>setShowShare(false)}/>}
@@ -8478,20 +8485,6 @@ function AppCore() {
                           setLog(dayLog.map(it=>({...it,uid:Date.now()+Math.random()})));
                           setShowHistory(false);
                           haptic('success');
-    // Check logros de diferenciadores
-    const logrosVisNow = LS.get('logrosVis',{});
-    if(a.marca==='Nutri IA' && !logrosVisNow.nutri_ia) {
-      setShowLogroUnlock({icon:'🤖',titulo:'¡Registraste con Nutri IA!',desc:'Dijiste qué comiste y la IA lo registró automáticamente. Ninguna app hace esto como Calorú.',xp:100});
-      LS.set('logrosVis',{...logrosVisNow, nutri_ia:true});
-    }
-    if(a.origen==='foto' && !logrosVisNow.foto_ia) {
-      setShowLogroUnlock({icon:'📸',titulo:'¡Primer plato escaneado!',desc:'Sacaste una foto y la IA detectó los macros. La nutrición del futuro, hoy en Chile.',xp:150});
-      LS.set('logrosVis',{...logrosVisNow, foto_ia:true});
-    }
-    if(a.barcode && !logrosVisNow.barcode) {
-      setShowLogroUnlock({icon:'📷',titulo:'🇨🇱 Chileno de corazón',desc:'Escaneaste un producto. Calorú tiene 475+ productos chilenos reales — lo que ninguna app internacional tiene.',xp:50});
-      LS.set('logrosVis',{...logrosVisNow, barcode:true});
-    }
                           setToast('📋 Comidas copiadas al día de hoy');
                         }} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
                           📋 Copiar estas comidas a hoy
@@ -8610,7 +8603,7 @@ function AppCore() {
         </div>
       )}
 
-      {showRestaurant&&<RestaurantEstimator C={C} F={F} meal={meal} onClose={()=>setShowRestaurant(false)} onAdd={food=>{addFood(food);setShowRestaurant(false);}}/>}
+      {showRestaurant&&<RestaurantEstimator C={C} F={F} meal={meal} accent={accent} onClose={()=>setShowRestaurant(false)} onAdd={food=>{addFood(food);setShowRestaurant(false);}}/>}
 
       {showChallenge&&<Challenge21 C={C} F={F} streak={streak} log={log} metas={metas} onClose={()=>setShowChallenge(false)}/>}
 
