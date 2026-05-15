@@ -3342,7 +3342,7 @@ const _aiCallLog = [];
 const AI_MAX_PER_HOUR = 20;
 const AI_COOLDOWN_MS  = 2000;
 
-/* Helper: llamar a la edge function con auth + rate limiting */
+/* Helper: llamar a la edge function con rate limiting */
 const callEdgeFn = async (body, signal) => {
   const now = Date.now();
   _aiCallLog.splice(0, _aiCallLog.length, ..._aiCallLog.filter(t => now - t < 3_600_000));
@@ -3353,11 +3353,6 @@ const callEdgeFn = async (body, signal) => {
     throw new Error('Demasiado rápido. Espera un momento.');
   _aiCallLog.push(now);
 
-  const { data: { session } } = await supabase.auth.getSession();
-  const authHeader = session?.access_token
-    ? { 'Authorization': `Bearer ${session.access_token}` }
-    : {};
-
   const ctrl = new AbortController();
   const tid  = setTimeout(() => ctrl.abort(), 30000);
   const combinedSignal = (signal && typeof AbortSignal.any === 'function')
@@ -3366,7 +3361,7 @@ const callEdgeFn = async (body, signal) => {
   try {
     const res = await fetch(EDGE_FN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeader },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       signal: combinedSignal,
     });
