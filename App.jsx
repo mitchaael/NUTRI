@@ -4200,7 +4200,7 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno'}) {
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna'}) {
   const chatKey = 'nutri_chat_' + new Date().toISOString().split('T')[0];
   const [msgs, setMsgs] = useState(()=>{
     const saved = LS.get(chatKey, []);
@@ -4230,6 +4230,10 @@ Comidas registradas hoy: ${log.length} items.
 Racha actual: ${streak.days} días.
 ${veganMode?'IMPORTANTE: El usuario es VEGANO. No sugerir ningún producto de origen animal.':''}
 ${userAllergens.length>0?`IMPORTANTE: El usuario tiene alergias/intolerancias a: ${userAllergens.join(', ')}. NUNCA sugerir alimentos con estos ingredientes.`:''}
+${condicion==='diabetes'?'CONDICIÓN DE SALUD: El usuario tiene DIABETES TIPO 2. Limita azúcares simples y carbohidratos refinados. Prioriza alimentos de bajo índice glucémico. Alerta si consume mucho azúcar.':''}
+${condicion==='hipertension'?'CONDICIÓN DE SALUD: El usuario tiene HIPERTENSIÓN. Prioriza alimentos bajos en sodio (<2000mg/día). Alerta si consume alimentos muy salados (cecinas, conservas, snacks).':''}
+${condicion==='colesterol'?'CONDICIÓN DE SALUD: El usuario tiene COLESTEROL ALTO. Limita grasas saturadas y trans. Prioriza grasas saludables (palta, aceite oliva, nueces) y fibra soluble.':''}
+${condicion==='celiaco'?'CONDICIÓN DE SALUD: El usuario tiene ENFERMEDAD CELÍACA. NUNCA sugerir alimentos con gluten (trigo, cebada, centeno, avena). Verifica siempre si un alimento es libre de gluten.':''}
 Responde siempre en español, de forma breve y amigable (máx 3 párrafos).
 Usa emojis con moderación. Sé específico con alimentos chilenos cuando puedas.
 Si el usuario pregunta algo fuera de nutrición, redirige amablemente.
@@ -5711,7 +5715,7 @@ function RecordatoriosModal({C, F, dark, onClose}) {
 /* ══════════════════════════════════════════════
    PLAN SEMANAL AUTOMÁTICO IA PRO
 ══════════════════════════════════════════════ */
-function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, userAllergens, veganMode, onClose}) {
+function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, userAllergens, veganMode, condicion='ninguna', onClose}) {
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState(null);
   const [diaActivo, setDiaActivo] = useState(0);
@@ -5724,8 +5728,9 @@ function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, user
       const ritmoTexto = RITMOS[ritmo]?.label || 'Normal';
       const alerg = userAllergens.length>0 ? `Alergias: ${userAllergens.join(', ')}.` : '';
       const vegan = veganMode ? 'Es VEGANO.' : '';
-      const prompt = `Crea un plan de alimentación semanal completo para ${nombre}. 
-Objetivo: ${objTexto}. Ritmo: ${ritmoTexto}. Calorías diarias: ${metas.cal} kcal. Proteínas: ${metas.prot}g. ${alerg} ${vegan}
+      const condTexto = condicion==='diabetes'?'TIENE DIABETES TIPO 2: bajo índice glucémico, sin azúcares simples.':condicion==='hipertension'?'TIENE HIPERTENSIÓN: máx 2000mg sodio/día.':condicion==='colesterol'?'TIENE COLESTEROL ALTO: sin grasas saturadas ni trans.':condicion==='celiaco'?'TIENE CELIAQUÍA: sin gluten.':'';
+      const prompt = `Crea un plan de alimentación semanal completo para ${nombre}.
+Objetivo: ${objTexto}. Ritmo: ${ritmoTexto}. Calorías diarias: ${metas.cal} kcal. Proteínas: ${metas.prot}g. ${alerg} ${vegan} ${condTexto}
 Usa ingredientes disponibles en supermercados chilenos (Jumbo, Lider, Santa Isabel).
 Responde SOLO con este JSON:
 {
@@ -6316,6 +6321,7 @@ Responde SOLO con JSON:
         mode: 'chat',
         system: 'Eres chef nutricionista chileno. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
         messages: [{role:'user', content:prompt}],
+        max_tokens: 2500,
       });
       const text = data.text || data.content?.[0]?.text || '';
       const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -7453,7 +7459,7 @@ function AppCore() {
   }, []);
   const [onboarded,setOnboarded] = useState(()=>LS.get('onboarded',false));
   const [nombre,setNombre]     = useState(()=>LS.get('nombre',''));
-  const [perfil,setPerfil]     = useState(()=>LS.get('perfil',{peso:70,altura:170,edad:25,sexo:'M',act:'1.55'}));
+  const [perfil,setPerfil]     = useState(()=>LS.get('perfil',{peso:70,altura:170,edad:25,sexo:'M',act:'1.55',condicion:'ninguna'}));
   const [customMetas,setCustomMetas] = useState(()=>LS.get('customMetas',null));
   const [userAllergens,setUserAllergens] = useState(()=>LS.get('allergens',[]));
   const [veganMode,setVeganMode]       = useState(()=>LS.get('veganMode',false));
@@ -8520,7 +8526,7 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -8533,7 +8539,7 @@ function AppCore() {
       {showPlanesDescargables&&<PlanesDescargablesModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanesDescargables(false)}/>}
       {showMarketplace&&<MarketplaceNutricionistasModal C={C} F={F} dark={dark} onClose={()=>setShowMarketplace(false)}/>}
       {showRecetasTemporada&&<RecetasTemporadaModal C={C} F={F} dark={dark} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasTemporada(false)}/>}
-      {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanSemanal(false)}/>}
+      {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} condicion={perfil.condicion||'ninguna'} onClose={()=>setShowPlanSemanal(false)}/>}
       {showPredicionPeso&&<PredicionPesoModal C={C} F={F} dark={dark} weightHistory={weightHistory} perfil={perfil} obj={obj} metas={metas} onClose={()=>setShowPredicionPeso(false)}/>}
       {showModoSalud&&<ModoSaludEspecialModal C={C} F={F} dark={dark} log={log} onClose={()=>setShowModoSalud(false)}/>}
       {showReporteSemanal&&<ReporteSemanalModal C={C} F={F} dark={dark} isPro={isPro} onClose={()=>setShowReporteSemanal(false)}/>}
@@ -9916,6 +9922,34 @@ function AppCore() {
                   <button key={v} className="tap" onClick={()=>setPerfil({...perfil,act:v})} style={{padding:'11px 14px',borderRadius:13,textAlign:'left',border:`1.5px solid ${perfil.act===v?C.primary:C.border}`,background:perfil.act===v?`${C.primary}12`:C.surfaceAlt,color:perfil.act===v?C.primary:C.textSec,fontSize:12,fontWeight:perfil.act===v?700:500,cursor:'pointer',fontFamily:F,transition:'all .15s'}}>{l}</button>
                 ))}
               </div>
+            </div>
+            {/* 🏥 Condición de salud */}
+            <div style={{marginTop:12}}>
+              <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:8,fontFamily:F}}>Condición de salud</div>
+              <div style={{display:'flex',flexDirection:'column',gap:5}}>
+                {[
+                  {v:'ninguna',   l:'✅ Sin condición especial'},
+                  {v:'diabetes',  l:'🩸 Diabetes tipo 2'},
+                  {v:'hipertension', l:'💊 Hipertensión'},
+                  {v:'colesterol',l:'🫀 Colesterol alto'},
+                  {v:'celiaco',   l:'🌾 Enfermedad celíaca'},
+                ].map(({v,l})=>(
+                  <button key={v} className="tap" onClick={()=>setPerfil({...perfil,condicion:v})}
+                    style={{padding:'11px 14px',borderRadius:13,textAlign:'left',border:`1.5px solid ${perfil.condicion===v?'#FF3B30':C.border}`,background:perfil.condicion===v?'rgba(255,59,48,0.08)':C.surfaceAlt,color:perfil.condicion===v?'#FF3B30':C.textSec,fontSize:12,fontWeight:perfil.condicion===v?700:500,cursor:'pointer',fontFamily:F,transition:'all .15s'}}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+              {perfil.condicion&&perfil.condicion!=='ninguna'&&(
+                <div style={{marginTop:8,padding:'10px 12px',borderRadius:12,background:'rgba(255,59,48,0.06)',border:'1px solid rgba(255,59,48,0.15)'}}>
+                  <div style={{fontSize:11,color:'#FF3B30',lineHeight:1.5}}>
+                    {perfil.condicion==='diabetes'&&'La IA limitará azúcares y carbohidratos refinados en tus planes y recomendaciones.'}
+                    {perfil.condicion==='hipertension'&&'La IA priorizará alimentos bajos en sodio y te alertará cuando registres comidas con alto contenido de sal.'}
+                    {perfil.condicion==='colesterol'&&'La IA reducirá grasas saturadas y trans en tus planes, y priorizará grasas saludables.'}
+                    {perfil.condicion==='celiaco'&&'La IA excluirá gluten de todos los planes y recetas generados para ti.'}
+                  </div>
+                </div>
+              )}
             </div>
             {/* ⚖️ Gráfico de peso */}
             <div style={{marginTop:14,background:C.surface,borderRadius:18,padding:'14px 16px',border:`1px solid ${C.border}`}}>

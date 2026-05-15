@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
  
   try {
     const body = await req.json();
-    const { mode, image, messages, system, prompt, nombre } = body;
+    const { mode, image, messages, system, prompt, nombre, max_tokens } = body;
  
     let anthropicBody;
  
@@ -114,7 +114,7 @@ Formato de respuesta:
  
       anthropicBody = {
         model: MODEL,
-        max_tokens: 1000,
+        max_tokens: Math.min(max_tokens || 1000, 4000),
         system: system || "Eres un asistente nutricional amigable.",
         messages: messages.map((m) => ({
           role: m.role,
