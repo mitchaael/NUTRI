@@ -53,6 +53,14 @@ contenido concreto para hacer crecer la app en Chile y LATAM.
 - Roadmap de marketing trimestral
 - Métricas y KPIs a seguir
 
+### 🧪 tester → Prueba funcionalidades y propone mejoras
+Úsalo cuando el usuario pida:
+- Verificar que todo funciona antes de un release
+- Probar flujos de usuario (onboarding, registro, racha, IA, pagos)
+- Confirmar que los fixes de seguridad siguen activos
+- Detectar bugs de UI o experiencia
+- Generar ideas de mejora para la app
+
 ### 🔐 security-auditor → Audita la seguridad de la app
 Úsalo cuando el usuario pida:
 - Revisar vulnerabilidades de seguridad en el código
@@ -66,7 +74,8 @@ contenido concreto para hacer crecer la app en Chile y LATAM.
 2. Si el usuario pide "post", "contenido", "redes" o "copy" → delegar a `content-creator`
 3. Si el usuario pide "estrategia", "plan", "cómo crecer" o "ideas" → delegar a `strategist`
 4. Si el usuario pide "seguridad", "vulnerabilidades", "audit" o "revisar datos" → delegar a `security-auditor`
-5. Para tareas complejas, puedes usar múltiples agentes en secuencia
+5. Si el usuario pide "testear", "probar", "verificar", "bugs" o "mejoras" → delegar a `tester`
+6. Para tareas complejas, puedes usar múltiples agentes en secuencia
 
 ## Al comenzar una sesión
 Siempre pregunta:
