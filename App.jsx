@@ -905,18 +905,9 @@ const F = "'Sora','Nunito',sans-serif";
 /* ═══════════════════════════════════════════════════════
    LOCALSTORAGE
 ═══════════════════════════════════════════════════════ */
-/* Claves con datos de salud — se guardan en sessionStorage (se limpian al cerrar el navegador)
-   El resto va a localStorage para persistencia normal entre sesiones */
-const _SENSITIVE_KEYS = new Set(['perfil','allergens','customMetas']);
 const LS = {
-  get:(k,d)=>{
-    const store = _SENSITIVE_KEYS.has(k) ? sessionStorage : localStorage;
-    try{const v=store.getItem('caloru_'+k);return v!=null?JSON.parse(v):d;}catch{return d;}
-  },
-  set:(k,v)=>{
-    const store = _SENSITIVE_KEYS.has(k) ? sessionStorage : localStorage;
-    try{store.setItem('caloru_'+k,JSON.stringify(v));}catch{}
-  },
+  get:(k,d)=>{try{const v=localStorage.getItem('caloru_'+k);return v!=null?JSON.parse(v):d;}catch{return d;}},
+  set:(k,v)=>{try{localStorage.setItem('caloru_'+k,JSON.stringify(v));}catch{}},
 };
 
 /* ═══════════════════════════════════════════════════════
