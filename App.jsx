@@ -3337,33 +3337,16 @@ const getPortionHints = (grams) => {
 ═══════════════════════════════════════════════════════ */
 const EDGE_FN_URL = 'https://fywghvfdwltayylswnid.supabase.co/functions/v1/analyze-food';
 
-/* Rate limiter: máx 20 llamadas/hora y 2s de cooldown entre llamadas */
-const _aiCallLog = [];
-const AI_MAX_PER_HOUR = 20;
-const AI_COOLDOWN_MS  = 2000;
-
-/* Helper: llamar a la edge function con rate limiting */
+/* Helper: llamar a la edge function */
 const callEdgeFn = async (body, signal) => {
-  const now = Date.now();
-  _aiCallLog.splice(0, _aiCallLog.length, ..._aiCallLog.filter(t => now - t < 3_600_000));
-  if (_aiCallLog.length >= AI_MAX_PER_HOUR)
-    throw new Error('Límite de consultas de IA alcanzado. Espera unos minutos.');
-  const last = _aiCallLog[_aiCallLog.length - 1] ?? 0;
-  if (now - last < AI_COOLDOWN_MS)
-    throw new Error('Demasiado rápido. Espera un momento.');
-  _aiCallLog.push(now);
-
-  const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), 30000);
-  const combinedSignal = (signal && typeof AbortSignal.any === 'function')
-    ? AbortSignal.any([signal, ctrl.signal])
-    : ctrl.signal;
+  const ctrl = signal ? null : new AbortController();
+  const tid  = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
   try {
     const res = await fetch(EDGE_FN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      signal: combinedSignal,
+      signal: signal || ctrl?.signal,
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
