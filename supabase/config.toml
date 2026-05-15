@@ -1,4 +1,10 @@
 
+[functions.analyze-food]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
 [functions.create-subscription]
 enabled = true
 verify_jwt = true
