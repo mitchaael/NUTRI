@@ -2692,6 +2692,7 @@ function WeeklySummary({C, F, metas, streak, xpTotal, onClose}) {
   const onGoal  = days.filter(d=>d.cal>0&&d.cal<=metas.cal).length;
   const avgCal  = Math.round(days.filter(d=>d.cal>0).reduce((s,d)=>s+d.cal,0)/Math.max(1,logged));
   const burned  = days.reduce((s,d)=>s+d.burned,0);
+  const xpWeek  = days.reduce((s,d)=>s+LS.get('xpHoy_'+d.key,0),0);
   const maxCal  = Math.max(...days.map(d=>d.cal),metas.cal,100);
   const score   = Math.round((logged/7)*40+(onGoal/Math.max(1,logged))*40+Math.min(streak.days/7,1)*20);
 
@@ -2749,7 +2750,7 @@ function WeeklySummary({C, F, metas, streak, xpTotal, onClose}) {
             {icon:'💪',l:'Kcal quemadas',v:`${burned}`,c:'#D42020'},
             {icon:'📈',l:'Racha actual',v:`${streak.days} días`,c:'#AF52DE'},
             {icon:'⭐',l:'Nivel',v:getNivel(xpTotal).nombre,c:getNivel(xpTotal).color},
-            {icon:'✨',l:'XP Total',v:`${xpTotal} XP`,c:'#FFD700'},
+            {icon:'✨',l:'XP esta semana',v:`${xpWeek} XP`,c:'#FFD700'},
           ].map(({icon,l,v,c2=null,c})=>(
             <div key={l} style={{background:C.surface,borderRadius:18,padding:'16px',border:`1px solid ${C.border}`}}>
               <div style={{fontSize:26,marginBottom:6}}>{icon}</div>
@@ -3366,14 +3367,17 @@ const callEdgeFn = async (body, signal) => {
     ? { 'Authorization': `Bearer ${session.access_token}` }
     : {};
 
-  const ctrl = signal ? null : new AbortController();
-  const tid  = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), 30000);
+  const combinedSignal = (signal && typeof AbortSignal.any === 'function')
+    ? AbortSignal.any([signal, ctrl.signal])
+    : ctrl.signal;
   try {
     const res = await fetch(EDGE_FN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...authHeader },
       body: JSON.stringify(body),
-      signal: signal || ctrl?.signal,
+      signal: combinedSignal,
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
