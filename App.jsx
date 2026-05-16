@@ -1864,6 +1864,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
   const [barcode,  setBarcode] = useState('');
   const [errMsg,  setErrMsg] = useState('');
   const [found,   setFound]  = useState(null);
+  const [dbQuery, setDbQuery] = useState('');
 
   /* ── Limpieza total ── */
   const stopAll = () => {
@@ -2118,40 +2119,37 @@ function BarcodeScanner({C, F, onFound, onClose}) {
         )}
 
         {/* No encontrado — opciones */}
-        {status==='notfound'&&(()=>{
-          const [q,setQ]=React.useState('');
-          const results=q.length>1?DB.filter(f=>f.nombre.toLowerCase().includes(q.toLowerCase())||f.marca?.toLowerCase().includes(q.toLowerCase())).slice(0,6):[];
-          return(
-            <div style={{padding:'8px 0',animation:'fadeUp .25s ease'}}>
-              <div style={{textAlign:'center',marginBottom:14}}>
-                <div style={{fontSize:32,marginBottom:6}}>🔍</div>
-                <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:4}}>Producto no encontrado</div>
-                <div style={{fontSize:12,color:C.textSec,lineHeight:1.4,marginBottom:12}}>No está en Open Food Facts Chile ni mundial. Búscalo en nuestra base o ingrésalo manual.</div>
-              </div>
-              {/* Buscador en DB local */}
-              <input
-                placeholder="🔍 Buscar en base Calorú (ej: marraqueta, Colun...)"
-                value={q} onChange={e=>setQ(e.target.value)} autoFocus
-                style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${C.border}`,borderRadius:14,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',marginBottom:8}}
-              />
-              {results.map(f=>(
-                <button key={f.id} className="tap" onClick={()=>{onFound({...f,id:Date.now()+Math.random(),barcode,cat:'Escaneado',origen:'escaneado'}); haptic('success');}}
-                  style={{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:13,border:`1px solid ${C.border}`,background:C.surfaceAlt,marginBottom:6,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
-                  <span style={{fontSize:22}}>{f.emoji}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:13,fontWeight:700,color:C.text}}>{f.nombre}</div>
-                    <div style={{fontSize:11,color:C.textSec}}>{f.marca} · {f.cal} kcal / {f.porcion}g</div>
-                  </div>
-                </button>
-              ))}
-              {q.length>1&&results.length===0&&<div style={{fontSize:12,color:C.textSec,textAlign:'center',padding:'8px 0 4px'}}>Sin resultados en la base local.</div>}
-              <div style={{display:'flex',gap:8,marginTop:8}}>
-                <button className="tap" onClick={retry} style={{flex:1,padding:'11px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>🔄 Reintentar</button>
-                <button className="tap" onClick={()=>setStatus('manual')} style={{flex:1,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Ingresar manual</button>
-              </div>
+        {status==='notfound'&&(
+          <div style={{padding:'8px 0',animation:'fadeUp .25s ease'}}>
+            <div style={{textAlign:'center',marginBottom:14}}>
+              <div style={{fontSize:32,marginBottom:6}}>🔍</div>
+              <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:4}}>Producto no encontrado</div>
+              <div style={{fontSize:12,color:C.textSec,lineHeight:1.4,marginBottom:12}}>No está en Open Food Facts Chile ni mundial. Búscalo en nuestra base o ingrésalo manual.</div>
             </div>
-          );
-        })()}
+            <input
+              placeholder="🔍 Buscar en base Calorú (ej: marraqueta, Colun...)"
+              value={dbQuery} onChange={e=>setDbQuery(e.target.value)} autoFocus
+              style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${C.border}`,borderRadius:14,fontSize:14,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',marginBottom:8}}
+            />
+            {dbQuery.length>1&&DB.filter(f=>f.nombre.toLowerCase().includes(dbQuery.toLowerCase())||f.marca?.toLowerCase().includes(dbQuery.toLowerCase())).slice(0,6).map(f=>(
+              <button key={f.id} className="tap" onClick={()=>{onFound({...f,id:Date.now()+Math.random(),barcode,cat:'Escaneado',origen:'escaneado'}); haptic('success');}}
+                style={{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:13,border:`1px solid ${C.border}`,background:C.surfaceAlt,marginBottom:6,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                <span style={{fontSize:22}}>{f.emoji}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:700,color:C.text}}>{f.nombre}</div>
+                  <div style={{fontSize:11,color:C.textSec}}>{f.marca} · {f.cal} kcal / {f.porcion}g</div>
+                </div>
+              </button>
+            ))}
+            {dbQuery.length>1&&DB.filter(f=>f.nombre.toLowerCase().includes(dbQuery.toLowerCase())||f.marca?.toLowerCase().includes(dbQuery.toLowerCase())).length===0&&(
+              <div style={{fontSize:12,color:C.textSec,textAlign:'center',padding:'8px 0 4px'}}>Sin resultados en la base local.</div>
+            )}
+            <div style={{display:'flex',gap:8,marginTop:8}}>
+              <button className="tap" onClick={retry} style={{flex:1,padding:'11px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>🔄 Reintentar</button>
+              <button className="tap" onClick={()=>setStatus('manual')} style={{flex:1,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Ingresar manual</button>
+            </div>
+          </div>
+        )}
 
         {/* Error de red */}
         {status==='error'&&(
