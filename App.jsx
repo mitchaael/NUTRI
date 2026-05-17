@@ -4613,6 +4613,12 @@ function ManualEntry({C, F, barcode, onSave, onBack, supabaseUser}) {
   const [sharing, setSharing] = useState(false);
   const valid = food.nombre.trim().length>0 && +food.cal>0;
 
+  // Detecta si los valores parecen ingresados por 100g en vez de por porción
+  const porcion = +food.porcion || 100;
+  const calPorGramo = +food.cal / porcion;
+  const suspiciousData = +food.cal > 0 && porcion < 80 && calPorGramo > 3.5;
+  // Ej: 311 kcal / 16g = 19.4 kcal/g → imposible. Máximo real: grasa pura ~9 kcal/g
+
   const handleSave = async () => {
     if(!valid) return;
     const product = {
@@ -4655,7 +4661,28 @@ function ManualEntry({C, F, barcode, onSave, onBack, supabaseUser}) {
   return(
     <div style={{padding:'8px 0',animation:'fadeUp .25s ease'}}>
       <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>✏️ Agregar manualmente</div>
-      {barcode&&<div style={{fontSize:11,color:C.textMuted,marginBottom:10,padding:'4px 10px',background:C.surfaceAlt,borderRadius:8,display:'inline-block'}}>📷 Código: {barcode}</div>}
+      {barcode&&<div style={{fontSize:11,color:C.textMuted,marginBottom:8,padding:'4px 10px',background:C.surfaceAlt,borderRadius:8,display:'inline-block'}}>📷 Código: {barcode}</div>}
+
+      {/* Aviso importante: valores por porción */}
+      <div style={{background:'rgba(255,149,0,0.1)',border:'1px solid rgba(255,149,0,0.3)',borderRadius:12,padding:'8px 12px',marginBottom:10,display:'flex',gap:8,alignItems:'flex-start'}}>
+        <span style={{fontSize:15,flexShrink:0}}>📋</span>
+        <div>
+          <div style={{fontSize:11,fontWeight:700,color:'#FF9500'}}>Ingresa los valores POR PORCIÓN</div>
+          <div style={{fontSize:10,color:C.textMuted,marginTop:1}}>Copia los datos tal como aparecen en la etiqueta del producto, según el tamaño de porción indicado. No por 100g.</div>
+        </div>
+      </div>
+
+      {/* Advertencia de datos sospechosos */}
+      {suspiciousData && (
+        <div style={{background:'rgba(255,59,48,0.1)',border:'1px solid rgba(255,59,48,0.3)',borderRadius:12,padding:'8px 12px',marginBottom:10,display:'flex',gap:8,alignItems:'flex-start'}}>
+          <span style={{fontSize:15,flexShrink:0}}>⚠️</span>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:'#FF3B30'}}>Los valores parecen muy altos para {porcion}g</div>
+            <div style={{fontSize:10,color:C.textMuted,marginTop:1}}>¿Ingresaste las calorías por 100g en vez de por {porcion}g? Revisa la etiqueta y ajusta la porción o los valores.</div>
+          </div>
+        </div>
+      )}
+
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
         <div style={{gridColumn:'1/-1'}}>
           <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.4,marginBottom:4}}>Nombre *</div>
