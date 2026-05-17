@@ -172,19 +172,19 @@ const DB = [
   {id:197,nombre:"Piña",                          marca:"Natural",      cat:"Frutas",     porcion:150, cal:78,  prot:0.9, carbs:20,  grasas:0.2, fibra:2, azucar:10, sodio:2,   emoji:"🍍"},
 
   /* ── VERDURAS ── */
-  {id:200,nombre:"Tomate",                        marca:"Natural",      cat:"Verduras",   porcion:120, cal:25,  prot:1,   carbs:5,   grasas:0.3, fibra:1.5, azucar:45, sodio:270, emoji:"🍅"},
-  {id:201,nombre:"Lechuga romana",                marca:"Natural",      cat:"Verduras",   porcion:80,  cal:14,  prot:1,   carbs:2,   grasas:0.2, fibra:1.5, azucar:20, sodio:20, emoji:"🥬"},
+  {id:200,nombre:"Tomate",                        marca:"Natural",      cat:"Verduras",   porcion:120, cal:25,  prot:1,   carbs:5,   grasas:0.3, fibra:1.5, azucar:4,  sodio:6,   emoji:"🍅"},
+  {id:201,nombre:"Lechuga romana",                marca:"Natural",      cat:"Verduras",   porcion:80,  cal:14,  prot:1,   carbs:2,   grasas:0.2, fibra:1.5, azucar:1,  sodio:8,  emoji:"🥬"},
   {id:202,nombre:"Espinaca",                      marca:"Natural",      cat:"Verduras",   porcion:80,  cal:18,  prot:2.5, carbs:2,   grasas:0.3, fibra:1.5, azucar:38, sodio:20, emoji:"🥬"},
   {id:203,nombre:"Choclo",                        marca:"Natural",      cat:"Verduras",   porcion:100, cal:65,  prot:2,   carbs:14,  grasas:0.7, fibra:1.5, azucar:25, sodio:20, emoji:"🌽"},
   {id:204,nombre:"Zanahoria",                     marca:"Natural",      cat:"Verduras",   porcion:100, cal:41,  prot:0.9, carbs:10,  grasas:0.2, fibra:2.8, azucar:30, sodio:20, emoji:"🥕"},
   {id:205,nombre:"Cebolla",                       marca:"Natural",      cat:"Verduras",   porcion:100, cal:40,  prot:1,   carbs:9,   grasas:0.1, fibra:1.7, azucar:35, sodio:20, emoji:"🧅"},
-  {id:206,nombre:"Papa blanca",                   marca:"Natural",      cat:"Verduras",   porcion:150, cal:120, prot:2.5, carbs:27,  grasas:0.2, fibra:2.5, azucar:40, sodio:20, emoji:"🥔"},
+  {id:206,nombre:"Papa blanca",                   marca:"Natural",      cat:"Verduras",   porcion:150, cal:120, prot:2.5, carbs:27,  grasas:0.2, fibra:2.5, azucar:1.5,sodio:10, emoji:"🥔"},
   {id:207,nombre:"Camote/batata",                 marca:"Natural",      cat:"Verduras",   porcion:150, cal:130, prot:2,   carbs:30,  grasas:0.2, fibra:4, azucar:22, sodio:20,   emoji:"🍠"},
   {id:208,nombre:"Brócoli",                       marca:"Natural",      cat:"Verduras",   porcion:100, cal:34,  prot:2.8, carbs:7,   grasas:0.4, fibra:2.6, azucar:28, sodio:20, emoji:"🥦"},
   {id:209,nombre:"Coliflor",                      marca:"Natural",      cat:"Verduras",   porcion:100, cal:25,  prot:2,   carbs:5,   grasas:0.3, fibra:2, azucar:32, sodio:20,   emoji:"🥦"},
   {id:210,nombre:"Pepino",                        marca:"Natural",      cat:"Verduras",   porcion:100, cal:16,  prot:0.7, carbs:3,   grasas:0.1, fibra:1, azucar:18, sodio:20,   emoji:"🥒"},
-  {id:211,nombre:"Pimentón rojo",                 marca:"Natural",      cat:"Verduras",   porcion:120, cal:38,  prot:1.5, carbs:9,   grasas:0.3, fibra:3, azucar:50, sodio:20,   emoji:"🫑"},
-  {id:212,nombre:"Pimentón verde",                marca:"Natural",      cat:"Verduras",   porcion:120, cal:30,  prot:1,   carbs:7,   grasas:0.2, fibra:2.5, azucar:35, sodio:20, emoji:"🫑"},
+  {id:211,nombre:"Pimentón rojo",                 marca:"Natural",      cat:"Verduras",   porcion:120, cal:38,  prot:1.5, carbs:9,   grasas:0.3, fibra:3,   azucar:6,  sodio:4,    emoji:"🫑"},
+  {id:212,nombre:"Pimentón verde",                marca:"Natural",      cat:"Verduras",   porcion:120, cal:30,  prot:1,   carbs:7,   grasas:0.2, fibra:2.5, azucar:3,  sodio:3,  emoji:"🫑"},
   {id:213,nombre:"Zapallo camote",                marca:"Natural",      cat:"Verduras",   porcion:100, cal:26,  prot:1,   carbs:6,   grasas:0.1, fibra:1.5, azucar:20, sodio:380, emoji:"🎃"},
   {id:214,nombre:"Berenjena",                     marca:"Natural",      cat:"Verduras",   porcion:100, cal:25,  prot:1,   carbs:6,   grasas:0.2, fibra:3, azucar:2, sodio:200,   emoji:"🍆"},
   {id:215,nombre:"Poroto verde",                  marca:"Natural",      cat:"Verduras",   porcion:100, cal:31,  prot:1.8, carbs:7,   grasas:0.1, fibra:2.7, azucar:1, sodio:20, emoji:"🫘"},
@@ -222,9 +222,9 @@ const DB = [
   {id:254,nombre:"Jurel en conserva",             marca:"Genérico",     cat:"Pescados",   porcion:100, cal:150, prot:22,  carbs:0,   grasas:7,   fibra:0, azucar:0, sodio:80,   emoji:"🥫"},
   {id:255,nombre:"Atún Salmonte en agua",         marca:"Salmonte",     cat:"Pescados",   porcion:100, cal:100, prot:23,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:80,   emoji:"🥫"},
   {id:256,nombre:"Sardinas en aceite",            marca:"Genérico",     cat:"Pescados",   porcion:85,  cal:190, prot:23,  carbs:0,   grasas:11,  fibra:0, azucar:60, sodio:80,   emoji:"🥫"},
-  {id:257,nombre:"Machas al natural",             marca:"Natural",      cat:"Pescados",   porcion:100, cal:55,  prot:10,  carbs:3,   grasas:0.5, fibra:0, azucar:0, sodio:38800,   emoji:"🦪"},
-  {id:258,nombre:"Camarones cocidos",             marca:"Natural",      cat:"Pescados",   porcion:100, cal:99,  prot:21,  carbs:0,   grasas:1,   fibra:0, azucar:99, sodio:0,   emoji:"🦐"},
-  {id:259,nombre:"Albacora (pez espada)",         marca:"Natural",      cat:"Pescados",   porcion:100, cal:145, prot:20,  carbs:0,   grasas:7,   fibra:0, azucar:97, sodio:0,   emoji:"🐟"},
+  {id:257,nombre:"Machas al natural",             marca:"Natural",      cat:"Pescados",   porcion:100, cal:55,  prot:10,  carbs:3,   grasas:0.5, fibra:0, azucar:0,  sodio:880,     emoji:"🦪"},
+  {id:258,nombre:"Camarones cocidos",             marca:"Natural",      cat:"Pescados",   porcion:100, cal:99,  prot:21,  carbs:0,   grasas:1,   fibra:0, azucar:0,  sodio:566,  emoji:"🦐"},
+  {id:259,nombre:"Albacora (pez espada)",         marca:"Natural",      cat:"Pescados",   porcion:100, cal:145, prot:20,  carbs:0,   grasas:7,   fibra:0, azucar:0,  sodio:90,   emoji:"🐟"},
   {id:260,nombre:"Salmón ahumado",                marca:"Genérico",     cat:"Pescados",   porcion:50,  cal:85,  prot:11,  carbs:0,   grasas:4.5, fibra:0, azucar:82, sodio:40,   emoji:"🐟"},
 
   /* ── HUEVOS ── */
@@ -695,7 +695,7 @@ const EXERCISES = [
 /* ═══════════════════════════════════════════════════════
    TIPS NUTRICIONALES
 ═══════════════════════════════════════════════════════ */
-const getTips = (tot, metas, obj, agua, pct, exercises, streak) => {
+const getTips = (tot, metas, obj, agua, pct, exercises, streak, waterGoal=8) => {
   const tips = [];
   const protPct  = metas.prot  > 0 ? tot.prot  / metas.prot  : 0;
   const azPct    = (tot.azucar||0) / 25; // OMS: máx 25g/día
@@ -715,7 +715,7 @@ const getTips = (tot, metas, obj, agua, pct, exercises, streak) => {
   if(azPct > 0.8 && azPct <= 1)
     tips.push({icon:'🍬', text:`Cerca del límite de azúcar (${Math.round(tot.azucar||0)}/25g). Cuidado con bebidas y snacks.`, color:'#FF9500'});
   if(agua < 4 && hr >= 15)
-    tips.push({icon:'💧', text:`Solo ${agua} de ${typeof waterGoal!=='undefined'?waterGoal:8} vasos de agua. Tomar más mejora el metabolismo.`, color:'#D42020'});
+    tips.push({icon:'💧', text:`Solo ${agua} de ${waterGoal} vasos de agua. Tomar más mejora el metabolismo.`, color:'#D42020'});
   if(agua >= 8)
     tips.push({icon:'💧', text:'¡Hidratación perfecta! Tu cuerpo te lo agradece.', color:'#D42020'});
   if(exercises.length > 0)
@@ -1091,9 +1091,8 @@ const haptic = (type='light') => {
    CONFETTI — celebración al cumplir meta calórica
 ═══════════════════════════════════════════════════════ */
 function Confetti({active}) {
-  if(!active) return null;
   const colors=['#D42020','#F04040','#28B044','#5DD975','#F5C21A','#FFD93D','#FF6B6B','#AF52DE'];
-  const particles = Array.from({length:55},(_,i)=>({
+  const particles = useMemo(()=>Array.from({length:55},(_,i)=>({
     id:i,
     color:colors[i%colors.length],
     left:Math.random()*100,
@@ -1102,7 +1101,8 @@ function Confetti({active}) {
     size:5+Math.random()*7,
     rotate:Math.random()*360,
     shape:i%3===0?'circle':i%3===1?'rect':'triangle',
-  }));
+  })),[]);
+  if(!active) return null;
   return (
     <div style={{position:'fixed',inset:0,zIndex:200,pointerEvents:'none',overflow:'hidden'}}>
       {particles.map(p=>(
@@ -1161,6 +1161,8 @@ const calcXPDia = (tot, metas, agua, waterGoal, exercises, streak) => {
 function Splash({onDone}) {
   const [phase,setPhase] = useState(0);
   const [tipIdx,setTipIdx] = useState(0);
+  const onDoneRef = useRef(onDone);
+  useEffect(()=>{ onDoneRef.current = onDone; });
   const tips = [
     {emoji:'🇨🇱', text:'400+ productos chilenos'},
     {emoji:'📸', text:'Escanea tu plato con IA'},
@@ -1172,7 +1174,7 @@ function Splash({onDone}) {
     const t0=setTimeout(()=>setPhase(1), 80);
     const t1=setTimeout(()=>setPhase(2), 700);
     const t2=setTimeout(()=>setPhase(3), 2600);
-    const t3=setTimeout(()=>onDone(), 3100);
+    const t3=setTimeout(()=>onDoneRef.current(), 3100);
     return ()=>[t0,t1,t2,t3].forEach(clearTimeout);
   },[]);
 
@@ -1705,7 +1707,8 @@ function WeekChart({data, meta, C, F}) {
   const maxCal = Math.max(...data.map(d=>d.cal), meta||1, 100);
   const H=110, bW=32;
   const total = data.reduce((s,d)=>s+d.cal,0);
-  const avg = Math.round(total/data.filter(d=>d.cal>0).length||0);
+  const daysWithData = data.filter(d=>d.cal>0);
+  const avg = daysWithData.length > 0 ? Math.round(total/daysWithData.length) : 0;
   return (
     <div>
       <svg width="100%" viewBox={`0 0 300 ${H+28}`} style={{overflow:'visible'}}>
@@ -1853,7 +1856,7 @@ function CustomFoodSheet({C, F, onSave, onClose}) {
    BARCODE SCANNER — ZXing.js + getUserMedia manual
    Funciona en iOS Safari + Chrome Android + Firefox
 ═══════════════════════════════════════════════════════ */
-function BarcodeScanner({C, F, onFound, onClose}) {
+function BarcodeScanner({C, F, onFound, onClose, supabaseUser}) {
   const videoRef  = useRef(null);
   const streamRef = useRef(null);
   const readerRef = useRef(null);
@@ -1927,7 +1930,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
     } catch { clearTimeout(tid); return null; }
   };
 
-  /* ── Cadena de búsqueda: CL → World → DB local → manual ── */
+  /* ── Cadena de búsqueda: CL → World → Comunidad → DB local → manual ── */
   const lookup = async(barcode) => {
     setStatus('looking');
     setErrMsg('');
@@ -1943,7 +1946,25 @@ function BarcodeScanner({C, F, onFound, onClose}) {
         return;
       }
 
-      // 3️⃣ Buscar en DB local por nombre aproximado (EAN-13 chilenos empiezan con 789)
+      // 3️⃣ DB Comunitaria Calorú (productos ingresados por otros usuarios)
+      try {
+        const { data: communityMatch } = await supabase
+          .from('community_products')
+          .select('*')
+          .eq('barcode', String(barcode))
+          .single();
+        if(communityMatch) {
+          // Incrementar contador de escaneos (sin bloquear)
+          supabase.from('community_products')
+            .update({ times_scanned: (communityMatch.times_scanned||1) + 1 })
+            .eq('barcode', String(barcode));
+          setFound({...communityMatch, id:Date.now()+Math.random(), cat:'Escaneado', origen:'comunidad'});
+          setStatus('found');
+          return;
+        }
+      } catch { /* si falla Supabase, seguir al siguiente paso */ }
+
+      // 4️⃣ Buscar en DB local por código de barras
       const localMatch = DB.find(item =>
         String(item.barcode) === String(barcode)
       );
@@ -1953,7 +1974,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
         return;
       }
 
-      // 4️⃣ No encontrado — mostrar opciones
+      // 5️⃣ No encontrado — mostrar opciones
       setStatus('notfound');
     } catch {
       setStatus('error');
@@ -2166,7 +2187,7 @@ function BarcodeScanner({C, F, onFound, onClose}) {
           </div>
         )}
         {status==='manual'&&(
-          <ManualEntry C={C} F={F} barcode={barcode} onBack={()=>setStatus('notfound')}
+          <ManualEntry C={C} F={F} barcode={barcode} supabaseUser={supabaseUser} onBack={()=>setStatus('notfound')}
             onSave={(food)=>{onFound({...food,origen:'escaneado'}); haptic('success');}}/>
         )}
       </div>
@@ -2393,7 +2414,7 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
                 <div style={{display:'flex',flexDirection:'column',gap:6}}>
                   {['Desayuno','Almuerzo','Once','Cena','Snack'].map(meal=>{
                     const items=plan[key]?.[meal]||[];
-                    const cal=items.reduce((s,f)=>s+f.cal,0);
+                    const cal=items.reduce((s,f)=>s+(f.cal*(f.grams&&f.porcion?f.grams/f.porcion:1)*(f.qty||1)),0);
                     return(
                       <div key={meal} style={{background:C.surface,borderRadius:14,padding:'10px 12px',border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:10}}>
                         <div style={{width:32,height:32,borderRadius:10,background:`${MC[meal]}18`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0}}>{MI[meal]}</div>
@@ -4583,12 +4604,53 @@ function RestaurantEstimator({C,F,meal,onAdd,onClose,accent}){
 /* ═══════════════════════════════════════════════════════
    ENTRADA MANUAL DE PRODUCTO (desde escáner)
 ═══════════════════════════════════════════════════════ */
-function ManualEntry({C, F, barcode, onSave, onBack}) {
+function ManualEntry({C, F, barcode, onSave, onBack, supabaseUser}) {
   const [food, setFood] = useState({
     nombre:'', marca:'', porcion:100,
     cal:'', prot:'', carbs:'', grasas:'', fibra:'', azucar:'', sodio:'',
   });
+  const [compartir, setCompartir] = useState(true);
+  const [sharing, setSharing] = useState(false);
   const valid = food.nombre.trim().length>0 && +food.cal>0;
+
+  const handleSave = async () => {
+    if(!valid) return;
+    const product = {
+      id:Date.now()+Math.random(),
+      nombre:food.nombre.trim(),
+      marca:food.marca.trim()||'Manual',
+      cat:'Escaneado', porcion:+food.porcion||100,
+      cal:+food.cal, prot:+food.prot||0, carbs:+food.carbs||0,
+      grasas:+food.grasas||0, fibra:+food.fibra||0,
+      azucar:food.azucar!==''?+food.azucar:null,
+      sodio:food.sodio!==''?+food.sodio:null,
+      emoji:'📦', barcode,
+    };
+    // Guardar en DB comunitaria si el usuario quiere compartir
+    if(compartir && barcode && supabaseUser) {
+      setSharing(true);
+      try {
+        await supabase.from('community_products').upsert({
+          barcode: String(barcode),
+          nombre: product.nombre,
+          marca: product.marca,
+          porcion: product.porcion,
+          cal: product.cal,
+          prot: product.prot,
+          carbs: product.carbs,
+          grasas: product.grasas,
+          fibra: product.fibra,
+          azucar: product.azucar,
+          sodio: product.sodio,
+          emoji: product.emoji,
+          cat: product.cat,
+          contributed_by: supabaseUser.id,
+        }, { onConflict: 'barcode', ignoreDuplicates: true });
+      } catch { /* si falla el compartir, igual agrega al diario */ }
+      setSharing(false);
+    }
+    onSave(product);
+  };
 
   return(
     <div style={{padding:'8px 0',animation:'fadeUp .25s ease'}}>
@@ -4627,23 +4689,38 @@ function ManualEntry({C, F, barcode, onSave, onBack}) {
           </div>
         ))}
       </div>
+
+      {/* Toggle compartir con la comunidad */}
+      {barcode && supabaseUser && (
+        <button onClick={()=>setCompartir(v=>!v)} style={{
+          width:'100%',marginBottom:10,padding:'10px 14px',borderRadius:14,
+          border:`1.5px solid ${compartir?'#34C759':'rgba(120,120,128,0.3)'}`,
+          background:compartir?'rgba(52,199,89,0.08)':'transparent',
+          display:'flex',alignItems:'center',gap:10,cursor:'pointer',fontFamily:F,
+        }}>
+          <span style={{fontSize:18}}>{compartir?'🌎':'🔒'}</span>
+          <div style={{flex:1,textAlign:'left'}}>
+            <div style={{fontSize:12,fontWeight:700,color:compartir?'#34C759':C.textSec}}>
+              {compartir?'Compartir con la comunidad Calorú':'Solo para mí'}
+            </div>
+            <div style={{fontSize:10,color:C.textMuted,marginTop:1}}>
+              {compartir?'Otros usuarios podrán encontrar este producto al escanearlo':'El producto se guardará solo en tu dispositivo'}
+            </div>
+          </div>
+          <div style={{
+            width:22,height:22,borderRadius:11,border:`2px solid ${compartir?'#34C759':'#C7C7CC'}`,
+            background:compartir?'#34C759':'transparent',
+            display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
+          }}>
+            {compartir&&<span style={{color:'white',fontSize:12,fontWeight:800}}>✓</span>}
+          </div>
+        </button>
+      )}
+
       <div style={{display:'flex',gap:8}}>
         <button className="tap" onClick={onBack} style={{flex:1,padding:'12px',borderRadius:16,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textSec,fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>← Volver</button>
-        <button className="tap" onClick={()=>{
-          if(!valid) return;
-          onSave({
-            id:Date.now()+Math.random(),
-            nombre:food.nombre.trim(),
-            marca:food.marca.trim()||'Manual',
-            cat:'Escaneado', porcion:+food.porcion||100,
-            cal:+food.cal, prot:+food.prot||0, carbs:+food.carbs||0,
-            grasas:+food.grasas||0, fibra:+food.fibra||0,
-            azucar:food.azucar!==''?+food.azucar:null,
-            sodio:food.sodio!==''?+food.sodio:null,
-            emoji:'📦', barcode,
-          });
-        }} style={{flex:2,padding:'12px',borderRadius:16,border:'none',background:valid?'#D42020':'#C7C7CC',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
-          ✅ Agregar al diario
+        <button className="tap" onClick={handleSave} disabled={sharing} style={{flex:2,padding:'12px',borderRadius:16,border:'none',background:valid?'#D42020':'#C7C7CC',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+          {sharing?'📤 Compartiendo…':'✅ Agregar al diario'}
         </button>
       </div>
     </div>
@@ -4667,7 +4744,8 @@ function Challenge21({C, F, streak, log, metas, onClose}) {
   const reset = () => { LS.set('challenge21',null); setActive(false); setStartDate(null); };
 
   const days = active ? Array.from({length:21},(_,i)=>{
-    const d = new Date(startDate);
+    const [sy,sm,sd] = startDate.split('-').map(Number);
+    const d = new Date(sy, sm-1, sd);
     d.setDate(d.getDate()+i);
     const key = dateToKey(d);
     const today = todayKey();
@@ -4776,6 +4854,26 @@ function Challenge21({C, F, streak, log, metas, onClose}) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   SELLOS OCTAGONALES MINSAL — Fase 3 (vigente desde 2019)
+   Umbrales por 100g (sólidos) o 100ml (líquidos)
+═══════════════════════════════════════════════════════ */
+const SELLOS_CONFIG = [
+  { key:'cal',    label:'CALORÍAS', solidT:275,  liquidT:70,  field:'cal'    },
+  { key:'azucar', label:'AZÚCARES', solidT:22.5, liquidT:6,   field:'azucar' },
+  { key:'sodio',  label:'SODIO',    solidT:400,  liquidT:100, field:'sodio'  },
+];
+const calcSellos = (food) => {
+  const p = food.porcion || 100;
+  const liquid = food.cat === 'Bebidas';
+  return SELLOS_CONFIG.filter(s => {
+    const val = food[s.field];
+    if(val == null) return false;
+    const per100 = (val / p) * 100;
+    return per100 >= (liquid ? s.liquidT : s.solidT);
+  });
+};
+
+/* ═══════════════════════════════════════════════════════
    MODAL DETALLE CON AJUSTE DE GRAMOS
 ═══════════════════════════════════════════════════════ */
 function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
@@ -4784,6 +4882,7 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
 
   useEffect(()=>{ setGrams(food.porcion||100); setMode('porcion'); },[food.id]);
 
+  const sellos = useMemo(()=>calcSellos(food),[food.id]);
   const r = grams / (food.porcion || 100);
   const v = (x) => Math.round(x * r * 10) / 10;
 
@@ -4962,6 +5061,29 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
             </div>
           ))}
         </div>
+
+        {/* Sellos octagonales MINSAL */}
+        {sellos.length > 0 && (
+          <div style={{marginBottom:16}}>
+            <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
+              <span style={{fontSize:10,fontWeight:700,color:C.textMuted,textTransform:'uppercase',letterSpacing:.8}}>Sellos MINSAL</span>
+              <span style={{fontSize:9,color:C.textMuted,opacity:.7}}>— por 100g/ml del producto</span>
+            </div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              {sellos.map(s=>(
+                <div key={s.key} style={{
+                  width:72,height:72,
+                  background:'#1C1C1E',
+                  clipPath:'polygon(29% 0%,71% 0%,100% 29%,100% 71%,71% 100%,29% 100%,0% 71%,0% 29%)',
+                  display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,
+                }}>
+                  <span style={{fontSize:7,fontWeight:700,color:'white',letterSpacing:.4,lineHeight:1}}>ALTO EN</span>
+                  <span style={{fontSize:s.label.length>6?8.5:10,fontWeight:800,color:'white',letterSpacing:.2,textAlign:'center',lineHeight:1.2,maxWidth:54,paddingTop:1}}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Gram info banner with equivalences */}
         <div style={{background:'#D4202010',borderRadius:13,padding:'10px 14px',marginBottom:16,border:'1px solid #D4202020'}}>
@@ -5656,21 +5778,21 @@ function RecordatoriosModal({C, F, dark, onClose}) {
 
   // Re-enviar schedule al SW cada vez que se abra el modal (por si se reinició el SW)
   React.useEffect(()=>{
-    if(Notification.permission === 'granted') sendScheduleToSW(reminders);
+    if('Notification' in window && Notification.permission === 'granted') sendScheduleToSW(reminders);
   },[]);
 
   const toggleReminder = (id) => {
     const updated = reminders.map(r=>r.id===id?{...r,activo:!r.activo}:r);
     setReminders(updated);
     LS.set('reminders', updated);
-    if(Notification.permission === 'granted') sendScheduleToSW(updated);
+    if('Notification' in window && Notification.permission === 'granted') sendScheduleToSW(updated);
   };
 
   const updateHora = (id, hora) => {
     const updated = reminders.map(r=>r.id===id?{...r,hora}:r);
     setReminders(updated);
     LS.set('reminders', updated);
-    if(Notification.permission === 'granted') sendScheduleToSW(updated);
+    if('Notification' in window && Notification.permission === 'granted') sendScheduleToSW(updated);
   };
 
   return (
@@ -6033,8 +6155,11 @@ Solo JSON, sin texto adicional.`;
       const match = text.match(/\{[\s\S]*\}/);
       if(match){
         const parsed = JSON.parse(match[0]);
-        setDesafiosIA(parsed.desafios);
-        LS.set(weekKey+'_ia', parsed.desafios);
+        const desafios = Array.isArray(parsed.desafios) ? parsed.desafios : [];
+        if(desafios.length){
+          setDesafiosIA(desafios);
+          LS.set(weekKey+'_ia', desafios);
+        }
       }
     } catch(e){ console.error('DesafiosIA error:',e); }
     setLoadingIA(false);
@@ -6189,14 +6314,22 @@ function LigaAmigosModal({C, F, dark, supabaseUser, nombre, saludScore, streak, 
         .select('nombre, subscription_status')
         .limit(20);
       
-      // Simular ranking con datos reales + datos del usuario actual
-      const ranking = (data||[]).map((p,i)=>({
-        nombre: p.nombre || 'Usuario',
-        xp: Math.floor(Math.random()*500) + 50,
-        streak: Math.floor(Math.random()*14),
-        score: Math.floor(Math.random()*100),
-        esYo: false,
-      }));
+      // Ranking con hash determinista del nombre para valores estables entre renders
+      const hashNum = (s, mod, offset=0) => {
+        let h = 0;
+        for(let i=0; i<s.length; i++) h = (h*31 + s.charCodeAt(i)) & 0xffffffff;
+        return (Math.abs(h) % mod) + offset;
+      };
+      const ranking = (data||[]).map((p,i)=>{
+        const seed = (p.nombre||'Usuario')+i;
+        return {
+          nombre: p.nombre || 'Usuario',
+          xp: hashNum(seed, 450, 80),
+          streak: hashNum(seed+'s', 13, 1),
+          score: hashNum(seed+'sc', 40, 50),
+          esYo: false,
+        };
+      });
       
       // Agregar al usuario actual
       ranking.push({nombre, xp:xpTotal, streak:streak.days, score:saludScore, esYo:true});
@@ -6912,10 +7045,13 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
   ];
 
   const [seleccionado, setSeleccionado] = useState(null);
+  const [localToast, setLocalToast] = useState('');
+  const showToast = (msg) => { setLocalToast(msg); setTimeout(()=>setLocalToast(''),3500); };
   const [showAgendar, setShowAgendar] = useState(false);
 
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
+      {localToast&&<div style={{position:'fixed',top:60,left:'50%',transform:'translateX(-50%)',background:'#333',color:'white',padding:'10px 20px',borderRadius:12,fontSize:13,zIndex:10001,maxWidth:300,textAlign:'center'}}>{localToast}</div>}
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>🏥 Nutricionistas</div>
@@ -6955,7 +7091,7 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
                     <button key={h} style={{padding:'6px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:11,fontFamily:F,cursor:'pointer',fontWeight:600}}>{h}</button>
                   ))}
                 </div>
-                <button onClick={()=>alert('¡Próximamente! Esta función estará disponible cuando lancemos el marketplace oficial.')} style={{width:'100%',padding:'11px',borderRadius:14,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
+                <button onClick={()=>showToast('¡Próximamente! Esta función estará disponible cuando lancemos el marketplace oficial.')} style={{width:'100%',padding:'11px',borderRadius:14,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
                   📅 Agendar consulta — ${n.precio.toLocaleString('es-CL')}
                 </button>
               </div>
@@ -6966,7 +7102,7 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
         <div style={{background:dark?'rgba(52,199,89,0.08)':'rgba(52,199,89,0.05)',borderRadius:14,padding:'12px 14px',border:'1px solid rgba(52,199,89,0.2)'}}>
           <div style={{fontSize:11,color:'#34C759',fontWeight:700,marginBottom:4}}>💡 ¿Eres nutricionista?</div>
           <div style={{fontSize:11,color:C.textSec}}>Únete a nuestra red de profesionales y llega a miles de usuarios Calorú.</div>
-          <button onClick={()=>alert('Contáctanos en mitchaelerling@gmail.com para unirte como nutricionista.')} style={{marginTop:8,padding:'6px 14px',borderRadius:10,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
+          <button onClick={()=>showToast('Contáctanos en mitchaelerling@gmail.com para unirte como nutricionista.')} style={{marginTop:8,padding:'6px 14px',borderRadius:10,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
             Registrarme como nutricionista
           </button>
         </div>
@@ -6976,6 +7112,8 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
 }
 function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [loading, setLoading] = useState(false);
+  const [localToast, setLocalToast] = useState('');
+  const showToast = (msg) => { setLocalToast(msg); setTimeout(()=>setLocalToast(''),3500); };
 
   // Detectar si estamos dentro de un TWA (Android app)
   const isTWA = document.referrer.includes('android-app://') ||
@@ -7011,16 +7149,16 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
         body: JSON.stringify({ purchaseToken, sku, user_email: supabaseUser.email, plan }),
       });
       await paymentResponse.complete('success');
-      alert('✅ ¡Suscripción activada! Recarga la app para disfrutar Calorú Pro.');
-      onClose();
+      showToast('✅ ¡Suscripción activada! Recarga la app para disfrutar Calorú Pro.');
+      setTimeout(onClose, 2000);
     } catch(e) {
       console.error('Play Billing error:', e);
-      alert('Error al procesar el pago. Intenta de nuevo.');
+      showToast('Error al procesar el pago. Intenta de nuevo.');
     }
   };
 
   const handleSubscribe = async (plan) => {
-    if (!supabaseUser) { alert('Debes iniciar sesión para suscribirte.'); return; }
+    if (!supabaseUser) { showToast('Debes iniciar sesión para suscribirte.'); return; }
     setLoading(true);
     try {
       // En Android TWA → Google Play Billing
@@ -7041,10 +7179,10 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
       if (data.init_point) {
         window.location.href = data.init_point;
       } else {
-        alert('Error al crear la suscripción. Intenta de nuevo.');
+        showToast('Error al crear la suscripción. Intenta de nuevo.');
       }
     } catch(e) {
-      alert('Error de conexión. Intenta de nuevo.');
+      showToast('Error de conexión. Intenta de nuevo.');
     }
     setLoading(false);
   };
@@ -7052,6 +7190,7 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   return (
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:9999,display:'flex',alignItems:'flex-end',justifyContent:'center'}}
       onClick={onClose}>
+      {localToast&&<div style={{position:'fixed',top:60,left:'50%',transform:'translateX(-50%)',background:'#333',color:'white',padding:'10px 20px',borderRadius:12,fontSize:13,zIndex:10001,maxWidth:300,textAlign:'center'}}>{localToast}</div>}
       <div onClick={e=>e.stopPropagation()} style={{
         background:C.surface,
         borderRadius:'24px 24px 0 0',
@@ -7624,13 +7763,15 @@ function AppCore() {
         setStreak(s); LS.set('streak',s);
       }
     }
-  },[log, streak]);
+  },[log.length]);
 
   /* ── font + styles ── */
   useEffect(()=>{
-    const link=document.createElement('link');
-    link.href='https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap';
-    link.rel='stylesheet'; document.head.appendChild(link);
+    if(!document.querySelector('link[href*="Sora"]')){
+      const link=document.createElement('link');
+      link.href='https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap';
+      link.rel='stylesheet'; document.head.appendChild(link);
+    }
     const s=document.createElement('style');
     s.textContent=`
       *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -7947,13 +8088,15 @@ function AppCore() {
   /* ── Sync automático: log del día ── */
   useEffect(()=>{
     if(!supabaseUser) return;
+    let cancelled = false;
     if(syncTimer.current) clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(()=>{
       setSyncStatus('syncing');
       syncDay(supabaseUser.id, todayKey(), log, agua, exercises)
-        .then(()=>{ setSyncStatus('done'); setTimeout(()=>setSyncStatus('idle'),1500); })
-        .catch(()=>setSyncStatus('error'));
+        .then(()=>{ if(!cancelled){ setSyncStatus('done'); setTimeout(()=>setSyncStatus('idle'),1500); }})
+        .catch(()=>{ if(!cancelled) setSyncStatus('error'); });
     }, 2000); // debounce 2s
+    return ()=>{ cancelled = true; };
   },[log.length, agua, exercises.length, supabaseUser?.id]);
 
   /* ── Sync automático: peso ── */
@@ -8000,6 +8143,7 @@ function AppCore() {
     };
     generate();
   },[log.length,nombre,streak.days]);
+  useEffect(()=>{LS.set('xpTotal',xpTotal);},[xpTotal]);
   useEffect(()=>{LS.set('customFoods',customFoods);},[customFoods]);
   useEffect(()=>{LS.set('favorites',favorites);},[favorites]);
   useEffect(()=>{LS.set('fastStart',fastStart);},[fastStart]);
@@ -8201,7 +8345,7 @@ function AppCore() {
   const metas     = customMetas || autoMetas;
   const tot    = useMemo(()=>sumLog(log),[log]);
   const pct    = metas.cal>0?tot.cal/metas.cal:0;
-  const tips   = getTips(tot, metas, obj, agua, pct, exercises, streak);
+  const tips   = getTips(tot, metas, obj, agua, pct, exercises, streak, waterGoal);
   const saludScore = calcSaludScore(tot, metas, agua, exercises, streak);
 
   const MACRO_DEFS = [
@@ -8335,7 +8479,7 @@ function AppCore() {
     haptic('add');
     setToast(`✓ ${a.nombre.split(' ').slice(0,3).join(' ')} agregado`);
     setAddFlash(true); setTimeout(()=>setAddFlash(false),600);
-  },[log,meal,customFoods]);
+  },[log,meal]);
 
   const adj=(uid,d)=>setLog(log.map(r=>r.uid===uid?{...r,qty:r.qty+d}:r).filter(r=>r.qty>0));
   const setItemGrams=(uid,g)=>setLog(log.map(r=>r.uid===uid?{...r,grams:Math.max(1,g)}:r));
@@ -8647,7 +8791,7 @@ function AppCore() {
       <Confetti active={confetti}/>
 
       {/* ══ BARCODE SCANNER ══ */}
-      {showScanner&&<BarcodeScanner C={C} F={F} onClose={()=>setShowScanner(false)} onFound={(food)=>{
+      {showScanner&&<BarcodeScanner C={C} F={F} supabaseUser={supabaseUser} onClose={()=>setShowScanner(false)} onFound={(food)=>{
                 setShowScanner(false);
                 // Small delay so camera stream stops before modal mounts
                 setTimeout(()=>setDetail(food), 200);
