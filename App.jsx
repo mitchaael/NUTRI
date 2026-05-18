@@ -187,7 +187,7 @@ const DB = [
   {id:212,nombre:"Pimentón verde",                marca:"Natural",      cat:"Verduras",   porcion:120, cal:30,  prot:1,   carbs:7,   grasas:0.2, fibra:2.5, azucar:3,  sodio:3,  emoji:"🫑"},
   {id:213,nombre:"Zapallo camote",                marca:"Natural",      cat:"Verduras",   porcion:100, cal:26,  prot:1,   carbs:6,   grasas:0.1, fibra:1.5, azucar:20, sodio:380, emoji:"🎃"},
   {id:214,nombre:"Berenjena",                     marca:"Natural",      cat:"Verduras",   porcion:100, cal:25,  prot:1,   carbs:6,   grasas:0.2, fibra:3, azucar:2, sodio:200,   emoji:"🍆"},
-  {id:215,nombre:"Poroto verde",                  marca:"Natural",      cat:"Verduras",   porcion:100, cal:31,  prot:1.8, carbs:7,   grasas:0.1, fibra:2.7, azucar:1, sodio:20, emoji:"🫘"},
+  {id:215,nombre:"Poroto verde",                  marca:"Natural",      cat:"Verduras",   porcion:100, cal:31,  prot:1.8, carbs:7,   grasas:0.1, fibra:2.7, azucar:1, sodio:20, emoji:"🫘", precio:890, pesoCompra:1000},
   {id:216,nombre:"Apio",                          marca:"Natural",      cat:"Verduras",   porcion:100, cal:16,  prot:0.7, carbs:3,   grasas:0.2, fibra:1.6, azucar:2, sodio:20, emoji:"🌿"},
   {id:217,nombre:"Champiñones",                   marca:"Natural",      cat:"Verduras",   porcion:100, cal:22,  prot:3,   carbs:3,   grasas:0.3, fibra:1, azucar:2, sodio:20,   emoji:"🍄"},
   {id:218,nombre:"Ajo",                           marca:"Natural",      cat:"Verduras",   porcion:10,  cal:15,  prot:0.6, carbs:3.4, grasas:0.1, fibra:0.2, azucar:2, sodio:20, emoji:"🧄"},
@@ -196,7 +196,7 @@ const DB = [
   {id:225,nombre:"Lentejas cocidas Gallo",        marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:115, prot:9,   carbs:20,  grasas:0.4, fibra:8, azucar:1, sodio:5,   emoji:"🫘", precio:1890, pesoCompra:1000},
   {id:226,nombre:"Porotos negros Gallo",          marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:130, prot:9,   carbs:24,  grasas:0.5, fibra:7, azucar:1, sodio:5,   emoji:"🫘", precio:1690, pesoCompra:1000},
   {id:227,nombre:"Garbanzos cocidos",             marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:165, prot:9,   carbs:27,  grasas:2.5, fibra:8, azucar:1, sodio:5,   emoji:"🫘", precio:2290, pesoCompra:1000},
-  {id:228,nombre:"Porotos blancos cocidos",       marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:125, prot:8.5, carbs:23,  grasas:0.4, fibra:7, azucar:1, sodio:5,   emoji:"🫘"},
+  {id:228,nombre:"Porotos blancos cocidos",       marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:125, prot:8.5, carbs:23,  grasas:0.4, fibra:7, azucar:1, sodio:5,   emoji:"🫘", precio:1690, pesoCompra:1000},
   {id:229,nombre:"Arvejas cocidas",               marca:"Natural",      cat:"Legumbres",  porcion:100, cal:84,  prot:5.5, carbs:15,  grasas:0.4, fibra:5, azucar:1, sodio:5,   emoji:"🫛"},
   {id:230,nombre:"Edamame",                       marca:"Natural",      cat:"Legumbres",  porcion:100, cal:121, prot:11,  carbs:10,  grasas:5,   fibra:5, azucar:1, sodio:5,   emoji:"🫛"},
   {id:231,nombre:"Hummus",                        marca:"Genérico",     cat:"Legumbres",  porcion:60,  cal:140, prot:5,   carbs:12,  grasas:8,   fibra:3.5, azucar:1, sodio:5, emoji:"🫙"},
@@ -210,14 +210,14 @@ const DB = [
   {id:240,nombre:"Pasta integral cocida",         marca:"Carozzi",      cat:"Granos",     porcion:100, cal:150, prot:6,   carbs:30,  grasas:1,   fibra:4, azucar:0.5, sodio:5,   emoji:"🍝"},
   {id:241,nombre:"Quinoa cocida",                 marca:"Genérico",     cat:"Granos",     porcion:100, cal:120, prot:4.5, carbs:21,  grasas:2,   fibra:2.8, azucar:0.5, sodio:5, emoji:"🌾"},
   {id:242,nombre:"Quinoa seca",                   marca:"Genérico",     cat:"Granos",     porcion:40,  cal:155, prot:6,   carbs:27,  grasas:2.5, fibra:3.5, azucar:0.5, sodio:5, emoji:"🌾"},
-  {id:243,nombre:"Avena seca",                    marca:"Genérico",     cat:"Granos",     porcion:40,  cal:150, prot:5,   carbs:26,  grasas:2.5, fibra:3.5, azucar:0.5, sodio:5, emoji:"🌾"},
-  {id:244,nombre:"Arroz seco Gallo",              marca:"Gallo",        cat:"Granos",     porcion:50,  cal:180, prot:3.5, carbs:40,  grasas:0.5, fibra:0.5, azucar:0.5, sodio:5, emoji:"🌾"},
+  {id:243,nombre:"Avena seca",                    marca:"Genérico",     cat:"Granos",     porcion:40,  cal:150, prot:5,   carbs:26,  grasas:2.5, fibra:3.5, azucar:0.5, sodio:5, emoji:"🌾", precio:1390, pesoCompra:1000},
+  {id:244,nombre:"Arroz seco Gallo",              marca:"Gallo",        cat:"Granos",     porcion:50,  cal:180, prot:3.5, carbs:40,  grasas:0.5, fibra:0.5, azucar:0.5, sodio:5, emoji:"🌾", precio:1290, pesoCompra:1000},
   {id:245,nombre:"Cous cous cocido",              marca:"Genérico",     cat:"Granos",     porcion:100, cal:112, prot:3.8, carbs:23,  grasas:0.2, fibra:1.5, azucar:0.5, sodio:5, emoji:"🌾"},
 
   /* ── PESCADOS / MARISCOS ── */
   {id:250,nombre:"Reineta al horno",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:115, prot:20,  carbs:0,   grasas:3.5, fibra:0, azucar:20, sodio:400,   emoji:"🐟"},
   {id:251,nombre:"Salmón fresco",                 marca:"Natural",      cat:"Pescados",   porcion:100, cal:200, prot:20,  carbs:0,   grasas:13,  fibra:0, azucar:5, sodio:160,   emoji:"🐟", precio:7990, pesoCompra:1000},
-  {id:252,nombre:"Merluza al vapor",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:80,  prot:18,  carbs:0,   grasas:0.8, fibra:0, azucar:0, sodio:480,   emoji:"🐟"},
+  {id:252,nombre:"Merluza al vapor",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:80,  prot:18,  carbs:0,   grasas:0.8, fibra:0, azucar:0, sodio:480,   emoji:"🐟", precio:3490, pesoCompra:1000},
   {id:253,nombre:"Congrio colorado",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:95,  prot:19,  carbs:0,   grasas:2,   fibra:0, azucar:15, sodio:80,   emoji:"🐟"},
   {id:254,nombre:"Jurel en conserva",             marca:"Genérico",     cat:"Pescados",   porcion:100, cal:150, prot:22,  carbs:0,   grasas:7,   fibra:0, azucar:0, sodio:80,   emoji:"🥫"},
   {id:255,nombre:"Atún Salmonte en agua",         marca:"Salmonte",     cat:"Pescados",   porcion:100, cal:100, prot:23,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:80,   emoji:"🥫", precio:990, pesoCompra:140},
@@ -228,7 +228,7 @@ const DB = [
   {id:260,nombre:"Salmón ahumado",                marca:"Genérico",     cat:"Pescados",   porcion:50,  cal:85,  prot:11,  carbs:0,   grasas:4.5, fibra:0, azucar:82, sodio:40,   emoji:"🐟"},
 
   /* ── HUEVOS ── */
-  {id:265,nombre:"Huevo entero grande",           marca:"Natural",      cat:"Huevos",     porcion:60,  cal:70,  prot:6,   carbs:0.5, grasas:5,   fibra:0, azucar:0, sodio:70,   emoji:"🥚"},
+  {id:265,nombre:"Huevo entero grande",           marca:"Natural",      cat:"Huevos",     porcion:60,  cal:70,  prot:6,   carbs:0.5, grasas:5,   fibra:0, azucar:0, sodio:70,   emoji:"🥚", precio:2990, pesoCompra:720},
   {id:266,nombre:"Clara de huevo",                marca:"Natural",      cat:"Huevos",     porcion:30,  cal:17,  prot:3.5, carbs:0.2, grasas:0,   fibra:0, azucar:0.2, sodio:70,   emoji:"🥚"},
   {id:267,nombre:"Yema de huevo",                 marca:"Natural",      cat:"Huevos",     porcion:18,  cal:55,  prot:2.7, carbs:0.3, grasas:4.5, fibra:0, azucar:0.2, sodio:70,   emoji:"🥚"},
   {id:268,nombre:"Claras líquidas pasteurizadas", marca:"Genérico",     cat:"Huevos",     porcion:100, cal:52,  prot:11,  carbs:0.7, grasas:0.2, fibra:0, azucar:0.2, sodio:70,   emoji:"🥚"},
@@ -343,17 +343,17 @@ const DB = [
   {id:401,nombre:"Pan molde Líder integral",        marca:"Líder",        cat:"Panes",      porcion:30,  cal:66,  prot:3,   carbs:12,  grasas:0.8, fibra:2.5, azucar:2, sodio:380, emoji:"🍞"},
   {id:402,nombre:"Leche entera Líder",              marca:"Líder",        cat:"Lácteos",    porcion:250, cal:155, prot:8,   carbs:12,  grasas:8.5, fibra:0, azucar:4.5, sodio:10,   emoji:"🥛"},
   {id:403,nombre:"Yogurt natural Líder",            marca:"Líder",        cat:"Lácteos",    porcion:150, cal:115, prot:6,   carbs:14,  grasas:3.5, fibra:0, azucar:4.5, sodio:10,   emoji:"🥣"},
-  {id:404,nombre:"Arroz grano largo Líder",         marca:"Líder",        cat:"Granos",     porcion:50,  cal:178, prot:3.5, carbs:39,  grasas:0.4, fibra:0.5, azucar:0.5, sodio:5, emoji:"🍚"},
+  {id:404,nombre:"Arroz grano largo Líder",         marca:"Líder",        cat:"Granos",     porcion:50,  cal:178, prot:3.5, carbs:39,  grasas:0.4, fibra:0.5, azucar:0.5, sodio:5, emoji:"🍚", precio:1190, pesoCompra:1000},
   {id:405,nombre:"Aceite maravilla Líder",          marca:"Líder",        cat:"Aceites",    porcion:15,  cal:124, prot:0,   carbs:0,   grasas:14,  fibra:0, azucar:0, sodio:0,   emoji:"🫙"},
   {id:406,nombre:"Azúcar Líder",                    marca:"Líder",        cat:"Condimentos",porcion:5,   cal:20,  prot:0,   carbs:5,   grasas:0,   fibra:0, azucar:8, sodio:300,   emoji:"🍬"},
   {id:407,nombre:"Fideos Líder espagueti",          marca:"Líder",        cat:"Granos",     porcion:80,  cal:288, prot:10,  carbs:57,  grasas:1.5, fibra:2.5, azucar:0.5, sodio:5, emoji:"🍝"},
-  {id:408,nombre:"Atún Líder al agua",              marca:"Líder",        cat:"Pescados",   porcion:100, cal:98,  prot:22,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:80,   emoji:"🥫"},
-  {id:409,nombre:"Porotos negros Líder",            marca:"Líder",        cat:"Legumbres",  porcion:100, cal:127, prot:8.5, carbs:23,  grasas:0.5, fibra:7, azucar:1, sodio:5,   emoji:"🫘"},
+  {id:408,nombre:"Atún Líder al agua",              marca:"Líder",        cat:"Pescados",   porcion:100, cal:98,  prot:22,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:80,   emoji:"🥫", precio:890, pesoCompra:140},
+  {id:409,nombre:"Porotos negros Líder",            marca:"Líder",        cat:"Legumbres",  porcion:100, cal:127, prot:8.5, carbs:23,  grasas:0.5, fibra:7, azucar:1, sodio:5,   emoji:"🫘", precio:1490, pesoCompra:1000},
   {id:410,nombre:"Granola Líder con miel",          marca:"Líder",        cat:"Cereales",   porcion:45,  cal:188, prot:4,   carbs:32,  grasas:5.5, fibra:3, azucar:12, sodio:200,   emoji:"🥣"},
   {id:411,nombre:"Leche condensada Líder",          marca:"Líder",        cat:"Lácteos",    porcion:40,  cal:128, prot:3,   carbs:22,  grasas:3.5, fibra:0, azucar:4.5, sodio:10,   emoji:"🥛"},
   {id:412,nombre:"Mantequilla Líder con sal",       marca:"Líder",        cat:"Lácteos",    porcion:10,  cal:71,  prot:0.1, carbs:0,   grasas:8,   fibra:0, azucar:4.5, sodio:10,   emoji:"🧈"},
   {id:413,nombre:"Mote Unimarc",                    marca:"Unimarc",      cat:"Granos",     porcion:100, cal:155, prot:4,   carbs:33,  grasas:0.8, fibra:2, azucar:0.5, sodio:5,   emoji:"🌾"},
-  {id:414,nombre:"Lentejas Unimarc",                marca:"Unimarc",      cat:"Legumbres",  porcion:60,  cal:202, prot:14,  carbs:33,  grasas:0.8, fibra:11, azucar:1, sodio:5,  emoji:"🫘"},
+  {id:414,nombre:"Lentejas Unimarc",                marca:"Unimarc",      cat:"Legumbres",  porcion:60,  cal:202, prot:14,  carbs:33,  grasas:0.8, fibra:11, azucar:1, sodio:5,  emoji:"🫘", precio:1790, pesoCompra:1000},
   {id:415,nombre:"Avena Unimarc",                   marca:"Unimarc",      cat:"Cereales",   porcion:45,  cal:168, prot:5.5, carbs:30,  grasas:2.8, fibra:4, azucar:12, sodio:200,   emoji:"🌾"},
   {id:416,nombre:"Mermelada frutilla Unimarc",      marca:"Unimarc",      cat:"Condimentos",porcion:20,  cal:44,  prot:0.1, carbs:11,  grasas:0,   fibra:0.3, azucar:8, sodio:300, emoji:"🍓"},
   {id:417,nombre:"Leche entera Santa Isabel",       marca:"Santa Isabel", cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:4.5, sodio:10,   emoji:"🥛"},
@@ -7604,18 +7604,40 @@ Responde SOLO con este JSON:
    MODO FERIA — Optimizador nutricional-económico
    Genera plan semanal basado en presupuesto en CLP
 ═══════════════════════════════════════════════════════ */
-const generarPlanFeria = (presupuesto, metas, db) => {
-  // Solo productos con precio definido
-  const conPrecio = db.filter(f => f.precio && f.pesoCompra);
+const generarPlanFeria = (presupuesto, metas, db, prefs = {}) => {
+  const { veganMode=false, allergens=[], favIds=new Set(), recentIds=new Set(), obj='mantener', condicion='ninguna' } = prefs;
 
-  // Calcular valor nutricional por peso (score)
+  // Solo productos con precio definido
+  let conPrecio = db.filter(f => f.precio && f.pesoCompra);
+
+  // Filtrar por modo vegano
+  if(veganMode) conPrecio = conPrecio.filter(f => isVegan(f));
+
+  // Filtrar alérgenos del usuario
+  if(allergens.length) conPrecio = conPrecio.filter(f => !getFoodAllergens(f).some(a => allergens.includes(a)));
+
+  // Filtrar para hipertensión (bajo sodio: < 400mg/100g)
+  if(condicion === 'hipertension') conPrecio = conPrecio.filter(f => ((f.sodio||0)/(f.porcion||100))*100 < 400);
+
+  // Filtrar para diabetes (bajo azúcar: < 15g/100g)
+  if(condicion === 'diabetes') conPrecio = conPrecio.filter(f => ((f.azucar||0)/(f.porcion||100))*100 < 15);
+
+  // Calcular valor nutricional por peso (score) con preferencias
   const scored = conPrecio.map(f => {
-    const factor = 100 / (f.porcion || 100); // normalizar a por 100g
+    const factor = 100 / (f.porcion || 100);
     const prot100 = (f.prot || 0) * factor;
     const cal100  = (f.cal  || 0) * factor;
     const precio100g = (f.precio / f.pesoCompra) * 100;
-    // Score: proteína vale 3x, calorías valen 1x — por peso gastado
-    const score = precio100g > 0 ? (prot100 * 3 + cal100) / precio100g : 0;
+    // Score según objetivo
+    let score = 0;
+    if(precio100g > 0) {
+      if(obj === 'bajar')      score = (prot100 * 5 - cal100 * 0.1) / precio100g;
+      else if(obj === 'subir') score = (prot100 * 3 + cal100 * 1.5) / precio100g;
+      else                     score = (prot100 * 3 + cal100) / precio100g;
+    }
+    // Boost por favoritos y recientes
+    if(favIds.has(f.id))    score *= 1.5;
+    if(recentIds.has(f.id)) score *= 1.2;
     return { ...f, prot100, cal100, precio100g, score };
   });
 
@@ -7668,15 +7690,87 @@ const generarPlanFeria = (presupuesto, metas, db) => {
   };
 };
 
-function ModFeriaModal({C, F, metas, onClose}) {
+const calcPrediccionSemanal = (db) => {
+  const logs = []; const dias = [];
+  for(let i = 1; i <= 28; i++) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dayLog = LS.get('log_'+key,[]);
+    if(dayLog.length){ logs.push(...dayLog.map(l=>({...l,_day:key}))); dias.push(key); }
+  }
+  if(dias.length < 3) return null;
+
+  // Frecuencia por food id
+  const freq = {};
+  logs.forEach(item=>{ const k=String(item.id); freq[k]=(freq[k]||0)+1; });
+
+  // Top 6 más comidos
+  const topFoods = Object.entries(freq)
+    .sort((a,b)=>b[1]-a[1]).slice(0,6)
+    .map(([id,cnt])=>{
+      const food = db.find(f=>String(f.id)===id) || logs.find(l=>String(l.id)===id);
+      return food ? {...food, frecuencia:cnt} : null;
+    }).filter(Boolean);
+
+  // Calorías promedio diaria
+  const totalCal = logs.reduce((s,item)=>{
+    const r=(item.grams?item.grams/(item.porcion||100):1)*(item.qty||1);
+    return s+(item.cal||0)*r;
+  },0);
+  const avgCal = Math.round(totalCal/dias.length);
+
+  // Comida más frecuente por tipo de comida
+  const byMeal = {};
+  logs.forEach(item=>{
+    if(!item.comida) return;
+    if(!byMeal[item.comida]) byMeal[item.comida]={};
+    const k=String(item.id); byMeal[item.comida][k]=(byMeal[item.comida][k]||0)+1;
+  });
+  const topByMeal = {};
+  Object.entries(byMeal).forEach(([meal,foods])=>{
+    const topId=Object.entries(foods).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const food=topId?(db.find(f=>String(f.id)===topId)||logs.find(l=>String(l.id)===topId)):null;
+    if(food) topByMeal[meal]=food;
+  });
+
+  // Tendencia: ¿las calorías de los últimos 7 días vs los 7 anteriores?
+  const cal7 = []; const cal7prev = [];
+  for(let i=1;i<=7;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dLog=LS.get('log_'+key,[]);
+    const c=dLog.reduce((s,it)=>s+(it.cal||0)*((it.grams?it.grams/(it.porcion||100):1)*(it.qty||1)),0);
+    cal7.push(c);
+  }
+  for(let i=8;i<=14;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dLog=LS.get('log_'+key,[]);
+    const c=dLog.reduce((s,it)=>s+(it.cal||0)*((it.grams?it.grams/(it.porcion||100):1)*(it.qty||1)),0);
+    cal7prev.push(c);
+  }
+  const avgReciente=Math.round(cal7.reduce((s,c)=>s+c,0)/7);
+  const avgPrevio=Math.round(cal7prev.reduce((s,c)=>s+c,0)/7);
+  const tendencia = avgReciente > avgPrevio+50 ? 'subiendo' : avgReciente < avgPrevio-50 ? 'bajando' : 'estable';
+
+  return { topFoods, avgCal, avgReciente, tendencia, diasAnalizados:dias.length, topByMeal };
+};
+
+function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[], favorites=[], recent=[], obj='mantener', condicion='ninguna', nombre=''}) {
   const [presupuesto, setPresupuesto] = useState(15000);
   const [plan, setPlan] = useState(null);
   const [generando, setGenerando] = useState(false);
+  const [tab, setTab] = useState('feria'); // 'feria' | 'prediccion'
+  const prediccion = useMemo(()=>calcPrediccionSemanal(DB),[]);
 
   const generar = () => {
     setGenerando(true);
     setTimeout(() => {
-      setPlan(generarPlanFeria(presupuesto, metas, DB));
+      const favIds   = new Set(favorites.map(f=>f.id));
+      const recentIds = new Set(recent.map(f=>f.id));
+      setPlan(generarPlanFeria(presupuesto, metas, DB, {
+        veganMode, allergens:userAllergens, favIds, recentIds, obj, condicion
+      }));
       setGenerando(false);
     }, 600);
   };
@@ -7693,8 +7787,103 @@ function ModFeriaModal({C, F, metas, onClose}) {
           <div style={{fontSize:11,color:C.textSec}}>Come sano. Gasta inteligente.</div>
         </div>
       </div>
+      {/* Tabs */}
+      <div style={{display:'flex',background:C.surface,borderBottom:`1px solid ${C.border}`,padding:'0 16px'}}>
+        {[{k:'feria',label:'🛒 Mi compra'},{k:'prediccion',label:'🔮 Predicción'}].map(({k,label})=>(
+          <button key={k} onClick={()=>setTab(k)} style={{
+            flex:1,padding:'10px 0',border:'none',background:'none',cursor:'pointer',fontFamily:F,
+            fontSize:13,fontWeight:700,color:tab===k?'#D42020':C.textSec,
+            borderBottom:tab===k?'2px solid #D42020':'2px solid transparent',
+          }}>{label}</button>
+        ))}
+      </div>
 
       <div style={{flex:1,overflowY:'auto',padding:16}}>
+
+        {/* ── TAB PREDICCIÓN ── */}
+        {tab==='prediccion' && (
+          <div style={{animation:'fadeUp .3s ease'}}>
+            {!prediccion ? (
+              <div style={{textAlign:'center',padding:'60px 20px',color:C.textSec}}>
+                <div style={{fontSize:48,marginBottom:12}}>🔮</div>
+                <div style={{fontSize:15,fontWeight:700,color:C.text}}>Aún no hay suficientes datos</div>
+                <div style={{fontSize:13,marginTop:8,lineHeight:1.5}}>Registra tus comidas al menos 3 días para que Calorú pueda predecir tus patrones.</div>
+              </div>
+            ) : (
+              <>
+                {/* Resumen de hábitos */}
+                <div style={{background:'linear-gradient(135deg,#5856D6,#AF52DE)',borderRadius:18,padding:'16px',marginBottom:16,color:'white'}}>
+                  <div style={{fontSize:14,fontWeight:800,marginBottom:4}}>🔮 Basado en tus últimos {prediccion.diasAnalizados} días</div>
+                  <div style={{fontSize:24,fontWeight:800}}>{prediccion.avgReciente} kcal</div>
+                  <div style={{fontSize:11,opacity:.85}}>promedio diario reciente · tendencia {prediccion.tendencia==='subiendo'?'📈 subiendo':prediccion.tendencia==='bajando'?'📉 bajando':'➡️ estable'}</div>
+                </div>
+
+                {/* Alimentos más frecuentes */}
+                <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:10}}>🍽️ Lo que más comes</div>
+                {prediccion.topFoods.map((f,i)=>(
+                  <div key={i} style={{background:C.surface,borderRadius:14,padding:'10px 14px',marginBottom:8,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
+                    <span style={{fontSize:24,flexShrink:0}}>{f.emoji||'🍽️'}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>{f.nombre}</div>
+                      <div style={{fontSize:11,color:C.textSec}}>{f.cal} kcal · {f.prot}g prot · {f.frecuencia}x en {prediccion.diasAnalizados} días</div>
+                    </div>
+                    <div style={{background:i===0?'#D4202015':C.surfaceAlt,borderRadius:8,padding:'3px 8px'}}>
+                      <span style={{fontSize:11,fontWeight:700,color:i===0?'#D42020':C.textSec}}>#{i+1}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Predicción por comida del día */}
+                {Object.keys(prediccion.topByMeal).length > 0 && (
+                  <>
+                    <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:10,marginTop:16}}>⏰ Tus patrones por comida</div>
+                    {['Desayuno','Almuerzo','Once','Cena','Snack'].map(meal=>{
+                      const f=prediccion.topByMeal[meal];
+                      if(!f) return null;
+                      const icons={'Desayuno':'🌅','Almuerzo':'☀️','Once':'🫖','Cena':'🌙','Snack':'🍎'};
+                      return(
+                        <div key={meal} style={{background:C.surface,borderRadius:14,padding:'10px 14px',marginBottom:8,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
+                          <span style={{fontSize:20}}>{icons[meal]}</span>
+                          <div style={{flex:1}}>
+                            <div style={{fontSize:11,color:C.textSec,fontWeight:600}}>{meal}</div>
+                            <div style={{fontSize:13,fontWeight:700,color:C.text}}>{f.nombre}</div>
+                          </div>
+                          <span style={{fontSize:20}}>{f.emoji||'🍽️'}</span>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Sugerencia inteligente */}
+                <div style={{background:'rgba(88,86,214,0.08)',borderRadius:14,padding:'12px 14px',marginTop:8,border:'1px solid rgba(88,86,214,0.2)'}}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#5856D6',marginBottom:4}}>💡 Sugerencia de Calorú</div>
+                  <div style={{fontSize:11,color:C.textSec,lineHeight:1.5}}>
+                    {prediccion.tendencia==='subiendo'
+                      ? 'Tus calorías están subiendo esta semana. Considera usar Modo Feria para planificar con más proteína y menos calorías vacías.'
+                      : prediccion.tendencia==='bajando'
+                      ? 'Tus calorías están bajando. Asegúrate de comer suficiente — usa Modo Feria para cubrir tus metas con tu presupuesto.'
+                      : 'Tus hábitos están estables. Usa Modo Feria para optimizar lo que gastas en comida esta semana.'}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── TAB MODO FERIA ── */}
+        {tab==='feria' && <>
+        {/* Indicadores de personalización activos */}
+        {(veganMode || userAllergens.length > 0 || condicion !== 'ninguna') && (
+          <div style={{background:'rgba(52,199,89,0.08)',border:'1px solid rgba(52,199,89,0.2)',borderRadius:12,padding:'8px 12px',marginBottom:12,display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+            <span style={{fontSize:10,fontWeight:700,color:'#34C759'}}>✓ Personalizado para ti:</span>
+            {veganMode && <span style={{fontSize:10,background:'#34C75920',color:'#34C759',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🌱 Vegano</span>}
+            {condicion==='diabetes' && <span style={{fontSize:10,background:'#FF950020',color:'#FF9500',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🩺 Bajo azúcar</span>}
+            {condicion==='hipertension' && <span style={{fontSize:10,background:'#5856D620',color:'#5856D6',padding:'2px 8px',borderRadius:8,fontWeight:600}}>💊 Bajo sodio</span>}
+            {userAllergens.length>0 && <span style={{fontSize:10,background:'#FF3B3020',color:'#FF3B30',padding:'2px 8px',borderRadius:8,fontWeight:600}}>⚠️ Sin alérgenos</span>}
+          </div>
+        )}
+
         {/* Banner explicativo */}
         <div style={{background:'linear-gradient(135deg,#D42020,#FF6B35)',borderRadius:18,padding:'16px',marginBottom:16,color:'white'}}>
           <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🇨🇱 Único en Chile</div>
@@ -7791,6 +7980,7 @@ function ModFeriaModal({C, F, metas, onClose}) {
             </div>
           </div>
         )}
+        </>}
       </div>
     </div>
   );
@@ -9015,7 +9205,7 @@ function AppCore() {
       <Confetti active={confetti}/>
 
       {/* ══ MODO FERIA ══ */}
-      {showModFeria&&<ModFeriaModal C={C} F={F} metas={metas} onClose={()=>setShowModFeria(false)}/>}
+      {showModFeria&&<ModFeriaModal C={C} F={F} metas={metas} veganMode={veganMode} userAllergens={userAllergens} favorites={favorites} recent={recent} obj={obj} condicion={perfil.condicion} nombre={nombre} onClose={()=>setShowModFeria(false)}/>}
 
       {/* ══ BARCODE SCANNER ══ */}
       {showScanner&&<BarcodeScanner C={C} F={F} supabaseUser={supabaseUser} onClose={()=>setShowScanner(false)} onFound={(food)=>{
