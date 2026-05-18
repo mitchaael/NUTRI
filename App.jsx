@@ -7,26 +7,26 @@ import { supabase, syncProfile, syncSettings, syncDay, syncWeight, restoreFromSu
 ═══════════════════════════════════════════════════════ */
 const DB = [
   /* ── LÁCTEOS ── */
-  {id:1,  nombre:"Leche entera Soprole",          marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:160, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:4.8, sodio:120,   emoji:"🥛"},
+  {id:1,  nombre:"Leche entera Soprole",          marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:160, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:4.8, sodio:120,   emoji:"🥛", precio:1090, pesoCompra:1000},
   {id:2,  nombre:"Leche semidescremada Soprole",  marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:120, prot:9,   carbs:12,  grasas:4.5, fibra:0, azucar:4.8, sodio:130,   emoji:"🥛"},
   {id:3,  nombre:"Leche descremada Soprole",      marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:90,  prot:9,   carbs:12,  grasas:0.5, fibra:0, azucar:4.8, sodio:130,   emoji:"🥛"},
-  {id:4,  nombre:"Leche entera Colun",            marca:"Colun",        cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:11,  grasas:8.5, fibra:0, azucar:4.8, sodio:110,   emoji:"🥛"},
+  {id:4,  nombre:"Leche entera Colun",            marca:"Colun",        cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:11,  grasas:8.5, fibra:0, azucar:4.8, sodio:110,   emoji:"🥛", precio:1090, pesoCompra:1000},
   {id:5,  nombre:"Leche semidescremada Colun",    marca:"Colun",        cat:"Lácteos",    porcion:250, cal:118, prot:9,   carbs:12,  grasas:4,   fibra:0, azucar:3.5, sodio:60,   emoji:"🥛"},
   {id:6,  nombre:"Leche entera Loncoleche",       marca:"Loncoleche",   cat:"Lácteos",    porcion:250, cal:158, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:11, sodio:80,   emoji:"🥛"},
   {id:7,  nombre:"Leche de avena Oatly",          marca:"Oatly",        cat:"Lácteos",    porcion:250, cal:120, prot:3,   carbs:16,  grasas:5,   fibra:1.5, azucar:10, sodio:45, emoji:"🥛"},
   {id:8,  nombre:"Leche de almendra Blue Diamond",marca:"Blue Diamond", cat:"Lácteos",    porcion:250, cal:50,  prot:1.5, carbs:4,   grasas:3,   fibra:0.5, azucar:4, sodio:35, emoji:"🥛"},
   {id:9,  nombre:"Leche de soja Alpro",           marca:"Alpro",        cat:"Lácteos",    porcion:250, cal:95,  prot:8,   carbs:7,   grasas:4,   fibra:0.5, azucar:0, sodio:400, emoji:"🥛"},
   {id:10, nombre:"Leche de coco Aroy-D (200ml)",  marca:"Aroy-D",       cat:"Lácteos",    porcion:200, cal:280, prot:3,   carbs:4,   grasas:28,  fibra:0, azucar:0.3, sodio:350,   emoji:"🥥"},
-  {id:11, nombre:"Yogurt natural Soprole",        marca:"Soprole",      cat:"Lácteos",    porcion:150, cal:120, prot:7,   carbs:14,  grasas:4,   fibra:0, azucar:0, sodio:200,   emoji:"🥣"},
+  {id:11, nombre:"Yogurt natural Soprole",        marca:"Soprole",      cat:"Lácteos",    porcion:150, cal:120, prot:7,   carbs:14,  grasas:4,   fibra:0, azucar:0, sodio:200,   emoji:"🥣", precio:1290, pesoCompra:500},
   {id:12, nombre:"Yogurt con fruta Soprole",      marca:"Soprole",      cat:"Lácteos",    porcion:150, cal:140, prot:6,   carbs:20,  grasas:3.5, fibra:0, azucar:0, sodio:180,   emoji:"🥣"},
   {id:13, nombre:"Yogurt 0% Soprole",             marca:"Soprole",      cat:"Lácteos",    porcion:150, cal:80,  prot:8,   carbs:12,  grasas:0,   fibra:0, azucar:4.8, sodio:120,   emoji:"🥣"},
-  {id:14, nombre:"Yogurt natural Colun",          marca:"Colun",        cat:"Lácteos",    porcion:150, cal:135, prot:6,   carbs:15,  grasas:5,   fibra:0, azucar:4.8, sodio:130,   emoji:"🥣"},
+  {id:14, nombre:"Yogurt natural Colun",          marca:"Colun",        cat:"Lácteos",    porcion:150, cal:135, prot:6,   carbs:15,  grasas:5,   fibra:0, azucar:4.8, sodio:130,   emoji:"🥣", precio:1490, pesoCompra:500},
   {id:15, nombre:"Yogurt griego Danone",          marca:"Danone",       cat:"Lácteos",    porcion:150, cal:135, prot:10,  carbs:13,  grasas:4,   fibra:0, azucar:11, sodio:80,   emoji:"🥣"},
   {id:16, nombre:"Yogurt griego 0% Danone",       marca:"Danone",       cat:"Lácteos",    porcion:150, cal:85,  prot:10,  carbs:13,  grasas:0,   fibra:0, azucar:13, sodio:90,   emoji:"🥣"},
   {id:17, nombre:"Yogurt bebible Soprole",        marca:"Soprole",      cat:"Lácteos",    porcion:200, cal:160, prot:6,   carbs:26,  grasas:3,   fibra:0, azucar:0.5, sodio:25,   emoji:"🥤"},
   {id:18, nombre:"Kéfir natural Colun",           marca:"Colun",        cat:"Lácteos",    porcion:150, cal:110, prot:7,   carbs:12,  grasas:3.5, fibra:0, azucar:13, sodio:90,   emoji:"🥣"},
   {id:19, nombre:"Queso gauda Colun",             marca:"Colun",        cat:"Lácteos",    porcion:30,  cal:105, prot:7,   carbs:0.5, grasas:8.5, fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
-  {id:20, nombre:"Queso chanco Colun",            marca:"Colun",        cat:"Lácteos",    porcion:30,  cal:95,  prot:6,   carbs:1,   grasas:8,   fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
+  {id:20, nombre:"Queso chanco Colun",            marca:"Colun",        cat:"Lácteos",    porcion:30,  cal:95,  prot:6,   carbs:1,   grasas:8,   fibra:0, azucar:0.5, sodio:10,   emoji:"🧀", precio:2490, pesoCompra:200},
   {id:21, nombre:"Queso mantecoso Colun",         marca:"Colun",        cat:"Lácteos",    porcion:30,  cal:100, prot:6,   carbs:1,   grasas:8,   fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
   {id:22, nombre:"Queso laminado Soprole",        marca:"Soprole",      cat:"Lácteos",    porcion:25,  cal:80,  prot:5.5, carbs:0.5, grasas:6.5, fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
   {id:23, nombre:"Queso crema Philadelphia",      marca:"Kraft",        cat:"Lácteos",    porcion:30,  cal:90,  prot:2,   carbs:1.5, grasas:9,   fibra:0, azucar:0.5, sodio:10,   emoji:"🧀"},
@@ -40,22 +40,22 @@ const DB = [
   {id:31, nombre:"Crema Soprole",                 marca:"Soprole",      cat:"Lácteos",    porcion:100, cal:330, prot:2.5, carbs:3,   grasas:35,  fibra:0, azucar:3, sodio:10,   emoji:"🫙"},
 
   /* ── CARNES ── */
-  {id:40, nombre:"Pechuga de pollo Ariztía",      marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:110, prot:23,  carbs:0,   grasas:1.5, fibra:0, azucar:0, sodio:60,   emoji:"🍗"},
-  {id:41, nombre:"Trutro de pollo Ariztía",       marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:185, prot:18,  carbs:0,   grasas:12,  fibra:0, azucar:0, sodio:60,   emoji:"🍗"},
-  {id:42, nombre:"Pechuga Super Pollo",           marca:"Super Pollo",  cat:"Carnes",     porcion:100, cal:108, prot:22,  carbs:0,   grasas:2,   fibra:0, azucar:0, sodio:60,   emoji:"🍗"},
-  {id:43, nombre:"Filete de pollo congelado",     marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:112, prot:22,  carbs:1,   grasas:2,   fibra:0, azucar:0, sodio:60,   emoji:"🍗"},
+  {id:40, nombre:"Pechuga de pollo Ariztía",      marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:110, prot:23,  carbs:0,   grasas:1.5, fibra:0, azucar:0, sodio:60,   emoji:"🍗", precio:4990, pesoCompra:1000},
+  {id:41, nombre:"Trutro de pollo Ariztía",       marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:185, prot:18,  carbs:0,   grasas:12,  fibra:0, azucar:0, sodio:60,   emoji:"🍗", precio:3490, pesoCompra:1000},
+  {id:42, nombre:"Pechuga Super Pollo",           marca:"Super Pollo",  cat:"Carnes",     porcion:100, cal:108, prot:22,  carbs:0,   grasas:2,   fibra:0, azucar:0, sodio:60,   emoji:"🍗", precio:4790, pesoCompra:1000},
+  {id:43, nombre:"Filete de pollo congelado",     marca:"Ariztía",      cat:"Carnes",     porcion:100, cal:112, prot:22,  carbs:1,   grasas:2,   fibra:0, azucar:0, sodio:60,   emoji:"🍗", precio:4490, pesoCompra:1000},
   {id:44, nombre:"Filete de vacuno",              marca:"Natural",      cat:"Carnes",     porcion:100, cal:175, prot:27,  carbs:0,   grasas:7,   fibra:0, azucar:0, sodio:60,   emoji:"🥩"},
   {id:45, nombre:"Lomo de vacuno",                marca:"Natural",      cat:"Carnes",     porcion:100, cal:215, prot:26,  carbs:0,   grasas:12,  fibra:0, azucar:0, sodio:60,   emoji:"🥩"},
   {id:46, nombre:"Asado de tira",                 marca:"Natural",      cat:"Carnes",     porcion:100, cal:250, prot:24,  carbs:0,   grasas:17,  fibra:0, azucar:0, sodio:60,   emoji:"🥩"},
   {id:47, nombre:"Palanca de vacuno",             marca:"Natural",      cat:"Carnes",     porcion:100, cal:180, prot:25,  carbs:0,   grasas:9,   fibra:0, azucar:0, sodio:60,   emoji:"🥩"},
-  {id:48, nombre:"Punta de ganso",                marca:"Natural",      cat:"Carnes",     porcion:100, cal:160, prot:26,  carbs:0,   grasas:5.5, fibra:0, azucar:0, sodio:60,   emoji:"🥩"},
+  {id:48, nombre:"Punta de ganso",                marca:"Natural",      cat:"Carnes",     porcion:100, cal:160, prot:26,  carbs:0,   grasas:5.5, fibra:0, azucar:0, sodio:60,   emoji:"🥩", precio:5990, pesoCompra:1000},
   {id:49, nombre:"Punta picana",                  marca:"Natural",      cat:"Carnes",     porcion:100, cal:195, prot:25,  carbs:0,   grasas:10,  fibra:0, azucar:0, sodio:60,   emoji:"🥩"},
   {id:50, nombre:"Carne molida 80% magra",        marca:"Natural",      cat:"Carnes",     porcion:100, cal:255, prot:17,  carbs:0,   grasas:20,  fibra:0, azucar:0, sodio:45,   emoji:"🥩"},
-  {id:51, nombre:"Carne molida 90% magra",        marca:"Natural",      cat:"Carnes",     porcion:100, cal:175, prot:20,  carbs:0,   grasas:10,  fibra:0, azucar:0, sodio:50,   emoji:"🥩"},
+  {id:51, nombre:"Carne molida 90% magra",        marca:"Natural",      cat:"Carnes",     porcion:100, cal:175, prot:20,  carbs:0,   grasas:10,  fibra:0, azucar:0, sodio:50,   emoji:"🥩", precio:4990, pesoCompra:1000},
   {id:52, nombre:"Cerdo chuleta",                 marca:"Natural",      cat:"Carnes",     porcion:100, cal:195, prot:24,  carbs:0,   grasas:10,  fibra:0, azucar:0, sodio:40,   emoji:"🥩"},
   {id:53, nombre:"Lomo de cerdo",                 marca:"Natural",      cat:"Carnes",     porcion:100, cal:165, prot:25,  carbs:0,   grasas:6.5, fibra:0, azucar:0, sodio:5,   emoji:"🥩"},
   {id:54, nombre:"Plateada de vacuno",            marca:"Natural",      cat:"Carnes",     porcion:100, cal:290, prot:22,  carbs:0,   grasas:22,  fibra:0, azucar:0, sodio:2,   emoji:"🥩"},
-  {id:55, nombre:"Pavo pechuga",                  marca:"Natural",      cat:"Carnes",     porcion:100, cal:105, prot:24,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:30,   emoji:"🍗"},
+  {id:55, nombre:"Pavo pechuga",                  marca:"Natural",      cat:"Carnes",     porcion:100, cal:105, prot:24,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:30,   emoji:"🍗", precio:5490, pesoCompra:1000},
   {id:56, nombre:"Cordero pierna",                marca:"Natural",      cat:"Carnes",     porcion:100, cal:250, prot:25,  carbs:0,   grasas:16,  fibra:0, azucar:0, sodio:2,   emoji:"🥩"},
   {id:57, nombre:"Hamburguesa vacuno 150g",       marca:"Genérico",     cat:"Carnes",     porcion:150, cal:380, prot:26,  carbs:0,   grasas:30,  fibra:0, azucar:0, sodio:5,   emoji:"🍔"},
   {id:58, nombre:"Hamburguesa pollo Ariztía 85g", marca:"Ariztía",      cat:"Carnes",     porcion:85,  cal:190, prot:14,  carbs:5,   grasas:13,  fibra:0, azucar:0, sodio:5,   emoji:"🍔"},
@@ -74,12 +74,12 @@ const DB = [
   {id:70, nombre:"Pepperoni San Jorge",           marca:"San Jorge",    cat:"Cecinas",    porcion:30,  cal:120, prot:6,   carbs:1,   grasas:10,  fibra:0, azucar:0, sodio:700,   emoji:"🥩"},
 
   /* ── PANES ── */
-  {id:80, nombre:"Marraqueta",                    marca:"Artesanal",    cat:"Panes",      porcion:80,  cal:230, prot:7,   carbs:44,  grasas:2.5, fibra:2, azucar:2, sodio:380,   emoji:"🍞"},
+  {id:80, nombre:"Marraqueta",                    marca:"Artesanal",    cat:"Panes",      porcion:80,  cal:230, prot:7,   carbs:44,  grasas:2.5, fibra:2, azucar:2, sodio:380,   emoji:"🍞", precio:190, pesoCompra:80},
   {id:81, nombre:"Hallulla",                      marca:"Artesanal",    cat:"Panes",      porcion:70,  cal:200, prot:6,   carbs:38,  grasas:3,   fibra:1.5, azucar:2, sodio:380, emoji:"🫓"},
   {id:82, nombre:"Pan molde blanco Harry's",      marca:"Harry's",      cat:"Panes",      porcion:30,  cal:75,  prot:2.5, carbs:14,  grasas:1,   fibra:0.5, azucar:2, sodio:380, emoji:"🍞"},
-  {id:83, nombre:"Pan molde integral Harry's",    marca:"Harry's",      cat:"Panes",      porcion:30,  cal:68,  prot:3,   carbs:12,  grasas:0.8, fibra:2, azucar:2, sodio:380,   emoji:"🍞"},
+  {id:83, nombre:"Pan molde integral Harry's",    marca:"Harry's",      cat:"Panes",      porcion:30,  cal:68,  prot:3,   carbs:12,  grasas:0.8, fibra:2, azucar:2, sodio:380,   emoji:"🍞", precio:2290, pesoCompra:500},
   {id:84, nombre:"Pan molde Bimbo blanco",        marca:"Bimbo",        cat:"Panes",      porcion:30,  cal:72,  prot:2.5, carbs:14,  grasas:0.8, fibra:0.5, azucar:2, sodio:380, emoji:"🍞"},
-  {id:85, nombre:"Pan molde Bimbo integral",      marca:"Bimbo",        cat:"Panes",      porcion:30,  cal:68,  prot:3,   carbs:12,  grasas:1,   fibra:2.5, azucar:2, sodio:380, emoji:"🍞"},
+  {id:85, nombre:"Pan molde Bimbo integral",      marca:"Bimbo",        cat:"Panes",      porcion:30,  cal:68,  prot:3,   carbs:12,  grasas:1,   fibra:2.5, azucar:2, sodio:380, emoji:"🍞", precio:2090, pesoCompra:480},
   {id:86, nombre:"Pan de molde sin gluten Schär", marca:"Schär",        cat:"Panes",      porcion:35,  cal:90,  prot:2.5, carbs:17,  grasas:1.5, fibra:1, azucar:2, sodio:380,   emoji:"🍞"},
   {id:87, nombre:"Pan pita Ideal",                marca:"Ideal",        cat:"Panes",      porcion:60,  cal:155, prot:5,   carbs:30,  grasas:1.5, fibra:1, azucar:2, sodio:380,   emoji:"🫓"},
   {id:88, nombre:"Pan ciabatta",                  marca:"Artesanal",    cat:"Panes",      porcion:80,  cal:215, prot:7,   carbs:41,  grasas:2,   fibra:1.5, azucar:2, sodio:380, emoji:"🥖"},
@@ -90,7 +90,7 @@ const DB = [
   {id:93, nombre:"Pan de centeno",                marca:"Artesanal",    cat:"Panes",      porcion:35,  cal:85,  prot:3,   carbs:16,  grasas:0.8, fibra:2.5, azucar:2, sodio:380, emoji:"🍞"},
 
   /* ── CEREALES ── */
-  {id:100,nombre:"Avena Quaker tradicional",      marca:"Quaker",       cat:"Cereales",   porcion:45,  cal:170, prot:6,   carbs:30,  grasas:3,   fibra:4, azucar:8, sodio:290,   emoji:"🌾"},
+  {id:100,nombre:"Avena Quaker tradicional",      marca:"Quaker",       cat:"Cereales",   porcion:45,  cal:170, prot:6,   carbs:30,  grasas:3,   fibra:4, azucar:8, sodio:290,   emoji:"🌾", precio:1590, pesoCompra:1000},
   {id:101,nombre:"Avena instantánea Quaker",      marca:"Quaker",       cat:"Cereales",   porcion:35,  cal:130, prot:4.5, carbs:23,  grasas:2.5, fibra:3, azucar:18, sodio:180,   emoji:"🌾"},
   {id:102,nombre:"Musli Quaker",                  marca:"Quaker",       cat:"Cereales",   porcion:45,  cal:175, prot:4.5, carbs:32,  grasas:3.5, fibra:3.5, azucar:25, sodio:80, emoji:"🥣"},
   {id:103,nombre:"Granola Quaker miel",           marca:"Quaker",       cat:"Cereales",   porcion:45,  cal:195, prot:4,   carbs:34,  grasas:5,   fibra:3, azucar:1, sodio:5,   emoji:"🥣"},
@@ -152,9 +152,9 @@ const DB = [
   {id:173,nombre:"Kombucha GT's 480ml",           marca:"GT's",         cat:"Bebidas",    porcion:480, cal:50,  prot:0,   carbs:12,  grasas:0,   fibra:0, azucar:28, sodio:20,   emoji:"🍶"},
 
   /* ── FRUTAS ── */
-  {id:180,nombre:"Palta Hass",                    marca:"Natural",      cat:"Frutas",     porcion:80,  cal:130, prot:1.5, carbs:7,   grasas:12,  fibra:5, azucar:10, sodio:2,   emoji:"🥑"},
-  {id:181,nombre:"Manzana fuji",                  marca:"Natural",      cat:"Frutas",     porcion:150, cal:80,  prot:0.5, carbs:20,  grasas:0.3, fibra:3, azucar:10, sodio:2,   emoji:"🍎"},
-  {id:182,nombre:"Plátano",                       marca:"Natural",      cat:"Frutas",     porcion:120, cal:105, prot:1.5, carbs:27,  grasas:0.3, fibra:3, azucar:10, sodio:2,   emoji:"🍌"},
+  {id:180,nombre:"Palta Hass",                    marca:"Natural",      cat:"Frutas",     porcion:80,  cal:130, prot:1.5, carbs:7,   grasas:12,  fibra:5, azucar:10, sodio:2,   emoji:"🥑", precio:1490, pesoCompra:500},
+  {id:181,nombre:"Manzana fuji",                  marca:"Natural",      cat:"Frutas",     porcion:150, cal:80,  prot:0.5, carbs:20,  grasas:0.3, fibra:3, azucar:10, sodio:2,   emoji:"🍎", precio:1290, pesoCompra:1000},
+  {id:182,nombre:"Plátano",                       marca:"Natural",      cat:"Frutas",     porcion:120, cal:105, prot:1.5, carbs:27,  grasas:0.3, fibra:3, azucar:10, sodio:2,   emoji:"🍌", precio:990, pesoCompra:1000},
   {id:183,nombre:"Naranja navel",                 marca:"Natural",      cat:"Frutas",     porcion:200, cal:90,  prot:2,   carbs:22,  grasas:0,   fibra:4, azucar:10, sodio:2,   emoji:"🍊"},
   {id:184,nombre:"Frutillas",                     marca:"Natural",      cat:"Frutas",     porcion:150, cal:50,  prot:1,   carbs:12,  grasas:0.5, fibra:3, azucar:10, sodio:2,   emoji:"🍓"},
   {id:185,nombre:"Uva red globe",                 marca:"Natural",      cat:"Frutas",     porcion:100, cal:70,  prot:0.7, carbs:18,  grasas:0.2, fibra:1, azucar:10, sodio:2,   emoji:"🍇"},
@@ -172,13 +172,13 @@ const DB = [
   {id:197,nombre:"Piña",                          marca:"Natural",      cat:"Frutas",     porcion:150, cal:78,  prot:0.9, carbs:20,  grasas:0.2, fibra:2, azucar:10, sodio:2,   emoji:"🍍"},
 
   /* ── VERDURAS ── */
-  {id:200,nombre:"Tomate",                        marca:"Natural",      cat:"Verduras",   porcion:120, cal:25,  prot:1,   carbs:5,   grasas:0.3, fibra:1.5, azucar:4,  sodio:6,   emoji:"🍅"},
-  {id:201,nombre:"Lechuga romana",                marca:"Natural",      cat:"Verduras",   porcion:80,  cal:14,  prot:1,   carbs:2,   grasas:0.2, fibra:1.5, azucar:1,  sodio:8,  emoji:"🥬"},
-  {id:202,nombre:"Espinaca",                      marca:"Natural",      cat:"Verduras",   porcion:80,  cal:18,  prot:2.5, carbs:2,   grasas:0.3, fibra:1.5, azucar:38, sodio:20, emoji:"🥬"},
+  {id:200,nombre:"Tomate",                        marca:"Natural",      cat:"Verduras",   porcion:120, cal:25,  prot:1,   carbs:5,   grasas:0.3, fibra:1.5, azucar:4,  sodio:6,   emoji:"🍅", precio:990, pesoCompra:1000},
+  {id:201,nombre:"Lechuga romana",                marca:"Natural",      cat:"Verduras",   porcion:80,  cal:14,  prot:1,   carbs:2,   grasas:0.2, fibra:1.5, azucar:1,  sodio:8,  emoji:"🥬", precio:790, pesoCompra:300},
+  {id:202,nombre:"Espinaca",                      marca:"Natural",      cat:"Verduras",   porcion:80,  cal:18,  prot:2.5, carbs:2,   grasas:0.3, fibra:1.5, azucar:38, sodio:20, emoji:"🥬", precio:590, pesoCompra:200},
   {id:203,nombre:"Choclo",                        marca:"Natural",      cat:"Verduras",   porcion:100, cal:65,  prot:2,   carbs:14,  grasas:0.7, fibra:1.5, azucar:25, sodio:20, emoji:"🌽"},
-  {id:204,nombre:"Zanahoria",                     marca:"Natural",      cat:"Verduras",   porcion:100, cal:41,  prot:0.9, carbs:10,  grasas:0.2, fibra:2.8, azucar:30, sodio:20, emoji:"🥕"},
+  {id:204,nombre:"Zanahoria",                     marca:"Natural",      cat:"Verduras",   porcion:100, cal:41,  prot:0.9, carbs:10,  grasas:0.2, fibra:2.8, azucar:30, sodio:20, emoji:"🥕", precio:690, pesoCompra:1000},
   {id:205,nombre:"Cebolla",                       marca:"Natural",      cat:"Verduras",   porcion:100, cal:40,  prot:1,   carbs:9,   grasas:0.1, fibra:1.7, azucar:35, sodio:20, emoji:"🧅"},
-  {id:206,nombre:"Papa blanca",                   marca:"Natural",      cat:"Verduras",   porcion:150, cal:120, prot:2.5, carbs:27,  grasas:0.2, fibra:2.5, azucar:1.5,sodio:10, emoji:"🥔"},
+  {id:206,nombre:"Papa blanca",                   marca:"Natural",      cat:"Verduras",   porcion:150, cal:120, prot:2.5, carbs:27,  grasas:0.2, fibra:2.5, azucar:1.5,sodio:10, emoji:"🥔", precio:790, pesoCompra:1000},
   {id:207,nombre:"Camote/batata",                 marca:"Natural",      cat:"Verduras",   porcion:150, cal:130, prot:2,   carbs:30,  grasas:0.2, fibra:4, azucar:22, sodio:20,   emoji:"🍠"},
   {id:208,nombre:"Brócoli",                       marca:"Natural",      cat:"Verduras",   porcion:100, cal:34,  prot:2.8, carbs:7,   grasas:0.4, fibra:2.6, azucar:28, sodio:20, emoji:"🥦"},
   {id:209,nombre:"Coliflor",                      marca:"Natural",      cat:"Verduras",   porcion:100, cal:25,  prot:2,   carbs:5,   grasas:0.3, fibra:2, azucar:32, sodio:20,   emoji:"🥦"},
@@ -193,9 +193,9 @@ const DB = [
   {id:218,nombre:"Ajo",                           marca:"Natural",      cat:"Verduras",   porcion:10,  cal:15,  prot:0.6, carbs:3.4, grasas:0.1, fibra:0.2, azucar:2, sodio:20, emoji:"🧄"},
 
   /* ── LEGUMBRES ── */
-  {id:225,nombre:"Lentejas cocidas Gallo",        marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:115, prot:9,   carbs:20,  grasas:0.4, fibra:8, azucar:1, sodio:5,   emoji:"🫘"},
-  {id:226,nombre:"Porotos negros Gallo",          marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:130, prot:9,   carbs:24,  grasas:0.5, fibra:7, azucar:1, sodio:5,   emoji:"🫘"},
-  {id:227,nombre:"Garbanzos cocidos",             marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:165, prot:9,   carbs:27,  grasas:2.5, fibra:8, azucar:1, sodio:5,   emoji:"🫘"},
+  {id:225,nombre:"Lentejas cocidas Gallo",        marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:115, prot:9,   carbs:20,  grasas:0.4, fibra:8, azucar:1, sodio:5,   emoji:"🫘", precio:1890, pesoCompra:1000},
+  {id:226,nombre:"Porotos negros Gallo",          marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:130, prot:9,   carbs:24,  grasas:0.5, fibra:7, azucar:1, sodio:5,   emoji:"🫘", precio:1690, pesoCompra:1000},
+  {id:227,nombre:"Garbanzos cocidos",             marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:165, prot:9,   carbs:27,  grasas:2.5, fibra:8, azucar:1, sodio:5,   emoji:"🫘", precio:2290, pesoCompra:1000},
   {id:228,nombre:"Porotos blancos cocidos",       marca:"Gallo",        cat:"Legumbres",  porcion:100, cal:125, prot:8.5, carbs:23,  grasas:0.4, fibra:7, azucar:1, sodio:5,   emoji:"🫘"},
   {id:229,nombre:"Arvejas cocidas",               marca:"Natural",      cat:"Legumbres",  porcion:100, cal:84,  prot:5.5, carbs:15,  grasas:0.4, fibra:5, azucar:1, sodio:5,   emoji:"🫛"},
   {id:230,nombre:"Edamame",                       marca:"Natural",      cat:"Legumbres",  porcion:100, cal:121, prot:11,  carbs:10,  grasas:5,   fibra:5, azucar:1, sodio:5,   emoji:"🫛"},
@@ -204,7 +204,7 @@ const DB = [
   /* ── GRANOS / PASTAS / ARROZ ── */
   {id:235,nombre:"Arroz blanco cocido",           marca:"Genérico",     cat:"Granos",     porcion:100, cal:130, prot:2.7, carbs:28,  grasas:0.3, fibra:0.4, azucar:0.5, sodio:5, emoji:"🍚"},
   {id:236,nombre:"Arroz integral cocido",         marca:"Genérico",     cat:"Granos",     porcion:100, cal:110, prot:2.5, carbs:23,  grasas:0.8, fibra:1.8, azucar:0.5, sodio:5, emoji:"🍚"},
-  {id:237,nombre:"Pasta Carozzi espagueti",       marca:"Carozzi",      cat:"Granos",     porcion:100, cal:360, prot:12,  carbs:72,  grasas:1.5, fibra:3, azucar:0.5, sodio:5,   emoji:"🍝"},
+  {id:237,nombre:"Pasta Carozzi espagueti",       marca:"Carozzi",      cat:"Granos",     porcion:100, cal:360, prot:12,  carbs:72,  grasas:1.5, fibra:3, azucar:0.5, sodio:5,   emoji:"🍝", precio:890, pesoCompra:500},
   {id:238,nombre:"Pasta Carozzi cocida",          marca:"Carozzi",      cat:"Granos",     porcion:100, cal:160, prot:5.5, carbs:32,  grasas:0.9, fibra:2, azucar:0.5, sodio:5,   emoji:"🍝"},
   {id:239,nombre:"Pasta integral Carozzi",        marca:"Carozzi",      cat:"Granos",     porcion:100, cal:345, prot:13,  carbs:68,  grasas:2,   fibra:8, azucar:0.5, sodio:5,   emoji:"🍝"},
   {id:240,nombre:"Pasta integral cocida",         marca:"Carozzi",      cat:"Granos",     porcion:100, cal:150, prot:6,   carbs:30,  grasas:1,   fibra:4, azucar:0.5, sodio:5,   emoji:"🍝"},
@@ -216,12 +216,12 @@ const DB = [
 
   /* ── PESCADOS / MARISCOS ── */
   {id:250,nombre:"Reineta al horno",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:115, prot:20,  carbs:0,   grasas:3.5, fibra:0, azucar:20, sodio:400,   emoji:"🐟"},
-  {id:251,nombre:"Salmón fresco",                 marca:"Natural",      cat:"Pescados",   porcion:100, cal:200, prot:20,  carbs:0,   grasas:13,  fibra:0, azucar:5, sodio:160,   emoji:"🐟"},
+  {id:251,nombre:"Salmón fresco",                 marca:"Natural",      cat:"Pescados",   porcion:100, cal:200, prot:20,  carbs:0,   grasas:13,  fibra:0, azucar:5, sodio:160,   emoji:"🐟", precio:7990, pesoCompra:1000},
   {id:252,nombre:"Merluza al vapor",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:80,  prot:18,  carbs:0,   grasas:0.8, fibra:0, azucar:0, sodio:480,   emoji:"🐟"},
   {id:253,nombre:"Congrio colorado",              marca:"Natural",      cat:"Pescados",   porcion:100, cal:95,  prot:19,  carbs:0,   grasas:2,   fibra:0, azucar:15, sodio:80,   emoji:"🐟"},
   {id:254,nombre:"Jurel en conserva",             marca:"Genérico",     cat:"Pescados",   porcion:100, cal:150, prot:22,  carbs:0,   grasas:7,   fibra:0, azucar:0, sodio:80,   emoji:"🥫"},
-  {id:255,nombre:"Atún Salmonte en agua",         marca:"Salmonte",     cat:"Pescados",   porcion:100, cal:100, prot:23,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:80,   emoji:"🥫"},
-  {id:256,nombre:"Sardinas en aceite",            marca:"Genérico",     cat:"Pescados",   porcion:85,  cal:190, prot:23,  carbs:0,   grasas:11,  fibra:0, azucar:60, sodio:80,   emoji:"🥫"},
+  {id:255,nombre:"Atún Salmonte en agua",         marca:"Salmonte",     cat:"Pescados",   porcion:100, cal:100, prot:23,  carbs:0,   grasas:1,   fibra:0, azucar:0, sodio:80,   emoji:"🥫", precio:990, pesoCompra:140},
+  {id:256,nombre:"Sardinas en aceite",            marca:"Genérico",     cat:"Pescados",   porcion:85,  cal:190, prot:23,  carbs:0,   grasas:11,  fibra:0, azucar:60, sodio:80,   emoji:"🥫", precio:890, pesoCompra:425},
   {id:257,nombre:"Machas al natural",             marca:"Natural",      cat:"Pescados",   porcion:100, cal:55,  prot:10,  carbs:3,   grasas:0.5, fibra:0, azucar:0,  sodio:880,     emoji:"🦪"},
   {id:258,nombre:"Camarones cocidos",             marca:"Natural",      cat:"Pescados",   porcion:100, cal:99,  prot:21,  carbs:0,   grasas:1,   fibra:0, azucar:0,  sodio:566,  emoji:"🦐"},
   {id:259,nombre:"Albacora (pez espada)",         marca:"Natural",      cat:"Pescados",   porcion:100, cal:145, prot:20,  carbs:0,   grasas:7,   fibra:0, azucar:0,  sodio:90,   emoji:"🐟"},
@@ -531,15 +531,15 @@ const DB = [
   {id:575,nombre:"Ketchup Heinz",                 marca:"Heinz",        cat:"Salsas",    porcion:17,  cal:20,  prot:0.5, carbs:5.0,  grasas:0,   fibra:0.5,azucar:4.0, sodio:190, emoji:"🍅"},
   {id:576,nombre:"Mostaza americana",             marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:10,  prot:0.5, carbs:1.0,  grasas:0.5, fibra:0.5,azucar:0.5, sodio:120, emoji:"🟡"},
   {id:577,nombre:"Salsa de soja Kikkoman",        marca:"Kikkoman",     cat:"Salsas",    porcion:15,  cal:10,  prot:1.5, carbs:1.0,  grasas:0,   fibra:0,  azucar:0.5, sodio:920, emoji:"🫙"},
-  {id:578,nombre:"Aceite de oliva",               marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙"},
-  {id:579,nombre:"Aceite vegetal",                marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙"},
+  {id:578,nombre:"Aceite de oliva",               marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙", precio:3490, pesoCompra:500},
+  {id:579,nombre:"Aceite vegetal",                marca:"Genérico",     cat:"Salsas",    porcion:10,  cal:90,  prot:0,   carbs:0,    grasas:10.0,fibra:0,  azucar:0,   sodio:0,   emoji:"🫙", precio:1990, pesoCompra:1000},
   {id:580,nombre:"Mermelada frutilla Watts",      marca:"Watts",        cat:"Salsas",    porcion:20,  cal:50,  prot:0.2, carbs:13.0, grasas:0,   fibra:0.5,azucar:12,  sodio:5,   emoji:"🍓"},
   {id:581,nombre:"Manjar",                        marca:"Genérico",     cat:"Salsas",    porcion:20,  cal:65,  prot:1.5, carbs:13.0, grasas:1.0, fibra:0,  azucar:13,  sodio:35,  emoji:"🍯"},
 
   /* ── PASTAS Y ARROZ ── */
   {id:582,nombre:"Fideos spaghetti Carozzi",      marca:"Carozzi",      cat:"Cereales",  porcion:85,  cal:300, prot:11.0,carbs:61.0, grasas:1.5, fibra:2.5,azucar:2.0, sodio:5,   emoji:"🍝"},
   {id:421,nombre:"Fideos pluma Carozzi",          marca:"Carozzi",      cat:"Cereales",  porcion:85,  cal:300, prot:11.0,carbs:61.0, grasas:1.5, fibra:2.5,azucar:2.0, sodio:5,   emoji:"🍝"},
-  {id:422,nombre:"Arroz grado 1 Tucapel",         marca:"Tucapel",      cat:"Cereales",  porcion:50,  cal:175, prot:3.5, carbs:39.0, grasas:0.5, fibra:0.5,azucar:0,   sodio:2,   emoji:"🍚"},
+  {id:422,nombre:"Arroz grado 1 Tucapel",         marca:"Tucapel",      cat:"Cereales",  porcion:50,  cal:175, prot:3.5, carbs:39.0, grasas:0.5, fibra:0.5,azucar:0,   sodio:2,   emoji:"🍚", precio:1290, pesoCompra:1000},
   {id:423,nombre:"Arroz integral Tucapel",        marca:"Tucapel",      cat:"Cereales",  porcion:50,  cal:170, prot:4.0, carbs:36.0, grasas:1.0, fibra:2.5,azucar:0,   sodio:2,   emoji:"🍚"},
   {id:424,nombre:"Quinoa",                        marca:"Genérico",     cat:"Cereales",  porcion:45,  cal:165, prot:6.0, carbs:30.0, grasas:2.5, fibra:3.0,azucar:0.5, sodio:5,   emoji:"🌾"},
   {id:425,nombre:"Cuscús",                        marca:"Genérico",     cat:"Cereales",  porcion:45,  cal:160, prot:5.5, carbs:33.0, grasas:0.5, fibra:2.5,azucar:0.5, sodio:5,   emoji:"🌾"},
@@ -7600,6 +7600,202 @@ Responde SOLO con este JSON:
   );
 }
 
+/* ═══════════════════════════════════════════════════════
+   MODO FERIA — Optimizador nutricional-económico
+   Genera plan semanal basado en presupuesto en CLP
+═══════════════════════════════════════════════════════ */
+const generarPlanFeria = (presupuesto, metas, db) => {
+  // Solo productos con precio definido
+  const conPrecio = db.filter(f => f.precio && f.pesoCompra);
+
+  // Calcular valor nutricional por peso (score)
+  const scored = conPrecio.map(f => {
+    const factor = 100 / (f.porcion || 100); // normalizar a por 100g
+    const prot100 = (f.prot || 0) * factor;
+    const cal100  = (f.cal  || 0) * factor;
+    const precio100g = (f.precio / f.pesoCompra) * 100;
+    // Score: proteína vale 3x, calorías valen 1x — por peso gastado
+    const score = precio100g > 0 ? (prot100 * 3 + cal100) / precio100g : 0;
+    return { ...f, prot100, cal100, precio100g, score };
+  });
+
+  // Ordenar por score descendente (más nutrición por peso)
+  scored.sort((a, b) => b.score - a.score);
+
+  const lista = [];
+  let gastado = 0;
+  const protSemanal = (metas.prot || 50) * 7;
+  const calSemanal  = (metas.cal  || 2000) * 7;
+  let protAcum = 0;
+  let calAcum  = 0;
+
+  // Selección greedy con variedad (máx 3 unidades por producto)
+  for (const food of scored) {
+    if (gastado >= presupuesto) break;
+    const maxUnidades = Math.min(
+      Math.floor((presupuesto - gastado) / food.precio),
+      3
+    );
+    if (maxUnidades < 1) continue;
+
+    // ¿Cuántas unidades necesitamos para la proteína?
+    const protPorUnidad = (food.prot100 / 100) * food.pesoCompra;
+    const unidadesNecesarias = protPorUnidad > 0
+      ? Math.ceil(Math.max(0, protSemanal - protAcum) / protPorUnidad)
+      : 1;
+    const unidades = Math.min(maxUnidades, Math.max(1, unidadesNecesarias));
+
+    lista.push({
+      ...food,
+      unidades,
+      costoTotal: food.precio * unidades,
+      protTotal: Math.round(protPorUnidad * unidades),
+      calTotal:  Math.round((food.cal100 / 100) * food.pesoCompra * unidades),
+    });
+    gastado  += food.precio * unidades;
+    protAcum += protPorUnidad * unidades;
+    calAcum  += (food.cal100 / 100) * food.pesoCompra * unidades;
+  }
+
+  return {
+    lista,
+    gastado,
+    vuelto: presupuesto - gastado,
+    protSemanal: Math.round(protAcum),
+    calSemanal:  Math.round(calAcum),
+    protMeta:    protSemanal,
+    calMeta:     calSemanal,
+  };
+};
+
+function ModFeriaModal({C, F, metas, onClose}) {
+  const [presupuesto, setPresupuesto] = useState(15000);
+  const [plan, setPlan] = useState(null);
+  const [generando, setGenerando] = useState(false);
+
+  const generar = () => {
+    setGenerando(true);
+    setTimeout(() => {
+      setPlan(generarPlanFeria(presupuesto, metas, DB));
+      setGenerando(false);
+    }, 600);
+  };
+
+  const formatCLP = (n) => '$' + Math.round(n).toLocaleString('es-CL');
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
+      {/* Header */}
+      <div style={{display:'flex',alignItems:'center',padding:'14px 16px',borderBottom:`1px solid ${C.border}`,background:C.surface}}>
+        <button onClick={onClose} style={{background:'none',border:'none',fontSize:22,cursor:'pointer',color:C.textSec,padding:'0 8px 0 0'}}>‹</button>
+        <div style={{flex:1}}>
+          <div style={{fontSize:17,fontWeight:800,color:C.text}}>🛒 Modo Feria</div>
+          <div style={{fontSize:11,color:C.textSec}}>Come sano. Gasta inteligente.</div>
+        </div>
+      </div>
+
+      <div style={{flex:1,overflowY:'auto',padding:16}}>
+        {/* Banner explicativo */}
+        <div style={{background:'linear-gradient(135deg,#D42020,#FF6B35)',borderRadius:18,padding:'16px',marginBottom:16,color:'white'}}>
+          <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🇨🇱 Único en Chile</div>
+          <div style={{fontSize:12,opacity:.9,lineHeight:1.4}}>Ingresa tu presupuesto semanal y Calorú te dice exactamente qué comprar en el Líder o Jumbo para cumplir tus metas de nutrición al menor costo posible.</div>
+        </div>
+
+        {/* Selector de presupuesto */}
+        <div style={{background:C.surface,borderRadius:16,padding:'16px',marginBottom:16,border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:12}}>¿Cuánto tienes para gastar en comida esta semana?</div>
+          <div style={{fontSize:32,fontWeight:800,color:'#D42020',textAlign:'center',marginBottom:12}}>{formatCLP(presupuesto)}</div>
+          <input
+            type="range"
+            min={5000} max={80000} step={1000}
+            value={presupuesto}
+            onChange={e => setPresupuesto(+e.target.value)}
+            style={{width:'100%',accentColor:'#D42020',marginBottom:8}}
+          />
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:C.textMuted}}>
+            <span>$5.000</span><span>$80.000</span>
+          </div>
+          {/* Atajos rápidos */}
+          <div style={{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}}>
+            {[10000,15000,20000,30000,50000].map(v=>(
+              <button key={v} onClick={()=>setPresupuesto(v)} style={{
+                padding:'6px 12px',borderRadius:20,border:`1.5px solid ${presupuesto===v?'#D42020':C.border}`,
+                background:presupuesto===v?'#D4202015':'transparent',
+                color:presupuesto===v?'#D42020':C.textSec,
+                fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F,
+              }}>{formatCLP(v)}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Botón generar */}
+        <button onClick={generar} disabled={generando} style={{
+          width:'100%',padding:'16px',borderRadius:18,border:'none',
+          background:generando?'#C7C7CC':'#D42020',color:'white',
+          fontSize:16,fontWeight:800,cursor:'pointer',fontFamily:F,marginBottom:16,
+        }}>
+          {generando ? '🛒 Buscando los mejores precios...' : '🛒 Generar mi plan de compras'}
+        </button>
+
+        {/* Resultados */}
+        {plan && (
+          <div style={{animation:'fadeUp .3s ease'}}>
+            {/* Resumen */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:16}}>
+              {[
+                {label:'Gastado',value:formatCLP(plan.gastado),color:'#D42020'},
+                {label:'Vuelto',value:formatCLP(plan.vuelto),color:'#34C759'},
+                {label:'Proteína',value:`${plan.protSemanal}g`,color:'#007AFF'},
+              ].map(({label,value,color})=>(
+                <div key={label} style={{background:C.surface,borderRadius:14,padding:'12px 8px',textAlign:'center',border:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:16,fontWeight:800,color}}>{value}</div>
+                  <div style={{fontSize:10,color:C.textMuted,marginTop:2}}>{label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Barra de progreso proteína */}
+            <div style={{background:C.surface,borderRadius:16,padding:'14px',marginBottom:16,border:`1px solid ${C.border}`}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+                <span style={{fontSize:12,fontWeight:700,color:C.text}}>💪 Proteína semanal</span>
+                <span style={{fontSize:12,color:C.textSec}}>{plan.protSemanal}g / {plan.protMeta}g meta</span>
+              </div>
+              <div style={{background:C.surfaceAlt,borderRadius:8,height:10,overflow:'hidden'}}>
+                <div style={{width:`${Math.min(100,Math.round(plan.protSemanal/plan.protMeta*100))}%`,height:'100%',background:'#007AFF',borderRadius:8,transition:'width .5s ease'}}/>
+              </div>
+              <div style={{fontSize:11,color:C.textMuted,marginTop:6}}>
+                {plan.protSemanal >= plan.protMeta ? '✅ Meta de proteína cubierta' : `⚠️ Faltan ${plan.protMeta - plan.protSemanal}g de proteína`}
+              </div>
+            </div>
+
+            {/* Lista de compras */}
+            <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:10}}>🛍️ Lista de compras</div>
+            {plan.lista.map((item,i)=>(
+              <div key={i} style={{background:C.surface,borderRadius:14,padding:'12px 14px',marginBottom:8,border:`1px solid ${C.border}`,display:'flex',alignItems:'center',gap:12}}>
+                <div style={{fontSize:28,flexShrink:0}}>{item.emoji}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{item.nombre}</div>
+                  <div style={{fontSize:11,color:C.textSec}}>{item.unidades > 1 ? `${item.unidades} unidades` : '1 unidad'} · {item.protTotal}g prot · {item.calTotal} kcal</div>
+                </div>
+                <div style={{textAlign:'right',flexShrink:0}}>
+                  <div style={{fontSize:14,fontWeight:800,color:'#D42020'}}>{formatCLP(item.costoTotal)}</div>
+                  <div style={{fontSize:10,color:C.textMuted}}>{formatCLP(item.precio)}/u</div>
+                </div>
+              </div>
+            ))}
+
+            {/* Dato diferenciador */}
+            <div style={{background:'rgba(212,32,32,0.08)',borderRadius:14,padding:'12px 14px',marginTop:8,border:'1px solid rgba(212,32,32,0.15)'}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#D42020',marginBottom:4}}>🇨🇱 Solo en Calorú</div>
+              <div style={{fontSize:11,color:C.textSec,lineHeight:1.5}}>Este plan usa precios reales de supermercados chilenos. Ninguna otra app de nutrición en español hace esto.</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AppCore() {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
@@ -7750,6 +7946,7 @@ function AppCore() {
   const [showAllLogros,setShowAllLogros]   = useState(false);
   const [showCustom,setShowCustom] = useState(false);
   const [showScanner,setShowScanner] = useState(false);
+  const [showModFeria,setShowModFeria] = useState(false);
   const [showPhotoScanner,setShowPhotoScanner] = useState(false);
   const [showRecipe,setShowRecipe]   = useState(false);
   const [showPlanner,setShowPlanner] = useState(false);
@@ -8817,6 +9014,9 @@ function AppCore() {
 
       <Confetti active={confetti}/>
 
+      {/* ══ MODO FERIA ══ */}
+      {showModFeria&&<ModFeriaModal C={C} F={F} metas={metas} onClose={()=>setShowModFeria(false)}/>}
+
       {/* ══ BARCODE SCANNER ══ */}
       {showScanner&&<BarcodeScanner C={C} F={F} supabaseUser={supabaseUser} onClose={()=>setShowScanner(false)} onFound={(food)=>{
                 setShowScanner(false);
@@ -9704,6 +9904,18 @@ function AppCore() {
               display:'flex',alignItems:'center',justifyContent:'center',gap:6,
             }}>
               <span style={{fontSize:18}}>📷</span> Escanear código
+            </button>
+            <button className="tap" onClick={()=>setShowModFeria(true)} style={{
+              background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,
+              padding:'14px 16px',display:'flex',alignItems:'center',gap:12,cursor:'pointer',fontFamily:F,width:'100%',textAlign:'left',
+              gridColumn:'1 / -1',
+            }}>
+              <div style={{width:40,height:40,borderRadius:12,background:'linear-gradient(135deg,#D42020,#FF6B35)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>🛒</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text}}>Modo Feria</div>
+                <div style={{fontSize:11,color:C.textSec}}>Plan semanal según tu presupuesto</div>
+              </div>
+              <div style={{background:'#D4202015',color:'#D42020',fontSize:9,fontWeight:800,padding:'3px 8px',borderRadius:8}}>NUEVO</div>
             </button>
             <button className="tap" onClick={()=>setShowRecipe(true)} style={{
               padding:'12px',borderRadius:16,
