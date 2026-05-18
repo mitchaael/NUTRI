@@ -8873,13 +8873,17 @@ function AppCore() {
     /* Normalizar gramos: null ó undefined ó la porción base = "porción estándar" → null.
        Esto evita duplicados como "1 hallulla (null)" + "1 hallulla (70g)" que son lo mismo. */
     const targetGrams = (a.grams && a.grams !== a.porcion) ? a.grams : null;
-    const ex = log.find(r =>
-      r.id === a.id &&
-      r.comida === meal &&
-      ((r.grams || null) === targetGrams)
-    );
-    if(ex) setLog(log.map(r=>r.uid===ex.uid?{...r,qty:r.qty+1}:r));
-    else   setLog([...log,{...a,comida:meal,qty:1,uid:Date.now()+Math.random(),grams:targetGrams}]);
+    /* Usar setter funcional para que múltiples llamadas seguidas (ej: escáner IA con varios
+       ingredientes) trabajen sobre el estado más reciente y no sobre el closure stale. */
+    setLog(prev => {
+      const ex = prev.find(r =>
+        r.id === a.id &&
+        r.comida === meal &&
+        ((r.grams || null) === targetGrams)
+      );
+      if(ex) return prev.map(r=>r.uid===ex.uid?{...r,qty:r.qty+1}:r);
+      return [...prev,{...a,comida:meal,qty:1,uid:Date.now()+Math.random(),grams:targetGrams}];
+    });
     setRecent(prev=>{const f=prev.filter(x=>x.id!==a.id);return [a,...f].slice(0,8);});
     /* Auto-save scanned/manual products to "Agregados por ti" */
     if((a.cat==='Escaneado'||a.barcode||a.marca==='Manual'||a.marca==='Estimado')){
@@ -8893,7 +8897,7 @@ function AppCore() {
     haptic('add');
     setToast(`✓ ${a.nombre.split(' ').slice(0,3).join(' ')} agregado`);
     setAddFlash(true); setTimeout(()=>setAddFlash(false),600);
-  },[log,meal]);
+  },[meal]);
 
   const adj=(uid,d)=>setLog(log.map(r=>r.uid===uid?{...r,qty:r.qty+d}:r).filter(r=>r.qty>0));
   const setItemGrams=(uid,g)=>setLog(log.map(r=>r.uid===uid?{...r,grams:Math.max(1,g)}:r));
