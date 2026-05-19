@@ -779,6 +779,39 @@ const RITMOS = {
   rapido:    {label:'🏃 Rápido',    desc:'0.75 kg/sem', factor:0.30, color:'#D42020'},
   agresivo:  {label:'🚀 Agresivo',  desc:'1 kg/sem',    factor:0.38, color:'#5856D6'},
 };
+const JUNAEB = {
+  'Puente Alto':    {pct:68,nivel:'muy alto',color:'#FF3B30'},
+  'La Pintana':     {pct:71,nivel:'muy alto',color:'#FF3B30'},
+  'Cerro Navia':    {pct:69,nivel:'muy alto',color:'#FF3B30'},
+  'Lo Espejo':      {pct:70,nivel:'muy alto',color:'#FF3B30'},
+  'Maipú':          {pct:65,nivel:'alto',    color:'#FF9500'},
+  'La Florida':     {pct:62,nivel:'alto',    color:'#FF9500'},
+  'El Bosque':      {pct:67,nivel:'alto',    color:'#FF9500'},
+  'Talca':          {pct:63,nivel:'alto',    color:'#FF9500'},
+  'Rancagua':       {pct:61,nivel:'alto',    color:'#FF9500'},
+  'Antofagasta':    {pct:60,nivel:'alto',    color:'#FF9500'},
+  'Arica':          {pct:58,nivel:'alto',    color:'#FF9500'},
+  'Temuco':         {pct:57,nivel:'alto',    color:'#FF9500'},
+  'Concepción':     {pct:55,nivel:'medio',   color:'#FFD700'},
+  'Valparaíso':     {pct:53,nivel:'medio',   color:'#FFD700'},
+  'Viña del Mar':   {pct:50,nivel:'medio',   color:'#FFD700'},
+  'La Serena':      {pct:51,nivel:'medio',   color:'#FFD700'},
+  'Santiago':       {pct:52,nivel:'medio',   color:'#FFD700'},
+  'Peñalolén':      {pct:56,nivel:'medio',   color:'#FFD700'},
+  'Las Condes':     {pct:38,nivel:'bajo',    color:'#34C759'},
+  'Providencia':    {pct:33,nivel:'bajo',    color:'#34C759'},
+  'Ñuñoa':          {pct:35,nivel:'bajo',    color:'#34C759'},
+  'Vitacura':       {pct:28,nivel:'bajo',    color:'#34C759'},
+  'Otra':           {pct:55,nivel:'medio',   color:'#FFD700'},
+};
+const MOODS = [
+  {e:'😊',l:'Feliz',     color:'#34C759'},
+  {e:'😐',l:'Neutro',    color:'#8E8E93'},
+  {e:'😔',l:'Triste',    color:'#5856D6'},
+  {e:'😰',l:'Ansioso/a', color:'#FF9500'},
+  {e:'😤',l:'Estresado/a',color:'#FF3B30'},
+  {e:'😴',l:'Cansado/a', color:'#AF52DE'},
+];
 
 const calcMetas = (tdee, obj, pesoKg=70, ritmo='normal') => {
   /* Déficit/superávit en % del TDEE según ritmo elegido */
@@ -1346,8 +1379,9 @@ function Onboarding({onDone}) {
   const [perfil,setPerfil]=useState({peso:70,altura:170,edad:25,sexo:'M',act:'1.55'});
   const [obj,setObj]=useState('mantener');
   const [accountType,setAccountType]=useState('personal');
+  const [comunaOB,setComunaOB]=useState('Otra');
   const C=LIGHT;
-  const totalSteps=5;
+  const totalSteps=6;
 
   const steps=[
     // Step 0: Pantalla de impacto — diferenciadores
@@ -1547,6 +1581,71 @@ function Onboarding({onDone}) {
       }}>Ver mi plan →</button>
     </div>,
 
+    // Step 4: Termómetro por Comuna
+    (()=>{
+      const data=JUNAEB[comunaOB]||JUNAEB['Otra'];
+      const comunas=Object.keys(JUNAEB);
+      return(
+        <div key={5} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
+          <div style={{textAlign:'center'}}>
+            <div style={{fontSize:48,marginBottom:8}}>🌡️</div>
+            <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>Tu comunidad</div>
+            <div style={{fontSize:13,color:C.textSec,marginTop:4,fontFamily:F}}>¿En qué comuna vives? Te mostramos cómo está tu entorno</div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            <div style={{fontSize:11,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:2}}>Tu comuna</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:6,maxHeight:200,overflowY:'auto'}}>
+              {comunas.map(c=>(
+                <button key={c} onClick={()=>setComunaOB(c)} style={{
+                  padding:'7px 14px',borderRadius:20,cursor:'pointer',fontFamily:F,
+                  border:`1.5px solid ${comunaOB===c?data.color:C.border}`,
+                  background:comunaOB===c?data.color+'18':C.surfaceAlt,
+                  color:comunaOB===c?data.color:C.textSec,
+                  fontSize:13,fontWeight:comunaOB===c?700:400,
+                  transition:'all .15s',
+                }}>{c}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{background:'linear-gradient(135deg,#1A0A0A,#0D0505)',borderRadius:20,padding:'18px'}}>
+            <div style={{fontSize:10,color:'rgba(255,255,255,.4)',fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:12}}>
+              Mapa Nutricional Junaeb 2024 · {comunaOB}
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:12}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11,color:'rgba(255,255,255,.5)',marginBottom:4}}>Escolares con sobrepeso u obesidad</div>
+                <div style={{height:12,background:'rgba(255,255,255,.1)',borderRadius:6,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:`${data.pct}%`,background:data.color,borderRadius:6,transition:'width .6s ease'}}/>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}>
+                  <span style={{fontSize:10,color:'rgba(255,255,255,.3)'}}>0%</span>
+                  <span style={{fontSize:13,fontWeight:800,color:data.color}}>{data.pct}%</span>
+                  <span style={{fontSize:10,color:'rgba(255,255,255,.3)'}}>100%</span>
+                </div>
+              </div>
+            </div>
+            <div style={{background:'rgba(255,255,255,.06)',borderRadius:12,padding:'10px 12px',display:'flex',alignItems:'center',gap:8}}>
+              <div style={{width:8,height:8,borderRadius:4,background:data.color,flexShrink:0}}/>
+              <div style={{fontSize:12,color:'rgba(255,255,255,.7)',fontFamily:F}}>
+                Riesgo nutricional <strong style={{color:data.color}}>{data.nivel}</strong> en tu comuna
+              </div>
+            </div>
+          </div>
+          <div style={{background:C.surfaceAlt,borderRadius:16,padding:'14px 16px',border:`1px solid ${C.border}`}}>
+            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:4}}>💡 ¿Por qué importa?</div>
+            <div style={{fontSize:12,color:C.textSec,lineHeight:1.6}}>
+              Los hábitos alimentarios se forman en familia y comunidad. Calorú te ayuda a construir mejores hábitos, uno a la vez — sin importar dónde vives.
+            </div>
+          </div>
+          <button onClick={()=>setStep(5)} style={{
+            padding:'16px',borderRadius:18,border:'none',
+            background:'#D42020',color:'white',
+            fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
+          }}>Ver mi proyección →</button>
+        </div>
+      );
+    })(),
+
     // Step 3: Yo futuro — proyección
     (()=>{
       const tP=calcTDEE(perfil);
@@ -1567,7 +1666,7 @@ function Onboarding({onDone}) {
         recomp:'Cambiarás grasa por músculo en 8–12 semanas',
       };
       return(
-        <div key={4} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:20}}>
+        <div key={6} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:20}}>
           <div style={{textAlign:'center'}}>
             <div style={{fontSize:52,marginBottom:8}}>🔮</div>
             <div style={{fontSize:22,fontWeight:800,color:C.text,letterSpacing:'-.5px',fontFamily:F}}>Tu transformación</div>
@@ -1617,7 +1716,7 @@ function Onboarding({onDone}) {
               </div>
             ))}
           </div>
-          <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj,accountType})} style={{
+          <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj,accountType,comuna:comunaOB})} style={{
             padding:'17px',borderRadius:18,border:'none',
             background:'#D42020',color:'white',
             fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
@@ -8153,6 +8252,13 @@ function AppCore() {
   const [showRestaurant,setShowRestaurant] = useState(false);
   const [showChallenge,setShowChallenge]   = useState(false);
   const [showAllLogros,setShowAllLogros]   = useState(false);
+  const [showHerramientasPro,setShowHerramientasPro] = useState(false);
+  const [perfilSubTab,setPerfilSubTab]     = useState(0);
+  const [moodEntries,setMoodEntries]       = useState(()=>LS.get('mood_'+todayKey(),[]));
+  const [showMoodModal,setShowMoodModal]   = useState(false);
+  const [moodDraft,setMoodDraft]           = useState(null);
+  const [moodNote,setMoodNote]             = useState('');
+  const [comuna,setComuna]                 = useState(()=>LS.get('comuna',''));
   const [showCustom,setShowCustom] = useState(false);
   const [showScanner,setShowScanner] = useState(false);
   const [showModFeria,setShowModFeria] = useState(false);
@@ -8172,6 +8278,8 @@ function AppCore() {
   /* ── persist ── */
   useEffect(()=>{LS.set('log_'+todayKey(),log);},[log]);
   useEffect(()=>{LS.set('agua_'+todayKey(),agua);},[agua]);
+  useEffect(()=>{LS.set('mood_'+todayKey(),moodEntries);},[moodEntries]);
+  useEffect(()=>{LS.set('comuna',comuna);},[comuna]);
   useEffect(()=>{LS.set('perfil',perfil);},[perfil]);
   useEffect(()=>{LS.set('obj',obj);},[obj]);
   useEffect(()=>{LS.set('ritmo',ritmo);},[ritmo]);
@@ -9007,9 +9115,10 @@ function AppCore() {
     </div>
   );
 
-  if(!onboarded) return <Onboarding onDone={({nombre:n,perfil:p,obj:o,accountType:at})=>{
+  if(!onboarded) return <Onboarding onDone={({nombre:n,perfil:p,obj:o,accountType:at,comuna:cm})=>{
     setNombre(n); setPerfil(p); setObj(o);
     setAccountType(at||'personal');
+    if(cm){setComuna(cm);LS.set('comuna',cm);}
     setOnboarded(true); LS.set('onboarded',true);
     LS.set('nombre',n); LS.set('perfil',p); LS.set('obj',o);
     LS.set('accountType',at||'personal');
@@ -10283,6 +10392,46 @@ function AppCore() {
             ))}
           </div>
 
+          {/* 😊 Mood del día */}
+          <div style={{background:C.surface,borderRadius:20,padding:'14px 16px',marginBottom:14,border:`1px solid ${C.border}`}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text}}>¿Cómo te sientes hoy?</div>
+              {moodEntries.length>0&&<div style={{fontSize:10,color:C.textMuted}}>{moodEntries.length} {moodEntries.length===1?'registro':'registros'}</div>}
+            </div>
+            <div style={{display:'flex',gap:8,justifyContent:'space-between'}}>
+              {MOODS.map(m=>{
+                const last=moodEntries.length>0?moodEntries[moodEntries.length-1]:null;
+                const active=last?.mood===m.l;
+                return(
+                  <button key={m.l} className="tap" onClick={()=>{setMoodDraft(m);setMoodNote('');setShowMoodModal(true);haptic('light');}}
+                    style={{flex:1,padding:'8px 4px',borderRadius:14,border:`2px solid ${active?m.color:C.border}`,
+                      background:active?m.color+'18':'transparent',cursor:'pointer',fontFamily:F,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                    <span style={{fontSize:22}}>{m.e}</span>
+                    <span style={{fontSize:8,color:active?m.color:C.textMuted,fontWeight:active?700:400}}>{m.l}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {moodEntries.length>0&&(
+              <div style={{marginTop:10,display:'flex',flexDirection:'column',gap:4}}>
+                {moodEntries.slice(-2).reverse().map((entry,i)=>{
+                  const mObj=MOODS.find(m=>m.l===entry.mood);
+                  return(
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',background:C.surfaceAlt,borderRadius:10}}>
+                      <span style={{fontSize:16}}>{mObj?.e||'😐'}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <span style={{fontSize:11,fontWeight:600,color:mObj?.color||C.text}}>{entry.mood}</span>
+                        {entry.comida&&<span style={{fontSize:10,color:C.textMuted}}> · {entry.comida}</span>}
+                        {entry.nota&&<div style={{fontSize:10,color:C.textSec,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{entry.nota}</div>}
+                      </div>
+                      <span style={{fontSize:9,color:C.textMuted,flexShrink:0}}>{new Date(entry.ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {log.length===0?(
             <div style={{textAlign:'center',padding:'40px 16px'}}>
               <div style={{fontSize:56,marginBottom:14}}>🍽️</div>
@@ -10430,7 +10579,23 @@ function AppCore() {
         ══════════════════════════════════ */}
         {tab===4&&<div className={tabAnim}>
 
-          {/* Profile */}
+          {/* ── SUB-TABS NAV ── */}
+          <div style={{display:'flex',background:C.surfaceAlt,borderRadius:16,padding:4,marginBottom:14,gap:2}}>
+            {['Mi perfil','Metas','Ajustes'].map((label,i)=>(
+              <button key={i} className="tap" onClick={()=>setPerfilSubTab(i)} style={{
+                flex:1,padding:'9px 4px',borderRadius:12,border:'none',
+                background:perfilSubTab===i?C.surface:'transparent',
+                color:perfilSubTab===i?C.text:C.textSec,
+                fontSize:12,fontWeight:perfilSubTab===i?700:500,
+                cursor:'pointer',fontFamily:F,
+                boxShadow:perfilSubTab===i?'0 1px 4px rgba(0,0,0,0.12)':'none',
+                transition:'all .15s',
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* ════ SUB-TAB 0: MI PERFIL ════ */}
+          {perfilSubTab===0&&(<>
           <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`}}>
             {/* Avatar + nombre */}
             <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}>
@@ -10521,14 +10686,12 @@ function AppCore() {
               </div>
             </div>
             <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:12}}>Datos físicos</div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
-              {[{l:'Nombre',k:'_nombre',special:true},{l:'Peso (kg)',k:'peso'},{l:'Altura (cm)',k:'altura'},{l:'Edad',k:'edad'}].map(({l,k,special})=>(
-                <div key={k} style={k==='_nombre'?{gridColumn:'1/-1'}:{}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:10}}>
+              {[{l:'Peso (kg)',k:'peso'},{l:'Altura (cm)',k:'altura'},{l:'Edad',k:'edad'}].map(({l,k})=>(
+                <div key={k}>
                   <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:6,fontFamily:F}}>{l}</div>
-                  <input type={special?'text':'number'}
-                    value={special?nombre:perfil[k]}
-                    onChange={e=>special?setNombre(e.target.value):setPerfil({...perfil,[k]:+e.target.value})}
-                    style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:special?15:16,fontFamily:F,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
+                  <input type="number" value={perfil[k]} onChange={e=>setPerfil({...perfil,[k]:+e.target.value})}
+                    style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:16,fontFamily:F,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
                 </div>
               ))}
             </div>
@@ -10576,282 +10739,6 @@ function AppCore() {
                 </div>
               )}
             </div>
-            {/* ⚖️ Gráfico de peso */}
-            <div style={{marginTop:14,background:C.surface,borderRadius:18,padding:'14px 16px',border:`1px solid ${C.border}`}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-                <div style={{fontSize:13,fontWeight:700,color:C.text}}>⚖️ Evolución de peso</div>
-                <button className="tap" onClick={()=>{
-                  const w=parseFloat(perfil.peso);
-                  if(!w||isNaN(w)) return;
-                  const today=todayKey();
-                  const lbl=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-                  const idx=weightHistory.findIndex(e=>e.date===today);
-                  if(idx>=0) setWeightHistory(weightHistory.map((e,i)=>i===idx?{...e,w}:e));
-                  else setWeightHistory([...weightHistory,{date:today,w,label:lbl}].slice(-30));
-                  haptic('success'); setToast(`⚖️ ${w} kg registrado`);
-                }} style={{padding:'6px 12px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>
-                  + Registrar hoy
-                </button>
-              </div>
-              <WeightChart
-                data={Array.from({length:30},(_,i)=>{
-                  const d=new Date(); d.setDate(d.getDate()-29+i);
-                  const key=dateToKey(d);
-                  const entry=weightHistory.find(e=>e.date===key);
-                  return {date:key,label:d.toLocaleDateString('es-CL',{day:'numeric',month:'short'}),w:entry?.w||null};
-                })}
-                C={C} F={F}
-              />
-            </div>
-
-            {/* ═══ RITMO DE PROGRESO ═══ */}
-            {(obj==='bajar'||obj==='subir')&&(
-              <div style={{marginTop:16,marginBottom:4}}>
-                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🎯 Ritmo de progreso</div>
-                <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
-                  ¿Qué tan rápido quieres alcanzar tu meta? Esto ajusta tus calorías diarias automáticamente.
-                </div>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-                  {Object.entries(RITMOS).map(([k,r])=>(
-                    <button key={k} onClick={()=>setRitmo(k)} style={{
-                      padding:'12px 10px',borderRadius:16,
-                      border:`2px solid ${ritmo===k?r.color:C.border}`,
-                      background:ritmo===k?r.color+'18':C.surface,
-                      color:ritmo===k?r.color:C.text,
-                      fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:12,
-                      textAlign:'left',
-                    }}>
-                      <div style={{fontSize:16,marginBottom:4}}>{r.label.split(' ')[0]}</div>
-                      <div style={{fontWeight:800}}>{r.label.split(' ').slice(1).join(' ')}</div>
-                      <div style={{fontSize:10,opacity:0.7,marginTop:2,fontWeight:500}}>{r.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                <div style={{marginTop:10,padding:'10px 14px',background:C.surfaceAlt,borderRadius:12,border:`1px solid ${C.border}`}}>
-                  <div style={{fontSize:11,color:C.textSec}}>
-                    Con ritmo <strong style={{color:RITMOS[ritmo]?.color}}>{RITMOS[ritmo]?.label}</strong>: tu meta calórica es <strong style={{color:C.text}}>{metas.cal} kcal/día</strong>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ═══ MODO FIN DE SEMANA ═══ */}
-            {isPro&&(
-              <div style={{marginTop:16,marginBottom:4}}>
-                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🌙 Modo fin de semana</div>
-                <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
-                  Los sábados y domingos tus metas calóricas se relajan automáticamente al ritmo "Tranquilo". Para que puedas disfrutar sin culpa.
-                </div>
-                <div onClick={()=>{haptic('light');setModoFinde(v=>!v);}} style={{
-                  display:'flex',alignItems:'center',justifyContent:'space-between',
-                  padding:'12px 16px',borderRadius:16,border:`1.5px solid ${modoFinde?'#5856D6':C.border}`,
-                  background:modoFinde?'rgba(88,86,214,0.08)':C.surface,cursor:'pointer',
-                }}>
-                  <div style={{display:'flex',alignItems:'center',gap:10}}>
-                    <span style={{fontSize:22}}>🌙</span>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>Relajar metas en finde</div>
-                      <div style={{fontSize:11,color:C.textSec}}>{esFinde?'Hoy aplica ✅':'Aplica sáb y dom'}</div>
-                    </div>
-                  </div>
-                  <div style={{width:48,height:28,borderRadius:14,background:modoFinde?'#5856D6':'#D4202030',position:'relative',transition:'background .2s'}}>
-                    <div style={{position:'absolute',top:3,left:modoFinde?22:4,width:22,height:22,borderRadius:11,background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ═══ MODO VEGANO ═══ */}
-            <div style={{marginTop:16}}>
-              <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🌱 Modo vegano</div>
-              <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
-                Filtra los productos no-veganos en el buscador y muestra el estado vegano de cada alimento.
-              </div>
-              {/* Toggle card */}
-              <div style={{
-                background:veganMode?'#34C75910':'#F2F2F7',
-                borderRadius:18,padding:'14px 16px',
-                border:`1.5px solid ${veganMode?'#34C75940':C.border}`,
-                display:'flex',alignItems:'center',gap:14,
-                transition:'all .25s ease',
-              }}>
-                <div style={{width:46,height:46,borderRadius:14,background:veganMode?'#34C75918':C.border,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0,transition:'background .2s'}}>🌱</div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{veganMode?'Modo vegano activo':'Modo vegano desactivado'}</div>
-                  <div style={{fontSize:11,color:C.textSec,marginTop:2,lineHeight:1.4}}>
-                    {veganMode?'Solo ves productos 100% veganos en el buscador':'Activar para filtrar productos con origen animal'}
-                  </div>
-                </div>
-                {/* Toggle switch */}
-                <button
-                  className="tap"
-                  onClick={()=>{haptic('light');setVeganMode(v=>!v);}}
-                  style={{
-                    flexShrink:0,
-                    width:51,height:31,borderRadius:16,border:'none',cursor:'pointer',
-                    background:veganMode?'#34C759':'#C7C7CC',
-                    position:'relative',
-                    transition:'background .25s ease',
-                    padding:0,
-                  }}
-                  aria-label="Activar modo vegano"
-                >
-                  <div style={{
-                    position:'absolute',top:3,
-                    left:veganMode?23:3,
-                    width:25,height:25,borderRadius:13,
-                    background:'white',
-                    boxShadow:'0 2px 6px rgba(0,0,0,0.20)',
-                    transition:'left .22s cubic-bezier(.34,1.56,.64,1)',
-                  }}/>
-                </button>
-              </div>
-              {veganMode&&(
-                <div style={{marginTop:8,padding:'8px 12px',background:'#34C75910',borderRadius:12,border:'1px solid #34C75930',fontSize:11,color:'#34C759',fontWeight:600,lineHeight:1.5}}>
-                  🌱 Filtrando productos no-veganos del buscador
-                </div>
-              )}
-            </div>
-
-                {/* Modo sin calorías */}
-                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${sinCalorias?'#34C759':C.border}`,display:'flex',alignItems:'center',gap:12}}>
-                  <div style={{fontSize:28,flexShrink:0}}>🎯</div>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{sinCalorias?'Modo sin calorías activo':'Modo sin calorías'}</div>
-                    <div style={{fontSize:11,color:C.textSec,marginTop:2}}>Semáforos y frases en vez de números</div>
-                  </div>
-                  <button className="tap" onClick={()=>{haptic('light');setSinCalorias(v=>!v);}}
-                    style={{width:44,height:26,borderRadius:13,border:'none',cursor:'pointer',padding:0,
-                      background:sinCalorias?'#34C759':C.border,position:'relative',transition:'background .2s',flexShrink:0}}>
-                    <div style={{position:'absolute',top:3,left:sinCalorias?20:3,width:20,height:20,borderRadius:10,
-                      background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
-                  </button>
-                </div>
-
-                {/* Tipo de cuenta */}
-                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${accountType==='professional'?'#1D3557':C.border}`}}>
-                  <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>{accountType==='professional'?'👩‍⚕️ Cuenta profesional':'👤 Cuenta personal'}</div>
-                  <div style={{fontSize:11,color:C.textSec,marginBottom:10}}>{accountType==='professional'?'Panel de nutricionista activo':'Cambia a profesional si eres nutricionista o coach'}</div>
-                  <div style={{display:'flex',gap:8}}>
-                    {[{k:'personal',l:'👤 Personal'},{k:'professional',l:'👩‍⚕️ Profesional'}].map(({k,l})=>(
-                      <button key={k} onClick={()=>{
-                        setAccountType(k);
-                        LS.set('accountType',k);
-                        if(supabaseUser) supabase.from('profiles').upsert({id:supabaseUser.id,account_type:k},{onConflict:'id'}).then(()=>{});
-                        haptic('light');
-                      }} style={{flex:1,padding:'9px',borderRadius:12,border:`1.5px solid ${accountType===k?'#1D3557':C.border}`,background:accountType===k?'#1D355715':'transparent',color:accountType===k?'#1D3557':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
-                        {l}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Vincular con nutricionista */}
-                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${nutriPlan?'#1D3557':C.border}`}}>
-                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:nutriPlan?10:0}}>
-                    <div style={{fontSize:28,flexShrink:0}}>👩‍⚕️</div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{nutriPlan?`Vinculado con ${nutriPlan.nutricionista_nombre||'tu nutricionista'}`:'Vincular con nutricionista'}</div>
-                      <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{nutriPlan?'Tu plan nutricional está activo':'Ingresa el código que te dio tu nutricionista'}</div>
-                    </div>
-                    {nutriPlan&&<button onClick={()=>{setNutriPlan(null);LS.set('nutriPlan',null);}} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}
-                  </div>
-                  {!nutriPlan&&(
-                    <div style={{display:'flex',gap:8,marginTop:10}}>
-                      <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase())}
-                        placeholder="NUT-XXXXX"
-                        style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
-                      <button onClick={async()=>{
-                        if(!nutriCode.trim()||loadingNutriCode) return;
-                        setLoadingNutriCode(true);
-                        // Buscar plan con ese código
-                        const {data} = await supabase.from('nutrition_plans')
-                          .select('*, nutricionista:nutricionista_id(id)')
-                          .ilike('nombre', `%${nutriCode.trim()}%`)
-                          .limit(1);
-                        // Buscar por código del profesional en profiles
-                        const {data:profData} = await supabase.from('profiles')
-                          .select('id,professional_code')
-                          .eq('professional_code', nutriCode.trim())
-                          .single();
-                        if(profData) {
-                          // Buscar plan de este nutricionista para este usuario
-                          const {data:planData} = await supabase.from('nutrition_plans')
-                            .select('*')
-                            .eq('nutricionista_id', profData.id)
-                            .order('created_at',{ascending:false})
-                            .limit(1)
-                            .single();
-                          if(planData){
-                            const plan = {...planData, nutricionista_nombre: profData.professional_code};
-                            setNutriPlan(plan);
-                            LS.set('nutriPlan', plan);
-                            // Actualizar paciente_id en el plan
-                            if(supabaseUser) {
-                              await supabase.from('nutrition_plans').update({paciente_id:supabaseUser.id}).eq('id',planData.id);
-                            }
-                            haptic('success');
-                          } else {
-                            haptic('error');
-                            alert('No se encontró un plan asignado para este código.');
-                          }
-                        } else {
-                          haptic('error');
-                          alert('Código no encontrado. Verifica con tu nutricionista.');
-                        }
-                        setLoadingNutriCode(false);
-                      }} disabled={loadingNutriCode} style={{padding:'10px 14px',borderRadius:12,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
-                        {loadingNutriCode?'...':'Vincular'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-            {/* ═══ ALERGIAS E INTOLERANCIAS ═══ */}
-            <div style={{marginTop:16}}>
-              <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🚫 Alergias e intolerancias</div>
-              <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
-                Los alimentos marcados se ocultarán automáticamente del buscador.
-              </div>
-              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                {ALLERGENS.map(al=>{
-                  const active=userAllergens.includes(al.k);
-                  return(
-                    <button key={al.k} className="tap" onClick={()=>{
-                      haptic('light');
-                      setUserAllergens(prev=>active?prev.filter(x=>x!==al.k):[...prev,al.k]);
-                    }} style={{
-                      display:'flex',alignItems:'center',gap:6,
-                      padding:'8px 14px',borderRadius:20,cursor:'pointer',fontFamily:F,
-                      border:`1.5px solid ${active?al.color:C.border}`,
-                      background:active?al.color+'18':C.surfaceAlt,
-                      transition:'all .18s ease',
-                    }}>
-                      <span style={{fontSize:16}}>{al.icon}</span>
-                      <div style={{textAlign:'left'}}>
-                        <div style={{fontSize:12,fontWeight:active?700:500,color:active?al.color:C.text,lineHeight:1}}>{al.label}</div>
-                        <div style={{fontSize:9,color:C.textMuted,marginTop:1}}>{al.desc}</div>
-                      </div>
-                      {active&&<span style={{fontSize:10,color:al.color,fontWeight:800,marginLeft:2}}>✓</span>}
-                    </button>
-                  );
-                })}
-              </div>
-              {userAllergens.length>0&&(
-                <div style={{marginTop:10,padding:'8px 12px',background:'#FF3B3010',borderRadius:12,border:'1px solid #FF3B3030',fontSize:11,color:'#FF3B30',fontWeight:600,lineHeight:1.5}}>
-                  ⚠️ Ocultando productos con: {userAllergens.map(k=>ALLERGENS.find(a=>a.k===k)?.label).filter(Boolean).join(', ')}
-                </div>
-              )}
-            </div>
-
-            <button className="tap" onClick={()=>{
-              if(window.confirm('¿Reiniciar toda la configuración? Se borrarán todos tus datos.')){
-                localStorage.clear(); window.location.reload();
-              }
-            }} style={{marginTop:12,width:'100%',padding:'12px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textMuted,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>
-              🔄 Reiniciar configuración
-            </button>
-
             {/* ── Cuenta en la nube ── */}
             <div style={{marginTop:12,background:supabaseUser?'#34C75910':C.surfaceAlt,borderRadius:16,padding:'14px',border:`1px solid ${supabaseUser?'#34C75940':C.border}`}}>
               {supabaseUser?(
@@ -10884,40 +10771,44 @@ function AppCore() {
                 </div>
               )}
             </div>
+          </div>
+          </>)}
 
-            <div style={{marginTop:12,background:C.surfaceAlt,borderRadius:16,padding:'12px 14px',display:'flex',alignItems:'center',gap:12,border:`1px solid ${C.border}`}}>
-              <span style={{fontSize:22}}>{autoTheme?'🌓':dark?'🌙':'☀️'}</span>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Tema {autoTheme?'automático':dark?'oscuro':'claro'}</div>
-                <div style={{fontSize:11,color:C.textSec,marginTop:1}}>{autoTheme?'Oscuro 20:00–07:00 · Claro resto del día':'Toca para cambiar'}</div>
-              </div>
-              <div style={{display:'flex',gap:6}}>
-                <button className="tap" onClick={()=>{setAutoTheme(!autoTheme);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${autoTheme?'#D42020':C.border}`,background:autoTheme?'#D4202018':C.surfaceAlt,color:autoTheme?'#D42020':C.textSec,fontSize:10,fontWeight:700,cursor:'pointer',fontFamily:F}}>Auto</button>
-                {!autoTheme&&<button className="tap" onClick={()=>{setDark(!dark);LS.set('darkMode',!dark);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textSec,fontSize:14,cursor:'pointer',fontFamily:F}}>{dark?'☀️':'🌙'}</button>}
-              </div>
+          {/* ════ SUB-TAB 1: METAS ════ */}
+          {perfilSubTab===1&&(<>
+          <div style={{marginBottom:12,background:'linear-gradient(135deg,#FF9500,#FF6B00)',borderRadius:16,padding:'14px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',boxShadow:'0 6px 18px rgba(255,149,0,0.35)'}}>
+            <div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:700,textTransform:'uppercase'}}>Tu TDEE</div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',fontWeight:500,marginTop:2}}>Calorías quemadas / día</div>
             </div>
-
-            <div style={{marginTop:12,background:C.surfaceAlt,borderRadius:16,padding:'12px 14px',display:'flex',alignItems:'center',gap:12,border:`1px solid ${C.border}`}}>
-              <span style={{fontSize:22}}>🔔</span>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Recordatorios</div>
-                <div style={{fontSize:11,color:C.textSec,marginTop:1}}>Aviso para registrar comidas</div>
-              </div>
-              <button className="tap" onClick={()=>{setNotifEnabled(!notifEnabled);haptic('medium');}} style={{width:50,height:28,borderRadius:14,border:'none',cursor:'pointer',background:notifEnabled?'#34C759':'rgba(120,120,128,0.2)',position:'relative',transition:'background .25s'}}>
-                <div style={{position:'absolute',top:3,left:notifEnabled?24:3,width:22,height:22,borderRadius:11,background:'white',boxShadow:'0 2px 6px rgba(0,0,0,0.25)',transition:'left .25s cubic-bezier(.34,1.56,.64,1)'}}/>
+            <div><span style={{fontSize:32,fontWeight:800,color:'white'}}>{tdee}</span><span style={{fontSize:13,color:'rgba(255,255,255,0.5)'}}> kcal</span></div>
+          </div>
+          <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:700,color:C.text}}>⚖️ Evolución de peso</div>
+              <button className="tap" onClick={()=>{
+                const w=parseFloat(perfil.peso);
+                if(!w||isNaN(w)) return;
+                const today=todayKey();
+                const lbl=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+                const idx=weightHistory.findIndex(e=>e.date===today);
+                if(idx>=0) setWeightHistory(weightHistory.map((e,i)=>i===idx?{...e,w}:e));
+                else setWeightHistory([...weightHistory,{date:today,w,label:lbl}].slice(-30));
+                haptic('success'); setToast(`⚖️ ${w} kg registrado`);
+              }} style={{padding:'6px 12px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+                + Registrar hoy
               </button>
             </div>
-
-            <div style={{marginTop:14,background:'linear-gradient(135deg,#FF9500,#FF6B00)',borderRadius:16,padding:'14px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',boxShadow:'0 6px 18px rgba(255,149,0,0.35)'}}>
-              <div>
-                <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:700,textTransform:'uppercase'}}>Tu TDEE</div>
-                <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',fontWeight:500,marginTop:2}}>Calorías quemadas / día</div>
-              </div>
-              <div><span style={{fontSize:32,fontWeight:800,color:'white'}}>{tdee}</span><span style={{fontSize:13,color:'rgba(255,255,255,0.5)'}}> kcal</span></div>
-            </div>
+            <WeightChart
+              data={Array.from({length:30},(_,i)=>{
+                const d=new Date(); d.setDate(d.getDate()-29+i);
+                const key=dateToKey(d);
+                const entry=weightHistory.find(e=>e.date===key);
+                return {date:key,label:d.toLocaleDateString('es-CL',{day:'numeric',month:'short'}),w:entry?.w||null};
+              })}
+              C={C} F={F}
+            />
           </div>
-
-          {/* Weight tracker */}
           <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`}}>
             <div style={{fontSize:15,fontWeight:800,color:C.text,marginBottom:14}}>⚖️ Registro de peso</div>
             <div style={{display:'flex',gap:8,marginBottom:14}}>
@@ -10947,8 +10838,6 @@ function AppCore() {
               </>
             ):<div style={{textAlign:'center',padding:'12px 0',color:C.textMuted,fontSize:13,fontWeight:500}}>Sin registros aún</div>}
           </div>
-
-          {/* Goal selector */}
           <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`}}>
             <div style={{fontSize:15,fontWeight:800,color:C.text,marginBottom:14}}>🎯 Mi objetivo</div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:16}}>
@@ -10983,9 +10872,60 @@ function AppCore() {
               </div>
               <div style={{fontSize:10,color:C.textMuted,marginTop:8,textAlign:'center'}}>Toca cualquier número para editar tu meta</div>
             </div>
+            {(obj==='bajar'||obj==='subir')&&(
+              <div style={{marginTop:16,marginBottom:4}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🎯 Ritmo de progreso</div>
+                <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
+                  ¿Qué tan rápido quieres alcanzar tu meta? Esto ajusta tus calorías diarias automáticamente.
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  {Object.entries(RITMOS).map(([k,r])=>(
+                    <button key={k} onClick={()=>setRitmo(k)} style={{
+                      padding:'12px 10px',borderRadius:16,
+                      border:`2px solid ${ritmo===k?r.color:C.border}`,
+                      background:ritmo===k?r.color+'18':C.surface,
+                      color:ritmo===k?r.color:C.text,
+                      fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:12,
+                      textAlign:'left',
+                    }}>
+                      <div style={{fontSize:16,marginBottom:4}}>{r.label.split(' ')[0]}</div>
+                      <div style={{fontWeight:800}}>{r.label.split(' ').slice(1).join(' ')}</div>
+                      <div style={{fontSize:10,opacity:0.7,marginTop:2,fontWeight:500}}>{r.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                <div style={{marginTop:10,padding:'10px 14px',background:C.surfaceAlt,borderRadius:12,border:`1px solid ${C.border}`}}>
+                  <div style={{fontSize:11,color:C.textSec}}>
+                    Con ritmo <strong style={{color:RITMOS[ritmo]?.color}}>{RITMOS[ritmo]?.label}</strong>: tu meta calórica es <strong style={{color:C.text}}>{metas.cal} kcal/día</strong>
+                  </div>
+                </div>
+              </div>
+            )}
+            {isPro&&(
+              <div style={{marginTop:16,marginBottom:4}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🌙 Modo fin de semana</div>
+                <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>
+                  Los sábados y domingos tus metas calóricas se relajan automáticamente al ritmo "Tranquilo". Para que puedas disfrutar sin culpa.
+                </div>
+                <div onClick={()=>{haptic('light');setModoFinde(v=>!v);}} style={{
+                  display:'flex',alignItems:'center',justifyContent:'space-between',
+                  padding:'12px 16px',borderRadius:16,border:`1.5px solid ${modoFinde?'#5856D6':C.border}`,
+                  background:modoFinde?'rgba(88,86,214,0.08)':C.surface,cursor:'pointer',
+                }}>
+                  <div style={{display:'flex',alignItems:'center',gap:10}}>
+                    <span style={{fontSize:22}}>🌙</span>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text}}>Relajar metas en finde</div>
+                      <div style={{fontSize:11,color:C.textSec}}>{esFinde?'Hoy aplica ✅':'Aplica sáb y dom'}</div>
+                    </div>
+                  </div>
+                  <div style={{width:48,height:28,borderRadius:14,background:modoFinde?'#5856D6':'#D4202030',position:'relative',transition:'background .2s'}}>
+                    <div style={{position:'absolute',top:3,left:modoFinde?22:4,width:22,height:22,borderRadius:11,background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Diet plans */}
           <div style={{fontSize:14,fontWeight:800,color:C.text,marginBottom:10}}>🥗 Planes sugeridos</div>
           {DIETAS.map(d=>(
             <div key={d.id} style={{background:C.surface,borderRadius:22,marginBottom:10,border:`2px solid ${expanded===d.id?d.color:C.border}`,boxShadow:expanded===d.id?`0 6px 24px ${d.color}22`:`0 2px 10px rgba(0,0,0,${dark?.12:.06})`,overflow:'hidden',transition:'all .2s'}}>
@@ -11023,50 +10963,150 @@ function AppCore() {
               )}
             </div>
           ))}
-          {/* Links legales */}
+          </>)}
+
+          {/* ════ SUB-TAB 2: AJUSTES ════ */}
+          {perfilSubTab===2&&(<>
+          <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`}}>
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🌱 Modo vegano</div>
+              <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>Filtra los productos no-veganos en el buscador y muestra el estado vegano de cada alimento.</div>
+              <div style={{background:veganMode?'#34C75910':'#F2F2F7',borderRadius:18,padding:'14px 16px',border:`1.5px solid ${veganMode?'#34C75940':C.border}`,display:'flex',alignItems:'center',gap:14,transition:'all .25s ease'}}>
+                <div style={{width:46,height:46,borderRadius:14,background:veganMode?'#34C75918':C.border,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0,transition:'background .2s'}}>🌱</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{veganMode?'Modo vegano activo':'Modo vegano desactivado'}</div>
+                  <div style={{fontSize:11,color:C.textSec,marginTop:2,lineHeight:1.4}}>{veganMode?'Solo ves productos 100% veganos en el buscador':'Activar para filtrar productos con origen animal'}</div>
+                </div>
+                <button className="tap" onClick={()=>{haptic('light');setVeganMode(v=>!v);}} style={{flexShrink:0,width:51,height:31,borderRadius:16,border:'none',cursor:'pointer',background:veganMode?'#34C759':'#C7C7CC',position:'relative',transition:'background .25s ease',padding:0}} aria-label="Activar modo vegano">
+                  <div style={{position:'absolute',top:3,left:veganMode?23:3,width:25,height:25,borderRadius:13,background:'white',boxShadow:'0 2px 6px rgba(0,0,0,0.20)',transition:'left .22s cubic-bezier(.34,1.56,.64,1)'}}/>
+                </button>
+              </div>
+              {veganMode&&<div style={{marginTop:8,padding:'8px 12px',background:'#34C75910',borderRadius:12,border:'1px solid #34C75930',fontSize:11,color:'#34C759',fontWeight:600}}>🌱 Filtrando productos no-veganos del buscador</div>}
+            </div>
+            <div style={{background:C.surfaceAlt,borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${sinCalorias?'#34C759':C.border}`,display:'flex',alignItems:'center',gap:12}}>
+              <div style={{fontSize:28,flexShrink:0}}>🎯</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{sinCalorias?'Modo sin calorías activo':'Modo sin calorías'}</div>
+                <div style={{fontSize:11,color:C.textSec,marginTop:2}}>Semáforos y frases en vez de números</div>
+              </div>
+              <button className="tap" onClick={()=>{haptic('light');setSinCalorias(v=>!v);}} style={{width:44,height:26,borderRadius:13,border:'none',cursor:'pointer',padding:0,background:sinCalorias?'#34C759':C.border,position:'relative',transition:'background .2s',flexShrink:0}}>
+                <div style={{position:'absolute',top:3,left:sinCalorias?20:3,width:20,height:20,borderRadius:10,background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
+              </button>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>🚫 Alergias e intolerancias</div>
+              <div style={{fontSize:11,color:C.textSec,marginBottom:12,lineHeight:1.5}}>Los alimentos marcados se ocultarán automáticamente del buscador.</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                {ALLERGENS.map(al=>{
+                  const active=userAllergens.includes(al.k);
+                  return(
+                    <button key={al.k} className="tap" onClick={()=>{haptic('light');setUserAllergens(prev=>active?prev.filter(x=>x!==al.k):[...prev,al.k]);}} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 14px',borderRadius:20,cursor:'pointer',fontFamily:F,border:`1.5px solid ${active?al.color:C.border}`,background:active?al.color+'18':C.surfaceAlt,transition:'all .18s ease'}}>
+                      <span style={{fontSize:16}}>{al.icon}</span>
+                      <div style={{textAlign:'left'}}>
+                        <div style={{fontSize:12,fontWeight:active?700:500,color:active?al.color:C.text,lineHeight:1}}>{al.label}</div>
+                        <div style={{fontSize:9,color:C.textMuted,marginTop:1}}>{al.desc}</div>
+                      </div>
+                      {active&&<span style={{fontSize:10,color:al.color,fontWeight:800,marginLeft:2}}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {userAllergens.length>0&&<div style={{marginTop:10,padding:'8px 12px',background:'#FF3B3010',borderRadius:12,border:'1px solid #FF3B3030',fontSize:11,color:'#FF3B30',fontWeight:600,lineHeight:1.5}}>⚠️ Ocultando productos con: {userAllergens.map(k=>ALLERGENS.find(a=>a.k===k)?.label).filter(Boolean).join(', ')}</div>}
+            </div>
+            <div style={{background:C.surfaceAlt,borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${accountType==='professional'?'#1D3557':C.border}`}}>
+              <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>{accountType==='professional'?'👩‍⚕️ Cuenta profesional':'👤 Cuenta personal'}</div>
+              <div style={{fontSize:11,color:C.textSec,marginBottom:10}}>{accountType==='professional'?'Panel de nutricionista activo':'Cambia a profesional si eres nutricionista o coach'}</div>
+              <div style={{display:'flex',gap:8}}>
+                {[{k:'personal',l:'👤 Personal'},{k:'professional',l:'👩‍⚕️ Profesional'}].map(({k,l})=>(
+                  <button key={k} onClick={()=>{setAccountType(k);LS.set('accountType',k);if(supabaseUser) supabase.from('profiles').upsert({id:supabaseUser.id,account_type:k},{onConflict:'id'}).then(()=>{});haptic('light');}} style={{flex:1,padding:'9px',borderRadius:12,border:`1.5px solid ${accountType===k?'#1D3557':C.border}`,background:accountType===k?'#1D355715':'transparent',color:accountType===k?'#1D3557':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>{l}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{background:C.surfaceAlt,borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${nutriPlan?'#1D3557':C.border}`}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:nutriPlan?10:0}}>
+                <div style={{fontSize:28,flexShrink:0}}>👩‍⚕️</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{nutriPlan?`Vinculado con ${nutriPlan.nutricionista_nombre||'tu nutricionista'}`:'Vincular con nutricionista'}</div>
+                  <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{nutriPlan?'Tu plan nutricional está activo':'Ingresa el código que te dio tu nutricionista'}</div>
+                </div>
+                {nutriPlan&&<button onClick={()=>{setNutriPlan(null);LS.set('nutriPlan',null);}} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}
+              </div>
+              {!nutriPlan&&(
+                <div style={{display:'flex',gap:8,marginTop:10}}>
+                  <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase())} placeholder="NUT-XXXXX" style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
+                  <button onClick={async()=>{
+                    if(!nutriCode.trim()||loadingNutriCode) return;
+                    setLoadingNutriCode(true);
+                    const {data} = await supabase.from('nutrition_plans').select('*, nutricionista:nutricionista_id(id)').ilike('nombre',`%${nutriCode.trim()}%`).limit(1);
+                    const {data:profData} = await supabase.from('profiles').select('id,professional_code').eq('professional_code',nutriCode.trim()).single();
+                    if(profData) {
+                      const {data:planData} = await supabase.from('nutrition_plans').select('*').eq('nutricionista_id',profData.id).order('created_at',{ascending:false}).limit(1).single();
+                      if(planData){
+                        const plan={...planData,nutricionista_nombre:profData.professional_code};
+                        setNutriPlan(plan); LS.set('nutriPlan',plan);
+                        if(supabaseUser) await supabase.from('nutrition_plans').update({paciente_id:supabaseUser.id}).eq('id',planData.id);
+                        haptic('success');
+                      } else { haptic('error'); alert('No se encontró un plan asignado para este código.'); }
+                    } else { haptic('error'); alert('Código no encontrado. Verifica con tu nutricionista.'); }
+                    setLoadingNutriCode(false);
+                  }} disabled={loadingNutriCode} style={{padding:'10px 14px',borderRadius:12,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
+                    {loadingNutriCode?'...':'Vincular'}
+                  </button>
+                </div>
+              )}
+            </div>
+            <div style={{background:C.surfaceAlt,borderRadius:16,padding:'12px 14px',marginBottom:10,display:'flex',alignItems:'center',gap:12,border:`1px solid ${C.border}`}}>
+              <span style={{fontSize:22}}>{autoTheme?'🌓':dark?'🌙':'☀️'}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Tema {autoTheme?'automático':dark?'oscuro':'claro'}</div>
+                <div style={{fontSize:11,color:C.textSec,marginTop:1}}>{autoTheme?'Oscuro 20:00–07:00 · Claro resto del día':'Toca para cambiar'}</div>
+              </div>
+              <div style={{display:'flex',gap:6}}>
+                <button className="tap" onClick={()=>{setAutoTheme(!autoTheme);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${autoTheme?'#D42020':C.border}`,background:autoTheme?'#D4202018':C.surfaceAlt,color:autoTheme?'#D42020':C.textSec,fontSize:10,fontWeight:700,cursor:'pointer',fontFamily:F}}>Auto</button>
+                {!autoTheme&&<button className="tap" onClick={()=>{setDark(!dark);LS.set('darkMode',!dark);haptic('light');}} style={{padding:'5px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textSec,fontSize:14,cursor:'pointer',fontFamily:F}}>{dark?'☀️':'🌙'}</button>}
+              </div>
+            </div>
+            <div style={{background:C.surfaceAlt,borderRadius:16,padding:'12px 14px',marginBottom:12,display:'flex',alignItems:'center',gap:12,border:`1px solid ${C.border}`}}>
+              <span style={{fontSize:22}}>🔔</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Recordatorios</div>
+                <div style={{fontSize:11,color:C.textSec,marginTop:1}}>Aviso para registrar comidas</div>
+              </div>
+              <button className="tap" onClick={()=>{setNotifEnabled(!notifEnabled);haptic('medium');}} style={{width:50,height:28,borderRadius:14,border:'none',cursor:'pointer',background:notifEnabled?'#34C759':'rgba(120,120,128,0.2)',position:'relative',transition:'background .25s'}}>
+                <div style={{position:'absolute',top:3,left:notifEnabled?24:3,width:22,height:22,borderRadius:11,background:'white',boxShadow:'0 2px 6px rgba(0,0,0,0.25)',transition:'left .25s cubic-bezier(.34,1.56,.64,1)'}}/>
+              </button>
+            </div>
+            <button className="tap" onClick={()=>{if(window.confirm('¿Reiniciar toda la configuración? Se borrarán todos tus datos.')){localStorage.clear();window.location.reload();}}} style={{width:'100%',padding:'12px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textMuted,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>
+              🔄 Reiniciar configuración
+            </button>
+          </div>
           <div style={{display:'flex',gap:14,justifyContent:'center',padding:'8px 0 4px'}}>
             <button onClick={()=>setShowLegal('privacy')} style={{background:'none',border:'none',fontSize:11,color:C.textMuted,cursor:'pointer',fontFamily:F}}>Política de privacidad</button>
             <span style={{color:C.textMuted,fontSize:11}}>·</span>
             <button onClick={()=>setShowLegal('terms')} style={{background:'none',border:'none',fontSize:11,color:C.textMuted,cursor:'pointer',fontFamily:F}}>Términos de servicio</button>
           </div>
-
-          {/* Eliminar cuenta — requerido por Google Play */}
           {supabaseUser&&(
             <div style={{marginTop:16,padding:'0 16px'}}>
               <button className="tap" onClick={async()=>{
-                const confirm1 = window.prompt('Para eliminar tu cuenta y TODOS tus datos permanentemente, escribe ELIMINAR:');
+                const confirm1=window.prompt('Para eliminar tu cuenta y TODOS tus datos permanentemente, escribe ELIMINAR:');
                 if(confirm1!=='ELIMINAR') return;
                 try{
                   setToast('Eliminando cuenta...');
-                  const session = await supabase.auth.getSession();
-                  const token = session?.data?.session?.access_token;
-                  if(!token){ setToast('❌ No hay sesión activa'); return; }
-                  const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/delete-account',{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-                  });
-                  const data = await res.json();
-                  if(data.success){
-                    // Clear all local data
-                    localStorage.clear();
-                    setToast('✓ Cuenta eliminada. Adiós 👋');
-                    setTimeout(()=>window.location.reload(), 2000);
-                  } else {
-                    setToast('❌ '+( data.error || 'Error al eliminar'));
-                  }
-                }catch(e){
-                  setToast('❌ Error de conexión');
-                }
-              }} style={{
-                width:'100%',padding:'13px',borderRadius:14,
-                border:'1px solid #FF3B3030',background:'#FF3B3008',
-                color:'#FF3B30',fontSize:12,fontWeight:600,
-                cursor:'pointer',fontFamily:F,
-              }}>
+                  const session=await supabase.auth.getSession();
+                  const token=session?.data?.session?.access_token;
+                  if(!token){setToast('❌ No hay sesión activa');return;}
+                  const res=await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/delete-account',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}});
+                  const data=await res.json();
+                  if(data.success){localStorage.clear();setToast('✓ Cuenta eliminada. Adiós 👋');setTimeout(()=>window.location.reload(),2000);}
+                  else{setToast('❌ '+(data.error||'Error al eliminar'));}
+                }catch(e){setToast('❌ Error de conexión');}
+              }} style={{width:'100%',padding:'13px',borderRadius:14,border:'1px solid #FF3B3030',background:'#FF3B3008',color:'#FF3B30',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>
                 🗑️ Eliminar mi cuenta permanentemente
               </button>
             </div>
           )}
+          </>)}
+
         </div>}
       </div>
 
@@ -11161,32 +11201,58 @@ function AppCore() {
           </div>
 
           {/* ── SECCIÓN 4: Herramientas Pro ── */}
-          <div style={{fontSize:11,fontWeight:600,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,padding:'0 4px',marginBottom:8}}>Herramientas Pro</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
-            {[
-              {icon:'🇨🇱',l:'Recetas IA',      sub:'Cocina chilena',       fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowRecetasIA(true);},       col:'#D42020'},
-              {icon:'🛒',l:'Lista Compras',    sub:'Inteligente IA',       fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowListaComprasIA(true);},   col:'#34C759'},
-              {icon:'📅',l:'Plan Semanal',     sub:'Menú 7 días IA',       fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanSemanal(true);},      col:'#5856D6'},
-              {icon:'📉',l:'Predicción Peso',  sub:'Ver mi progreso',      fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPredicionPeso(true);},    col:'#D42020'},
-              {icon:'🧬',l:'Plan Adaptativo',  sub:'Ajuste semanal IA',    fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanAdaptativo(true);},   col:'#5856D6'},
-              {icon:'👨‍👩‍👧',l:'Plan Familiar',   sub:'Hasta 5 miembros',    fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanFamiliar(true);},     col:'#FF9500'},
-              {icon:'🏥',l:'Salud Especial',   sub:'Diabetes / Hipert.',   fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowModoSalud(true);},        col:'#5856D6'},
-              {icon:'📄',l:'Planes PDF',       sub:'Descarga tu plan',     fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowPlanesDescargables(true);},col:'#D42020'},
-              {icon:'📊',l:'Exportar CSV',     sub:'Últimos 30 días',      fn:()=>{if(!isPro){setShowPaywall(true);return;}exportCSV();},                   col:'#34C759'},
-              {icon:'👥',l:'Liga Amigos',      sub:'Ranking semanal',      fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowLigaAmigos(true);},       col:'#AF52DE'},
-              {icon:'🍂',l:'Recetas Temp.',    sub:'Ingredientes oferta',  fn:()=>{if(!isPro){setShowPaywall(true);return;}setShowRecetasTemporada(true);}, col:'#34C759'},
-              {icon:'🏆',l:'Reto 21 días',     sub:'Nuevo hábito',         fn:()=>setShowChallenge(true),                                                  col:'#FF9500', free:true},
-            ].map(({icon,l,sub,fn,col,free})=>(
-              <button key={l} className="tap" onClick={fn} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:18,padding:'14px 12px',display:'flex',flexDirection:'column',alignItems:'flex-start',gap:5,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
-                <div style={{display:'flex',justifyContent:'space-between',width:'100%',alignItems:'center'}}>
-                  <div style={{width:42,height:42,borderRadius:12,background:`${col}14`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>{icon}</div>
-                  {!free&&<span style={{fontSize:9,fontWeight:700,background:'#FFD700',color:'#5a3e00',padding:'2px 7px',borderRadius:6}}>PRO</span>}
+          <button className="tap" onClick={()=>setShowHerramientasPro(true)} style={{
+            width:'100%',padding:'14px 16px',borderRadius:18,marginBottom:14,
+            background:C.surface,border:`1px solid ${C.border}`,
+            display:'flex',alignItems:'center',justifyContent:'space-between',
+            cursor:'pointer',fontFamily:F,
+          }}>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <div style={{width:42,height:42,borderRadius:12,background:'#5856D614',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>⚙️</div>
+              <div style={{textAlign:'left'}}>
+                <div style={{fontSize:13,fontWeight:700,color:C.text}}>Herramientas Pro</div>
+                <div style={{fontSize:11,color:C.textSec}}>12 herramientas disponibles</div>
+              </div>
+            </div>
+            <span style={{fontSize:18,color:C.textMuted}}>›</span>
+          </button>
+
+          {/* Modal Herramientas Pro */}
+          {showHerramientasPro&&(
+            <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:50,display:'flex',alignItems:'flex-end'}} onClick={()=>setShowHerramientasPro(false)}>
+              <div style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'20px 16px 32px',width:'100%',maxHeight:'80vh',overflowY:'auto',boxSizing:'border-box'}} onClick={e=>e.stopPropagation()}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                  <div style={{fontSize:17,fontWeight:800,color:C.text}}>⚙️ Herramientas Pro</div>
+                  <button onClick={()=>setShowHerramientasPro(false)} style={{background:'none',border:'none',fontSize:22,color:C.textMuted,cursor:'pointer',padding:4,fontFamily:F}}>✕</button>
                 </div>
-                <div style={{fontSize:12,fontWeight:700,color:C.text,lineHeight:1.2}}>{l}</div>
-                <div style={{fontSize:10,color:C.textSec}}>{sub}</div>
-              </button>
-            ))}
-          </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  {[
+                    {icon:'🇨🇱',l:'Recetas IA',      sub:'Cocina chilena',       fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowRecetasIA(true);},       col:'#D42020'},
+                    {icon:'🛒',l:'Lista Compras',    sub:'Inteligente IA',       fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowListaComprasIA(true);},   col:'#34C759'},
+                    {icon:'📅',l:'Plan Semanal',     sub:'Menú 7 días IA',       fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanSemanal(true);},      col:'#5856D6'},
+                    {icon:'📉',l:'Predicción Peso',  sub:'Ver mi progreso',      fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPredicionPeso(true);},    col:'#D42020'},
+                    {icon:'🧬',l:'Plan Adaptativo',  sub:'Ajuste semanal IA',    fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanAdaptativo(true);},   col:'#5856D6'},
+                    {icon:'👨‍👩‍👧',l:'Plan Familiar',   sub:'Hasta 5 miembros',    fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanFamiliar(true);},     col:'#FF9500'},
+                    {icon:'🏥',l:'Salud Especial',   sub:'Diabetes / Hipert.',   fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowModoSalud(true);},        col:'#5856D6'},
+                    {icon:'📄',l:'Planes PDF',       sub:'Descarga tu plan',     fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanesDescargables(true);},col:'#D42020'},
+                    {icon:'📊',l:'Exportar CSV',     sub:'Últimos 30 días',      fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}exportCSV();},                   col:'#34C759'},
+                    {icon:'👥',l:'Liga Amigos',      sub:'Ranking semanal',      fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowLigaAmigos(true);},       col:'#AF52DE'},
+                    {icon:'🍂',l:'Recetas Temp.',    sub:'Ingredientes oferta',  fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowRecetasTemporada(true);}, col:'#34C759'},
+                    {icon:'🏆',l:'Reto 21 días',     sub:'Nuevo hábito',         fn:()=>{setShowHerramientasPro(false);setShowChallenge(true);},                                                col:'#FF9500', free:true},
+                  ].map(({icon,l,sub,fn,col,free})=>(
+                    <button key={l} className="tap" onClick={fn} style={{background:C.surfaceAlt,border:`1px solid ${C.border}`,borderRadius:18,padding:'14px 12px',display:'flex',flexDirection:'column',alignItems:'flex-start',gap:5,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',width:'100%',alignItems:'center'}}>
+                        <div style={{width:42,height:42,borderRadius:12,background:`${col}14`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>{icon}</div>
+                        {!free&&<span style={{fontSize:9,fontWeight:700,background:'#FFD700',color:'#5a3e00',padding:'2px 7px',borderRadius:6}}>PRO</span>}
+                      </div>
+                      <div style={{fontSize:12,fontWeight:700,color:C.text,lineHeight:1.2}}>{l}</div>
+                      <div style={{fontSize:10,color:C.textSec}}>{sub}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── Logros ── */}
           {(()=>{
@@ -11279,6 +11345,46 @@ function AppCore() {
 
       {/* ══ LOGRO DESBLOQUEADO ══ */}
       {showLogroUnlock&&<LogroUnlockModal C={C} F={F} logro={showLogroUnlock} onClose={()=>setShowLogroUnlock(null)}/>}
+
+      {/* ══ MOOD MODAL ══ */}
+      {showMoodModal&&moodDraft&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.55)',zIndex:60,display:'flex',alignItems:'flex-end'}} onClick={()=>setShowMoodModal(false)}>
+          <div style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'20px 20px 36px',width:'100%',boxSizing:'border-box'}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+              <div style={{fontSize:17,fontWeight:800,color:C.text}}>{moodDraft.e} {moodDraft.l}</div>
+              <button onClick={()=>setShowMoodModal(false)} style={{background:'none',border:'none',fontSize:22,color:C.textMuted,cursor:'pointer',padding:4,fontFamily:F}}>✕</button>
+            </div>
+            <div style={{fontSize:12,color:C.textSec,marginBottom:10}}>¿Con qué comida lo relacionas?</div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
+              {['—',...MEALS].map(m=>{
+                const active=moodDraft._comida===m;
+                return(
+                  <button key={m} className="tap" onClick={()=>setMoodDraft({...moodDraft,_comida:m})}
+                    style={{padding:'6px 12px',borderRadius:20,border:`1.5px solid ${active?moodDraft.color:C.border}`,
+                      background:active?moodDraft.color+'18':C.surfaceAlt,color:active?moodDraft.color:C.textSec,
+                      fontSize:12,fontWeight:active?700:400,cursor:'pointer',fontFamily:F}}>
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+            <textarea value={moodNote} onChange={e=>setMoodNote(e.target.value)}
+              placeholder="Nota opcional... (ej. 'comí por ansiedad')"
+              rows={2}
+              style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${C.border}`,borderRadius:14,fontSize:13,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',resize:'none',marginBottom:14,boxSizing:'border-box'}}/>
+            <button className="tap" onClick={()=>{
+              const entry={ts:Date.now(),mood:moodDraft.l,emoji:moodDraft.e,comida:moodDraft._comida&&moodDraft._comida!=='—'?moodDraft._comida:null,nota:moodNote.trim()};
+              setMoodEntries(prev=>[...prev,entry]);
+              setShowMoodModal(false);
+              setMoodNote('');
+              haptic('success');
+              setToast(`${moodDraft.e} ¡Registrado!`);
+            }} style={{width:'100%',padding:'13px',borderRadius:16,border:'none',background:moodDraft.color,color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F}}>
+              Guardar estado de ánimo
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ══ TOAST ══ */}
       {toast&&(
