@@ -3392,9 +3392,14 @@ const callEdgeFn = async (body, signal) => {
   const ctrl = signal ? null : new AbortController();
   const tid  = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
   try {
+    // Siempre enviar JWT para que la Edge Function pueda verificar autenticación
+    const session = await supabase.auth.getSession();
+    const token = session?.data?.session?.access_token;
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(EDGE_FN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(body),
       signal: signal || ctrl?.signal,
     });
@@ -5156,8 +5161,15 @@ function LegalModal({ type, onClose }) {
 
 DATOS QUE RECOPILAMOS
 • Datos de cuenta: email y contraseña (gestionados por Supabase Auth con cifrado).
-• Datos de salud: peso corporal, medidas, objetivos calóricos y registros de alimentación que tú mismo ingresas.
+• Datos de salud: peso corporal, historial de peso, medidas, objetivos calóricos y registros de alimentación que tú mismo ingresas voluntariamente.
+• Condición médica: si lo indicas, guardamos condiciones de salud como diabetes, hipertensión, colesterol alto o celiaquía, únicamente para personalizar tus recomendaciones nutricionales.
 • Datos técnicos: tipo de dispositivo y errores de la app para mejorar la experiencia.
+
+SUBPROCESADORES DE DATOS
+Cuando usas las funciones de inteligencia artificial, tus datos nutricionales (nunca tu condición médica completa ni datos de identificación) son procesados por Anthropic PBC (anthropic.com) bajo sus políticas de privacidad. Anthropic no retiene datos de usuarios de forma permanente. Consulta su política en anthropic.com/privacy.
+
+AVISO MÉDICO IMPORTANTE
+El contenido generado por la IA de Calorú es orientativo y no constituye consejo médico profesional. Consulta siempre a un profesional de la salud certificado para decisiones relacionadas con tu salud, especialmente si tienes condiciones médicas diagnosticadas.
 
 USO DE LOS DATOS
 Usamos tus datos únicamente para:
@@ -7142,9 +7154,12 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [localToast, setLocalToast] = useState('');
   const showToast = (msg) => { setLocalToast(msg); setTimeout(()=>setLocalToast(''),3500); };
 
-  // Detectar si estamos dentro de un TWA (Android app)
-  const isTWA = document.referrer.includes('android-app://') ||
-    window.matchMedia('(display-mode: standalone)').matches && /android/i.test(navigator.userAgent);
+  // Detectar si estamos dentro de un TWA (Android app de Google Play)
+  // La detección precisa requiere que el referrer incluya el package name de la app
+  const isTWA = document.referrer.startsWith('android-app://cl.caloru.app') ||
+    (window.matchMedia('(display-mode: standalone)').matches &&
+     /android/i.test(navigator.userAgent) &&
+     typeof window.getDigitalGoodsService !== 'undefined');
 
   // Google Play Billing via Digital Goods API
   const handleGooglePlayBilling = async (plan) => {
@@ -7167,14 +7182,18 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
       );
       const paymentResponse = await paymentRequest.show();
       const purchaseToken = paymentResponse.details.purchaseToken;
-      // Verificar y activar Pro en Supabase via Edge Function
+      // Verificar la compra en Google Play via Edge Function (JWT requerido)
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
-      await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
+      const verifyRes = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ purchaseToken, sku, user_email: supabaseUser.email, plan }),
+        body: JSON.stringify({ purchaseToken, sku, plan }),
       });
+      if (!verifyRes.ok) {
+        await paymentResponse.complete('fail');
+        throw new Error('No se pudo verificar la compra con Google Play');
+      }
       await paymentResponse.complete('success');
       showToast('✅ ¡Suscripción activada! Recarga la app para disfrutar Calorú Pro.');
       setTimeout(onClose, 2000);
