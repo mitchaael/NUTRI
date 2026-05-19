@@ -69,3 +69,36 @@ haciendo solo una cosa con tono local. Queda ataca el problema PREVIO a Fintual.
 
 *Documento creado: Mayo 2026*
 *Retomar: post lanzamiento iOS de Calorú*
+
+---
+
+## 🇨🇱 Diferenciadores únicos — Calorú (investigados con datos reales)
+*Agregado: Mayo 2026*
+
+### 1. 🎉 Modo Patrias — PRIORIDAD ALTA (antes de sept 2026)
+Modo estacional 15-20 septiembre con platos típicos de Fiestas Patrias (anticucho, choripán, borgoña, chicha, empanada) y "presupuesto de calorías patriotas". Los chilenos suben 3-4 kilos en Fiestas Patrias. Nadie en el mundo tiene esto. Dificultad: Baja. Virabilidad: Altísima.
+- Fuente: Diario Estrategia + Revista de Salud UC
+- Datos caloricos: MINSAL + publicaciones UC y Santo Tomás
+
+### 2. 😔 Mood Log — Registro emocional + comida
+2 toques al registrar comida para indicar estado emocional. Después de 30 días la IA muestra patrones: "cuando estás estresado comes 340 kcal extra entre 21-23hrs". 69.3% de chilenas tiene alimentación emocional (U. de Chile, 2024). Dificultad: Media.
+- Fuente: Revista Chilena de Nutrición 2024 + U. de Chile
+
+### 3. 📍 Termómetro Nutricional por Comuna
+Al crear perfil, comparas tu situación con tu comuna usando Mapa Nutricional Junaeb 2025 (datos por comuna: Pudahuel 53%, La Pintana 52.5%, Providencia 47.8%). Datos públicos que solo un equipo local conoce. Dificultad: Media.
+- Fuente: Junaeb.cl/mapa-nutricional + DEIS MINSAL tablero público
+
+### 4. 🫙 Cocina Patrimonial Regional
+Recetas con valores nutricionales reales de gastronomía regional chilena (atacameña, mapuche, chilota, patagónica): cochayuyo, merkén, mote, chuchoca, ulte. Fuente oficial: Catálogo de la Subsecretaría de Turismo 2024. Ninguna app lo ha digitalizado. Dificultad: Media.
+- Fuente: Subsecretaría de Turismo + Tabla Composición MINSAL
+
+### 5. 💰 Precio Real Hoy — Complemento Modo Feria
+Precios en tiempo real de ingredientes en Líder, Jumbo, Unimarc, Tottus actualizados diariamente. Carriapp (9.000 usuarios) ya resolvió el problema técnico de scraping — posible alianza. Canaresta Básica superó $90.000 por persona (marzo 2026). Dificultad: Alta.
+- Fuente: Carriapp (nov 2025) + Ministerio Desarrollo Social + ChileAtiende Observatorio Precios
+
+### Calendario sugerido de implementación
+- **Junio 2026** — Mood Log (retención profunda)
+- **Julio 2026** — Termómetro por Comuna (mejora onboarding)
+- **Agosto 2026** — Modo Patrias (listo para el 15 sept)
+- **Sep-Oct 2026** — Cocina Patrimonial (posicionamiento regional)
+- **Q1 2027** — Precio Real Hoy (requiere alianza técnica)
