@@ -102,3 +102,24 @@ Precios en tiempo real de ingredientes en Líder, Jumbo, Unimarc, Tottus actuali
 - **Agosto 2026** — Modo Patrias (listo para el 15 sept)
 - **Sep-Oct 2026** — Cocina Patrimonial (posicionamiento regional)
 - **Q1 2027** — Precio Real Hoy (requiere alianza técnica)
+
+---
+
+## 🎨 UX/UI — Reorganizar la app (pendiente)
+*Prioridad: Alta — hacer antes de lanzar nuevas features*
+
+La app está saturada en algunos apartados. Revisar y simplificar antes de agregar más contenido.
+
+**Áreas a revisar:**
+- Pantalla principal (home) — demasiados elementos
+- Pantalla de búsqueda de alimentos — muchos accesos rápidos
+- Perfil / configuración — demasiadas opciones anidadas
+- Modales con demasiada información junta
+
+**Approach sugerido:**
+- Auditoría visual de cada pantalla
+- Jerarquía clara: qué es primario vs secundario
+- Esconder funciones avanzadas detrás de un "ver más"
+- Consistencia visual entre secciones
+
+*Revisar mañana con screenshots reales del usuario*
