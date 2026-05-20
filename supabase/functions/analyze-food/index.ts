@@ -79,33 +79,48 @@ async function searchOpenFoodFacts(query: string): Promise<string> {
   return '';
 }
 
-// ── 2. Búsqueda Brave Search enfocada en Chile (.cl, supermercados) ──
+// ── 2. Búsqueda Brave Search — web abierta con foco nutricional Chile ──
 async function searchBraveChile(query: string): Promise<string> {
   if (!BRAVE_API_KEY) return '';
   try {
-    // Prioriza fuentes chilenas: jumbo, lider, tottus, unimarc, MINSAL, recetas
-    const searchQuery = `"${query}" calorías proteínas información nutricional Chile (site:jumbo.cl OR site:lider.cl OR site:tottus.cl OR site:unimarc.cl OR site:minsal.cl OR site:fatsecret.es OR site:calorieking.com)`;
-    const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&country=cl&lang=es&count=5&search_lang=es`;
-    const res = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'X-Subscription-Token': BRAVE_API_KEY,
-      },
-      signal: AbortSignal.timeout(6000),
-    });
-    if (!res.ok) return '';
-    const data = await res.json() as { web?: { results?: any[] } };
-    const results = data.web?.results ?? [];
-    if (!results.length) return '';
+    // Búsqueda abierta: sin restricción de sitio, prioriza resultados en español/Chile
+    // Dos intentos: primero con "Chile" explícito, luego sin para marcas internacionales
+    const queries = [
+      `${query} calorías información nutricional por 100g Chile`,
+      `${query} nutrition facts calories per 100g`,
+    ];
 
-    const snippets = results
-      .slice(0, 4)
-      .map((r: any) => `[${r.title ?? ''}] ${r.description ?? ''}`)
-      .filter(s => s.length > 10)
-      .join('\n');
+    for (const searchQuery of queries) {
+      const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&country=cl&lang=es&count=6&search_lang=es`;
+      const res = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Subscription-Token': BRAVE_API_KEY,
+        },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) continue;
 
-    if (!snippets) return '';
-    return `BÚSQUEDA WEB CHILE para "${query}" — fuentes chilenas:\n${snippets}\n(Extrae los datos nutricionales más relevantes de estos resultados)`;
+      const data = await res.json() as { web?: { results?: any[] } };
+      const results = data.web?.results ?? [];
+      if (!results.length) continue;
+
+      const snippets = results
+        .slice(0, 5)
+        .map((r: any) => {
+          const title = (r.title ?? '').slice(0, 80);
+          const desc  = (r.description ?? '').slice(0, 200);
+          const url   = (r.url ?? '').replace(/https?:\/\//, '').split('/')[0];
+          return `[${url}] ${title}: ${desc}`;
+        })
+        .filter(s => s.length > 20)
+        .join('\n');
+
+      if (snippets) {
+        return `BÚSQUEDA WEB para "${query}":\n${snippets}\n\nExtrae los datos nutricionales (kcal, proteínas, carbs, grasas, fibra, azúcar, sodio) más precisos de estos resultados. Indica la fuente.`;
+      }
+    }
+    return '';
   } catch {
     return '';
   }
