@@ -11220,11 +11220,12 @@ function AppCore() {
           {/* Modal Herramientas Pro */}
           {showHerramientasPro&&(
             <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:50,display:'flex',alignItems:'flex-end'}} onClick={()=>setShowHerramientasPro(false)}>
-              <div style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'20px 16px 32px',width:'100%',maxHeight:'80vh',overflowY:'auto',boxSizing:'border-box'}} onClick={e=>e.stopPropagation()}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                  <div style={{fontSize:17,fontWeight:800,color:C.text}}>⚙️ Herramientas Pro</div>
+              <div style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'16px 16px 40px',width:'100%',height:'72vh',display:'flex',flexDirection:'column',boxSizing:'border-box'}} onClick={e=>e.stopPropagation()}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,flexShrink:0}}>
+                  <div style={{fontSize:16,fontWeight:800,color:C.text}}>⚙️ Herramientas Pro</div>
                   <button onClick={()=>setShowHerramientasPro(false)} style={{background:'none',border:'none',fontSize:22,color:C.textMuted,cursor:'pointer',padding:4,fontFamily:F}}>✕</button>
                 </div>
+                <div style={{overflowY:'auto',flex:1}}>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
                   {[
                     {icon:'🇨🇱',l:'Recetas IA',      sub:'Cocina chilena',       fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowRecetasIA(true);},       col:'#D42020'},
@@ -11249,6 +11250,7 @@ function AppCore() {
                       <div style={{fontSize:10,color:C.textSec}}>{sub}</div>
                     </button>
                   ))}
+                </div>
                 </div>
               </div>
             </div>

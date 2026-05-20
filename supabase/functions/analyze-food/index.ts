@@ -1,7 +1,7 @@
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const SUPABASE_URL      = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-const MODEL = "claude-sonnet-4-5-20250929";
+const MODEL = "claude-sonnet-4-6";
 
 // Rate limiting en memoria — por user_id autenticado
 // Límites: 20 llamadas/hora para usuarios free, 60 para Pro
@@ -24,18 +24,11 @@ function checkRateLimit(userId: string, isPro: boolean): boolean {
   return true;
 }
 
-// CORS — solo permite el origen de Calorú y localhost para desarrollo
-const ALLOWED_ORIGINS = [
-  "https://caloru.cl",
-  "https://www.caloru.cl",
-  "http://localhost:5173",
-  "http://localhost:4173",
-];
-
+// CORS — permisivo en origen porque la seguridad real la da el JWT
+// El TWA Android puede enviar orígenes variables; la autenticación es por Bearer token
 function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
-    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Origin": origin || "https://caloru.cl",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Vary": "Origin",
@@ -135,18 +128,21 @@ Deno.serve(async (req) => {
 
       anthropicBody = {
         model: MODEL,
-        max_tokens: 1200,
-        system: `Eres un nutricionista experto. El usuario te envia una foto de su comida.
-Tu tarea es:
-1. Identificar TODOS los alimentos visibles en la foto.
-2. Estimar la porcion en gramos de cada uno.
-3. Estimar las calorias (kcal), proteinas (g), carbohidratos (g), grasas (g) y fibra (g) de cada alimento.
-4. Dar un total estimado del plato completo.
+        max_tokens: 1500,
+        system: `Eres un nutricionista experto en gastronomía chilena y latinoamericana. El usuario te envía una foto de su comida desde Chile.
 
-IMPORTANTE:
-- Se especifico con los alimentos chilenos si los reconoces (marraqueta, porotos, cazuela, pastel de choclo, empanada, sopaipilla, etc.)
-- Responde SOLO con un JSON valido, sin texto antes ni despues, sin backticks, sin markdown.
-- Si no puedes identificar la comida o la imagen no es de comida, responde: {"error": "No pude identificar alimentos en esta imagen"}
+Tu tarea:
+1. Identificar TODOS los alimentos y preparaciones visibles.
+2. Estimar la porción realista en gramos (considera tamaños de plato chileno típico).
+3. Calcular calorías (kcal), proteínas, carbohidratos, grasas y fibra por alimento.
+4. Sumar el total del plato completo.
+
+Alimentos chilenos comunes: marraqueta (200 kcal c/u), hallulla, sopaipilla, cazuela de vacuno, cazuela de pollo, pastel de choclo, humitas, porotos con rienda, charquicán, arroz con pollo, chorrillana, completo italiano, empanada de pino (350 kcal), ensalada chilena (tomate+cebolla), pebre, puré, legumbres (porotos, lentejas, garbanzos), ave asada, lomo a lo pobre, merluza al vapor o frita.
+
+REGLAS CRÍTICAS:
+- Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin backticks, sin markdown.
+- Si la imagen no muestra comida claramente: {"error": "No pude identificar alimentos en esta imagen"}
+- Sé conservador con las estimaciones — es mejor subestimar que sobreestimar.
 
 Formato de respuesta:
 {
