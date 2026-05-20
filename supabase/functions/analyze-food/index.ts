@@ -3,6 +3,66 @@ const SUPABASE_URL      = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 const MODEL = "claude-sonnet-4-6";
 
+// ── Palabras que indican que el usuario menciona o registra comida ──
+const FOOD_KEYWORDS = [
+  'comí','comi','comiendo','comiste','almorcé','almorce','desayuné','desayune',
+  'cené','cene','meriendé','merendie','tomé','tome','bebí','bebi','me tomé',
+  'me comí','me comi','me tomé','me tome','me bebí','me bebi',
+  'registra','anota','agrega','añade','agregar','anotar',
+  'acabo de comer','acabo de tomar','acabo de beber',
+  'calorías','calorias','macros','proteínas','proteinas','carbohidratos',
+  'tiene','cuánto tiene','cuanto tiene','cuantas calorias','cuántas calorías',
+  'información de','informacion de','datos de','nutricional','nutrición de',
+  'qué tiene','que tiene','composición','composicion',
+];
+
+// ── Busca en OpenFoodFacts y retorna contexto nutricional ──
+async function searchFoodOnline(query: string): Promise<string> {
+  try {
+    // Limpiar query: quitar palabras de trigger y dejar solo el alimento
+    const cleanQuery = query
+      .replace(/[^\wáéíóúÁÉÍÓÚñÑüÜ\s]/g, ' ')
+      .replace(/\b(me|comí|comi|comí|tomé|tome|desayuné|almorcé|cené|registra|anota|agrega|hoy|ayer|recién|recien|un|una|el|la|los|las|de|del|con|para)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 100);
+
+    if (cleanQuery.length < 2) return '';
+
+    const encoded = encodeURIComponent(cleanQuery);
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=8&fields=product_name,product_name_es,brands,serving_size,serving_quantity,nutriments,quantity`;
+
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return '';
+
+    const data = await res.json() as { products?: any[] };
+    if (!data.products?.length) return '';
+
+    const hits = data.products
+      .filter((p: any) => p.nutriments && (p['energy-kcal_100g'] !== undefined || p.nutriments['energy-kcal_100g'] !== undefined))
+      .slice(0, 4)
+      .map((p: any) => {
+        const n = p.nutriments || {};
+        const name  = (p.product_name_es || p.product_name || 'Producto').slice(0, 60);
+        const brand = p.brands ? ` — ${String(p.brands).split(',')[0].trim()}` : '';
+        const kcal  = Math.round(n['energy-kcal_100g'] ?? n['energy-kcal'] ?? 0);
+        const prot  = Math.round(n['proteins_100g'] ?? n['proteins'] ?? 0);
+        const carbs = Math.round(n['carbohydrates_100g'] ?? n['carbohydrates'] ?? 0);
+        const fat   = Math.round(n['fat_100g'] ?? n['fat'] ?? 0);
+        const fiber = Math.round(n['fiber_100g'] ?? n['fiber'] ?? 0);
+        const sugar = Math.round(n['sugars_100g'] ?? n['sugars'] ?? 0);
+        const sodium= Math.round((n['sodium_100g'] ?? n['sodium'] ?? 0) * 1000); // g→mg
+        const serv  = p.serving_size ? ` (porción: ${p.serving_size})` : '';
+        return `• ${name}${brand}${serv}: ${kcal} kcal/100g | P:${prot}g C:${carbs}g G:${fat}g Fibra:${fiber}g Azúcar:${sugar}g Sodio:${sodium}mg`;
+      });
+
+    if (!hits.length) return '';
+    return `DATOS REALES (OpenFoodFacts) para "${cleanQuery}":\n${hits.join('\n')}`;
+  } catch {
+    return ''; // falla silenciosa — Claude usa sus estimaciones
+  }
+}
+
 // Rate limiting en memoria — por user_id autenticado
 // Límites: 20 llamadas/hora para usuarios free, 60 para Pro
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
@@ -206,19 +266,31 @@ Formato de respuesta:
         .slice(-MAX_MESSAGES)
         .map((m: { role: string; content: string }) => ({
           role: m.role === "user" || m.role === "assistant" ? m.role : "user",
-          content: String(m.content).slice(0, 4000), // limitar por mensaje
+          content: String(m.content).slice(0, 4000),
         }));
 
-      // El system prompt viene del frontend y no es contenido de usuario,
-      // pero lo limitamos por seguridad
+      // El system prompt viene del frontend, limitado por seguridad
       const safeSystem = system
         ? String(system).slice(0, 8000)
         : "Eres un asistente nutricional amigable.";
 
+      // ── Búsqueda de datos reales si el usuario menciona comida ──
+      const lastUserMsg = sanitizedMessages.filter(m => m.role === 'user').at(-1)?.content ?? '';
+      const msgLower = lastUserMsg.toLowerCase();
+      const needsSearch = FOOD_KEYWORDS.some(kw => msgLower.includes(kw));
+
+      let enrichedSystem = safeSystem;
+      if (needsSearch && lastUserMsg.length > 3) {
+        const foodData = await searchFoodOnline(lastUserMsg);
+        if (foodData) {
+          enrichedSystem = `${safeSystem}\n\n${foodData}\n\nSi estos datos corresponden a lo que el usuario menciona, úsalos para calcular sus macros con precisión. Si no corresponden, usa tu conocimiento general. SIEMPRE indica la fuente cuando uses datos de OpenFoodFacts.`;
+        }
+      }
+
       anthropicBody = {
         model: MODEL,
-        max_tokens: Math.min(max_tokens || 1000, 2000), // reducido de 4000 a 2000
-        system: safeSystem,
+        max_tokens: Math.min(max_tokens || 1000, 2000),
+        system: enrichedSystem,
         messages: sanitizedMessages,
       };
 
