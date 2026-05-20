@@ -3349,6 +3349,15 @@ const VEGAN_OVERRIDES = new Set([
 // IDs explícitamente no-veganos en categorías mixtas
 const NON_VEGAN_IDS = new Set([
   // Lácteos animales (toda la cat salvo overrides — se maneja por cat)
+  // Panes con lácteos, huevo o manteca animal
+  81,  // Hallulla — manteca de cerdo (artesanal)
+  82,  // Pan molde Harry's blanco — suero de leche
+  83,  // Pan molde Harry's integral — suero de leche
+  84,  // Pan molde Bimbo blanco — suero de leche + leche descremada
+  85,  // Pan molde Bimbo integral — suero de leche
+  86,  // Pan Schär sin gluten — huevo en polvo
+  87,  // Pan pita Ideal — leche en polvo
+  90,  // Sopaipilla — manteca animal
   // Cereales: granola con miel
   103,
   // Snacks con lácteos/huevos/gelatina/carne
@@ -3373,8 +3382,13 @@ const NON_VEGAN_IDS = new Set([
 
 // IDs veganos dentro de categorías mixtas
 const VEGAN_IDS = new Set([
-  // Panes (base harina/agua/levadura — sin lácteos ni huevos)
-  80,81,82,83,84,85,86,87,88,89,91,92,93,
+  // Panes veganos reales (harina/agua/levadura/sal — sin lácteos ni huevos)
+  80,  // Marraqueta
+  88,  // Ciabatta
+  89,  // Baguette
+  91,  // Tostadas de agua Luchetti
+  92,  // Galletas de arroz
+  93,  // Pan de centeno
   // Cereales veganos
   100,101,102,104,105,106,107,108,109,110,
   // Snacks veganos
