@@ -2,6 +2,7 @@ const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const SUPABASE_URL      = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 const MODEL = "claude-sonnet-4-6";
+const BRAVE_API_KEY = Deno.env.get("BRAVE_API_KEY");
 
 // ── Palabras que indican que el usuario menciona o registra comida ──
 const FOOD_KEYWORDS = [
@@ -16,51 +17,114 @@ const FOOD_KEYWORDS = [
   'qué tiene','que tiene','composición','composicion',
 ];
 
-// ── Busca en OpenFoodFacts y retorna contexto nutricional ──
-async function searchFoodOnline(query: string): Promise<string> {
+// ── Limpia la query dejando solo el nombre del alimento ──
+function cleanFoodQuery(raw: string): string {
+  return raw
+    .replace(/[^\wáéíóúÁÉÍÓÚñÑüÜ\s]/g, ' ')
+    .replace(/\b(me|comí|comi|tomé|tome|desayuné|almorcé|cené|registra|anota|agrega|hoy|ayer|recién|recien|acabo de comer|un|una|unos|unas|el|la|los|las|de|del|con|para|que|qué|cuánto|cuanto|cuantas|cuántas|tiene|tienen|información|informacion|datos|nutricional|calorías|calorias|proteínas|proteinas|macros)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+}
+
+// ── Helper: formatea un producto OFF en una línea ──
+function formatOFFProduct(p: any): string | null {
+  const n = p.nutriments;
+  if (!n) return null;
+  const kcal = Math.round(n['energy-kcal_100g'] ?? n['energy-kcal'] ?? 0);
+  if (!kcal) return null;
+  const name  = (p.product_name_es || p.product_name || '').slice(0, 60);
+  const brand = p.brands ? ` — ${String(p.brands).split(',')[0].trim()}` : '';
+  const prot  = Math.round(n['proteins_100g'] ?? 0);
+  const carbs = Math.round(n['carbohydrates_100g'] ?? 0);
+  const fat   = Math.round(n['fat_100g'] ?? 0);
+  const fiber = Math.round(n['fiber_100g'] ?? 0);
+  const sugar = Math.round(n['sugars_100g'] ?? 0);
+  const sodium= Math.round((n['sodium_100g'] ?? 0) * 1000);
+  const serv  = p.serving_size ? ` (porción: ${p.serving_size})` : '';
+  return `• ${name}${brand}${serv}: ${kcal} kcal/100g | P:${prot}g C:${carbs}g G:${fat}g Fibra:${fiber}g Azúcar:${sugar}g Sodio:${sodium}mg`;
+}
+
+// ── 1. Busca en OpenFoodFacts Chile primero, luego mundial ──
+async function searchOpenFoodFacts(query: string): Promise<string> {
+  const encoded = encodeURIComponent(query);
+  const fields  = 'product_name,product_name_es,brands,serving_size,nutriments';
+
+  // Intento 1: catálogo chileno
   try {
-    // Limpiar query: quitar palabras de trigger y dejar solo el alimento
-    const cleanQuery = query
-      .replace(/[^\wáéíóúÁÉÍÓÚñÑüÜ\s]/g, ' ')
-      .replace(/\b(me|comí|comi|comí|tomé|tome|desayuné|almorcé|cené|registra|anota|agrega|hoy|ayer|recién|recien|un|una|el|la|los|las|de|del|con|para)\b/gi, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 100);
+    const res = await fetch(
+      `https://cl.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=6&fields=${fields}`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    if (res.ok) {
+      const data = await res.json() as { products?: any[] };
+      const hits = (data.products ?? []).map(formatOFFProduct).filter(Boolean);
+      if (hits.length) return `DATOS REALES — OpenFoodFacts Chile para "${query}":\n${hits.slice(0,4).join('\n')}`;
+    }
+  } catch { /* continuar */ }
 
-    if (cleanQuery.length < 2) return '';
+  // Intento 2: catálogo mundial
+  try {
+    const res = await fetch(
+      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=8&fields=${fields}`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (res.ok) {
+      const data = await res.json() as { products?: any[] };
+      const hits = (data.products ?? []).map(formatOFFProduct).filter(Boolean);
+      if (hits.length) return `DATOS REALES — OpenFoodFacts para "${query}":\n${hits.slice(0,4).join('\n')}`;
+    }
+  } catch { /* continuar */ }
 
-    const encoded = encodeURIComponent(cleanQuery);
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encoded}&search_simple=1&action=process&json=1&page_size=8&fields=product_name,product_name_es,brands,serving_size,serving_quantity,nutriments,quantity`;
+  return '';
+}
 
-    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+// ── 2. Búsqueda Brave Search enfocada en Chile (.cl, supermercados) ──
+async function searchBraveChile(query: string): Promise<string> {
+  if (!BRAVE_API_KEY) return '';
+  try {
+    // Prioriza fuentes chilenas: jumbo, lider, tottus, unimarc, MINSAL, recetas
+    const searchQuery = `"${query}" calorías proteínas información nutricional Chile (site:jumbo.cl OR site:lider.cl OR site:tottus.cl OR site:unimarc.cl OR site:minsal.cl OR site:fatsecret.es OR site:calorieking.com)`;
+    const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&country=cl&lang=es&count=5&search_lang=es`;
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'X-Subscription-Token': BRAVE_API_KEY,
+      },
+      signal: AbortSignal.timeout(6000),
+    });
     if (!res.ok) return '';
+    const data = await res.json() as { web?: { results?: any[] } };
+    const results = data.web?.results ?? [];
+    if (!results.length) return '';
 
-    const data = await res.json() as { products?: any[] };
-    if (!data.products?.length) return '';
-
-    const hits = data.products
-      .filter((p: any) => p.nutriments && (p['energy-kcal_100g'] !== undefined || p.nutriments['energy-kcal_100g'] !== undefined))
+    const snippets = results
       .slice(0, 4)
-      .map((p: any) => {
-        const n = p.nutriments || {};
-        const name  = (p.product_name_es || p.product_name || 'Producto').slice(0, 60);
-        const brand = p.brands ? ` — ${String(p.brands).split(',')[0].trim()}` : '';
-        const kcal  = Math.round(n['energy-kcal_100g'] ?? n['energy-kcal'] ?? 0);
-        const prot  = Math.round(n['proteins_100g'] ?? n['proteins'] ?? 0);
-        const carbs = Math.round(n['carbohydrates_100g'] ?? n['carbohydrates'] ?? 0);
-        const fat   = Math.round(n['fat_100g'] ?? n['fat'] ?? 0);
-        const fiber = Math.round(n['fiber_100g'] ?? n['fiber'] ?? 0);
-        const sugar = Math.round(n['sugars_100g'] ?? n['sugars'] ?? 0);
-        const sodium= Math.round((n['sodium_100g'] ?? n['sodium'] ?? 0) * 1000); // g→mg
-        const serv  = p.serving_size ? ` (porción: ${p.serving_size})` : '';
-        return `• ${name}${brand}${serv}: ${kcal} kcal/100g | P:${prot}g C:${carbs}g G:${fat}g Fibra:${fiber}g Azúcar:${sugar}g Sodio:${sodium}mg`;
-      });
+      .map((r: any) => `[${r.title ?? ''}] ${r.description ?? ''}`)
+      .filter(s => s.length > 10)
+      .join('\n');
 
-    if (!hits.length) return '';
-    return `DATOS REALES (OpenFoodFacts) para "${cleanQuery}":\n${hits.join('\n')}`;
+    if (!snippets) return '';
+    return `BÚSQUEDA WEB CHILE para "${query}" — fuentes chilenas:\n${snippets}\n(Extrae los datos nutricionales más relevantes de estos resultados)`;
   } catch {
-    return ''; // falla silenciosa — Claude usa sus estimaciones
+    return '';
   }
+}
+
+// ── Orquesta toda la búsqueda: OFF Chile → OFF mundial → Brave Chile ──
+async function searchFoodOnline(query: string): Promise<string> {
+  const clean = cleanFoodQuery(query);
+  if (clean.length < 2) return '';
+
+  // 1. OpenFoodFacts (Chile → mundial)
+  const offResult = await searchOpenFoodFacts(clean);
+  if (offResult) return offResult;
+
+  // 2. Brave Search Chile (si está configurado)
+  const braveResult = await searchBraveChile(clean);
+  if (braveResult) return braveResult;
+
+  return ''; // sin resultados — Claude estima
 }
 
 // Rate limiting en memoria — por user_id autenticado
