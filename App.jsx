@@ -2945,6 +2945,122 @@ function WeeklySummary({C, F, metas, streak, xpTotal, onClose}) {
 
 
 /* ═══════════════════════════════════════════════════════
+   COMPARTIR LOGRO — card de milestone (racha, meta, etc.)
+═══════════════════════════════════════════════════════ */
+function ShareAchievementModal({C, F, achievement, onClose}) {
+  const canvasRef = useRef(null);
+  const [ready, setReady] = useState(false);
+
+  const CONFIGS = {
+    streak_3:   {emoji:'⚡', titulo:'¡3 días seguidos!',    desc:'Estás construyendo el hábito',  grad:['#FF9500','#FF6B35']},
+    streak_7:   {emoji:'🔥', titulo:'¡1 semana de racha!',  desc:'Primera semana completa 💪',     grad:['#D42020','#FF6B35']},
+    streak_14:  {emoji:'🔥', titulo:'¡2 semanas seguidas!', desc:'La constancia es tu superpoder', grad:['#D42020','#8B0000']},
+    streak_21:  {emoji:'💎', titulo:'¡21 días seguidos!',   desc:'Ya es un hábito real 🎉',        grad:['#5856D6','#AF52DE']},
+    streak_30:  {emoji:'🏆', titulo:'¡30 días de racha!',   desc:'Un mes sin parar. Eres increíble',grad:['#FFD700','#FF9500']},
+    streak_50:  {emoji:'🏆', titulo:'¡50 días de racha!',   desc:'Nivel elite. Muy pocos llegan',   grad:['#FFD700','#34C759']},
+    streak_100: {emoji:'👑', titulo:'¡100 días de racha!',  desc:'Leyenda de Calorú 🇨🇱',           grad:['#FFD700','#D42020']},
+    goal_daily: {emoji:'🎯', titulo:'¡Meta del día!',        desc:'Cerraste el día en tu objetivo',  grad:['#34C759','#007AFF']},
+  };
+
+  const cfg = CONFIGS[achievement?.key] || {emoji:'⭐', titulo:'¡Logro desbloqueado!', desc:'Sigue así', grad:['#5856D6','#D42020']};
+
+  useEffect(()=>{
+    const canvas = canvasRef.current; if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W=400, H=400;
+    canvas.width=W; canvas.height=H;
+
+    // Fondo gradiente
+    const bg = ctx.createLinearGradient(0,0,W,H);
+    bg.addColorStop(0, cfg.grad[0]); bg.addColorStop(1, cfg.grad[1]);
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    // Patrón sutil
+    ctx.fillStyle='rgba(255,255,255,0.05)';
+    for(let x=0;x<W;x+=28) for(let y=0;y<H;y+=28){ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fill();}
+
+    // Badge app
+    ctx.fillStyle='rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.roundRect(16,16,110,28,14); ctx.fill();
+    ctx.fillStyle='white'; ctx.font='bold 12px system-ui';
+    ctx.fillText('🍽️ Calorú',26,34);
+
+    // Fecha
+    ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='11px system-ui'; ctx.textAlign='right';
+    ctx.fillText(new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}),W-18,34);
+    ctx.textAlign='left';
+
+    // Emoji grande
+    ctx.font='90px system-ui'; ctx.textAlign='center';
+    ctx.fillText(cfg.emoji, W/2, 185);
+
+    // Título
+    ctx.fillStyle='white'; ctx.font='bold 28px system-ui'; ctx.textAlign='center';
+    ctx.fillText(cfg.titulo, W/2, 240);
+
+    // Descripción
+    ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='16px system-ui';
+    ctx.fillText(cfg.desc, W/2, 272);
+
+    // Nombre usuario
+    if(achievement?.nombre){
+      ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='14px system-ui';
+      ctx.fillText(achievement.nombre, W/2, 310);
+    }
+
+    // Valor (ej: "30 días")
+    if(achievement?.valor){
+      ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='bold 20px system-ui';
+      ctx.fillText(achievement.valor, W/2, 345);
+    }
+
+    // CTA
+    ctx.fillStyle='rgba(255,255,255,0.2)';
+    ctx.beginPath(); ctx.roundRect(W/2-90, H-50, 180, 28, 14); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='bold 11px system-ui';
+    ctx.fillText('Descarga Calorú 🇨🇱 · caloru.cl', W/2, H-31);
+    ctx.textAlign='left';
+
+    setReady(true);
+  },[]);
+
+  const share = async () => {
+    const canvas = canvasRef.current; if(!canvas) return;
+    haptic('success');
+    canvas.toBlob(async(blob)=>{
+      try {
+        await navigator.share({files:[new File([blob],'logro-caloru.png',{type:'image/png'})],title:cfg.titulo,text:`${cfg.titulo} en Calorú — Tu nutrición, a tu ritmo 🇨🇱`});
+      } catch {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='logro-caloru.png'; a.click();
+      }
+    }, 'image/png');
+  };
+
+  return (
+    <div onClick={onClose} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:9999,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end',paddingBottom:'env(safe-area-inset-bottom)'}}>
+      <div onClick={e=>e.stopPropagation()} style={{width:'100%',maxWidth:420,background:C.surface,borderRadius:'26px 26px 0 0',padding:'20px 20px 36px',animation:'slideUp .35s ease'}}>
+        <div style={{width:40,height:4,borderRadius:2,background:C.border,margin:'0 auto 18px'}}/>
+        <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:4,textAlign:'center'}}>🎉 ¡Nuevo logro!</div>
+        <div style={{fontSize:12,color:C.textSec,textAlign:'center',marginBottom:16}}>Compártelo con tus amigos</div>
+        <div style={{borderRadius:20,overflow:'hidden',marginBottom:16,boxShadow:'0 8px 32px rgba(0,0,0,0.25)'}}>
+          <canvas ref={canvasRef} style={{width:'100%',height:'auto',display:'block'}}/>
+        </div>
+        {ready&&(
+          <button onClick={share} style={{width:'100%',padding:'15px',borderRadius:18,border:'none',background:`linear-gradient(135deg,${cfg.grad[0]},${cfg.grad[1]})`,color:'white',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:8}}>
+            📤 Compartir logro
+          </button>
+        )}
+        <button onClick={onClose} style={{width:'100%',padding:'13px',borderRadius:18,border:`1px solid ${C.border}`,background:'transparent',color:C.textSec,fontSize:14,cursor:'pointer',fontFamily:F}}>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════
    COMPARTIR PROGRESO — genera imagen canvas
 ═══════════════════════════════════════════════════════ */
 function ShareCard({C, F, nombre, tot, metas, obj, streak, exercises, onClose, xpTotal=0, nivel=null}) {
@@ -3532,12 +3648,14 @@ const callEdgeFn = async (body, signal) => {
 ═══════════════════════════════════════════════════════ */
 function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[], veganMode=false}) {
   const dark = C.surface !== '#FFFFFF' && C.surface !== '#ffffff'; // derive from theme
-  const [status, setStatus]     = useState('idle');    // idle | capturing | analyzing | results | error
-  const [image, setImage]       = useState(null);      // base64 string
-  const [preview, setPreview]   = useState(null);      // object URL for display
-  const [result, setResult]     = useState(null);      // parsed analysis
-  const [error, setError]       = useState('');
-  const [selected, setSelected] = useState({});        // {index: true} — alimentos seleccionados para agregar
+  const [status, setStatus]         = useState('idle');  // idle | capturing | analyzing | results | error
+  const [image, setImage]           = useState(null);    // base64 string
+  const [preview, setPreview]       = useState(null);    // object URL for display
+  const [result, setResult]         = useState(null);    // parsed analysis
+  const [error, setError]           = useState('');
+  const [selected, setSelected]     = useState({});      // {index: true}
+  const [editingIdx, setEditingIdx] = useState(null);    // índice del alimento en edición
+  const [editedFoods, setEditedFoods] = useState([]);   // copia editable de alimentos
   const inputRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -3591,6 +3709,7 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
         const sel = {};
         data.result.alimentos.forEach((_, i) => sel[i] = true);
         setSelected(sel);
+        setEditedFoods([...data.result.alimentos]);
         setStatus('results');
       } else {
         setError('No se identificaron alimentos en la imagen. Intenta con una foto más clara.');
@@ -3623,10 +3742,29 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
     img.src = base64;
   });
 
+  /* ── Edición inline de un alimento ── */
+  const updateFoodField = (idx, field, val) => {
+    setEditedFoods(prev => prev.map((f, i) => i !== idx ? f : { ...f, [field]: val }));
+  };
+  const updateFoodPorcion = (idx, newG) => {
+    const orig = result?.alimentos?.[idx];
+    if (!orig || !newG) return;
+    const ratio = Math.max(0.01, newG) / Math.max(1, orig.porcion_g || 100);
+    setEditedFoods(prev => prev.map((f, i) => i !== idx ? f : {
+      ...f, porcion_g: newG,
+      cal:    Math.round((orig.cal   || 0) * ratio),
+      prot:   Math.round((orig.prot  || 0) * ratio * 10) / 10,
+      carbs:  Math.round((orig.carbs || 0) * ratio * 10) / 10,
+      grasas: Math.round((orig.grasas|| 0) * ratio * 10) / 10,
+      fibra:  Math.round((orig.fibra || 0) * ratio * 10) / 10,
+    }));
+  };
+
   /* ── Agregar alimentos seleccionados al log ── */
   const addSelected = () => {
-    if (!result?.alimentos) return;
-    result.alimentos.forEach((food, i) => {
+    const foods = editedFoods.length ? editedFoods : result?.alimentos;
+    if (!foods) return;
+    foods.forEach((food, i) => {
       if (!selected[i]) return;
       onAdd({
         id: Date.now() + Math.random() + i,
@@ -3649,10 +3787,9 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
     onClose();
   };
 
-  const toggleItem = (i) => setSelected(prev => ({ ...prev, [i]: !prev[i] }));
-  const totalSelected = result?.alimentos
-    ? result.alimentos.reduce((t, f, i) => selected[i] ? t + (f.cal || 0) : t, 0)
-    : 0;
+  const toggleItem = (i) => { if (editingIdx !== i) setSelected(prev => ({ ...prev, [i]: !prev[i] })); };
+  const activeFoods = editedFoods.length ? editedFoods : (result?.alimentos || []);
+  const totalSelected = activeFoods.reduce((t, f, i) => selected[i] ? t + (f.cal || 0) : t, 0);
 
   /* ── Confidencia visual ── */
   const confColor = {alta:'#34C759', media:'#FF9500', baja:'#FF3B30'};
@@ -3843,48 +3980,105 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
               </div>
             )}
 
-            {/* Lista de alimentos — seleccionables */}
+            {/* Lista de alimentos — seleccionables y editables */}
             <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>
-              Alimentos detectados · toca para seleccionar
+              Alimentos detectados · toca para seleccionar · ✏️ para editar
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:14}}>
-              {result.alimentos.map((food, i) => (
-                <div key={i} onClick={() => toggleItem(i)} style={{
-                  display:'flex', alignItems:'center', gap:10,
-                  background:selected[i] ? (C.surfaceAlt) : C.surface,
-                  borderRadius:14, padding:'10px 12px',
-                  border:`1.5px solid ${selected[i] ? '#D42020' : C.border}`,
-                  cursor:'pointer', transition:'all .2s',
+              {activeFoods.map((food, i) => (
+                <div key={i} style={{
+                  background:selected[i] ? C.surfaceAlt : C.surface,
+                  borderRadius:14,
+                  border:`1.5px solid ${editingIdx===i ? '#007AFF' : selected[i] ? '#D42020' : C.border}`,
+                  overflow:'hidden', transition:'all .2s',
                 }}>
-                  {/* Checkbox */}
-                  <div style={{
-                    width:24, height:24, borderRadius:8, flexShrink:0,
-                    background:selected[i] ? '#D42020' : 'transparent',
-                    border:selected[i] ? 'none' : `2px solid ${C.border}`,
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                    color:'white', fontSize:14, fontWeight:700,
-                    transition:'all .2s',
+                  {/* Fila principal — tap = toggle selección */}
+                  <div onClick={() => toggleItem(i)} style={{
+                    display:'flex', alignItems:'center', gap:10,
+                    padding:'10px 12px', cursor:'pointer',
                   }}>
-                    {selected[i] && '✓'}
-                  </div>
-                  {/* Emoji */}
-                  <div style={{fontSize:26, flexShrink:0}}>{food.emoji || '🍽️'}</div>
-                  {/* Info */}
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13,fontWeight:700,color:C.text,lineHeight:1.3}}>
-                      {food.nombre}
+                    <div style={{
+                      width:24, height:24, borderRadius:8, flexShrink:0,
+                      background:selected[i] ? '#D42020' : 'transparent',
+                      border:selected[i] ? 'none' : `2px solid ${C.border}`,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      color:'white', fontSize:14, fontWeight:700, transition:'all .2s',
+                    }}>
+                      {selected[i] && '✓'}
                     </div>
-                    <div style={{fontSize:11,color:C.textSec,marginTop:2}}>
-                      ~{food.porcion_g}g · P:{food.prot}g · C:{food.carbs}g · G:{food.grasas}g
+                    <div style={{fontSize:24, flexShrink:0}}>{food.emoji || '🍽️'}</div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13,fontWeight:700,color:C.text,lineHeight:1.3}}>{food.nombre}</div>
+                      <div style={{fontSize:11,color:C.textSec,marginTop:2}}>
+                        ~{food.porcion_g}g · P:{food.prot}g · C:{food.carbs}g · G:{food.grasas}g
+                      </div>
+                    </div>
+                    <div style={{flexShrink:0,display:'flex',alignItems:'center',gap:6}}>
+                      <div style={{textAlign:'right'}}>
+                        <div style={{fontSize:14,fontWeight:800,color:'#D42020'}}>{food.cal}</div>
+                        <div style={{fontSize:9,color:C.textMuted}}>kcal</div>
+                      </div>
+                      <button onClick={e=>{e.stopPropagation();setEditingIdx(editingIdx===i?null:i);}} style={{
+                        width:28,height:28,borderRadius:8,border:`1px solid ${editingIdx===i?'#007AFF':C.border}`,
+                        background:editingIdx===i?'#007AFF':C.surfaceAlt,
+                        color:editingIdx===i?'white':C.textSec,
+                        fontSize:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
+                      }}>✏️</button>
                     </div>
                   </div>
-                  {/* Cals */}
-                  <div style={{
-                    flexShrink:0, textAlign:'right',
-                  }}>
-                    <div style={{fontSize:14,fontWeight:800,color:C.primary}}>{food.cal}</div>
-                    <div style={{fontSize:9,color:C.textMuted}}>kcal</div>
-                  </div>
+                  {/* Panel edición inline */}
+                  {editingIdx === i && (
+                    <div onClick={e=>e.stopPropagation()} style={{
+                      padding:'12px',borderTop:`1px solid ${C.border}`,
+                      background:dark?'rgba(0,122,255,0.07)':'rgba(0,122,255,0.04)',
+                    }}>
+                      <div style={{fontSize:10,fontWeight:700,color:'#007AFF',marginBottom:8,textTransform:'uppercase',letterSpacing:.5}}>
+                        ✏️ Editar alimento
+                      </div>
+                      {/* Nombre */}
+                      <input
+                        value={food.nombre}
+                        onChange={e=>updateFoodField(i,'nombre',e.target.value)}
+                        placeholder="Nombre del alimento"
+                        style={{width:'100%',boxSizing:'border-box',padding:'8px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surface,color:C.text,fontSize:12,fontFamily:F,marginBottom:8,outline:'none'}}
+                      />
+                      {/* Porción → escala macros automáticamente */}
+                      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                        <div style={{fontSize:11,color:C.textSec,fontWeight:600,whiteSpace:'nowrap',flexShrink:0}}>⚖️ Porción</div>
+                        <input
+                          type="number" min="1" max="2000"
+                          value={food.porcion_g}
+                          onChange={e=>updateFoodPorcion(i,Number(e.target.value)||1)}
+                          style={{flex:1,padding:'7px 10px',borderRadius:10,border:'1.5px solid #007AFF',background:C.surface,color:C.text,fontSize:13,fontWeight:700,fontFamily:F,textAlign:'center',outline:'none'}}
+                        />
+                        <div style={{fontSize:10,color:'#007AFF',whiteSpace:'nowrap',flexShrink:0}}>g → escala macros</div>
+                      </div>
+                      {/* Macros editables manualmente */}
+                      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginBottom:8}}>
+                        {[
+                          {field:'cal',   label:'Kcal',    color:'#D42020'},
+                          {field:'prot',  label:'Prot g',  color:'#FF6B6B'},
+                          {field:'carbs', label:'Carbs g', color:'#FF9500'},
+                          {field:'grasas',label:'Grasas g',color:'#AF52DE'},
+                        ].map(({field,label,color})=>(
+                          <div key={field} style={{textAlign:'center'}}>
+                            <div style={{fontSize:9,fontWeight:700,color,marginBottom:3}}>{label}</div>
+                            <input
+                              type="number" min="0"
+                              value={food[field]}
+                              onChange={e=>updateFoodField(i,field,Number(e.target.value)||0)}
+                              style={{width:'100%',padding:'5px 2px',borderRadius:8,border:`1px solid ${color}40`,background:C.surface,color:C.text,fontSize:12,fontWeight:700,fontFamily:F,textAlign:'center',outline:'none'}}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <button onClick={()=>setEditingIdx(null)} style={{
+                        width:'100%',padding:'9px',borderRadius:10,border:'none',
+                        background:'#007AFF',color:'white',fontSize:12,fontWeight:700,
+                        cursor:'pointer',fontFamily:F,
+                      }}>✓ Listo</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -8259,6 +8453,7 @@ function AppCore() {
   const [historyDay,setHistoryDay]   = useState(null);
   const [showWeekly,setShowWeekly]   = useState(false);
   const [showShare,setShowShare]     = useState(false);
+  const [pendingAchievement,setPendingAchievement] = useState(null); // {key, nombre, valor}
   const [avatar,setAvatar]           = useState(()=>LS.get('avatar','🧑'));
   const [showAvatarPicker,setShowAvatarPicker] = useState(false);
   const [photoUrl,setPhotoUrl]         = useState(()=>LS.get('photoUrl',''));
@@ -8698,6 +8893,40 @@ function AppCore() {
       challenge21: LS.get('challenge21',null),
     });
   },[userAllergens, veganMode, dark, notifEnabled, supabaseUser?.id]);
+
+  /* ── Re-schedule notificaciones: al abrir app y al volver al foco ── */
+  useEffect(()=>{
+    const reschedule = () => {
+      if(!('Notification' in window) || Notification.permission !== 'granted') return;
+      const reminders = LS.get('reminders', []);
+      if(!reminders.some(r=>r.activo)) return;
+      // Esperar a que el SW esté listo
+      if(navigator.serviceWorker?.controller){
+        sendScheduleToSW(reminders);
+      } else if(navigator.serviceWorker){
+        navigator.serviceWorker.ready.then(()=>{ if(navigator.serviceWorker.controller) sendScheduleToSW(reminders); });
+      }
+    };
+    reschedule();
+    const onVisible = () => { if(document.visibilityState==='visible') reschedule(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  },[]);
+
+  /* ── Detección de milestones de racha para compartir ── */
+  useEffect(()=>{
+    const MILESTONE_DAYS = [3,7,14,21,30,50,100];
+    if(!MILESTONE_DAYS.includes(streak.days)) return;
+    const key = `streak_${streak.days}`;
+    const shown = LS.get('achievements_shown',[]);
+    if(shown.includes(key)) return; // ya celebrado
+    // Esperar 800ms para no interrumpir el flujo del usuario
+    const t = setTimeout(()=>{
+      setPendingAchievement({ key, nombre: nombre||'', valor:`${streak.days} días consecutivos 🔥` });
+      LS.set('achievements_shown',[...shown, key]);
+    }, 800);
+    return ()=>clearTimeout(t);
+  },[streak.days]);
 
   /* ── daily AI insight (se genera una vez por día) ── */
   useEffect(()=>{
@@ -9186,6 +9415,9 @@ function AppCore() {
 
       {/* ══ SHARE CARD ══ */}
       {showShare&&<ShareCard C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} streak={streak} exercises={exercises} xpTotal={xpTotal} nivel={getNivel(xpTotal)} onClose={()=>setShowShare(false)}/>}
+
+      {/* ══ ACHIEVEMENT SHARE ══ */}
+      {pendingAchievement&&<ShareAchievementModal C={C} F={F} achievement={pendingAchievement} onClose={()=>setPendingAchievement(null)}/>}
 
       {/* ══ HISTORY MODAL ══ */}
       {showHistory&&(

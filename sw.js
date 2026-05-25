@@ -38,7 +38,7 @@ self.addEventListener('fetch', e => {
 });
 
 // ═══════════════════════════════════════════
-//   PUSH NOTIFICATIONS
+//   PUSH NOTIFICATIONS (push del servidor)
 // ═══════════════════════════════════════════
 
 self.addEventListener('push', e => {
@@ -74,40 +74,68 @@ self.addEventListener('notificationclick', e => {
 
 // ═══════════════════════════════════════════
 //   SCHEDULED NOTIFICATIONS (via postMessage)
-//   La app le envía el schedule al SW cuando
-//   el usuario activa los recordatorios
+//
+//   Usa timestamps absolutos (fireAt) en vez de
+//   setTimeout para sobrevivir reinicios del SW.
+//   El interval de 60s revisa si alguna notif venció.
 // ═══════════════════════════════════════════
 
-let scheduledTimers = [];
+// { fireAt: timestamp_ms, title, body, tag, icon, dailyMs: 86400000 }
+let scheduledNotifications = [];
+let checkIntervalId = null;
 
-const clearScheduled = () => {
-  scheduledTimers.forEach(t => clearTimeout(t));
-  scheduledTimers = [];
+const fireNotification = ({ title, body, tag, icon }) => {
+  self.registration.showNotification(title, {
+    body,
+    icon:  icon || '/icon-192.png',
+    badge: '/icon-72.png',
+    tag:   tag  || 'caloru-notif',
+    renotify: true,
+  });
 };
 
-const scheduleNotification = ({ delay, title, body, tag, icon }) => {
-  const t = setTimeout(() => {
-    self.registration.showNotification(title, {
-      body,
-      icon: icon || '/icon-192.png',
-      badge: '/icon-72.png',
-      tag: tag || 'caloru-notif',
-      renotify: true,
-    });
-  }, delay);
-  scheduledTimers.push(t);
+const checkDueNotifications = () => {
+  const now = Date.now();
+  scheduledNotifications.forEach(n => {
+    if (n.fireAt <= now) {
+      fireNotification(n);
+      // Re-agendar para mañana a la misma hora
+      n.fireAt += n.dailyMs || (24 * 60 * 60 * 1000);
+    }
+  });
+};
+
+const startChecker = () => {
+  if (checkIntervalId) return; // ya está corriendo
+  checkIntervalId = setInterval(checkDueNotifications, 60 * 1000); // cada 60 s
+};
+
+const stopChecker = () => {
+  if (checkIntervalId) { clearInterval(checkIntervalId); checkIntervalId = null; }
 };
 
 self.addEventListener('message', e => {
   if (!e.data) return;
 
   if (e.data.type === 'SCHEDULE_NOTIFICATIONS') {
-    clearScheduled();
+    stopChecker();
     const notifications = e.data.notifications || [];
-    notifications.forEach(n => scheduleNotification(n));
+    const now = Date.now();
+    scheduledNotifications = notifications
+      .filter(n => n.delay != null)
+      .map(n => ({
+        title:   n.title,
+        body:    n.body,
+        tag:     n.tag,
+        icon:    n.icon,
+        fireAt:  now + Math.max(0, n.delay),
+        dailyMs: 24 * 60 * 60 * 1000,
+      }));
+    if (scheduledNotifications.length) startChecker();
   }
 
   if (e.data.type === 'CLEAR_NOTIFICATIONS') {
-    clearScheduled();
+    scheduledNotifications = [];
+    stopChecker();
   }
 });
