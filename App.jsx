@@ -4387,32 +4387,54 @@ function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userA
   const objLabels={bajar:'bajar de peso',mantener:'mantener peso',recomp:'recomposición corporal',subir:'ganar masa muscular'};
   const pct = metas.cal>0?Math.round(tot.cal/metas.cal*100):0;
 
-  const systemPrompt = `Eres Nutri, un asistente nutricional para la app Calorú, enfocada en usuarios chilenos.
-Nombre del usuario: ${nombre}.
-Objetivo: ${objLabels[obj]||obj}.
-Hoy consumió: ${Math.round(tot.cal)} kcal (${pct}% de su meta de ${metas.cal} kcal).
-Proteínas: ${Math.round(tot.prot)}g / ${metas.prot}g meta.
-Carbohidratos: ${Math.round(tot.carbs)}g / ${metas.carbs}g meta.
-Grasas: ${Math.round(tot.grasas)}g / ${metas.grasas}g meta.
-Comidas registradas hoy: ${log.length} items.
-Racha actual: ${streak.days} días.
-${veganMode?'IMPORTANTE: El usuario es VEGANO. No sugerir ningún producto de origen animal.':''}
-${userAllergens.length>0?`IMPORTANTE: El usuario tiene alergias/intolerancias a: ${userAllergens.join(', ')}. NUNCA sugerir alimentos con estos ingredientes.`:''}
-${condicion==='diabetes'?'CONDICIÓN DE SALUD: El usuario tiene DIABETES TIPO 2. Limita azúcares simples y carbohidratos refinados. Prioriza alimentos de bajo índice glucémico. Alerta si consume mucho azúcar.':''}
-${condicion==='hipertension'?'CONDICIÓN DE SALUD: El usuario tiene HIPERTENSIÓN. Prioriza alimentos bajos en sodio (<2000mg/día). Alerta si consume alimentos muy salados (cecinas, conservas, snacks).':''}
-${condicion==='colesterol'?'CONDICIÓN DE SALUD: El usuario tiene COLESTEROL ALTO. Limita grasas saturadas y trans. Prioriza grasas saludables (palta, aceite oliva, nueces) y fibra soluble.':''}
-${condicion==='celiaco'?'CONDICIÓN DE SALUD: El usuario tiene ENFERMEDAD CELÍACA. NUNCA sugerir alimentos con gluten (trigo, cebada, centeno, avena). Verifica siempre si un alimento es libre de gluten.':''}
-Responde siempre en español, de forma breve y amigable (máx 3 párrafos).
-Usa emojis con moderación. Sé específico con alimentos chilenos cuando puedas.
-Si el usuario pregunta algo fuera de nutrición, redirige amablemente.
-${isPro && iaMemoria?.gustos?.length>0 ? `MEMORIA - Le gustan: ${iaMemoria.gustos.join(', ')}.` : ''}
-${isPro && iaMemoria?.disgustos?.length>0 ? `MEMORIA - No le gustan: ${iaMemoria.disgustos.join(', ')}.` : ''}
-${isPro && iaMemoria?.patrones?.length>0 ? `MEMORIA - Patrones observados: ${iaMemoria.patrones.join(', ')}.` : ''}
-${isPro ? 'Cuando el usuario mencione que le gusta o disgusta algo, o detectes patrones de comportamiento, mencionalo en tu respuesta para mostrar que lo recuerdas.' : ''}
+  const todayFoods = log.length > 0
+    ? log.slice(0, 10).map(i => i.nombre).join(', ') + (log.length > 10 ? ` y ${log.length-10} más` : '')
+    : 'ninguna aún';
 
-REGISTRO DE COMIDAS: Si el usuario menciona que comió, está comiendo, o quiere registrar algo (ej: "comí X", "me comí X", "registra X", "acabo de comer X"), debes responder con un JSON especial al INICIO de tu mensaje con este formato exacto (sin backticks):
-<<<REGISTER_FOOD:{"nombre":"nombre del alimento","cal":número,"prot":número,"carbs":número,"grasas":número,"fibra":número,"azucar":número,"sodio":número,"emoji":"emoji"}>>>
-Seguido de tu respuesta normal. Estima los valores nutricionales para una porción típica chilena si no los sabes exactamente. El campo "nombre" debe ser descriptivo (ej: "Subway 30cm pollo a la parrilla con vegetales").`;
+  const systemPrompt = `Eres Nutri, el asistente nutricional de Calorú — app chilena de nutrición. Eres cercano, motivador y experto en alimentación chilena.
+Usuario: ${nombre} | Objetivo: ${objLabels[obj]||obj} | Racha: ${streak.days} días 🔥
+
+RESUMEN DE HOY:
+• Calorías: ${Math.round(tot.cal)} / ${metas.cal} kcal (${pct}%)
+• Proteínas: ${Math.round(tot.prot)}g / ${metas.prot}g | Carbs: ${Math.round(tot.carbs)}g / ${metas.carbs}g | Grasas: ${Math.round(tot.grasas)}g / ${metas.grasas}g
+• Registrado hoy (${log.length} item${log.length!==1?'s':''}): ${todayFoods}
+${log.length===0?'• Aún no ha registrado comidas hoy.':''}
+${veganMode?'• VEGANO: No sugerir productos de origen animal (sin carnes, lácteos, huevos ni miel).':''}
+${userAllergens.length>0?`• ALERGIAS: ${userAllergens.join(', ')} — NUNCA sugerir estos.`:''}
+${condicion==='diabetes'?'• DIABETES TIPO 2: bajo índice glucémico, sin azúcares simples ni refinados.':''}
+${condicion==='hipertension'?'• HIPERTENSIÓN: máx 2000mg sodio/día. Evitar cecinas, conservas, snacks salados.':''}
+${condicion==='colesterol'?'• COLESTEROL ALTO: sin grasas saturadas/trans. Priorizar palta, aceite oliva, nueces, fibra.':''}
+${condicion==='celiaco'?'• CELIAQUÍA: NUNCA sugerir gluten (trigo, cebada, centeno, avena).':''}
+${isPro && iaMemoria?.gustos?.length>0?`• LE GUSTA: ${iaMemoria.gustos.join(', ')}.`:''}
+${isPro && iaMemoria?.disgustos?.length>0?`• NO LE GUSTA: ${iaMemoria.disgustos.join(', ')}.`:''}
+${isPro && iaMemoria?.patrones?.length>0?`• PATRONES: ${iaMemoria.patrones.join(', ')}.`:''}
+
+INSTRUCCIONES:
+- Responde en español, breve y amigable (máx 3 párrafos). Emojis con moderación.
+- Usa marcas y alimentos chilenos reales cuando puedas: Soprole, Colún, Nestlé Chile, Carozzi, Fruna, Watts, Super Pollo, La Crianza, Costa, Ideal, Lider, Jumbo, Santa Isabel.
+- Si tienes datos de búsqueda web en el contexto, úsalos con precisión e indica la fuente.
+- Si el usuario pregunta algo fuera de nutrición, redirige amablemente.
+${isPro?'- Cuando el usuario mencione gustos/disgustos o detectes patrones, recuérdalos en tu respuesta.':''}
+
+REGISTRAR COMIDAS: Si el usuario menciona que comió, está comiendo o quiere registrar algo (ej: "comí X", "me comí X", "registra X", "acabo de comer X"), incluye al INICIO de tu respuesta este JSON exacto (sin backticks, sin texto antes del JSON):
+<<<REGISTER_FOOD:{"nombre":"nombre descriptivo","cal":número,"prot":número,"carbs":número,"grasas":número,"fibra":número,"azucar":número,"sodio":número,"emoji":"emoji"}>>>
+Luego sigue con tu respuesta normal. Los valores deben ser para la porción COMPLETA mencionada, no por 100g.
+
+PORCIONES TÍPICAS CHILENAS para REGISTER_FOOD (úsalas de base):
+• Marraqueta (1): cal:210, prot:7, carbs:40, grasas:2, fibra:2, azucar:1, sodio:400
+• Empanada de pino horneada: cal:350, prot:14, carbs:35, grasas:16, fibra:2, azucar:2, sodio:580
+• Empanada de pino frita: cal:450, prot:14, carbs:38, grasas:25, fibra:2, azucar:2, sodio:620
+• Completo italiano: cal:480, prot:18, carbs:42, grasas:26, fibra:3, azucar:5, sodio:850
+• Cazuela de pollo (plato): cal:300, prot:28, carbs:22, grasas:8, fibra:3, azucar:2, sodio:650
+• Arroz con pollo (plato): cal:520, prot:32, carbs:55, grasas:14, fibra:2, azucar:1, sodio:700
+• Pechuga de pollo a la plancha (150g): cal:230, prot:43, carbs:0, grasas:5, fibra:0, azucar:0, sodio:90
+• Chorrillana (plato): cal:900, prot:30, carbs:60, grasas:55, fibra:4, azucar:5, sodio:1200
+• Salmón a la plancha (filete): cal:290, prot:36, carbs:0, grasas:15, fibra:0, azucar:0, sodio:95
+• Pizza (1 porción): cal:270, prot:11, carbs:33, grasas:11, fibra:2, azucar:4, sodio:580
+• Yogur Soprole frutas (175g): cal:140, prot:5, carbs:25, grasas:3, fibra:0, azucar:22, sodio:60
+• Manzana mediana: cal:80, prot:0, carbs:21, grasas:0, fibra:4, azucar:16, sodio:2
+• Café con leche (200ml): cal:70, prot:4, carbs:8, grasas:3, fibra:0, azucar:8, sodio:50
+Ajusta al tamaño mencionado (ej: "2 empanadas" = dobla los valores). El campo "nombre" debe ser descriptivo ("Empanada de pino horneada", "Arroz con pollo casero", "Yogur Soprole frutilla 175g").`;
 
   const QUICK_PROMPTS = [
     {icon:'🍽️', text:'¿Qué debería comer ahora?'},
@@ -6056,7 +6078,7 @@ Incluye los 7 días de la semana.`;
 
       const data = await callEdgeFn({
         mode: 'chat',
-        system: 'Eres un nutricionista chileno experto. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
+        system: 'Eres un nutricionista chileno experto. Propones comidas con ingredientes reales de supermercados chilenos (Jumbo, Lider, Santa Isabel) y marcas nacionales (Soprole, Colún, Carozzi, Super Pollo, La Crianza, Fruna, Ideal, Costa). Responde SOLO con JSON válido, sin texto adicional ni backticks.',
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
@@ -6190,7 +6212,7 @@ Responde SOLO con JSON:
 }`;
       const data = await callEdgeFn({
         mode: 'chat',
-        system: 'Eres nutricionista chileno. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
+        system: 'Eres nutricionista chileno experto. Propones opciones concretas con ingredientes disponibles en Chile (Jumbo, Lider, Santa Isabel) y alimentos típicos chilenos. Incluye opciones rápidas y fáciles de preparar. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
@@ -6302,7 +6324,7 @@ function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, st
 Genera 3 desafíos semanales personalizados y motivadores en formato JSON:
 {"desafios":[{"id":"d1","emoji":"emoji","titulo":"título corto","desc":"descripción motivadora específica para este usuario","xp":número entre 30 y 100,"tipo":"nutricion|ejercicio|habito"}]}
 Solo JSON, sin texto adicional.`;
-      const data = await callEdgeFn({mode:'chat', system:'Eres un coach nutricional. Genera desafíos personalizados. Solo JSON válido.', messages:[{role:'user',content:prompt}]});
+      const data = await callEdgeFn({mode:'chat', system:'Eres un coach nutricional chileno. Genera desafíos semanales específicos, motivadores y alcanzables para usuarios chilenos. Solo JSON válido, sin texto adicional.', messages:[{role:'user',content:prompt}]});
       const text = data.text || '';
       const match = text.match(/\{[\s\S]*\}/);
       if(match){
@@ -6633,7 +6655,7 @@ Responde SOLO con JSON:
 
       const data = await callEdgeFn({
         mode: 'chat',
-        system: 'Eres chef nutricionista chileno. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
+        system: 'Eres chef nutricionista chileno experto en cocina de temporada. Usas ingredientes frescos y económicos del mercado chileno. Las recetas son simples, nutritivas y con pasos claros. Responde SOLO con JSON válido, sin texto adicional ni backticks.',
         messages: [{role:'user', content:prompt}],
         max_tokens: 2500,
       });
@@ -6752,7 +6774,7 @@ Responde SOLO con JSON:
 
       const data = await callEdgeFn({
         mode:'chat',
-        system:'Eres nutricionista deportivo chileno experto. Responde SOLO JSON válido.',
+        system:'Eres nutricionista deportivo chileno experto. Analizas el progreso real del usuario y propones ajustes concretos con calorías y macros específicos. Los alimentos clave que recomiendas están disponibles en Chile. Responde SOLO JSON válido, sin texto adicional.',
         messages:[{role:'user',content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
@@ -7050,7 +7072,7 @@ Incluye solo la semana 1 detallada para mantener el JSON manejable.`;
 
       const data = await callEdgeFn({
         mode:'chat',
-        system:'Eres nutricionista chileno experto. Responde SOLO JSON válido.',
+        system:'Eres nutricionista chileno experto. Creas planes de alimentación con comidas típicas chilenas reales (cazuela, arroz con pollo, ensalada chilena, etc.) e ingredientes de supermercados chilenos. Las calorías deben sumar aproximadamente la meta indicada. Responde SOLO JSON válido, sin texto adicional.',
         messages:[{role:'user',content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
@@ -7515,7 +7537,7 @@ Responde SOLO en este formato JSON exacto:
 }`;
       const data = await callEdgeFn({
         mode: 'chat',
-        system: 'Eres un chef nutricionista chileno experto. Genera recetas con ingredientes típicos de Chile (supermercados chilenos). Responde SOLO con JSON válido, sin texto adicional.',
+        system: 'Eres un chef nutricionista chileno experto. Generas recetas sabrosas y nutritivas con ingredientes reales de Chile disponibles en Jumbo, Lider y Santa Isabel. Los macros que calculas son precisos y basados en los ingredientes indicados. Responde SOLO con JSON válido, sin texto adicional.',
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
@@ -7651,7 +7673,7 @@ Responde SOLO con este JSON:
 }`;
       const data = await callEdgeFn({
         mode: 'chat',
-        system: 'Eres un nutricionista chileno. Genera listas de compras con productos disponibles en supermercados chilenos. Responde SOLO con JSON válido.',
+        system: 'Eres un nutricionista chileno. Generas listas de compras realistas con productos disponibles en Jumbo, Lider y Santa Isabel. Incluyes marcas chilenas conocidas (Soprole, Colún, Carozzi, Super Pollo, Fruna, Watts, La Crianza). El presupuesto estimado es en CLP reales y razonable para Chile 2025. Responde SOLO con JSON válido.',
         messages: [{role:'user', content:prompt}],
       });
       const text = data.text || data.content?.[0]?.text || '';
@@ -8689,8 +8711,8 @@ function AppCore() {
         const prevKey=dateToKey(prevDay);
         const prevLog=LS.get('log_'+prevKey,[]);
         const prevProt=Math.round(sumLog(prevLog).prot);
-        const prompt=`Eres un nutricionista chileno amigable. Genera UN SOLO insight motivacional personalizado para ${nombre} en máximo 2 oraciones. Datos de hoy: ${Math.round(tot.cal)} kcal consumidas de ${metas.cal} kcal meta, ${Math.round(tot.prot)}g proteína de ${metas.prot}g meta, racha de ${streak.days} días. ${prevProt>0?`Ayer consumió ${prevProt}g de proteína.`:''} Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}. IMPORTANTE: usa EXACTAMENTE los números del contexto, no inventes ni redondees diferente. Solo devuelve el insight, sin saludos ni explicaciones extra.`;
-        const data = await callEdgeFn({ mode: 'insight', prompt });
+        const insightUserMsg=`Datos de hoy de ${nombre}: ${Math.round(tot.cal)} kcal de ${metas.cal} kcal meta (${metas.cal>0?Math.round(tot.cal/metas.cal*100):0}%), ${Math.round(tot.prot)}g proteína de ${metas.prot}g meta, racha de ${streak.days} días consecutivos.${prevProt>0?` Ayer consumió ${prevProt}g de proteína.`:''} Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}. Genera UN SOLO insight motivacional personalizado en máximo 2 oraciones. Usa EXACTAMENTE estos números, no inventes otros. Solo el insight, sin saludos ni explicaciones.`;
+        const data = await callEdgeFn({ mode: 'chat', system: 'Eres un nutricionista chileno amigable y motivador. Generas insights breves y personalizados basándote en los datos reales del usuario. Solo devuelves el insight sin saludos, sin "Hola", sin explicaciones adicionales.', messages:[{role:'user',content:insightUserMsg}] });
         const text=data.text||'';
         if(text){ setDailyInsight(text); LS.set(insightKey,text); LS.set(insightKey+'_cal', tot.cal); }
       }catch(e){}
