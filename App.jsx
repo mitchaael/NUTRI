@@ -9793,7 +9793,7 @@ function AppCore() {
           {/* Banner rotativo diferenciadores */}
           {(()=>{
             const banners = [
-              {bg:'linear-gradient(135deg,#D42020,#FF6B35)', tag:'SOLO EN CALORÚ 🇨🇱', titulo:'Escanea tu plato con IA', sub:'Foto → calorías en segundos, sin escribir nada', btn:'📸 Probar', action:()=>setShowPhotoScanner(true)},
+              {bg:'linear-gradient(135deg,#D42020,#FF6B35)', tag:'SOLO EN CALORÚ 🇨🇱', titulo:'Escanea tu plato con IA', sub:'Foto → calorías en segundos, sin escribir nada', btn:'📸 Probar', action:()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); }},
               {bg:'linear-gradient(135deg,#1D3557,#2E6DA4)', tag:'INTELIGENCIA ARTIFICIAL', titulo:'Registra hablando naturalmente', sub:'"Me comí un completo con todo" — y listo', btn:'🤖 Hablar con Nutri', action:()=>setShowAI(true)},
               {bg:'linear-gradient(135deg,#28B044,#1a7a36)', tag:'475+ PRODUCTOS CHILENOS', titulo:'Tu comida real, tus macros exactos', sub:'Cazuela, marraqueta, sopaipilla y mucho más', btn:'🇨🇱 Buscar alimento', action:()=>setTab(1)},
               {bg:'linear-gradient(135deg,#5856D6,#AF52DE)', tag:'PLAN NUTRICIONAL', titulo:'Tu nutricionista en el bolsillo', sub:'Vincula tu plan profesional y sigue tus metas', btn:'👩‍⚕️ Ver plan', action:()=>setTab(4)},
