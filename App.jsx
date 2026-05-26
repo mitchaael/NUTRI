@@ -8384,7 +8384,7 @@ function AppCore() {
     supabase.from('profiles').select('subscription_status,subscription_expires_at,linked_nutricionista_id,linked_nutricionista_nombre').eq('id',supabaseUser.id).single()
       .then(({data})=>{
         if(data){
-          const bySub = data.subscription_status==='pro' && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
+          const bySub = (data.subscription_status==='pro'||data.subscription_status==='nutricionista') && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
           const byNutri = !!data.linked_nutricionista_id;
           setIsPro(bySub || byNutri);
           if(byNutri && data.linked_nutricionista_nombre) setProSource('nutricionista:'+data.linked_nutricionista_nombre);
@@ -11327,7 +11327,7 @@ function AppCore() {
                   setNutriPlan(null); LS.set('nutriPlan',null); setProSource('');
                   if(supabaseUser) await supabase.from('profiles').update({linked_nutricionista_id:null,linked_nutricionista_nombre:null}).eq('id',supabaseUser.id);
                   supabase.from('profiles').select('subscription_status,subscription_expires_at').eq('id',supabaseUser.id).single().then(({data})=>{
-                    if(data) setIsPro(data.subscription_status==='pro'&&(!data.subscription_expires_at||new Date(data.subscription_expires_at)>new Date()));
+                    if(data) setIsPro((data.subscription_status==='pro'||data.subscription_status==='nutricionista')&&(!data.subscription_expires_at||new Date(data.subscription_expires_at)>new Date()));
                     else setIsPro(false);
                   });
                 }} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}

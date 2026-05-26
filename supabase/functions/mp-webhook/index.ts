@@ -100,15 +100,16 @@ Deno.serve(async (req) => {
     }
 
     // Determinar plan y fecha de expiración
+    const isNutricionista = reason.toLowerCase().includes("nutricionista");
     const isMonthly = reason.toLowerCase().includes("mensual");
-    const plan = isMonthly ? "monthly" : "yearly";
+    const plan = isNutricionista ? "nutricionista" : isMonthly ? "monthly" : "yearly";
 
     const now = new Date();
     const expiresAt = new Date(now);
-    if (plan === "monthly") {
-      expiresAt.setMonth(expiresAt.getMonth() + 1);
-    } else {
+    if (plan === "yearly") {
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    } else {
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
     }
 
     // Buscar usuario en Supabase por email
@@ -137,9 +138,9 @@ Deno.serve(async (req) => {
     let updateData: Record<string, string | null> = {};
 
     if (status === "authorized") {
-      // Pago aprobado → activar Pro
+      // Pago aprobado → activar Pro (nutricionista tiene su propio status)
       updateData = {
-        subscription_status: "pro",
+        subscription_status: plan === "nutricionista" ? "nutricionista" : "pro",
         subscription_plan: plan,
         subscription_id: subscriptionId,
         subscription_expires_at: expiresAt.toISOString(),
