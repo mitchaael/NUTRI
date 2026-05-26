@@ -52,6 +52,11 @@ Deno.serve(async (req) => {
         frequency: 12,
         transaction_amount: 29900,
       },
+      nutricionista: {
+        reason: "Caloru Nutricionista Mensual",
+        frequency: 1,
+        transaction_amount: 9990,
+      },
     };
 
     const selectedPlan = planConfig[plan];

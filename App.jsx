@@ -4212,16 +4212,26 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   const [loading, setLoading]     = React.useState(false);
   const [showNuevoPlan, setShowNuevoPlan] = React.useState(false);
   const [selectedPaciente, setSelectedPaciente] = React.useState(null);
-  const [codigoPro] = React.useState(()=>{
-    const saved = LS.get('professional_code','');
-    if(saved) return saved;
-    const code = 'NUT-' + Math.random().toString(36).substring(2,7).toUpperCase();
-    LS.set('professional_code', code);
-    return code;
-  });
+  const [codigoPro, setCodigoPro] = React.useState(()=>LS.get('professional_code',''));
 
   React.useEffect(()=>{
     if(!supabaseUser) return;
+    (async()=>{
+      const {data:existing} = await supabase.from('nutricionista_codes')
+        .select('code').eq('nutricionista_id', supabaseUser.id).single();
+      if(existing?.code) {
+        setCodigoPro(existing.code);
+        LS.set('professional_code', existing.code);
+      } else {
+        const code = LS.get('professional_code','') || 'NUT-'+Math.random().toString(36).substring(2,7).toUpperCase();
+        await supabase.from('nutricionista_codes').upsert(
+          {nutricionista_id:supabaseUser.id, code, nombre},
+          {onConflict:'nutricionista_id'}
+        );
+        setCodigoPro(code);
+        LS.set('professional_code', code);
+      }
+    })();
     setLoading(true);
     supabase.from('nutrition_plans')
       .select('*, paciente:paciente_id(id,nombre:raw_user_meta_data->nombre)')
@@ -4230,7 +4240,7 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         setPacientes(data||[]);
         setLoading(false);
       });
-  },[supabaseUser]);
+  },[supabaseUser?.id]);
 
   const hoy = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
 
@@ -7403,7 +7413,7 @@ Incluye solo la semana 1 detallada para mantener el JSON manejable.`;
 /* ══════════════════════════════════════════════
    MARKETPLACE NUTRICIONISTAS
 ══════════════════════════════════════════════ */
-function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
+function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
   const NUTRICIONISTAS = [
     {id:1,nombre:'Catalina Morales',esp:'Nutrición deportiva',rating:4.9,reviews:127,precio:15000,disponible:true,emoji:'👩‍⚕️',tag:'🏆 Top rated'},
     {id:2,nombre:'Diego Fuentes',esp:'Pérdida de peso',rating:4.8,reviews:89,precio:12000,disponible:true,emoji:'👨‍⚕️',tag:'🔥 Popular'},
@@ -7469,9 +7479,22 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose}) {
 
         <div style={{background:dark?'rgba(52,199,89,0.08)':'rgba(52,199,89,0.05)',borderRadius:14,padding:'12px 14px',border:'1px solid rgba(52,199,89,0.2)'}}>
           <div style={{fontSize:11,color:'#34C759',fontWeight:700,marginBottom:4}}>💡 ¿Eres nutricionista?</div>
-          <div style={{fontSize:11,color:C.textSec}}>Únete a nuestra red de profesionales y llega a miles de usuarios Calorú.</div>
-          <button onClick={()=>showToast('Contáctanos en mitchaelerling@gmail.com para unirte como nutricionista.')} style={{marginTop:8,padding:'6px 14px',borderRadius:10,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
-            Registrarme como nutricionista
+          <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>Suscríbete por <strong>$9.990/mes</strong> y tus pacientes obtienen Calorú Pro automáticamente. Ellos pueden reembolsarlo por Isapre o Fonasa.</div>
+          <button onClick={async()=>{
+            if(!supabaseUser){showToast('Inicia sesión para registrarte.');return;}
+            try{
+              const session=await supabase.auth.getSession();
+              const token=session.data.session?.access_token;
+              const res=await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription',{
+                method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                body:JSON.stringify({plan:'nutricionista',back_url:'https://caloru.cl'}),
+              });
+              const data=await res.json();
+              if(data.init_point) window.location.href=data.init_point;
+              else showToast('Error al crear la suscripción. Intenta de nuevo.');
+            }catch{showToast('Error de conexión. Intenta de nuevo.');}
+          }} style={{marginTop:8,padding:'8px 16px',borderRadius:10,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
+            Suscribirme — $9.990/mes
           </button>
         </div>
       </div>
@@ -8343,6 +8366,7 @@ function AppCore() {
   const [isOnline, setIsOnline]           = useState(navigator.onLine);
   const syncTimer = useRef(null);
   const [isPro, setIsPro] = useState(false);
+  const [proSource, setProSource] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
   const [showMicronutrientes, setShowMicronutrientes] = useState(false);
   const [showRecetasIA, setShowRecetasIA] = useState(false);
@@ -8357,11 +8381,13 @@ function AppCore() {
   /* ── Cargar estado de suscripción ── */
   useEffect(()=>{
     if(!supabaseUser) return;
-    supabase.from('profiles').select('subscription_status,subscription_expires_at').eq('id',supabaseUser.id).single()
+    supabase.from('profiles').select('subscription_status,subscription_expires_at,linked_nutricionista_id,linked_nutricionista_nombre').eq('id',supabaseUser.id).single()
       .then(({data})=>{
         if(data){
-          const active = data.subscription_status==='pro' && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
-          setIsPro(active);
+          const bySub = data.subscription_status==='pro' && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
+          const byNutri = !!data.linked_nutricionista_id;
+          setIsPro(bySub || byNutri);
+          if(byNutri && data.linked_nutricionista_nombre) setProSource('nutricionista:'+data.linked_nutricionista_nombre);
         }
       });
   },[supabaseUser?.id]);
@@ -9524,7 +9550,7 @@ function AppCore() {
       {showPlanAdaptativo&&<PlanAdaptativoModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} weightHistory={weightHistory} streak={streak} tot={tot} onClose={()=>setShowPlanAdaptativo(false)}/>}
       {showPlanFamiliar&&<PlanFamiliarModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} isPro={isPro} onClose={()=>setShowPlanFamiliar(false)}/>}
       {showPlanesDescargables&&<PlanesDescargablesModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanesDescargables(false)}/>}
-      {showMarketplace&&<MarketplaceNutricionistasModal C={C} F={F} dark={dark} onClose={()=>setShowMarketplace(false)}/>}
+      {showMarketplace&&<MarketplaceNutricionistasModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} onClose={()=>setShowMarketplace(false)}/>}
       {showRecetasTemporada&&<RecetasTemporadaModal C={C} F={F} dark={dark} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasTemporada(false)}/>}
       {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} condicion={perfil.condicion||'ninguna'} onClose={()=>setShowPlanSemanal(false)}/>}
       {showPredicionPeso&&<PredicionPesoModal C={C} F={F} dark={dark} weightHistory={weightHistory} perfil={perfil} obj={obj} metas={metas} onClose={()=>setShowPredicionPeso(false)}/>}
@@ -9798,10 +9824,10 @@ function AppCore() {
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
                 <div style={{width:36,height:36,borderRadius:10,background:'#1D355720',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>👩‍⚕️</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:12,fontWeight:700,color:'#1D3557'}}>Tu nutricionista</div>
-                  <div style={{fontSize:10,color:C.textSec,marginTop:1}}>Plan activo · {nutriPlan.nombre}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:'#1D3557'}}>{nutriPlan.nutricionista_nombre||'Tu nutricionista'}</div>
+                  <div style={{fontSize:10,color:'#34C759',marginTop:1,fontWeight:700}}>⭐ Pro activado</div>
                 </div>
-                <div style={{fontSize:11,fontWeight:700,color:'#1D3557'}}>{nutriPlan.calorias_meta} kcal/día</div>
+                {nutriPlan.calorias_meta&&<div style={{fontSize:11,fontWeight:700,color:'#1D3557'}}>{nutriPlan.calorias_meta} kcal/día</div>}
               </div>
               {nutriPlan.mensaje&&(
                 <div style={{background:'white',borderRadius:12,padding:'10px 12px',marginBottom:10,border:'1px solid #1D355720'}}>
@@ -11295,27 +11321,36 @@ function AppCore() {
                 <div style={{fontSize:28,flexShrink:0}}>👩‍⚕️</div>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{nutriPlan?`Vinculado con ${nutriPlan.nutricionista_nombre||'tu nutricionista'}`:'Vincular con nutricionista'}</div>
-                  <div style={{fontSize:11,color:C.textSec,marginTop:2}}>{nutriPlan?'Tu plan nutricional está activo':'Ingresa el código que te dio tu nutricionista'}</div>
+                  <div style={{fontSize:11,color:nutriPlan?'#34C759':C.textSec,marginTop:2,fontWeight:nutriPlan?700:400}}>{nutriPlan?'⭐ Pro activado por tu nutricionista':'Ingresa el código que te dio tu nutricionista'}</div>
                 </div>
-                {nutriPlan&&<button onClick={()=>{setNutriPlan(null);LS.set('nutriPlan',null);}} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}
+                {nutriPlan&&<button onClick={async()=>{
+                  setNutriPlan(null); LS.set('nutriPlan',null); setProSource('');
+                  if(supabaseUser) await supabase.from('profiles').update({linked_nutricionista_id:null,linked_nutricionista_nombre:null}).eq('id',supabaseUser.id);
+                  supabase.from('profiles').select('subscription_status,subscription_expires_at').eq('id',supabaseUser.id).single().then(({data})=>{
+                    if(data) setIsPro(data.subscription_status==='pro'&&(!data.subscription_expires_at||new Date(data.subscription_expires_at)>new Date()));
+                    else setIsPro(false);
+                  });
+                }} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}
               </div>
               {!nutriPlan&&(
                 <div style={{display:'flex',gap:8,marginTop:10}}>
                   <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase())} placeholder="NUT-XXXXX" style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
                   <button onClick={async()=>{
-                    if(!nutriCode.trim()||loadingNutriCode) return;
+                    if(!nutriCode.trim()||loadingNutriCode||!supabaseUser) return;
                     setLoadingNutriCode(true);
-                    const {data} = await supabase.from('nutrition_plans').select('*, nutricionista:nutricionista_id(id)').ilike('nombre',`%${nutriCode.trim()}%`).limit(1);
-                    const {data:profData} = await supabase.from('profiles').select('id,professional_code').eq('professional_code',nutriCode.trim()).single();
-                    if(profData) {
-                      const {data:planData} = await supabase.from('nutrition_plans').select('*').eq('nutricionista_id',profData.id).order('created_at',{ascending:false}).limit(1).single();
-                      if(planData){
-                        const plan={...planData,nutricionista_nombre:profData.professional_code};
-                        setNutriPlan(plan); LS.set('nutriPlan',plan);
-                        if(supabaseUser) await supabase.from('nutrition_plans').update({paciente_id:supabaseUser.id}).eq('id',planData.id);
-                        haptic('success');
-                      } else { haptic('error'); alert('No se encontró un plan asignado para este código.'); }
-                    } else { haptic('error'); alert('Código no encontrado. Verifica con tu nutricionista.'); }
+                    const {data:nutrData} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',nutriCode.trim()).single();
+                    if(nutrData) {
+                      await supabase.from('profiles').update({
+                        linked_nutricionista_id: nutrData.nutricionista_id,
+                        linked_nutricionista_nombre: nutrData.nombre,
+                      }).eq('id', supabaseUser.id);
+                      const plan = {nutricionista_nombre: nutrData.nombre};
+                      setNutriPlan(plan); LS.set('nutriPlan', plan);
+                      setIsPro(true);
+                      setProSource('nutricionista:'+nutrData.nombre);
+                      haptic('success');
+                      showToast('✅ Vinculado con '+nutrData.nombre+'. ¡Pro activado!');
+                    } else { haptic('error'); showToast('Código no encontrado. Verifica con tu nutricionista.'); }
                     setLoadingNutriCode(false);
                   }} disabled={loadingNutriCode} style={{padding:'10px 14px',borderRadius:12,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
                     {loadingNutriCode?'...':'Vincular'}
