@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Actualizar perfil en Supabase
+    // Actualizar perfil del nutricionista/usuario en Supabase
     const updateRes = await fetch(
       `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`,
       {
@@ -180,6 +180,26 @@ Deno.serve(async (req) => {
     }
 
     console.log(`✅ Usuario ${payerEmail} actualizado a ${updateData.subscription_status}`);
+
+    // Si era un nutricionista que canceló → revocar Pro de todos sus pacientes vinculados
+    if (plan === "nutricionista" && (status === "cancelled" || status === "paused")) {
+      const revokeRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/profiles?linked_nutricionista_id=eq.${userId}`,
+        {
+          method: "PATCH",
+          headers: supabaseHeaders,
+          body: JSON.stringify({
+            linked_nutricionista_id: null,
+            linked_nutricionista_nombre: null,
+          }),
+        }
+      );
+      if (revokeRes.ok) {
+        console.log(`✅ Pro revocado para pacientes del nutricionista ${payerEmail}`);
+      } else {
+        console.error("Error revocando Pro de pacientes:", await revokeRes.text());
+      }
+    }
 
     return new Response(
       JSON.stringify({ ok: true, email: payerEmail, status: updateData.subscription_status }),
