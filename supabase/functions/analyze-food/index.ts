@@ -268,7 +268,10 @@ Deno.serve(async (req) => {
       anthropicBody = {
         model: MODEL,
         max_tokens: 1500,
-        system: `Eres un nutricionista y chef experto en gastronomía chilena y latinoamericana. El usuario te envía una foto de su comida desde Chile.
+        system: [
+          {
+            type: "text",
+            text: `Eres un nutricionista y chef experto en gastronomía chilena y latinoamericana. El usuario te envía una foto de su comida desde Chile.
 
 TAREA:
 1. Identifica TODOS los alimentos, preparaciones, salsas y bebidas visibles.
@@ -343,6 +346,9 @@ FORMATO DE RESPUESTA OBLIGATORIO:
   },
   "consejo": "Tip nutricional breve y motivador sobre este plato"
 }`,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
         messages: [
           {
             role: "user",
@@ -443,6 +449,7 @@ FORMATO DE RESPUESTA OBLIGATORIO:
         "Content-Type": "application/json",
         "x-api-key": ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
+        "anthropic-beta": "prompt-caching-2024-07-31",
       },
       body: JSON.stringify(anthropicBody),
     });
