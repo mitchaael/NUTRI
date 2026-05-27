@@ -6,3 +6,13 @@ dist/
 
 # Claude worktrees
 .claude/worktrees/
+.claude/settings.local.json
+
+# Outreach — datos sensibles y archivos grandes
+outreach/*.pdf
+outreach/contactos_*.csv
+outreach/nutricionistas_*.csv
+outreach/instagram_profile_urls.txt
+
+# Supabase temp
+supabase/.temp/

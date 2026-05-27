@@ -1996,18 +1996,34 @@ function BarcodeScanner({C, F, onFound, onClose, supabaseUser}) {
     else if(offLabels.some(l=>l.includes('non-vegan')||l.includes('no-vegan'))) veganStatus=false;
     else if(offIngred.length>10) veganStatus=NON_VEGAN_INGR.some(kw=>offIngred.includes(kw))||offCats.match(/dairi|meat|seafood|egg|poultry|fish|pork|beef|chicken|milk/)?false:true;
     else if(offCats.match(/dairi|meat|seafood|egg|poultry|fish|pork|beef|chicken|milk/)) veganStatus=false;
+    // Tamaño de porción: serving_quantity es el campo numérico más confiable de OFF
+    const serving = parseFloat(p.serving_quantity)
+                 || parseFloat(p.serving_size_g)
+                 || parseFloat(p.serving_size)   // "30 g" → 30, "30g" → 30
+                 || 100;
+    const ratio = serving / 100; // factor de escala desde valores _100g
+
+    // Para cada nutriente: usar _serving si OFF lo provee, sino escalar _100g × ratio
+    const kcal  = n['energy-kcal_serving']  != null ? n['energy-kcal_serving']  : (n['energy-kcal_100g']||0)  * ratio;
+    const prot  = n['proteins_serving']      != null ? n['proteins_serving']      : (n.proteins_100g||0)        * ratio;
+    const carbs = n['carbohydrates_serving'] != null ? n['carbohydrates_serving'] : (n.carbohydrates_100g||0)   * ratio;
+    const fat   = n['fat_serving']           != null ? n['fat_serving']           : (n.fat_100g||0)             * ratio;
+    const fiber = n['fiber_serving']         != null ? n['fiber_serving']         : (n.fiber_100g||0)           * ratio;
+    const sugar = n['sugars_serving']        != null ? n['sugars_serving']        : (n['sugars_100g']||0)       * ratio;
+    const sodium= n['sodium_serving']        != null ? n['sodium_serving']        : (n.sodium_100g||0)          * ratio;
+
     return {
       id:Date.now()+Math.random(),
       nombre:p.product_name_es||p.product_name||'Producto escaneado',
       marca:(p.brands||'').split(',')[0].trim()||'Desconocido',
-      cat:'Escaneado', porcion:parseInt(p.serving_size_g)||parseInt(p.serving_size)||100,
-      cal:Math.round(n['energy-kcal_100g']||0),
-      prot:Math.round((n.proteins_100g||0)*10)/10,
-      carbs:Math.round((n.carbohydrates_100g||0)*10)/10,
-      grasas:Math.round((n.fat_100g||0)*10)/10,
-      fibra:Math.round((n.fiber_100g||0)*10)/10,
-      azucar:Math.round((n['sugars_100g']||0)*10)/10,
-      sodio:Math.round((n.sodium_100g||0)*1000),
+      cat:'Escaneado', porcion: Math.round(serving),
+      cal:  Math.round(kcal),
+      prot: Math.round(prot  * 10) / 10,
+      carbs:Math.round(carbs * 10) / 10,
+      grasas:Math.round(fat  * 10) / 10,
+      fibra: Math.round(fiber* 10) / 10,
+      azucar:Math.round(sugar* 10) / 10,
+      sodio: Math.round(sodium * 1000),
       emoji:'📦', barcode, vegan:veganStatus,
       ingredients:offIngred.slice(0,300)||null,
       offLabels:offLabels.slice(0,10),
