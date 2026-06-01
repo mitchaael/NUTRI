@@ -1371,6 +1371,82 @@ function Splash({onDone}) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   NUTRIBOT — Mascota animada de Calorú
+═══════════════════════════════════════════════════════ */
+function NutriBot({state='idle', size=60}) {
+  return (
+    <div style={{width:size,height:size,position:'relative',flexShrink:0}}>
+      <style>{`
+        @keyframes bot-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+        @keyframes bot-think{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+        @keyframes bot-happy{0%{transform:scale(1) rotate(0deg)}30%{transform:scale(1.13) rotate(-5deg)}70%{transform:scale(1.13) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
+        @keyframes bot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+        @keyframes bot-antenna{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+        @keyframes bot-shadow{0%,100%{transform:scaleX(1);opacity:.15}50%{transform:scaleX(0.7);opacity:.08}}
+      `}</style>
+      <svg width={size} height={size} viewBox="0 0 60 60"
+        style={{
+          animation: state==='thinking'?'bot-think 0.65s ease-in-out infinite':
+                     state==='happy'   ?'bot-happy 0.45s ease-in-out 3':
+                     'bot-idle 2.2s ease-in-out infinite',
+          filter:`drop-shadow(0 ${size>50?6:3}px ${size>50?10:5}px rgba(212,32,32,0.3))`,
+          display:'block',
+        }}>
+        <defs>
+          <radialGradient id="bg-body" cx="38%" cy="28%" r="68%">
+            <stop offset="0%" stopColor="#FF5252"/>
+            <stop offset="100%" stopColor="#C41A1A"/>
+          </radialGradient>
+          <radialGradient id="bg-screen" cx="50%" cy="35%" r="60%">
+            <stop offset="0%" stopColor="#1C1C2E"/>
+            <stop offset="100%" stopColor="#0A0A18"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx={30} cy={58} rx={13} ry={2} fill="rgba(200,26,26,0.18)" style={{animation:'bot-shadow 2.2s ease-in-out infinite'}}/>
+        <rect x={28} y={6} width={4} height={9} rx={2} fill="#9B1515"/>
+        <circle cx={30} cy={5} r={5} fill="#D42020" style={{animation:state==='thinking'?'bot-antenna 0.5s ease-in-out infinite':'none'}}/>
+        <circle cx={30} cy={5} r={2.8} fill="#FF5252"/>
+        <rect x={7} y={15} width={46} height={35} rx={11} fill="url(#bg-body)"/>
+        <ellipse cx={17} cy={21} rx={7} ry={4} fill="rgba(255,255,255,0.2)" transform="rotate(-20 17 21)"/>
+        <rect x={11} y={19} width={38} height={24} rx={7} fill="url(#bg-screen)"/>
+        <rect x={11} y={19} width={38} height={24} rx={7} fill="none" stroke="rgba(90,200,250,0.18)" strokeWidth={1}/>
+        {state==='thinking'?(
+          <>
+            <circle cx={22} cy={31} r={3.2} fill="#5AC8FA" style={{animation:'bot-pulse 0.55s ease infinite'}}/>
+            <circle cx={30} cy={31} r={3.2} fill="#5AC8FA" style={{animation:'bot-pulse 0.55s ease infinite 0.18s'}}/>
+            <circle cx={38} cy={31} r={3.2} fill="#5AC8FA" style={{animation:'bot-pulse 0.55s ease infinite 0.36s'}}/>
+          </>
+        ):state==='happy'?(
+          <>
+            <ellipse cx={22} cy={28} rx={4} ry={4} fill="#5AC8FA"/>
+            <circle cx={23} cy={29} r={2} fill="#0A0A18"/>
+            <circle cx={24} cy={28} r={0.9} fill="white"/>
+            <ellipse cx={38} cy={28} rx={4} ry={4} fill="#5AC8FA"/>
+            <circle cx={39} cy={29} r={2} fill="#0A0A18"/>
+            <circle cx={40} cy={28} r={0.9} fill="white"/>
+            <path d="M18 36 Q30 43 42 36" stroke="#32D74B" strokeWidth={2.5} fill="none" strokeLinecap="round"/>
+          </>
+        ):(
+          <>
+            <ellipse cx={22} cy={29} rx={4} ry={4} fill="#5AC8FA"/>
+            <circle cx={23} cy={30} r={2} fill="#0A0A18"/>
+            <circle cx={24} cy={29} r={0.9} fill="white"/>
+            <ellipse cx={38} cy={29} rx={4} ry={4} fill="#5AC8FA"/>
+            <circle cx={39} cy={30} r={2} fill="#0A0A18"/>
+            <circle cx={40} cy={29} r={0.9} fill="white"/>
+            <path d="M21 37 Q30 41 39 37" stroke="#5AC8FA" strokeWidth={2} fill="none" strokeLinecap="round"/>
+          </>
+        )}
+        <rect x={3} y={24} width={4} height={9} rx={2} fill="#9B1515"/>
+        <rect x={53} y={24} width={4} height={9} rx={2} fill="#9B1515"/>
+        <rect x={13} y={48} width={11} height={8} rx={4} fill="#9B1515"/>
+        <rect x={36} y={48} width={11} height={8} rx={4} fill="#9B1515"/>
+      </svg>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
    ONBOARDING
 ═══════════════════════════════════════════════════════ */
 function Onboarding({onDone}) {
@@ -4878,11 +4954,11 @@ Ajusta al tamaño. Nombre descriptivo ("Empanada de pino horneada", "Arroz con p
       {/* Header */}
       <div style={{...modalHeaderStyle(C), gap:12}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
-        <div style={{flex:1,display:'flex',alignItems:'center',gap:8}}>
-          <div style={{width:36,height:36,borderRadius:12,background:'linear-gradient(135deg,#D42020,#5856D6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>🤖</div>
+        <div style={{flex:1,display:'flex',alignItems:'center',gap:10}}>
+          <NutriBot state={loading?'thinking':'idle'} size={44}/>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:C.text}}>Nutri IA</div>
-            <div style={{fontSize:10,color:'#34C759',fontWeight:600}}>● En línea</div>
+            <div style={{fontSize:10,color:loading?'#FF9500':'#34C759',fontWeight:600,transition:'color .3s'}}>{loading?'⚡ Pensando...':'● En línea'}</div>
           </div>
         </div>
       </div>
@@ -11914,6 +11990,24 @@ function AppCore() {
           boxShadow:'0 8px 24px rgba(0,0,0,0.35)',
           animation:'fadeUp .3s ease',
         }}>{toast}</div>
+      )}
+
+      {/* ══ NUTRIBOT FLOTANTE ══ */}
+      {tab===0&&(
+        <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }}
+          style={{
+            position:'fixed', bottom:'calc(90px + env(safe-area-inset-bottom, 0px))', right:16,
+            zIndex:25, background:'none', border:'none', cursor:'pointer', padding:0,
+            WebkitTapHighlightColor:'transparent',
+          }}>
+          <NutriBot state='idle' size={58}/>
+          <div style={{
+            position:'absolute', top:-4, right:-4,
+            background:'#D42020', color:'white',
+            fontSize:8, fontWeight:800, borderRadius:8, padding:'2px 5px',
+            fontFamily:F, letterSpacing:.3, boxShadow:'0 2px 6px rgba(212,32,32,0.4)',
+          }}>{isPro?'IA':'PRO'}</div>
+        </button>
       )}
 
       {/* ══ BOTTOM NAV ══ */}
