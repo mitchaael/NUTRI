@@ -4700,7 +4700,7 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna'}) {
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna', perfil={}, agua=0, exercises=[], saludScore=0, nutriPlan=null}) {
   const chatKey = 'nutri_chat_' + new Date().toISOString().split('T')[0];
   const [msgs, setMsgs] = useState(()=>{
     const saved = LS.get(chatKey, []);
@@ -4711,75 +4711,102 @@ function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userA
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('chat'); // chat | tips | memoria
   const endRef = useRef(null);
-  
+
   useEffect(()=>{
-    if(msgs.length > 0) LS.set(chatKey, msgs.slice(-20)); // guardar últimos 20 mensajes
+    if(msgs.length > 0) LS.set(chatKey, msgs.slice(-20));
   },[msgs]);
 
   const objLabels={bajar:'bajar de peso',mantener:'mantener peso',recomp:'recomposición corporal',subir:'ganar masa muscular'};
+  const actLabels={'1.2':'Sedentario','1.375':'Ligero (1-2 días/sem)','1.55':'Moderado (3-5 días/sem)','1.725':'Activo (6-7 días/sem)','1.9':'Muy activo'};
   const pct = metas.cal>0?Math.round(tot.cal/metas.cal*100):0;
+  const imc = perfil.peso&&perfil.altura ? (perfil.peso/((perfil.altura/100)**2)).toFixed(1) : null;
+  const imcLabel = imc ? (imc<18.5?'Bajo peso':imc<25?'Normal':imc<30?'Sobrepeso':'Obesidad') : '';
+  const totalBurn = (exercises||[]).reduce((s,e)=>s+(e.burn||0),0);
+  const todayFoods = log.length>0 ? log.slice(0,10).map(i=>i.nombre).join(', ')+(log.length>10?` y ${log.length-10} más`:'') : 'ninguna aún';
 
-  const todayFoods = log.length > 0
-    ? log.slice(0, 10).map(i => i.nombre).join(', ') + (log.length > 10 ? ` y ${log.length-10} más` : '')
-    : 'ninguna aún';
+  const systemPrompt = `Eres NutriBot, el asistente personal de Calorú — app chilena de nutrición. Eres cercano, motivador y EXPERTO en nutrición chilena Y en todas las funciones de la app. Actúas como consultor 360: conoces todo del usuario y puedes ayudarlo con nutrición y con el uso de la app.
 
-  const systemPrompt = `Eres Nutri, el asistente nutricional de Calorú — app chilena de nutrición. Eres cercano, motivador y experto en alimentación chilena.
-Usuario: ${nombre} | Objetivo: ${objLabels[obj]||obj} | Racha: ${streak.days} días 🔥
+══ PERFIL COMPLETO DEL USUARIO ══
+Nombre: ${nombre} | Objetivo: ${objLabels[obj]||obj} | Racha: ${streak.days} días 🔥
+${perfil.peso?`Físico: ${perfil.sexo==='M'?'Hombre':'Mujer'}, ${perfil.edad} años, ${perfil.peso}kg, ${perfil.altura}cm${imc?` | IMC: ${imc} (${imcLabel})`:''}`:''}
+${perfil.act?`Actividad: ${actLabels[String(perfil.act)]||perfil.act}`:''}
+Condición médica: ${condicion==='ninguna'?'Sin condición especial':condicion}
+${veganMode?'🌱 Modo vegano activo.':''}
+${userAllergens.length>0?`🚫 Alergias: ${userAllergens.join(', ')} — NUNCA sugerir estos.`:''}
+${nutriPlan?`👩‍⚕️ Nutricionista: ${nutriPlan.nutricionista_nombre}${nutriPlan.calorias_meta?` (meta: ${nutriPlan.calorias_meta} kcal/día)`:''}`:'Sin nutricionista vinculado.'}
+Plan: ${isPro?'Calorú Pro ✨':'Calorú Gratis 🆓'}
+Salud Score hoy: ${saludScore}/100
 
-RESUMEN DE HOY:
-• Calorías: ${Math.round(tot.cal)} / ${metas.cal} kcal (${pct}%)
-• Proteínas: ${Math.round(tot.prot)}g / ${metas.prot}g | Carbs: ${Math.round(tot.carbs)}g / ${metas.carbs}g | Grasas: ${Math.round(tot.grasas)}g / ${metas.grasas}g
-• Registrado hoy (${log.length} item${log.length!==1?'s':''}): ${todayFoods}
-${log.length===0?'• Aún no ha registrado comidas hoy.':''}
-${veganMode?'• VEGANO: No sugerir productos de origen animal (sin carnes, lácteos, huevos ni miel).':''}
-${userAllergens.length>0?`• ALERGIAS: ${userAllergens.join(', ')} — NUNCA sugerir estos.`:''}
-${condicion==='diabetes'?'• DIABETES TIPO 2: bajo índice glucémico, sin azúcares simples ni refinados.':''}
-${condicion==='hipertension'?'• HIPERTENSIÓN: máx 2000mg sodio/día. Evitar cecinas, conservas, snacks salados.':''}
-${condicion==='colesterol'?'• COLESTEROL ALTO: sin grasas saturadas/trans. Priorizar palta, aceite oliva, nueces, fibra.':''}
-${condicion==='celiaco'?'• CELIAQUÍA: NUNCA sugerir gluten (trigo, cebada, centeno, avena).':''}
-${isPro && iaMemoria?.gustos?.length>0?`• LE GUSTA: ${iaMemoria.gustos.join(', ')}.`:''}
-${isPro && iaMemoria?.disgustos?.length>0?`• NO LE GUSTA: ${iaMemoria.disgustos.join(', ')}.`:''}
-${isPro && iaMemoria?.patrones?.length>0?`• PATRONES: ${iaMemoria.patrones.join(', ')}.`:''}
+══ RESUMEN DE HOY ══
+Calorías: ${Math.round(tot.cal)}/${metas.cal} kcal (${pct}%) — quedan ${Math.max(0,metas.cal-Math.round(tot.cal))} kcal
+Prot: ${Math.round(tot.prot)}/${metas.prot}g | Carbs: ${Math.round(tot.carbs)}/${metas.carbs}g | Grasas: ${Math.round(tot.grasas)}/${metas.grasas}g | Azúcar: ${Math.round(tot.azucar||0)}g/25g
+Agua: ${agua}/8 vasos | Ejercicio: ${totalBurn>0?`${totalBurn} kcal quemadas (${(exercises||[]).map(e=>e.nombre).join(', ')})`:'Sin ejercicio hoy'}
+Comidas (${log.length}): ${todayFoods}
+${meseta?'⚠️ Posible meseta detectada — el peso no ha bajado en días.':''}
+${condicion==='diabetes'?'⚠️ DIABETES: bajo IG, sin azúcares simples.':''}${condicion==='hipertension'?'⚠️ HIPERTENSIÓN: máx 2000mg sodio/día.':''}${condicion==='colesterol'?'⚠️ COLESTEROL: sin grasas sat/trans.':''}${condicion==='celiaco'?'⚠️ CELIAQUÍA: sin gluten.':''}
+${isPro&&iaMemoria?.gustos?.length>0?`❤️ Le gusta: ${iaMemoria.gustos.join(', ')}.`:''}
+${isPro&&iaMemoria?.disgustos?.length>0?`🚫 No le gusta: ${iaMemoria.disgustos.join(', ')}.`:''}
 
-INSTRUCCIONES:
-- Responde en español, breve y amigable (máx 3 párrafos). Emojis con moderación.
-- Usa marcas y alimentos chilenos reales cuando puedas: Soprole, Colún, Nestlé Chile, Carozzi, Fruna, Watts, Super Pollo, La Crianza, Costa, Ideal, Lider, Jumbo, Santa Isabel.
-- Si tienes datos de búsqueda web en el contexto, úsalos con precisión e indica la fuente.
-- Si el usuario pregunta algo fuera de nutrición, redirige amablemente.
-${isPro?'- Cuando el usuario mencione gustos/disgustos o detectes patrones, recuérdalos en tu respuesta.':''}
+══ FUNCIONES DE CALORÚ (para consultas de la app) ══
+• REGISTRO: Busca 475+ alimentos chilenos en Tab ➕. Usa nombre, marca o categoría.
+• ESCÁNER DE BARRAS: Botón 📷 en Tab ➕. Escanea el código del producto.
+• FOTO IA (Pro): Foto del plato → calorías automáticas. Solo Pro.
+• NUTRI IA (yo): Soy yo. Chat de nutrición + ayuda con la app.
+• MI DÍA (📋): Resumen del día con gráficos, hidratación, ejercicio, nota personal.
+• STATS (📊): Gráficos de evolución semanal/mensual de calorías y peso.
+• RACHA 🔥: Registra algo cada día para mantenerla. Se pierde si no registras.
+• AGUA: Registro de vasos en el home. Meta: 8 vasos/día.
+• EJERCICIO: Agregar en el home. Resta kcal quemadas de tu balance.
+• SALUD SCORE: Puntuación 0-100 del día basada en calorías, proteínas, agua y ejercicio.
+• METAS: Perfil > Metas. Calcula tu TDEE con tus datos físicos.
+• NUTRICIONISTA: Perfil > Ajustes > "Vincular con nutricionista". Ingresa el código NUT-XXXXX.
+• ALERGIAS: Perfil > Ajustes > Alergias. Filtra productos automáticamente.
+• MODO VEGANO: Perfil > Ajustes. Filtra sugerencias con carne/lácteos.
+• PRO ($3.500/mes): Foto IA, Nutri IA ilimitado, micronutrientes, sin límites.
+• MODO PROFESIONAL (nutricionistas): Requiere plan Profesional ($9.990/mes). Gestiona pacientes.
+• MODO SIN CALORÍAS: Perfil > Ajustes. Muestra semáforos en vez de números.
+• TEMA: Auto (oscuro 20:00–07:00), claro u oscuro. Perfil > Ajustes.
+• PRODUCTOS COMUNITARIOS: Si no encuentras un alimento, agrégalo para la comunidad.
 
-REGISTRAR COMIDAS: Si el usuario menciona que comió, está comiendo o quiere registrar algo (ej: "comí X", "me comí X", "registra X", "acabo de comer X"), incluye al INICIO de tu respuesta este JSON exacto (sin backticks, sin texto antes del JSON):
+══ INSTRUCCIONES ══
+- Responde en español chileno, breve y amigable (máx 3 párrafos). Emojis con moderación.
+- Puedes responder sobre NUTRICIÓN y sobre CÓMO USAR CALORÚ. Eres experto en ambos.
+- Si preguntan cómo hacer algo en la app, da pasos claros y específicos.
+- Usa marcas chilenas: Soprole, Colún, Nestlé Chile, Carozzi, Fruna, Costa, Super Pollo, Ideal, Lider, Jumbo.
+- No redirigir si preguntan sobre la app — eso ES tu área de expertise.
+${isPro?'- Cuando detectes gustos/disgustos o patrones, recuérdalos en tu respuesta.':''}
+
+REGISTRAR COMIDAS: Si el usuario menciona que comió algo, incluye AL INICIO de tu respuesta (sin texto previo):
 <<<REGISTER_FOOD:{"nombre":"nombre descriptivo","cal":número,"prot":número,"carbs":número,"grasas":número,"fibra":número,"azucar":número,"sodio":número,"emoji":"emoji"}>>>
-Luego sigue con tu respuesta normal. Los valores deben ser para la porción COMPLETA mencionada, no por 100g.
 
-PORCIONES TÍPICAS CHILENAS para REGISTER_FOOD (úsalas de base):
-• Marraqueta (1): cal:210, prot:7, carbs:40, grasas:2, fibra:2, azucar:1, sodio:400
-• Empanada de pino horneada: cal:350, prot:14, carbs:35, grasas:16, fibra:2, azucar:2, sodio:580
-• Empanada de pino frita: cal:450, prot:14, carbs:38, grasas:25, fibra:2, azucar:2, sodio:620
-• Completo italiano: cal:480, prot:18, carbs:42, grasas:26, fibra:3, azucar:5, sodio:850
-• Cazuela de pollo (plato): cal:300, prot:28, carbs:22, grasas:8, fibra:3, azucar:2, sodio:650
-• Arroz con pollo (plato): cal:520, prot:32, carbs:55, grasas:14, fibra:2, azucar:1, sodio:700
-• Pechuga de pollo a la plancha (150g): cal:230, prot:43, carbs:0, grasas:5, fibra:0, azucar:0, sodio:90
-• Chorrillana (plato): cal:900, prot:30, carbs:60, grasas:55, fibra:4, azucar:5, sodio:1200
-• Salmón a la plancha (filete): cal:290, prot:36, carbs:0, grasas:15, fibra:0, azucar:0, sodio:95
-• Pizza (1 porción): cal:270, prot:11, carbs:33, grasas:11, fibra:2, azucar:4, sodio:580
-• Yogur Soprole frutas (175g): cal:140, prot:5, carbs:25, grasas:3, fibra:0, azucar:22, sodio:60
-• Manzana mediana: cal:80, prot:0, carbs:21, grasas:0, fibra:4, azucar:16, sodio:2
-• Café con leche (200ml): cal:70, prot:4, carbs:8, grasas:3, fibra:0, azucar:8, sodio:50
-Ajusta al tamaño mencionado (ej: "2 empanadas" = dobla los valores). El campo "nombre" debe ser descriptivo ("Empanada de pino horneada", "Arroz con pollo casero", "Yogur Soprole frutilla 175g").`;
+PORCIONES TÍPICAS CHILENAS:
+• Marraqueta (1): cal:210,prot:7,carbs:40,grasas:2,fibra:2,azucar:1,sodio:400
+• Empanada pino horneada: cal:350,prot:14,carbs:35,grasas:16,fibra:2,azucar:2,sodio:580
+• Completo italiano: cal:480,prot:18,carbs:42,grasas:26,fibra:3,azucar:5,sodio:850
+• Cazuela de pollo: cal:300,prot:28,carbs:22,grasas:8,fibra:3,azucar:2,sodio:650
+• Pechuga pollo plancha 150g: cal:230,prot:43,carbs:0,grasas:5,fibra:0,azucar:0,sodio:90
+• Chorrillana: cal:900,prot:30,carbs:60,grasas:55,fibra:4,azucar:5,sodio:1200
+• Arroz con pollo: cal:520,prot:32,carbs:55,grasas:14,fibra:2,azucar:1,sodio:700
+• Salmón plancha (filete): cal:290,prot:36,carbs:0,grasas:15,fibra:0,azucar:0,sodio:95
+• Manzana mediana: cal:80,prot:0,carbs:21,grasas:0,fibra:4,azucar:16,sodio:2
+Ajusta al tamaño. Nombre descriptivo ("Empanada de pino horneada", "Arroz con pollo casero").`;
 
   const QUICK_PROMPTS = [
+    {icon:'📊', text:'¿Cómo voy hoy?'},
     {icon:'🍽️', text:'¿Qué debería comer ahora?'},
     {icon:'💪', text:'¿Cómo llego a mi meta de proteínas?'},
-    {icon:'📊', text:'¿Cómo voy hoy con mi dieta?'},
-    {icon:'🇨🇱', text:'Sugiéreme un almuerzo chileno sano'},
+    {icon:'📱', text:'¿Cómo uso el escáner de código?'},
+    {icon:'🔥', text:'¿Cómo no perder mi racha?'},
+    {icon:'⭐', text:'¿Qué incluye Calorú Pro?'},
+    {icon:'🇨🇱', text:'Sugiéreme un almuerzo chileno'},
     {icon:'🌙', text:'¿Qué puedo cenar liviano?'},
-    {icon:'🔥', text:'Consejos para mi racha'},
   ];
 
   useEffect(()=>{
     if(msgs.length===0){
-      setMsgs([{role:'assistant',content:`¡Hola ${nombre}! 👋 Soy Nutri, tu asistente nutricional. Llevas **${Math.round(tot.cal)} kcal** hoy (${pct}% de tu meta). ¿En qué te puedo ayudar?`}]);
+      const kcalRestantes = Math.max(0, metas.cal - Math.round(tot.cal));
+      const saludo = saludScore>=70?'¡Vas muy bien hoy! 💪':saludScore>=40?'Buen inicio del día 🌱':'¡Empecemos juntos hoy! ☀️';
+      setMsgs([{role:'assistant',content:`¡Hola ${nombre}! Soy NutriBot, tu asistente personal de Calorú 🤖\n\n${saludo} Llevas **${Math.round(tot.cal)} kcal** (${pct}% de tu meta) y te quedan **${kcalRestantes} kcal** hoy.\n\nPuedo ayudarte con nutrición, consejos personalizados y cualquier duda sobre la app. ¿Qué necesitas?`}]);
     }
   },[]);
 
@@ -9692,7 +9719,7 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'} perfil={perfil} agua={agua} exercises={exercises} saludScore={saludScore} nutriPlan={nutriPlan}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
