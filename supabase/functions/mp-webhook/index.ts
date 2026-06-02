@@ -71,6 +71,29 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Protección anti-replay: verificar si este evento ya fue procesado
+    const webhookKey = `${topic}:${resourceId}`;
+    const existingRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/processed_webhooks?webhook_key=eq.${encodeURIComponent(webhookKey)}&select=id`,
+      { headers: supabaseHeaders }
+    );
+    if (existingRes.ok) {
+      const existing = await existingRes.json();
+      if (existing?.length > 0) {
+        console.log("MP Webhook: evento ya procesado, ignorando replay:", webhookKey);
+        return new Response(JSON.stringify({ ok: true, msg: "already processed" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Registrar el evento como procesado ANTES de procesar (evita race conditions)
+    await fetch(`${SUPABASE_URL}/rest/v1/processed_webhooks`, {
+      method: "POST",
+      headers: { ...supabaseHeaders, "Prefer": "return=minimal" },
+      body: JSON.stringify({ webhook_key: webhookKey, processed_at: new Date().toISOString() }),
+    });
+
     // Consultamos el detalle de la suscripción en MP
     const mpRes = await fetch(`https://api.mercadopago.com/preapproval/${resourceId}`, {
       headers: { "Authorization": `Bearer ${MP_ACCESS_TOKEN}` },

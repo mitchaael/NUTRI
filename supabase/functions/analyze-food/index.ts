@@ -217,6 +217,20 @@ Deno.serve(async (req) => {
     const userData = await userRes.json();
     userId = userData?.id ?? null;
     if (!userId) throw new Error("No user id in token");
+
+    // Verificar plan de suscripción desde Supabase (no confiar en el cliente)
+    const profileRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,subscription_expires_at`,
+      { headers: { "apikey": SUPABASE_SERVICE_ROLE_KEY!, "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` } }
+    );
+    if (profileRes.ok) {
+      const profiles = await profileRes.json();
+      const profile = profiles?.[0];
+      const isActiveSub = !profile?.subscription_expires_at ||
+        new Date(profile.subscription_expires_at) > new Date();
+      userIsPro = (profile?.subscription_status === 'pro' ||
+                   profile?.subscription_status === 'nutricionista') && isActiveSub;
+    }
   } catch {
     return new Response(
       JSON.stringify({ error: "Error verificando autenticación" }),
@@ -389,10 +403,11 @@ FORMATO DE RESPUESTA OBLIGATORIO:
           content: String(m.content).slice(0, 4000),
         }));
 
-      // El system prompt viene del frontend, limitado por seguridad
-      const safeSystem = system
-        ? String(system).slice(0, 8000)
-        : "Eres un asistente nutricional amigable.";
+      // SEGURIDAD: ignorar system prompt del cliente — usar prompt hardcodeado en el servidor
+      // El cliente puede agregar contexto de usuario, pero el rol y las instrucciones
+      // base las define el servidor para evitar uso como proxy de Claude API.
+      const clientContext = system ? String(system).slice(0, 6000) : "";
+      const safeSystem = `Eres NutriBot, el asistente personal de Calorú — app chilena de nutrición. Eres cercano, motivador y experto en nutrición chilena y en las funciones de la app. Responde en español, breve y amigable (máx 3 párrafos). Si la pregunta no está relacionada con nutrición o con la app Calorú, redirige amablemente.\n\n${clientContext}`;
 
       // ── Búsqueda de datos reales si el usuario menciona comida ──
       const lastUserMsg = sanitizedMessages.filter(m => m.role === 'user').at(-1)?.content ?? '';

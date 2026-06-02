@@ -15,7 +15,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { plan, back_url, test_mode } = await req.json();
+    const { plan, back_url } = await req.json();
+
+    // test_mode se controla desde el servidor, no desde el cliente
+    const test_mode = Deno.env.get("MP_ENV") === "sandbox";
+
+    // Validar back_url contra lista blanca (previene open redirect)
+    const ALLOWED_BACK_URLS = ["https://caloru.cl", "https://caloru.cl/pro", "https://www.caloru.cl"];
+    const safeBackUrl = ALLOWED_BACK_URLS.includes(back_url) ? back_url : "https://caloru.cl";
 
     // Obtener email del JWT verificado — no confiar en el body
     const authHeader = req.headers.get("authorization") || "";
@@ -82,7 +89,7 @@ Deno.serve(async (req) => {
           transaction_amount: selectedPlan.transaction_amount,
           currency_id: "CLP",
         },
-        back_url: back_url || "https://caloru.cl",
+        back_url: safeBackUrl,
       }),
     });
 

@@ -4306,6 +4306,21 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   const [selectedPaciente, setSelectedPaciente] = React.useState(null);
   const [codigoPro, setCodigoPro] = React.useState(()=>LS.get('professional_code',''));
 
+  // Verificación server-side de suscripción al montar (segunda capa de seguridad)
+  React.useEffect(()=>{
+    if(!supabaseUser) return;
+    supabase.from('profiles')
+      .select('subscription_status')
+      .eq('id', supabaseUser.id)
+      .single()
+      .then(({data})=>{
+        if(data?.subscription_status !== 'nutricionista') {
+          // La suscripción no es válida — redirigir al modo personal
+          onSwitchPersonal();
+        }
+      });
+  },[supabaseUser?.id]);
+
   React.useEffect(()=>{
     if(!supabaseUser) return;
     (async()=>{
@@ -4315,8 +4330,10 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         setCodigoPro(existing.code);
         LS.set('professional_code', existing.code);
       } else {
-        // Siempre generar código nuevo — no reusar localStorage (puede sobreescribir código en DB desde otro dispositivo)
-        const newCode = 'NUT-'+Math.random().toString(36).substring(2,7).toUpperCase();
+        // Código criptográficamente seguro — no usar Math.random() (predecible)
+        const arr = new Uint8Array(4);
+        crypto.getRandomValues(arr);
+        const newCode = 'NUT-'+Array.from(arr).map(b=>b.toString(36).padStart(2,'0')).join('').toUpperCase().slice(0,6);
         const nombreSeguro = nombre?.trim() || supabaseUser.email?.split('@')[0] || 'Nutricionista';
         await supabase.from('nutricionista_codes').upsert(
           {nutricionista_id:supabaseUser.id, code:newCode, nombre:nombreSeguro},
@@ -6917,10 +6934,10 @@ function LigaAmigosModal({C, F, dark, supabaseUser, nombre, saludScore, streak, 
     if(!supabaseUser) return;
     setLoading(true);
     try {
-      // Obtener top usuarios por XP de esta semana
+      // Obtener top usuarios (solo nombre, sin subscription_status por privacidad)
       const {data} = await supabase
         .from('profiles')
-        .select('nombre, subscription_status')
+        .select('nombre')
         .limit(20);
       
       // Ranking con hash determinista del nombre para valores estables entre renders
@@ -9655,8 +9672,19 @@ function AppCore() {
 
   // Si es profesional y está en modo profesional → verificar suscripción y mostrar panel
   if(accountType==='professional' && proMode==='professional') {
-    // Bloquear si está logueado y la suscripción ya cargó pero no es 'nutricionista'
-    const notSubscribed = supabaseUser && subscriptionStatus && subscriptionStatus !== 'nutricionista';
+    // Esperar a que cargue la suscripción antes de renderizar (evita bypass vía localStorage)
+    if(supabaseUser && !subscriptionStatus) {
+      return (
+        <div style={{minHeight:'100vh',background:dark?'#0D0D0D':'#F2F2F7',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:F}}>
+          <div style={{textAlign:'center'}}>
+            <div style={{fontSize:32,marginBottom:12,animation:'spin 1s linear infinite'}}>🔐</div>
+            <div style={{fontSize:14,color:dark?'rgba(255,255,255,0.5)':'#8E8E93'}}>Verificando suscripción...</div>
+          </div>
+        </div>
+      );
+    }
+    // Bloquear si está logueado y la suscripción cargó pero no es 'nutricionista'
+    const notSubscribed = supabaseUser && subscriptionStatus !== 'nutricionista';
     if(notSubscribed) {
       return (
         <div style={{minHeight:'100vh',background:dark?'#0D0D0D':'#F2F2F7',fontFamily:F,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>

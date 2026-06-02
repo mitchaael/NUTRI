@@ -8,11 +8,12 @@ dist/
 .claude/worktrees/
 .claude/settings.local.json
 
-# Outreach — datos sensibles y archivos grandes
+# Outreach — datos sensibles de terceros (emails, teléfonos) — NUNCA subir a git
+outreach/*.csv
+outreach/*.txt
+outreach/*.js
 outreach/*.pdf
-outreach/contactos_*.csv
-outreach/nutricionistas_*.csv
-outreach/instagram_profile_urls.txt
+outreach/*.json
 
 # Supabase temp
 supabase/.temp/
