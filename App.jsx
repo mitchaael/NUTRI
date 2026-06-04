@@ -758,6 +758,76 @@ const DIETAS = [
 /* ═══════════════════════════════════════════════════════
    CONSTANTS
 ═══════════════════════════════════════════════════════ */
+/* ──────────────────────────────────────────────
+   SINÓNIMOS CHILENOS — búsqueda inteligente
+   Permite encontrar "palta" buscando "aguacate"
+   y viceversa, más otros coloquialismos locales.
+────────────────────────────────────────────── */
+const SINONIMOS_CL: Record<string,string[]> = {
+  palta:       ['aguacate'],
+  aguacate:    ['palta'],
+  betarraga:   ['remolacha','betabel'],
+  remolacha:   ['betarraga','betabel'],
+  choclo:      ['maíz','maiz','elote'],
+  maíz:        ['choclo','elote'],
+  maiz:        ['choclo','elote'],
+  porotos:     ['frijoles','frijol','habichuelas'],
+  frijoles:    ['porotos','poroto'],
+  poroto:      ['frijol','porotos'],
+  arvejas:     ['guisantes','chícharos'],
+  guisantes:   ['arvejas','chícharos'],
+  zapallo:     ['calabaza','auyama'],
+  calabaza:    ['zapallo','auyama'],
+  damasco:     ['albaricoque','chabacano'],
+  albaricoque: ['damasco','chabacano'],
+  durazno:     ['melocotón','melocoton'],
+  melocoton:   ['durazno','melocotón'],
+  frutilla:    ['fresa'],
+  fresa:       ['frutilla'],
+  pepino:      ['cohombro'],
+  pimentón:    ['pimiento','ají dulce','morron'],
+  aji:         ['chile','guindilla'],
+  papas:       ['patatas'],
+  patatas:     ['papas'],
+  cerdo:       ['chancho','puerco'],
+  chancho:     ['cerdo','puerco'],
+  pavo:        ['guajolote'],
+  leche:       ['lácteo'],
+  queso:       ['quesillo'],
+  quesillo:    ['queso fresco','queso blanco'],
+  manjar:      ['dulce de leche','cajeta'],
+  merkén:      ['merken','aji cacho de cabra'],
+  merken:      ['merkén','aji cacho de cabra'],
+  mote:        ['trigo cocido','hominy'],
+  cochayuyo:   ['alga marina','kelp'],
+  marraqueta:  ['pan francés','baguette chilena'],
+  hallulla:    ['pan blandito'],
+  sopaipilla:  ['sopaipillas','sopaipa'],
+};
+
+/** Expande un query con sus sinónimos chilenos */
+const expandSearch = (q: string): string[] => {
+  const terms = [q];
+  const words = q.split(' ');
+  for (const word of words) {
+    const syns = SINONIMOS_CL[word.toLowerCase()];
+    if (syns) terms.push(...syns);
+  }
+  const direct = SINONIMOS_CL[q.toLowerCase()];
+  if (direct) terms.push(...direct);
+  return [...new Set(terms)];
+};
+
+/** Filtra alimentos con sinónimos */
+const filterWithSynonyms = (foods: any[], query: string): any[] => {
+  if (query.length < 2) return [];
+  const terms = expandSearch(query.toLowerCase());
+  return foods.filter(f => {
+    const name = f.nombre.toLowerCase();
+    return terms.some(t => name.includes(t));
+  });
+};
+
 const CATS = ["Todas","Lácteos","Carnes","Cecinas","Panes","Cereales","Snacks","Bebidas","Frutas","Verduras","Legumbres","Granos","Pescados","Huevos","Comidas CL","Platos chilenos","Congelados","Comida rápida","Preparados","Aceites","Condimentos","Salsas","Postres","Suplementos","Mis alimentos","Mis recetas","Escaneado"];
 const MEALS = ["Desayuno","Almuerzo","Once","Cena","Snack"];
 const MC = {Desayuno:"#FF9500",Almuerzo:"#FF3B30",Once:"#AF52DE",Cena:"#D42020",Snack:"#34C759"};
@@ -2396,7 +2466,7 @@ function RecipeBuilder({C, F, allFoods, onSave, onClose}) {
   const [emoji, setEmoji] = useState('🍲');
 
   const filtered = search.length>1
-    ? allFoods.filter(f=>f.nombre.toLowerCase().includes(search.toLowerCase())).slice(0,15)
+    ? filterWithSynonyms(allFoods, search).slice(0,15)
     : [];
 
   const addIngr = (food) => {
@@ -2556,7 +2626,7 @@ function WeeklyPlanner({C, F, allFoods, onClose, onApplyToday}) {
     return Object.values(map).sort((a,b)=>a.cat?.localeCompare(b.cat||'')||0);
   },[plan]);
 
-  const filtered = search.length>1 ? allFoods.filter(f=>f.nombre.toLowerCase().includes(search.toLowerCase())).slice(0,12) : [];
+  const filtered = search.length>1 ? filterWithSynonyms(allFoods, search).slice(0,12) : [];
 
   return(
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:80,display:'flex',flexDirection:'column',animation:'fadeUp .3s ease'}}>
@@ -8749,6 +8819,7 @@ function AppCore() {
   const [weekData,setWeekData]     = useState([]);
   const [showExSheet,setShowEx]    = useState(false);
   const [confetti,setConfetti]     = useState(false);
+  const [nutribotHappy,setNutribotHappy] = useState(false);
   const [notifEnabled,setNotifEnabled] = useState(()=>LS.get('notif',false));
   const [lastPct,setLastPct]       = useState(0);
   const [newAchiev,setNewAchiev]   = useState(null);
@@ -8796,18 +8867,41 @@ function AppCore() {
   useEffect(()=>{LS.set('recentFoods',recent);},[recent]);
   useEffect(()=>{LS.set('weights',weights);},[weights]);
 
-  /* ── streak ── */
+  /* ── streak con día de gracia (1 por mes) ── */
   useEffect(()=>{
     if(log.length>0){
       const today=todayKey();
       if(streak.last!==today){
         // Aritmética local: parse YYYY-MM-DD como fecha local, no UTC
         const [yy,mm,dd] = today.split('-').map(Number);
-        const prev = new Date(yy, mm-1, dd); // local midnight
+        const prev = new Date(yy, mm-1, dd);
         prev.setDate(prev.getDate()-1);
         const prevKey = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
-        const newDays=streak.last===prevKey?streak.days+1:1;
-        const s={days:newDays,last:today};
+        // 2 días atrás — para detectar un día perdido
+        const twoPrev = new Date(yy, mm-1, dd);
+        twoPrev.setDate(twoPrev.getDate()-2);
+        const twoPrevKey = `${twoPrev.getFullYear()}-${String(twoPrev.getMonth()+1).padStart(2,'0')}-${String(twoPrev.getDate()).padStart(2,'0')}`;
+
+        const currentMonth = today.slice(0,7); // YYYY-MM
+        const graceAvailable = streak.days > 0 &&
+          (!streak.graceMonth || streak.graceMonth !== currentMonth);
+
+        let newDays, newGraceMonth;
+        if(streak.last===prevKey){
+          // Ayer fue el último registro → racha continúa
+          newDays = streak.days+1;
+          newGraceMonth = streak.graceMonth||'';
+        } else if(streak.last===twoPrevKey && graceAvailable){
+          // Se saltó ayer pero tiene día de gracia disponible → ¡racha salvada!
+          newDays = streak.days+1;
+          newGraceMonth = currentMonth;
+          setTimeout(()=>setToast('🛡️ Día de gracia usado — ¡racha salvada! (1 por mes)'), 200);
+        } else {
+          // Racha perdida
+          newDays = 1;
+          newGraceMonth = streak.graceMonth||'';
+        }
+        const s={days:newDays, last:today, graceMonth:newGraceMonth};
         setStreak(s); LS.set('streak',s);
       }
     }
@@ -9444,12 +9538,23 @@ function AppCore() {
   const sobre  = Math.round(tot.cal)-metas.cal;
   const ringR=50, ringC=2*Math.PI*ringR, ringPct=Math.min(pct,1);
 
-  /* ── Goal celebration ── */
+  /* ── Goal celebration + NutriBot feliz ── */
   useEffect(()=>{
     if(pct>=1 && lastPct<1 && tot.cal>0){
       setConfetti(true);
       haptic('goal');
       setTimeout(()=>setConfetti(false), 3000);
+      // NutriBot baila por 4 segundos
+      setNutribotHappy(true);
+      setTimeout(()=>setNutribotHappy(false), 4000);
+      // Toast motivador chileno
+      const msgs = [
+        '🎉 ¡Meta del día cumplida! ¡Bacán po!',
+        '🎯 ¡Lo lograste! Meta calórica completada 💪',
+        '🏆 ¡Excelente día! Tu racha sigue viva 🔥',
+        '✅ ¡Meta cumplida! Eso se celebra, campeón 🇨🇱',
+      ];
+      setToast(msgs[Math.floor(Math.random()*msgs.length)]);
     }
     setLastPct(pct);
   },[pct]);
@@ -12028,7 +12133,7 @@ function AppCore() {
             zIndex:25, background:'none', border:'none', cursor:'pointer', padding:0,
             WebkitTapHighlightColor:'transparent',
           }}>
-          <NutriBot state='idle' size={58}/>
+          <NutriBot state={nutribotHappy?'happy':'idle'} size={58}/>
           <div style={{
             position:'absolute', top:-4, right:-4,
             background:'#D42020', color:'white',

@@ -1,6 +1,7 @@
-const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-const SUPABASE_URL      = Deno.env.get("SUPABASE_URL");
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+const ANTHROPIC_API_KEY       = Deno.env.get("ANTHROPIC_API_KEY");
+const SUPABASE_URL            = Deno.env.get("SUPABASE_URL");
+const SUPABASE_ANON_KEY       = Deno.env.get("SUPABASE_ANON_KEY");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const MODEL = "claude-sonnet-4-6";
 const BRAVE_API_KEY = Deno.env.get("BRAVE_API_KEY");
 
@@ -142,25 +143,60 @@ async function searchFoodOnline(query: string): Promise<string> {
   return ''; // sin resultados — Claude estima
 }
 
-// Rate limiting en memoria — por user_id autenticado
+// Rate limiting persistente en Supabase — sobrevive cold starts de Deno
 // Límites: 20 llamadas/hora para usuarios free, 60 para Pro
-const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 const RATE_LIMIT_FREE = 20;
 const RATE_LIMIT_PRO  = 60;
 
-function checkRateLimit(userId: string, isPro: boolean): boolean {
-  const now = Date.now();
+async function checkRateLimit(userId: string, isPro: boolean): Promise<boolean> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return true; // falla abierta si no hay config
   const limit = isPro ? RATE_LIMIT_PRO : RATE_LIMIT_FREE;
-  const entry = rateLimitMap.get(userId);
+  const now = new Date();
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
 
-  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    rateLimitMap.set(userId, { count: 1, windowStart: now });
-    return true; // dentro del límite
+  try {
+    // Leer registro actual
+    const getRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/ai_rate_limits?user_id=eq.${userId}&select=count,window_start`,
+      { headers: { "apikey": SUPABASE_SERVICE_ROLE_KEY, "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` } }
+    );
+    const rows = getRes.ok ? await getRes.json() : [];
+    const row = rows?.[0];
+
+    let newCount: number;
+    let newWindowStart: string;
+
+    if (!row || row.window_start < windowStart) {
+      // Ventana expirada o usuario nuevo → resetear
+      newCount = 1;
+      newWindowStart = now.toISOString();
+    } else {
+      if (row.count >= limit) return false; // límite alcanzado
+      newCount = row.count + 1;
+      newWindowStart = row.window_start;
+    }
+
+    // Upsert del contador
+    await fetch(`${SUPABASE_URL}/rest/v1/ai_rate_limits`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        count: newCount,
+        window_start: newWindowStart,
+        updated_at: now.toISOString(),
+      }),
+    });
+    return true;
+  } catch {
+    return true; // falla abierta — no bloquear al usuario por error de DB
   }
-  if (entry.count >= limit) return false; // excedió el límite
-  entry.count++;
-  return true;
 }
 
 // CORS — permisivo en origen porque la seguridad real la da el JWT
@@ -238,8 +274,8 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Comprobar rate limit
-  if (!checkRateLimit(userId, userIsPro)) {
+  // Comprobar rate limit (persistente en Supabase)
+  if (!await checkRateLimit(userId, userIsPro)) {
     return new Response(
       JSON.stringify({ error: "Demasiadas solicitudes. Intenta más tarde." }),
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "3600" } }
