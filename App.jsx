@@ -763,7 +763,7 @@ const DIETAS = [
    Permite encontrar "palta" buscando "aguacate"
    y viceversa, más otros coloquialismos locales.
 ────────────────────────────────────────────── */
-const SINONIMOS_CL: Record<string,string[]> = {
+const SINONIMOS_CL = {
   palta:       ['aguacate'],
   aguacate:    ['palta'],
   betarraga:   ['remolacha','betabel'],
@@ -806,7 +806,7 @@ const SINONIMOS_CL: Record<string,string[]> = {
 };
 
 /** Expande un query con sus sinónimos chilenos */
-const expandSearch = (q: string): string[] => {
+const expandSearch = (q) => {
   const terms = [q];
   const words = q.split(' ');
   for (const word of words) {
@@ -819,7 +819,7 @@ const expandSearch = (q: string): string[] => {
 };
 
 /** Filtra alimentos con sinónimos */
-const filterWithSynonyms = (foods: any[], query: string): any[] => {
+const filterWithSynonyms = (foods, query) => {
   if (query.length < 2) return [];
   const terms = expandSearch(query.toLowerCase());
   return foods.filter(f => {
