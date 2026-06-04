@@ -1441,18 +1441,23 @@ function Splash({onDone}) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   NUTRIBOT — Mascota animada de Calorú
+   NUTRIBOT — Mascota animada de Calorú con outfits
+   outfit: 'chef' | 'crown' | 'sport' | 'huaso' | 'llama' | 'none'
 ═══════════════════════════════════════════════════════ */
-function NutriBot({state='idle', size=60}) {
+function NutriBot({state='idle', size=60, outfit='chef'}) {
+  const uid = `nb${size}${outfit}`; // IDs únicos para gradients por instancia
   return (
     <div style={{width:size,height:size,position:'relative',flexShrink:0}}>
       <style>{`
         @keyframes bot-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
         @keyframes bot-think{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
-        @keyframes bot-happy{0%{transform:scale(1) rotate(0deg)}30%{transform:scale(1.13) rotate(-5deg)}70%{transform:scale(1.13) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
+        @keyframes bot-happy{0%{transform:scale(1) rotate(0deg)}25%{transform:scale(1.15) rotate(-6deg)}75%{transform:scale(1.15) rotate(6deg)}100%{transform:scale(1) rotate(0deg)}}
         @keyframes bot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
         @keyframes bot-antenna{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
         @keyframes bot-shadow{0%,100%{transform:scaleX(1);opacity:.15}50%{transform:scaleX(0.7);opacity:.08}}
+        @keyframes bot-flame{0%,100%{transform:scaleY(1) rotate(-3deg)}50%{transform:scaleY(1.15) rotate(3deg)}}
+        @keyframes bot-crown-gem{0%,100%{opacity:1}50%{opacity:0.4}}
+        @keyframes bot-star{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.2) rotate(15deg)}}
       `}</style>
       <svg width={size} height={size} viewBox="0 0 60 60"
         style={{
@@ -1463,23 +1468,115 @@ function NutriBot({state='idle', size=60}) {
           display:'block',
         }}>
         <defs>
-          <radialGradient id="bg-body" cx="38%" cy="28%" r="68%">
+          <radialGradient id={`${uid}-body`} cx="38%" cy="28%" r="68%">
             <stop offset="0%" stopColor="#FF5252"/>
             <stop offset="100%" stopColor="#C41A1A"/>
           </radialGradient>
-          <radialGradient id="bg-screen" cx="50%" cy="35%" r="60%">
+          <radialGradient id={`${uid}-screen`} cx="50%" cy="35%" r="60%">
             <stop offset="0%" stopColor="#1C1C2E"/>
             <stop offset="100%" stopColor="#0A0A18"/>
           </radialGradient>
+          {/* Crown gradient */}
+          <linearGradient id={`${uid}-gold`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFE566"/>
+            <stop offset="100%" stopColor="#D4920A"/>
+          </linearGradient>
+          {/* Flame gradient */}
+          <linearGradient id={`${uid}-flame`} x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stopColor="#FF3B00"/>
+            <stop offset="50%" stopColor="#FF9500"/>
+            <stop offset="100%" stopColor="#FFE566"/>
+          </linearGradient>
+          {/* Huaso hat gradient */}
+          <linearGradient id={`${uid}-straw`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#F0C040"/>
+            <stop offset="100%" stopColor="#C8960A"/>
+          </linearGradient>
         </defs>
+
+        {/* ── Sombra en el piso ── */}
         <ellipse cx={30} cy={58} rx={13} ry={2} fill="rgba(200,26,26,0.18)" style={{animation:'bot-shadow 2.2s ease-in-out infinite'}}/>
+
+        {/* ══════ OUTFITS que van DETRÁS del cuerpo ══════ */}
+        {/* Capa Pro — detrás del cuerpo */}
+        {outfit==='crown'&&(
+          <path d="M10 25 Q10 52 30 56 Q50 52 50 25 Z" fill="#6B21A8" opacity={0.7}/>
+        )}
+
+        {/* ── Antena base ── */}
         <rect x={28} y={6} width={4} height={9} rx={2} fill="#9B1515"/>
         <circle cx={30} cy={5} r={5} fill="#D42020" style={{animation:state==='thinking'?'bot-antenna 0.5s ease-in-out infinite':'none'}}/>
         <circle cx={30} cy={5} r={2.8} fill="#FF5252"/>
-        <rect x={7} y={15} width={46} height={35} rx={11} fill="url(#bg-body)"/>
+
+        {/* ── Cuerpo ── */}
+        <rect x={7} y={15} width={46} height={35} rx={11} fill={`url(#${uid}-body)`}/>
         <ellipse cx={17} cy={21} rx={7} ry={4} fill="rgba(255,255,255,0.2)" transform="rotate(-20 17 21)"/>
-        <rect x={11} y={19} width={38} height={24} rx={7} fill="url(#bg-screen)"/>
+
+        {/* ══════ OUTFITS que van SOBRE el cuerpo (delantero) ══════ */}
+
+        {/* Delantal de chef */}
+        {outfit==='chef'&&(
+          <>
+            {/* Delantal blanco */}
+            <rect x={18} y={26} width={24} height={22} rx={4} fill="white" opacity={0.92}/>
+            <rect x={18} y={26} width={24} height={22} rx={4} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth={0.8}/>
+            {/* Lazo del delantal */}
+            <path d="M18 29 Q14 27 15 24 Q16 21 18 22 Q20 23 18 26" fill="white" opacity={0.9}/>
+            <path d="M42 29 Q46 27 45 24 Q44 21 42 22 Q40 23 42 26" fill="white" opacity={0.9}/>
+            <rect x={26} y={26} width={8} height={2} rx={1} fill="rgba(0,0,0,0.12)"/>
+            {/* Bolsillo del delantal */}
+            <rect x={23} y={33} width={14} height={10} rx={3} fill="rgba(0,0,0,0.05)" stroke="rgba(0,0,0,0.08)" strokeWidth={0.6}/>
+            {/* Cuchillo y tenedor en el bolsillo */}
+            <rect x={27} y={35} width={1.5} height={6} rx={0.8} fill="#8E8E93"/>
+            <path d="M31 35 L31 38 Q33 38 33 36.5 Q33 35 31 35Z" fill="#8E8E93"/>
+            <rect x={31} y={38} width={1.5} height={3} rx={0.8} fill="#8E8E93"/>
+          </>
+        )}
+
+        {/* Camiseta deportiva */}
+        {outfit==='sport'&&(
+          <>
+            {/* Camiseta roja con líneas */}
+            <rect x={14} y={26} width={32} height={22} rx={5} fill="#D42020" opacity={0.85}/>
+            <rect x={14} y={26} width={32} height={22} rx={5} fill="none" stroke="white" strokeWidth={0.8} strokeOpacity={0.4}/>
+            {/* Número en la camiseta */}
+            <text x={30} y={39} textAnchor="middle" fill="white" fontSize={10} fontWeight={800} fontFamily="system-ui" opacity={0.9}>1</text>
+            {/* Rayas en los hombros */}
+            <rect x={14} y={26} width={7} height={6} rx={2} fill="white" opacity={0.25}/>
+            <rect x={39} y={26} width={7} height={6} rx={2} fill="white" opacity={0.25}/>
+          </>
+        )}
+
+        {/* Capa de corona Pro */}
+        {outfit==='crown'&&(
+          <>
+            {/* Medallón Pro en el pecho */}
+            <circle cx={30} cy={34} r={7} fill={`url(#${uid}-gold)`}/>
+            <circle cx={30} cy={34} r={7} fill="none" stroke="#FFE566" strokeWidth={0.8}/>
+            <text x={30} y={37.5} textAnchor="middle" fill="#6B21A8" fontSize={7} fontWeight={800} fontFamily="system-ui">PRO</text>
+          </>
+        )}
+
+        {/* Poncho huaso */}
+        {outfit==='huaso'&&(
+          <>
+            {/* Poncho */}
+            <path d="M7 22 L7 48 Q7 50 10 50 L20 50 L20 30 Z" fill="#D42020" opacity={0.85}/>
+            <path d="M53 22 L53 48 Q53 50 50 50 L40 50 L40 30 Z" fill="#D42020" opacity={0.85}/>
+            <rect x={20} y={26} width={20} height={24} rx={2} fill="white" opacity={0.9}/>
+            {/* Detalles del poncho */}
+            <rect x={20} y={26} width={20} height={2} rx={1} fill="#003087"/>
+            <rect x={20} y={44} width={20} height={2} rx={1} fill="#003087"/>
+            {/* Estrellas */}
+            <text x={30} y={38} textAnchor="middle" fill="#D42020" fontSize={9} fontWeight={800}>★</text>
+          </>
+        )}
+
+        {/* ── Pantalla / Cara ── */}
+        <rect x={11} y={19} width={38} height={24} rx={7} fill={`url(#${uid}-screen)`}/>
         <rect x={11} y={19} width={38} height={24} rx={7} fill="none" stroke="rgba(90,200,250,0.18)" strokeWidth={1}/>
+
+        {/* Expresión según estado */}
         {state==='thinking'?(
           <>
             <circle cx={22} cy={31} r={3.2} fill="#5AC8FA" style={{animation:'bot-pulse 0.55s ease infinite'}}/>
@@ -1491,10 +1588,16 @@ function NutriBot({state='idle', size=60}) {
             <ellipse cx={22} cy={28} rx={4} ry={4} fill="#5AC8FA"/>
             <circle cx={23} cy={29} r={2} fill="#0A0A18"/>
             <circle cx={24} cy={28} r={0.9} fill="white"/>
+            {/* Pestañas felices */}
+            <path d="M18 25 Q22 22 26 25" stroke="#5AC8FA" strokeWidth={1.5} fill="none" strokeLinecap="round"/>
             <ellipse cx={38} cy={28} rx={4} ry={4} fill="#5AC8FA"/>
             <circle cx={39} cy={29} r={2} fill="#0A0A18"/>
             <circle cx={40} cy={28} r={0.9} fill="white"/>
+            <path d="M34 25 Q38 22 42 25" stroke="#5AC8FA" strokeWidth={1.5} fill="none" strokeLinecap="round"/>
             <path d="M18 36 Q30 43 42 36" stroke="#32D74B" strokeWidth={2.5} fill="none" strokeLinecap="round"/>
+            {/* Mejillas rosadas */}
+            <ellipse cx={17} cy={33} rx={3} ry={2} fill="rgba(255,100,100,0.35)"/>
+            <ellipse cx={43} cy={33} rx={3} ry={2} fill="rgba(255,100,100,0.35)"/>
           </>
         ):(
           <>
@@ -1507,10 +1610,97 @@ function NutriBot({state='idle', size=60}) {
             <path d="M21 37 Q30 41 39 37" stroke="#5AC8FA" strokeWidth={2} fill="none" strokeLinecap="round"/>
           </>
         )}
+
+        {/* ── Brazos ── */}
         <rect x={3} y={24} width={4} height={9} rx={2} fill="#9B1515"/>
         <rect x={53} y={24} width={4} height={9} rx={2} fill="#9B1515"/>
+
+        {/* ── Pies ── */}
         <rect x={13} y={48} width={11} height={8} rx={4} fill="#9B1515"/>
         <rect x={36} y={48} width={11} height={8} rx={4} fill="#9B1515"/>
+
+        {/* ══════ OUTFITS que van ENCIMA de todo (sombreros) ══════ */}
+
+        {/* Gorro de chef */}
+        {outfit==='chef'&&(
+          <>
+            {/* Cuerpo alto del gorro */}
+            <rect x={20} y={0} width={20} height={14} rx={4} fill="white"/>
+            <rect x={20} y={0} width={20} height={14} rx={4} fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth={0.6}/>
+            {/* Pliegues del gorro */}
+            <path d="M22 5 Q25 3 28 5 Q31 7 34 5 Q37 3 38 6" stroke="rgba(0,0,0,0.08)" strokeWidth={0.8} fill="none"/>
+            {/* Puff top del gorro */}
+            <ellipse cx={30} cy={2} rx={12} ry={5} fill="white"/>
+            <ellipse cx={30} cy={2} rx={12} ry={5} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth={0.6}/>
+            {/* Ala del gorro */}
+            <rect x={16} y={12} width={28} height={4} rx={2} fill="white"/>
+            <rect x={16} y={12} width={28} height={4} rx={2} fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth={0.6}/>
+            {/* Línea azul del gorro (chef profesional) */}
+            <rect x={16} y={14} width={28} height={1.5} rx={0.5} fill="#5AC8FA" opacity={0.6}/>
+          </>
+        )}
+
+        {/* Corona dorada Pro */}
+        {outfit==='crown'&&(
+          <>
+            {/* Base de la corona */}
+            <rect x={16} y={12} width={28} height={5} rx={2} fill={`url(#${uid}-gold)`}/>
+            {/* Picos de la corona */}
+            <path d="M16 13 L20 5 L24 11 L30 3 L36 11 L40 5 L44 13 Z" fill={`url(#${uid}-gold)`}/>
+            <path d="M16 13 L20 5 L24 11 L30 3 L36 11 L40 5 L44 13 Z" fill="none" stroke="#FFE566" strokeWidth={0.5}/>
+            {/* Gemas de la corona */}
+            <circle cx={20} cy={9} r={2} fill="#FF3B30" style={{animation:'bot-crown-gem 1.4s ease-in-out infinite'}}/>
+            <circle cx={30} cy={6} r={2.2} fill="#5AC8FA" style={{animation:'bot-crown-gem 1.4s ease-in-out infinite 0.3s'}}/>
+            <circle cx={40} cy={9} r={2} fill="#32D74B" style={{animation:'bot-crown-gem 1.4s ease-in-out infinite 0.6s'}}/>
+            {/* Brillo en las gemas */}
+            <circle cx={19.5} cy={8.5} r={0.7} fill="white" opacity={0.8}/>
+            <circle cx={29.5} cy={5.5} r={0.8} fill="white" opacity={0.8}/>
+            <circle cx={39.5} cy={8.5} r={0.7} fill="white" opacity={0.8}/>
+          </>
+        )}
+
+        {/* Banda deportiva + llamas de racha */}
+        {outfit==='sport'&&(
+          <>
+            {/* Banda roja */}
+            <rect x={14} y={12} width={32} height={6} rx={3} fill="#D42020"/>
+            <rect x={14} y={12} width={32} height={6} rx={3} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth={0.6}/>
+            {/* Franja blanca */}
+            <rect x={14} y={14.5} width={32} height={1.5} rx={0.5} fill="white" opacity={0.5}/>
+          </>
+        )}
+
+        {/* Sombrero huaso */}
+        {outfit==='huaso'&&(
+          <>
+            {/* Ala ancha del sombrero */}
+            <ellipse cx={30} cy={14} rx={20} ry={3.5} fill={`url(#${uid}-straw)`}/>
+            <ellipse cx={30} cy={14} rx={20} ry={3.5} fill="none" stroke="#A07010" strokeWidth={0.6}/>
+            {/* Copa del sombrero */}
+            <rect x={20} y={2} width={20} height={13} rx={5} fill={`url(#${uid}-straw)`}/>
+            <rect x={20} y={2} width={20} height={13} rx={5} fill="none" stroke="#A07010" strokeWidth={0.6}/>
+            {/* Banda roja del sombrero */}
+            <rect x={20} y={10} width={20} height={4} rx={2} fill="#D42020" opacity={0.9}/>
+            {/* Estrella */}
+            <text x={30} y={13.5} textAnchor="middle" fill="white" fontSize={3.5} fontWeight={800} style={{animation:'bot-star 2s ease-in-out infinite'}}>★</text>
+            {/* Sombreado en la copa */}
+            <ellipse cx={26} cy={6} rx={5} ry={3} fill="rgba(255,255,255,0.15)" transform="rotate(-20 26 6)"/>
+          </>
+        )}
+
+        {/* Llamas de racha épica */}
+        {outfit==='llama'&&(
+          <>
+            {/* Llamas detrás */}
+            <path d="M20 15 Q16 8 20 2 Q21 8 25 6 Q22 11 26 8 Q24 13 28 11 Q27 15 30 13" fill={`url(#${uid}-flame)`} opacity={0.7} style={{animation:'bot-flame 0.6s ease-in-out infinite',transformOrigin:'30px 14px'}}/>
+            <path d="M40 15 Q44 8 40 2 Q39 8 35 6 Q38 11 34 8 Q36 13 32 11 Q33 15 30 13" fill={`url(#${uid}-flame)`} opacity={0.7} style={{animation:'bot-flame 0.6s ease-in-out infinite 0.15s',transformOrigin:'30px 14px'}}/>
+            {/* Llama central más grande */}
+            <path d="M24 15 Q22 5 28 0 Q27 7 32 4 Q29 10 34 7 Q31 13 36 11 Q33 15 30 12 Z" fill={`url(#${uid}-flame)`} style={{animation:'bot-flame 0.7s ease-in-out infinite 0.08s',transformOrigin:'30px 14px'}}/>
+            {/* Número de racha en las llamas */}
+            <circle cx={30} cy={8} r={5} fill="rgba(255,200,0,0.9)"/>
+            <text x={30} y={11} textAnchor="middle" fill="#FF3B00" fontSize={6} fontWeight={800} fontFamily="system-ui">🔥</text>
+          </>
+        )}
       </svg>
     </div>
   );
@@ -4863,7 +5053,7 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna', perfil={}, agua=0, exercises=[], saludScore=0, nutriPlan=null}) {
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna', perfil={}, agua=0, exercises=[], saludScore=0, nutriPlan=null, botOutfit='chef'}) {
   const chatKey = 'nutri_chat_' + new Date().toISOString().split('T')[0];
   const [msgs, setMsgs] = useState(()=>{
     const saved = LS.get(chatKey, []);
@@ -5042,7 +5232,7 @@ Ajusta al tamaño. Nombre descriptivo ("Empanada de pino horneada", "Arroz con p
       <div style={{...modalHeaderStyle(C), gap:12}}>
         <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
         <div style={{flex:1,display:'flex',alignItems:'center',gap:10}}>
-          <NutriBot state={loading?'thinking':'idle'} size={44}/>
+          <NutriBot state={loading?'thinking':'idle'} size={44} outfit={botOutfit}/>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:C.text}}>Nutri IA</div>
             <div style={{fontSize:10,color:loading?'#FF9500':'#34C759',fontWeight:600,transition:'color .3s'}}>{loading?'⚡ Pensando...':'● En línea'}</div>
@@ -8820,6 +9010,16 @@ function AppCore() {
   const [showExSheet,setShowEx]    = useState(false);
   const [confetti,setConfetti]     = useState(false);
   const [nutribotHappy,setNutribotHappy] = useState(false);
+
+  // Auto-outfit: cambia según contexto del usuario
+  const nutribotOutfit = useMemo(()=>{
+    const mes = new Date().getMonth(); // 0-based, 8 = septiembre
+    if(mes===8||mes===9) return 'huaso';          // Fiestas Patrias sept-oct
+    if(isPro) return 'crown';                      // Suscriptores Pro
+    if(streak.days>=30) return 'llama';            // Racha épica 30+ días
+    if(streak.days>=7) return 'sport';             // Racha 7+ días
+    return 'chef';                                 // Default: nutricionista
+  },[isPro, streak.days]);
   const [notifEnabled,setNotifEnabled] = useState(()=>LS.get('notif',false));
   const [lastPct,setLastPct]       = useState(0);
   const [newAchiev,setNewAchiev]   = useState(null);
@@ -8992,15 +9192,52 @@ function AppCore() {
         100%{transform:translateY(120vh) rotate(720deg);opacity:0}
       }
 
-      /* ── Tab transitions ── */
-      .anim-right{animation:slideInRight .26s cubic-bezier(.25,.46,.45,.94) both}
-      .anim-left{animation:slideInLeft .26s cubic-bezier(.25,.46,.45,.94) both}
-      .anim{animation:fadeUp .26s cubic-bezier(.25,.46,.45,.94) both}
+      /* ── Tab transitions (más fluidas) ── */
+      .anim-right{animation:slideInRight .3s cubic-bezier(.34,1.2,.64,1) both}
+      .anim-left{animation:slideInLeft .3s cubic-bezier(.34,1.2,.64,1) both}
+      .anim{animation:fadeUp .3s cubic-bezier(.34,1.2,.64,1) both}
       .spring-in{animation:springIn .5s cubic-bezier(.25,.46,.45,.94) both}
 
+      /* ── Cards con entrada escalonada ── */
+      @keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+      .card-in{animation:cardIn .35s cubic-bezier(.34,1.2,.64,1) both}
+      .card-in-1{animation:cardIn .35s cubic-bezier(.34,1.2,.64,1) .04s both}
+      .card-in-2{animation:cardIn .35s cubic-bezier(.34,1.2,.64,1) .08s both}
+      .card-in-3{animation:cardIn .35s cubic-bezier(.34,1.2,.64,1) .12s both}
+      .card-in-4{animation:cardIn .35s cubic-bezier(.34,1.2,.64,1) .16s both}
+      .card-in-5{animation:cardIn .35s cubic-bezier(.34,1.2,.64,1) .20s both}
+
+      /* ── Ring de macros animado ── */
+      @keyframes ringFill{from{stroke-dashoffset:var(--ring-start,314)}to{stroke-dashoffset:var(--ring-end,0)}}
+      .ring-anim{animation:ringFill .8s cubic-bezier(.25,.46,.45,.94) .2s both}
+
+      /* ── Food item add pop ── */
+      @keyframes foodAddPop{0%{transform:scale(1)}30%{transform:scale(1.18) translateY(-3px)}60%{transform:scale(.96)}100%{transform:scale(1)}}
+      .food-add{animation:foodAddPop .4s cubic-bezier(.34,1.56,.64,1)}
+
+      /* ── Streak pulse ── */
+      @keyframes streakPulse{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+      .streak-pulse{animation:streakPulse .5s cubic-bezier(.34,1.56,.64,1)}
+
+      /* ── Modal entrance mejorada ── */
+      @keyframes modalIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+      @keyframes modalOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(100%)}}
+      .modal-in{animation:modalIn .38s cubic-bezier(.34,1.1,.64,1) both}
+
+      /* ── Hero número principal ── */
+      @keyframes numberPop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+      .num-pop{animation:numberPop .5s cubic-bezier(.34,1.56,.64,1) both}
+
+      /* ── Floating button ── */
+      @keyframes floatIn{from{opacity:0;transform:scale(0) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+      .float-in{animation:floatIn .4s cubic-bezier(.34,1.56,.64,1) .5s both}
+
+      /* ── Shimmer skeleton ── */
+      .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:8px}
+
       /* ── Tap feedback ── */
-      .tap{transition:transform .1s cubic-bezier(.34,1.56,.64,1),opacity .1s ease;-webkit-user-select:none;user-select:none}
-      .tap:active{opacity:.65;transform:scale(.93)}
+      .tap{transition:transform .12s cubic-bezier(.34,1.56,.64,1),opacity .1s ease;-webkit-user-select:none;user-select:none}
+      .tap:active{opacity:.6;transform:scale(.91)}
       .nav-btn{transition:all .22s cubic-bezier(.34,1.56,.64,1)}
       .pop{animation:springPop .35s cubic-bezier(.34,1.56,.64,1)}
       .celebrate{animation:goalCelebrate .5s ease}
@@ -9928,7 +10165,7 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'} perfil={perfil} agua={agua} exercises={exercises} saludScore={saludScore} nutriPlan={nutriPlan}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'} perfil={perfil} agua={agua} exercises={exercises} saludScore={saludScore} nutriPlan={nutriPlan} botOutfit={nutribotOutfit}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -10403,7 +10640,7 @@ function AppCore() {
           )}
 
           {/* ── CALORIE RING HERO ── */}
-          <div className="s1" style={{
+          <div className="s1 card-in" style={{
             background:C.surface,
             borderRadius:24,padding:'20px',marginBottom:12,
             border:`1px solid ${C.border}`,
@@ -10485,7 +10722,7 @@ function AppCore() {
           )}
 
           {/* ── 4 MACRO CARDS ── */}
-          <div className="s2" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6,marginBottom:12}}>
+          <div className="s2 card-in-1" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6,marginBottom:12}}>
             {[
               {k:'prot',   lS:'Prot',   c:C.red,     meta:metas.prot},
               {k:'carbs',  lS:'Carbs',  c:C.amber,   meta:metas.carbs},
@@ -10591,7 +10828,7 @@ function AppCore() {
             {isPro?<span style={{fontSize:11,fontWeight:700,color:"#FFD700"}}>⭐ PRO</span>:<span style={{fontSize:11,fontWeight:700,color:"#D42020"}}>🔒 PRO</span>}
           </button>
           {/* ── WATER TRACKER ── */}
-          <div className="s3" style={{
+          <div className="s3 card-in-2" style={{
             background:C.surface,borderRadius:20,padding:'14px 16px',marginBottom:12,
             border:`1px solid ${C.border}`,
             boxShadow:dark?'none':'0 1px 8px rgba(0,0,0,0.05)',
@@ -12127,13 +12364,13 @@ function AppCore() {
 
       {/* ══ NUTRIBOT FLOTANTE ══ */}
       {tab===0&&(
-        <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }}
+        <button className="tap float-in" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }}
           style={{
             position:'fixed', bottom:'calc(90px + env(safe-area-inset-bottom, 0px))', right:16,
             zIndex:25, background:'none', border:'none', cursor:'pointer', padding:0,
             WebkitTapHighlightColor:'transparent',
           }}>
-          <NutriBot state={nutribotHappy?'happy':'idle'} size={58}/>
+          <NutriBot state={nutribotHappy?'happy':'idle'} size={58} outfit={nutribotOutfit}/>
           <div style={{
             position:'absolute', top:-4, right:-4,
             background:'#D42020', color:'white',
