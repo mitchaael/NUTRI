@@ -32,7 +32,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|manifest\\.json|sw\\.js|favicon\\.ico|icon-.*\\.png).*)",
+      "source": "/((?!api/|\\.well-known/|manifest\\.json|sw\\.js|favicon\\.ico|icon-.*\\.png|privacy\\.html).*)",
       "destination": "/index.html"
     }
   ]
