@@ -11951,9 +11951,20 @@ function AppCore() {
               <div style={{fontSize:11,color:C.textSec,marginBottom:10}}>{accountType==='professional'?'Panel de nutricionista activo':'Cambia a profesional si eres nutricionista o coach'}</div>
               <div style={{display:'flex',gap:8}}>
                 {[{k:'personal',l:'👤 Personal'},{k:'professional',l:'👩‍⚕️ Profesional'}].map(({k,l})=>(
-                  <button key={k} onClick={()=>{
+                  <button key={k} onClick={async()=>{
                     if(k==='professional' && supabaseUser && subscriptionStatus && subscriptionStatus!=='nutricionista'){
-                      setToast('Necesitas el Plan Nutricionista ($9.990/mes) para activar el modo profesional 👩‍⚕️');
+                      setToast('Necesitas el Plan Nutricionista ($9.990/mes) — te llevamos a pagar 👩‍⚕️');
+                      try{
+                        const session=await supabase.auth.getSession();
+                        const token=session.data.session?.access_token;
+                        const res=await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription',{
+                          method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                          body:JSON.stringify({plan:'nutricionista',back_url:'https://caloru.cl'}),
+                        });
+                        const data=await res.json();
+                        if(data.init_point) window.location.href=data.init_point;
+                        else setToast('Error al crear la suscripción. Intenta de nuevo.');
+                      }catch{setToast('Error de conexión. Intenta de nuevo.');}
                       return;
                     }
                     setAccountType(k);LS.set('accountType',k);
