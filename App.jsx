@@ -10037,8 +10037,21 @@ function AppCore() {
             <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:700,letterSpacing:1.2,textTransform:'uppercase',marginBottom:8}}>Plan Profesional</div>
             <div style={{fontSize:34,fontWeight:800,color:'white',marginBottom:4}}>$9.990<span style={{fontSize:14,fontWeight:400,color:'rgba(255,255,255,0.7)'}}>/mes</span></div>
             <div style={{fontSize:12,color:'rgba(255,255,255,0.7)',marginBottom:20,lineHeight:1.6}}>Panel de pacientes · Planes nutricionales · Código de vinculación · Pro para tus pacientes</div>
-            <button onClick={()=>{setProMode('personal');setShowPaywall(true);}} style={{width:'100%',padding:'13px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
-              Suscribirse →
+            <button onClick={async()=>{
+              if(!supabaseUser){setToast('Inicia sesión para suscribirte.');return;}
+              try{
+                const session=await supabase.auth.getSession();
+                const token=session.data.session?.access_token;
+                const res=await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription',{
+                  method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                  body:JSON.stringify({plan:'nutricionista',back_url:'https://caloru.cl'}),
+                });
+                const data=await res.json();
+                if(data.init_point) window.location.href=data.init_point;
+                else setToast('Error al crear la suscripción. Intenta de nuevo.');
+              }catch{setToast('Error de conexión. Intenta de nuevo.');}
+            }} style={{width:'100%',padding:'13px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
+              Suscribirse — $9.990/mes →
             </button>
           </div>
           <button onClick={()=>setProMode('personal')} style={{background:'none',border:'none',color:dark?'rgba(255,255,255,0.4)':'#8E8E93',fontFamily:F,cursor:'pointer',fontSize:13,padding:'8px'}}>
