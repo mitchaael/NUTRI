@@ -5480,7 +5480,21 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
 /* ─── Modal Detalle Paciente ─── */
 function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
   const [deleting, setDeleting] = React.useState(false);
+  const [pLogs, setPLogs] = React.useState(null); // null = cargando
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener peso',subir:'Ganar músculo',salud:'Salud general'};
+
+  // Cargar progreso del paciente (últimos 7 días) si está vinculado
+  React.useEffect(()=>{
+    if(!plan.paciente_id){ setPLogs([]); return; }
+    let cancel=false;
+    supabase.from('daily_logs')
+      .select('date,log')
+      .eq('user_id', plan.paciente_id)
+      .order('date',{ascending:false})
+      .limit(7)
+      .then(({data})=>{ if(!cancel) setPLogs(data||[]); }, ()=>{ if(!cancel) setPLogs([]); });
+    return ()=>{ cancel=true; };
+  },[plan.paciente_id]);
 
   const handleDelete = async () => {
     if(!window.confirm('¿Eliminar este plan? Esta acción no se puede deshacer.')) return;
@@ -5539,6 +5553,44 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
             </div>
           </div>
         )}
+
+        {/* Progreso del paciente (últimos 7 días) */}
+        {plan.paciente_id&&(()=>{
+          const calTarget = plan.calorias_meta || 0;
+          const dias = (pLogs||[]).map(r=>({date:r.date, cal:Math.round(sumLog(r.log||[]).cal)})).filter(d=>d.cal>0);
+          const enMeta = calTarget>0 ? dias.filter(d=>d.cal>=calTarget*0.9 && d.cal<=calTarget*1.1).length : 0;
+          const maxCal = Math.max(calTarget, ...dias.map(d=>d.cal), 1);
+          return (
+            <div style={{marginBottom:14}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5}}>Progreso · últimos 7 días</div>
+                {calTarget>0&&dias.length>0&&<div style={{fontSize:11,fontWeight:800,color:enMeta>=dias.length*0.7?'#34C759':enMeta>0?'#FF9500':'#FF3B30'}}>{enMeta}/{dias.length} en meta</div>}
+              </div>
+              {pLogs===null
+                ? <div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'12px 0'}}>Cargando…</div>
+                : dias.length===0
+                  ? <div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'14px 0',background:dark?'rgba(255,255,255,0.04)':'#F2F2F7',borderRadius:12}}>Sin registros todavía.</div>
+                  : (
+                    <div style={{background:dark?'rgba(255,255,255,0.04)':'#F2F2F7',borderRadius:14,padding:'12px 14px'}}>
+                      {dias.map((d,i)=>{
+                        const col = calTarget===0?'#1D3557':(d.cal>=calTarget*0.9&&d.cal<=calTarget*1.1)?'#34C759':d.cal<calTarget*0.9?'#FF9500':'#FF3B30';
+                        const fecha = new Date(d.date+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric'});
+                        return (
+                          <div key={i} style={{display:'flex',alignItems:'center',gap:10,marginBottom:i<dias.length-1?8:0}}>
+                            <div style={{width:52,fontSize:11,color:C.textSec,fontWeight:600,textTransform:'capitalize',flexShrink:0}}>{fecha}</div>
+                            <div style={{flex:1,height:8,borderRadius:4,background:dark?'rgba(255,255,255,0.08)':'#E5E5EA',overflow:'hidden'}}>
+                              <div style={{width:`${Math.min((d.cal/maxCal)*100,100)}%`,height:'100%',background:col,borderRadius:4}}/>
+                            </div>
+                            <div style={{width:62,textAlign:'right',fontSize:11,fontWeight:700,color:col,flexShrink:0}}>{d.cal} kcal</div>
+                          </div>
+                        );
+                      })}
+                      {calTarget>0&&<div style={{fontSize:10,color:C.textMuted,marginTop:8,textAlign:'center'}}>Meta: {calTarget} kcal/día · 🟢 en meta · 🟠 bajo · 🔴 sobre</div>}
+                    </div>
+                  )}
+            </div>
+          );
+        })()}
 
         {/* Mensaje */}
         {plan.mensaje&&(
@@ -9718,7 +9770,7 @@ function AppCore({onRequestAuth}) {
           // Refrescar el plan del nutricionista por si actualizó mensaje/metas/recomendaciones
           if(byNutri && supabaseUser.email){
             supabase.from('nutrition_plans')
-              .select('calorias_meta,mensaje,recomendaciones,objetivo')
+              .select('id,paciente_id,calorias_meta,mensaje,recomendaciones,objetivo')
               .eq('nutricionista_id', data.linked_nutricionista_id)
               .eq('paciente_email', supabaseUser.email.toLowerCase())
               .limit(1).maybeSingle()
@@ -9731,6 +9783,14 @@ function AppCore({onRequestAuth}) {
                     recomendaciones: plan.recomendaciones||[],
                   };
                   setNutriPlan(fresh); LS.set('nutriPlan', fresh);
+                  // Auto-reclamar el plan si aún no estaba reclamado (auto-sana
+                  // pacientes que se vincularon antes del fix de políticas) y
+                  // registra actividad para que el panel del nutri se actualice.
+                  if(!plan.paciente_id){
+                    supabase.from('nutrition_plans')
+                      .update({paciente_id:supabaseUser.id, ultima_actividad:new Date().toISOString()})
+                      .eq('id', plan.id).then(()=>{},()=>{});
+                  }
                 }
               }, ()=>{});
           }
