@@ -855,6 +855,46 @@ const MC = {Desayuno:"#FF9500",Almuerzo:"#FF3B30",Once:"#AF52DE",Cena:"#D42020",
 const MI = {Desayuno:"🌅",Almuerzo:"☀️",Once:"☕",Cena:"🌙",Snack:"🍎"};
 
 /* ═══════════════════════════════════════════════════════
+   PAUTA NUTRICIONAL — estructura profesional del plan
+   Tiempos de comida con nombres profesionales chilenos.
+═══════════════════════════════════════════════════════ */
+const PAUTA_COMIDAS = [
+  {k:'Desayuno',      icon:'🌅', color:'#FF9500'},
+  {k:'Colación AM',   icon:'🍎', color:'#34C759'},
+  {k:'Almuerzo',      icon:'☀️', color:'#FF3B30'},
+  {k:'Once',          icon:'☕', color:'#AF52DE'},
+  {k:'Cena',          icon:'🌙', color:'#5856D6'},
+  {k:'Colación PM',   icon:'🌰', color:'#A2845E'},
+];
+const MACRO_KCAL = {prot:4, carbs:4, grasas:9};
+const macrosToKcal = (mac={}) =>
+  Math.round((+mac.prot||0)*4 + (+mac.carbs||0)*4 + (+mac.grasas||0)*9);
+
+/* Normaliza recomendaciones (compat con formato antiguo en array y nuevo en objeto).
+   Devuelve { macros:{prot,carbs,grasas}, comidas:[{comida, items:[{tipo,porcion}]}] } */
+const normalizeRecs = (r) => {
+  if(r && !Array.isArray(r) && typeof r === 'object'){
+    return {
+      macros: r.macros || {prot:null,carbs:null,grasas:null},
+      comidas: Array.isArray(r.comidas) ? r.comidas : [],
+    };
+  }
+  // Formato antiguo: array plano → todo bajo "Indicaciones generales"
+  const items = Array.isArray(r) ? r.filter(x=>x&&(x.tipo||x.porcion)) : [];
+  return {
+    macros: {prot:null,carbs:null,grasas:null},
+    comidas: items.length ? [{comida:'Indicaciones generales', items}] : [],
+  };
+};
+/* Aplana la pauta a un array [{tipo,porcion,comida}] para consumidores legacy */
+const recsToArray = (r) => {
+  const n = normalizeRecs(r);
+  const out = [];
+  n.comidas.forEach(c => (c.items||[]).forEach(it => out.push({...it, comida:c.comida})));
+  return out;
+};
+
+/* ═══════════════════════════════════════════════════════
    HELPERS
 ═══════════════════════════════════════════════════════ */
 const calcTDEE = ({peso,altura,edad,sexo,act}) => {
@@ -5155,31 +5195,84 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   );
 }
 
-/* ─── Modal Nuevo Plan Nutricional ─── */
+/* ─── Modal Nuevo / Editar Pauta Nutricional (wizard profesional) ─── */
 function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCreated, onUpdated}) {
   const isEdit = !!editPlan;
+  const recsInit = normalizeRecs(editPlan?.recomendaciones);
+  const [step,   setStep]   = React.useState(0);
   const [nombre, setNombre] = React.useState(editPlan?.nombre||'');
   const [email,  setEmail]  = React.useState(editPlan?.paciente_email||'');
   const [cal,    setCal]    = React.useState(String(editPlan?.calorias_meta||'1800'));
   const [obj,    setObj]    = React.useState(editPlan?.objetivo||'bajar');
   const [msg,    setMsg]    = React.useState(editPlan?.mensaje||'');
-  const [recs,   setRecs]   = React.useState(editPlan?.recomendaciones?.length?editPlan.recomendaciones:[{tipo:'fruta',porcion:'2 porciones/día'},{tipo:'verdura',porcion:'3 porciones/día'},{tipo:'agua',porcion:'8 vasos/día'}]);
+  const [macros, setMacros] = React.useState({
+    prot:  recsInit.macros.prot  ?? null,
+    carbs: recsInit.macros.carbs ?? null,
+    grasas:recsInit.macros.grasas?? null,
+  });
+  const [pauta,  setPauta]  = React.useState(()=>{
+    if(recsInit.comidas.length) return recsInit.comidas.map(c=>({comida:c.comida, items:(c.items||[]).map(it=>({...it}))}));
+    return [
+      {comida:'Desayuno', items:[]},
+      {comida:'Almuerzo', items:[]},
+      {comida:'Once',     items:[]},
+      {comida:'Cena',     items:[]},
+    ];
+  });
   const [loading,setLoading]= React.useState(false);
   const [planError,setPlanError]= React.useState('');
 
+  const C2 = {surface:dark?'#1C1C1E':C.surface, alt:dark?'rgba(255,255,255,0.05)':'#F2F2F7', border:dark?'rgba(255,255,255,0.1)':'#E5E5EA', text:dark?'#fff':'#1C1C1E', sec:dark?'rgba(255,255,255,0.5)':'#8E8E93', muted:dark?'rgba(255,255,255,0.3)':'#C7C7CC'};
+  const objLabels = {bajar:'Bajar peso',mantener:'Mantener',subir:'Ganar músculo',salud:'Salud general'};
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const puedeGuardar = nombre.trim() && emailValido;
+  const datosOk = nombre.trim() && emailValido;
+
+  // Macros → kcal y % de distribución
+  const macroKcal = macrosToKcal(macros);
+  const calNum = parseInt(cal)||0;
+  const macrosSet = macros.prot!=null || macros.carbs!=null || macros.grasas!=null;
+  const pctOf = (g,f)=> macroKcal>0 ? Math.round(((+g||0)*f/macroKcal)*100) : 0;
+
+  const autoDistribuir = () => {
+    const c = parseInt(cal)||1800;
+    const split = {bajar:[.32,.33,.35], mantener:[.25,.45,.30], subir:[.30,.45,.25], salud:[.22,.48,.30]}[obj]||[.25,.45,.30];
+    setMacros({
+      prot:  Math.round(c*split[0]/4),
+      carbs: Math.round(c*split[1]/4),
+      grasas:Math.round(c*split[2]/9),
+    });
+    haptic('light');
+  };
+
+  const setMacro = (k,v)=> setMacros(m=>({...m,[k]:Math.max(0, v)}));
+  const addComida = (k)=> setPauta(p=> p.find(c=>c.comida===k)?p:[...p,{comida:k,items:[]}]);
+  const removeComida = (k)=> setPauta(p=> p.filter(c=>c.comida!==k));
+  const addItem = (k)=> setPauta(p=> p.map(c=> c.comida===k?{...c,items:[...c.items,{tipo:'',porcion:''}]}:c));
+  const setItem = (k,i,field,val)=> setPauta(p=> p.map(c=> c.comida===k?{...c,items:c.items.map((it,j)=>j===i?{...it,[field]:val}:it)}:c));
+  const delItem = (k,i)=> setPauta(p=> p.map(c=> c.comida===k?{...c,items:c.items.filter((_,j)=>j!==i)}:c));
 
   const guardar = async () => {
-    if(!puedeGuardar) return;
+    if(!datosOk) { setStep(0); return; }
     setPlanError('');
     setLoading(true);
+    const comidasLimpias = pauta
+      .map(c=>({comida:c.comida, items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())}))
+      .filter(c=>c.items.length);
+    const recomendaciones = {
+      v: 2,
+      macros: {
+        prot:  macros.prot!=null?Math.round(macros.prot):null,
+        carbs: macros.carbs!=null?Math.round(macros.carbs):null,
+        grasas:macros.grasas!=null?Math.round(macros.grasas):null,
+      },
+      comidas: comidasLimpias,
+    };
     const payload = {
       nombre: nombre.trim(),
       objetivo: obj,
       calorias_meta: parseInt(cal)||1800,
       mensaje: msg.trim(),
-      recomendaciones: recs,
+      recomendaciones,
       paciente_email: email.trim().toLowerCase(),
     };
     if(isEdit){
@@ -5189,78 +5282,185 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
       setLoading(false);
       return;
     }
-    const {data, error} = await supabase.from('nutrition_plans').insert({
-      nutricionista_id: supabaseUser.id,
-      ...payload,
-    }).select().single();
-    if(error) { setPlanError('Error al guardar el plan. Inténtalo de nuevo.'); setLoading(false); return; }
+    const {data, error} = await supabase.from('nutrition_plans').insert({ nutricionista_id: supabaseUser.id, ...payload }).select().single();
+    if(error) { setPlanError('Error al guardar la pauta. Inténtalo de nuevo.'); setLoading(false); return; }
     if(data){ haptic('success'); onCreated(data); }
     setLoading(false);
   };
 
+  const STEPS = ['Paciente','Prescripción','Pauta'];
+  const inp = {width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C2.border}`,fontSize:15,fontWeight:700,color:C2.text,background:C2.alt,outline:'none',fontFamily:F,boxSizing:'border-box'};
+  const lbl = {fontSize:11,fontWeight:700,color:C2.sec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6};
+
+  // Stepper de macro (interactivo)
+  const MacroRow = ({k,label,color,unit='g'}) => {
+    const val = macros[k];
+    return (
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+        <div style={{width:9,height:9,borderRadius:5,background:color,flexShrink:0}}/>
+        <div style={{flex:1}}>
+          <div style={{fontSize:13,fontWeight:700,color:C2.text}}>{label}</div>
+          <div style={{fontSize:10,color:C2.sec}}>{val!=null&&macroKcal>0?`${pctOf(val, MACRO_KCAL[k])}% · ${Math.round((+val||0)*MACRO_KCAL[k])} kcal`:'—'}</div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:6}}>
+          <button onClick={()=>setMacro(k,(+val||0)-5)} style={{width:30,height:30,borderRadius:9,border:`1.5px solid ${C2.border}`,background:C2.alt,color:C2.sec,fontSize:16,cursor:'pointer',fontFamily:F}}>−</button>
+          <input value={val==null?'':val} onChange={e=>{const v=e.target.value.replace(/[^0-9]/g,'');setMacro(k, v===''?0:parseInt(v));}} placeholder="0" inputMode="numeric"
+            style={{width:52,padding:'7px 4px',borderRadius:9,border:`1.5px solid ${C2.border}`,fontSize:14,fontWeight:800,color:C2.text,background:C2.alt,outline:'none',textAlign:'center',fontFamily:F}}/>
+          <span style={{fontSize:11,color:C2.sec,width:10}}>{unit}</span>
+          <button onClick={()=>setMacro(k,(+val||0)+5)} style={{width:30,height:30,borderRadius:9,border:'none',background:color,color:'white',fontSize:16,cursor:'pointer',fontFamily:F}}>+</button>
+        </div>
+      </div>
+    );
+  };
+
   return(
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:9999,display:'flex',alignItems:'flex-end'}}>
-      <div style={{background:dark?'#1C1C1E':C.surface,borderRadius:'24px 24px 0 0',width:'100%',maxHeight:'85vh',overflow:'auto',padding:'20px 20px 40px',paddingBottom:'calc(40px + env(safe-area-inset-bottom))'}}>
-        <div style={{display:'flex',justifyContent:'center',marginBottom:12}}>
-          <div style={{width:36,height:4,borderRadius:2,background:dark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'}}/>
-        </div>
-        <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:16}}>{isEdit?'Editar plan':'Nuevo paciente'}</div>
-        {/* Nombre */}
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Nombre del paciente</div>
-          <input value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: María González" type="text"
-            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
-        </div>
-        {/* Email — obligatorio para la vinculación */}
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Email del paciente</div>
-          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Ej: maria@gmail.com" type="email" inputMode="email" autoCapitalize="none"
-            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${email&&!emailValido?'#FF3B30':C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
-          <div style={{fontSize:11,color:email&&!emailValido?'#FF3B30':C.textMuted,marginTop:5,lineHeight:1.4}}>
-            {email&&!emailValido?'Ingresa un email válido.':'⚠️ Debe ser el MISMO correo con que tu paciente se registra en Calorú — así se vincula automáticamente.'}
+      <div style={{background:C2.surface,borderRadius:'24px 24px 0 0',width:'100%',maxHeight:'92vh',display:'flex',flexDirection:'column',overflow:'hidden'}}>
+        {/* Header con progreso */}
+        <div style={{padding:'14px 20px 0',flexShrink:0}}>
+          <div style={{display:'flex',justifyContent:'center',marginBottom:12}}>
+            <div style={{width:36,height:4,borderRadius:2,background:C2.muted}}/>
           </div>
-        </div>
-        {/* Calorías */}
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Calorías meta/día</div>
-          <input value={cal} onChange={e=>setCal(e.target.value)} placeholder="1800" type="number" inputMode="numeric"
-            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
-        </div>
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Objetivo</div>
-          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-            {[{k:'bajar',l:'Bajar peso'},{k:'mantener',l:'Mantener'},{k:'subir',l:'Ganar músculo'},{k:'salud',l:'Salud general'}].map(({k,l})=>(
-              <button key={k} onClick={()=>setObj(k)} style={{padding:'8px 14px',borderRadius:10,border:`1.5px solid ${obj===k?'#D42020':C.border}`,background:obj===k?'#D4202012':'transparent',color:obj===k?'#D42020':C.textSec,fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700}}>
-                {l}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+            <div style={{fontSize:18,fontWeight:800,color:C2.text}}>{isEdit?'Editar pauta':'Nueva pauta'}{nombre.trim()?` · ${nombre.trim().split(' ')[0]}`:''}</div>
+            <button onClick={onClose} style={{background:'none',border:'none',fontSize:20,color:C2.muted,cursor:'pointer',padding:'0 4px'}}>✕</button>
+          </div>
+          {/* Stepper */}
+          <div style={{display:'flex',gap:6,marginBottom:16}}>
+            {STEPS.map((s,i)=>(
+              <button key={s} onClick={()=>{ if(i===0||datosOk) setStep(i); }} style={{flex:1,cursor:'pointer',border:'none',background:'none',fontFamily:F,padding:0,textAlign:'left'}}>
+                <div style={{height:4,borderRadius:2,background:i<=step?'#D42020':C2.border,marginBottom:5,transition:'background .2s'}}/>
+                <div style={{fontSize:10,fontWeight:i===step?800:600,color:i===step?'#D42020':C2.sec}}>{i+1}. {s}</div>
               </button>
             ))}
           </div>
         </div>
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Mensaje para el paciente</div>
-          <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Recuerda aumentar las porciones de fruta esta semana..."
-            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:13,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,minHeight:80,resize:'none'}}/>
-        </div>
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Recomendaciones (grupos alimenticios)</div>
-          {recs.map((r,i)=>(
-            <div key={i} style={{display:'flex',gap:8,marginBottom:6}}>
-              <input value={r.tipo} onChange={e=>{const n=[...recs];n[i]={...n[i],tipo:e.target.value};setRecs(n);}} placeholder="Alimento"
-                style={{flex:1,padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,fontSize:12,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
-              <input value={r.porcion} onChange={e=>{const n=[...recs];n[i]={...n[i],porcion:e.target.value};setRecs(n);}} placeholder="Porción"
-                style={{flex:1,padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,fontSize:12,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+
+        {/* Contenido scrollable */}
+        <div style={{flex:1,overflowY:'auto',padding:'4px 20px 12px'}}>
+          {/* ── PASO 1: Paciente ── */}
+          {step===0&&(
+            <div style={{animation:'fadeUp .25s ease'}}>
+              <div style={{marginBottom:14}}>
+                <div style={lbl}>Nombre del paciente</div>
+                <input value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: María González" type="text" style={inp}/>
+              </div>
+              <div style={{marginBottom:14}}>
+                <div style={lbl}>Email del paciente</div>
+                <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Ej: maria@gmail.com" type="email" inputMode="email" autoCapitalize="none"
+                  style={{...inp,border:`1.5px solid ${email&&!emailValido?'#FF3B30':C2.border}`}}/>
+                <div style={{fontSize:11,color:email&&!emailValido?'#FF3B30':C2.muted,marginTop:5,lineHeight:1.4}}>
+                  {email&&!emailValido?'Ingresa un email válido.':'⚠️ Debe ser el MISMO correo con que tu paciente se registra en Calorú — así se vincula automáticamente.'}
+                </div>
+              </div>
+              <div>
+                <div style={lbl}>Objetivo</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  {[{k:'bajar',l:'Bajar peso',e:'📉'},{k:'mantener',l:'Mantener',e:'⚖️'},{k:'subir',l:'Ganar músculo',e:'💪'},{k:'salud',l:'Salud general',e:'🌿'}].map(({k,l,e})=>(
+                    <button key={k} onClick={()=>setObj(k)} style={{padding:'13px 10px',borderRadius:14,textAlign:'left',border:`1.5px solid ${obj===k?'#D42020':C2.border}`,background:obj===k?'#D4202012':C2.alt,color:obj===k?'#D42020':C2.sec,fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700,display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{fontSize:18}}>{e}</span>{l}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          ))}
-          <button onClick={()=>setRecs([...recs,{tipo:'',porcion:''}])} style={{fontSize:11,color:'#D42020',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>
-            + Agregar grupo
-          </button>
+          )}
+
+          {/* ── PASO 2: Prescripción energética + macros ── */}
+          {step===1&&(
+            <div style={{animation:'fadeUp .25s ease'}}>
+              <div style={{marginBottom:16}}>
+                <div style={lbl}>Requerimiento energético (kcal/día)</div>
+                <input value={cal} onChange={e=>setCal(e.target.value.replace(/[^0-9]/g,''))} placeholder="1800" inputMode="numeric" style={{...inp,fontSize:20,textAlign:'center'}}/>
+              </div>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                <div style={lbl}>Distribución de macronutrientes</div>
+                <button onClick={autoDistribuir} style={{fontSize:11,fontWeight:800,color:'#D42020',background:'#D4202012',border:'none',borderRadius:9,padding:'6px 10px',cursor:'pointer',fontFamily:F}}>✨ Auto</button>
+              </div>
+              {/* Barra de distribución */}
+              {macroKcal>0&&(
+                <div style={{marginBottom:14}}>
+                  <div style={{display:'flex',height:12,borderRadius:6,overflow:'hidden',marginBottom:6}}>
+                    <div style={{width:`${pctOf(macros.prot,4)}%`,background:'#34C759'}}/>
+                    <div style={{width:`${pctOf(macros.carbs,4)}%`,background:'#FF9500'}}/>
+                    <div style={{width:`${pctOf(macros.grasas,9)}%`,background:'#5856D6'}}/>
+                  </div>
+                  <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:C2.sec}}>
+                    <span>Total: <strong style={{color:C2.text}}>{macroKcal} kcal</strong></span>
+                    {calNum>0&&<span style={{color:Math.abs(macroKcal-calNum)<=80?'#34C759':'#FF9500'}}>
+                      {Math.abs(macroKcal-calNum)<=80?'✓ Calza con la meta':`${macroKcal>calNum?'+':''}${macroKcal-calNum} kcal vs meta`}
+                    </span>}
+                  </div>
+                </div>
+              )}
+              <div style={{background:C2.alt,borderRadius:16,padding:'14px 14px 6px'}}>
+                <MacroRow k="prot"   label="Proteínas"      color="#34C759"/>
+                <MacroRow k="carbs"  label="Carbohidratos"  color="#FF9500"/>
+                <MacroRow k="grasas" label="Lípidos"        color="#5856D6"/>
+              </div>
+              {!macrosSet&&<div style={{fontSize:11,color:C2.muted,marginTop:10,textAlign:'center',lineHeight:1.4}}>Opcional. Toca <strong>✨ Auto</strong> para distribuir según el objetivo, o ajústalo manualmente.</div>}
+            </div>
+          )}
+
+          {/* ── PASO 3: Pauta por tiempos de comida ── */}
+          {step===2&&(
+            <div style={{animation:'fadeUp .25s ease'}}>
+              <div style={{...lbl,marginBottom:10}}>Pauta alimentaria por tiempo de comida</div>
+              {pauta.map(c=>{
+                const meta = PAUTA_COMIDAS.find(m=>m.k===c.comida) || {icon:'🍽️',color:'#8E8E93'};
+                return (
+                  <div key={c.comida} style={{background:C2.alt,borderRadius:16,padding:'12px 14px',marginBottom:10,border:`1px solid ${C2.border}`}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:c.items.length?10:0}}>
+                      <span style={{fontSize:16}}>{meta.icon}</span>
+                      <div style={{flex:1,fontSize:13.5,fontWeight:800,color:meta.color}}>{c.comida}</div>
+                      <button onClick={()=>removeComida(c.comida)} style={{background:'none',border:'none',color:C2.muted,fontSize:13,cursor:'pointer'}}>✕</button>
+                    </div>
+                    {c.items.map((it,i)=>(
+                      <div key={i} style={{display:'flex',gap:6,marginBottom:6}}>
+                        <input value={it.tipo} onChange={e=>setItem(c.comida,i,'tipo',e.target.value)} placeholder="Alimento / grupo"
+                          style={{flex:1.3,padding:'9px 11px',borderRadius:10,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.surface,outline:'none',fontFamily:F,minWidth:0}}/>
+                        <input value={it.porcion} onChange={e=>setItem(c.comida,i,'porcion',e.target.value)} placeholder="Porción"
+                          style={{flex:1,padding:'9px 11px',borderRadius:10,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.surface,outline:'none',fontFamily:F,minWidth:0}}/>
+                        <button onClick={()=>delItem(c.comida,i)} style={{width:32,borderRadius:10,border:`1px solid ${C2.border}`,background:C2.surface,color:C2.muted,fontSize:12,cursor:'pointer',flexShrink:0}}>✕</button>
+                      </div>
+                    ))}
+                    <button onClick={()=>addItem(c.comida)} style={{fontSize:11.5,color:meta.color,background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>+ Agregar alimento</button>
+                  </div>
+                );
+              })}
+              {/* Agregar tiempos de comida que falten */}
+              {PAUTA_COMIDAS.filter(m=>!pauta.find(c=>c.comida===m.k)).length>0&&(
+                <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
+                  {PAUTA_COMIDAS.filter(m=>!pauta.find(c=>c.comida===m.k)).map(m=>(
+                    <button key={m.k} onClick={()=>addComida(m.k)} style={{padding:'7px 12px',borderRadius:10,border:`1px dashed ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:11.5,fontWeight:700}}>
+                      + {m.icon} {m.k}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {/* Indicaciones generales */}
+              <div style={{marginTop:6}}>
+                <div style={lbl}>Indicaciones generales</div>
+                <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Beber 2 L de agua al día, evitar frituras, caminar 30 min..."
+                  style={{...inp,fontSize:13,fontWeight:500,minHeight:80,resize:'none'}}/>
+              </div>
+            </div>
+          )}
+
+          {planError&&<div style={{color:'#FF3B30',fontSize:12,fontWeight:600,marginTop:12,textAlign:'center',padding:'8px 12px',background:'#FF3B3010',borderRadius:10}}>{planError}</div>}
         </div>
-        {planError&&<div style={{color:'#FF3B30',fontSize:12,fontWeight:600,marginBottom:10,textAlign:'center',padding:'8px 12px',background:'#FF3B3010',borderRadius:10}}>{planError}</div>}
-        <div style={{display:'flex',gap:10}}>
-          <button onClick={onClose} style={{flex:1,padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'none',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>Cancelar</button>
-          <button onClick={guardar} disabled={loading||!puedeGuardar} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:puedeGuardar?'#D42020':'#C7C7CC',color:'white',fontFamily:F,cursor:puedeGuardar?'pointer':'default',fontSize:14,fontWeight:800}}>
-            {loading?'Guardando...':isEdit?'Guardar cambios ✓':'Crear paciente ✓'}
-          </button>
+
+        {/* Footer navegación */}
+        <div style={{flexShrink:0,padding:'12px 20px calc(20px + env(safe-area-inset-bottom))',borderTop:`1px solid ${C2.border}`,display:'flex',gap:10}}>
+          {step>0
+            ? <button onClick={()=>setStep(step-1)} style={{flex:1,padding:'14px',borderRadius:14,border:`1px solid ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:700}}>‹ Atrás</button>
+            : <button onClick={onClose} style={{flex:1,padding:'14px',borderRadius:14,border:`1px solid ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>Cancelar</button>}
+          {step<2
+            ? <button onClick={()=>{ if(step===0&&!datosOk){ setPlanError('Completa nombre y email válido para continuar.'); return;} setPlanError(''); setStep(step+1); }}
+                style={{flex:2,padding:'14px',borderRadius:14,border:'none',background:(step===0&&!datosOk)?'#C7C7CC':'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>Continuar ›</button>
+            : <button onClick={guardar} disabled={loading} style={{flex:2,padding:'14px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
+                {loading?'Guardando...':isEdit?'Guardar pauta ✓':'Crear pauta ✓'}
+              </button>}
         </div>
       </div>
     </div>
@@ -5338,20 +5538,52 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
           </div>
         )}
 
-        {/* Recomendaciones */}
-        {plan.recomendaciones?.length>0&&(
-          <div style={{marginBottom:16}}>
-            <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Recomendaciones</div>
-            <div style={{display:'flex',flexDirection:'column',gap:6}}>
-              {(plan.recomendaciones||[]).map((r,i)=>(
-                <div key={i} style={{background:dark?'rgba(255,255,255,0.06)':'#F2F2F7',borderRadius:12,padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                  <span style={{fontSize:13,fontWeight:600,color:C.text}}>{r.tipo}</span>
-                  <span style={{fontSize:11,color:C.textSec}}>{r.porcion}</span>
+        {/* Prescripción: macros */}
+        {(()=>{
+          const norm = normalizeRecs(plan.recomendaciones);
+          const mac = norm.macros||{};
+          const tieneMacros = mac.prot!=null||mac.carbs!=null||mac.grasas!=null;
+          return (<>
+            {tieneMacros&&(
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Prescripción de macronutrientes</div>
+                <div style={{display:'flex',gap:8}}>
+                  {[{l:'Proteínas',v:mac.prot,c:'#34C759'},{l:'Carbohid.',v:mac.carbs,c:'#FF9500'},{l:'Lípidos',v:mac.grasas,c:'#5856D6'}].map(({l,v,c})=>(
+                    <div key={l} style={{flex:1,background:dark?'rgba(255,255,255,0.06)':'#F2F2F7',borderRadius:14,padding:'10px 8px',textAlign:'center',borderTop:`3px solid ${c}`}}>
+                      <div style={{fontSize:17,fontWeight:800,color:C.text}}>{v!=null?v:'—'}<span style={{fontSize:10,fontWeight:600,color:C.textSec}}>g</span></div>
+                      <div style={{fontSize:9.5,color:C.textSec,fontWeight:600,marginTop:1}}>{l}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
+            )}
+            {/* Pauta por tiempos de comida */}
+            {norm.comidas.length>0&&(
+              <div style={{marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Pauta alimentaria</div>
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {norm.comidas.map((c,ci)=>{
+                    const meta = PAUTA_COMIDAS.find(m=>m.k===c.comida) || {icon:'🍽️',color:'#8E8E93'};
+                    return (
+                      <div key={ci} style={{background:dark?'rgba(255,255,255,0.05)':'#F2F2F7',borderRadius:14,padding:'10px 12px'}}>
+                        <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:6}}>
+                          <span style={{fontSize:14}}>{meta.icon}</span>
+                          <span style={{fontSize:12.5,fontWeight:800,color:meta.color}}>{c.comida}</span>
+                        </div>
+                        {(c.items||[]).map((it,i)=>(
+                          <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderTop:i>0?`1px solid ${dark?'rgba(255,255,255,0.06)':'#E5E5EA'}`:'none'}}>
+                            <span style={{fontSize:12.5,color:C.text}}>{it.tipo}</span>
+                            <span style={{fontSize:11,color:C.textSec,fontWeight:600}}>{it.porcion}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>);
+        })()}
 
         <div style={{display:'flex',gap:10}}>
           <button onClick={()=>onEdit&&onEdit(plan)} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
@@ -9767,11 +9999,12 @@ function AppCore() {
       }
 
       // Recordatorios inteligentes del plan del nutricionista
-      if(nutriPlan?.recomendaciones?.length>0) {
+      const recsPlan = recsToArray(nutriPlan?.recomendaciones);
+      if(recsPlan.length>0) {
         const recsKey = 'nutri_recs_'+todayKey();
         const sentRecs = LS.get(recsKey, {});
         const hora = h*60+m;
-        nutriPlan.recomendaciones.forEach((rec, idx) => {
+        recsPlan.forEach((rec, idx) => {
           const recKey = `rec_${idx}`;
           if(sentRecs[recKey]) return;
           // Distribuir recordatorios: fruta→11:30, verdura→13:30, agua→10:00, otros→random entre 10-17h
@@ -11036,11 +11269,21 @@ function AppCore() {
                   <div style={{fontSize:11,color:'#1D3557',lineHeight:1.5,fontStyle:'italic'}}>"{nutriPlan.mensaje}"</div>
                 </div>
               )}
-              {nutriPlan.recomendaciones?.length>0&&(
+              {(()=>{ const nPlanMac = normalizeRecs(nutriPlan.recomendaciones).macros; const tieneMac = nPlanMac.prot!=null||nPlanMac.carbs!=null||nPlanMac.grasas!=null; return tieneMac&&(
+                <div style={{display:'flex',gap:6,marginBottom:10}}>
+                  {[{l:'Prot',v:nPlanMac.prot,c:'#34C759'},{l:'Carbs',v:nPlanMac.carbs,c:'#FF9500'},{l:'Lípidos',v:nPlanMac.grasas,c:'#5856D6'}].map(({l,v,c})=>(
+                    <div key={l} style={{flex:1,background:'white',borderRadius:10,padding:'7px 6px',textAlign:'center',border:'1px solid #1D355720',borderTop:`3px solid ${c}`}}>
+                      <div style={{fontSize:14,fontWeight:800,color:'#1D3557'}}>{v!=null?v:'—'}<span style={{fontSize:9,fontWeight:600,color:C.textSec}}>g</span></div>
+                      <div style={{fontSize:9,color:C.textSec,fontWeight:600}}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+              ); })()}
+              {recsToArray(nutriPlan.recomendaciones).length>0&&(
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:'#1D3557',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>Tus recomendaciones esta semana</div>
+                  <div style={{fontSize:10,fontWeight:700,color:'#1D3557',marginBottom:6,textTransform:'uppercase',letterSpacing:.5}}>Tu pauta</div>
                   <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-                    {(nutriPlan.recomendaciones||[]).filter(r=>{
+                    {recsToArray(nutriPlan.recomendaciones).filter(r=>{
                       // Filtrar recomendaciones que contradigan alergias
                       const tipo = (r.tipo||'').toLowerCase();
                       if(userAllergens.includes('gluten') && (tipo.includes('pan')||tipo.includes('trigo')||tipo.includes('cereal'))) return false;
