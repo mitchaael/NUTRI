@@ -859,13 +859,14 @@ const MI = {Desayuno:"🌅",Almuerzo:"☀️",Once:"☕",Cena:"🌙",Snack:"🍎
    Tiempos de comida con nombres profesionales chilenos.
 ═══════════════════════════════════════════════════════ */
 const PAUTA_COMIDAS = [
-  {k:'Desayuno',      icon:'🌅', color:'#FF9500'},
-  {k:'Colación AM',   icon:'🍎', color:'#34C759'},
-  {k:'Almuerzo',      icon:'☀️', color:'#FF3B30'},
-  {k:'Once',          icon:'☕', color:'#AF52DE'},
-  {k:'Cena',          icon:'🌙', color:'#5856D6'},
-  {k:'Colación PM',   icon:'🌰', color:'#A2845E'},
+  {k:'Desayuno',      icon:'🌅', color:'#FF9500', hora:'08:00'},
+  {k:'Colación AM',   icon:'🍎', color:'#34C759', hora:'11:00'},
+  {k:'Almuerzo',      icon:'☀️', color:'#FF3B30', hora:'13:30'},
+  {k:'Once',          icon:'☕', color:'#AF52DE', hora:'17:00'},
+  {k:'Cena',          icon:'🌙', color:'#5856D6', hora:'20:30'},
+  {k:'Colación PM',   icon:'🌰', color:'#A2845E', hora:'22:00'},
 ];
+const horaDeComida = (k)=> (PAUTA_COMIDAS.find(m=>m.k===k)||{}).hora || '';
 const MACRO_KCAL = {prot:4, carbs:4, grasas:9};
 const macrosToKcal = (mac={}) =>
   Math.round((+mac.prot||0)*4 + (+mac.carbs||0)*4 + (+mac.grasas||0)*9);
@@ -890,7 +891,7 @@ const normalizeRecs = (r) => {
 const recsToArray = (r) => {
   const n = normalizeRecs(r);
   const out = [];
-  n.comidas.forEach(c => (c.items||[]).forEach(it => out.push({...it, comida:c.comida})));
+  n.comidas.forEach(c => (c.items||[]).forEach(it => out.push({...it, comida:c.comida, hora:c.hora||''})));
   return out;
 };
 
@@ -5211,13 +5212,8 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
     grasas:recsInit.macros.grasas?? null,
   });
   const [pauta,  setPauta]  = React.useState(()=>{
-    if(recsInit.comidas.length) return recsInit.comidas.map(c=>({comida:c.comida, items:(c.items||[]).map(it=>({...it}))}));
-    return [
-      {comida:'Desayuno', items:[]},
-      {comida:'Almuerzo', items:[]},
-      {comida:'Once',     items:[]},
-      {comida:'Cena',     items:[]},
-    ];
+    if(recsInit.comidas.length) return recsInit.comidas.map(c=>({comida:c.comida, hora:c.hora||horaDeComida(c.comida), items:(c.items||[]).map(it=>({...it}))}));
+    return ['Desayuno','Almuerzo','Once','Cena'].map(k=>({comida:k, hora:horaDeComida(k), items:[]}));
   });
   const [loading,setLoading]= React.useState(false);
   const [planError,setPlanError]= React.useState('');
@@ -5245,8 +5241,9 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
   };
 
   const setMacro = (k,v)=> setMacros(m=>({...m,[k]:Math.max(0, v)}));
-  const addComida = (k)=> setPauta(p=> p.find(c=>c.comida===k)?p:[...p,{comida:k,items:[]}]);
+  const addComida = (k)=> setPauta(p=> p.find(c=>c.comida===k)?p:[...p,{comida:k,hora:horaDeComida(k),items:[]}]);
   const removeComida = (k)=> setPauta(p=> p.filter(c=>c.comida!==k));
+  const setHora = (k,v)=> setPauta(p=> p.map(c=> c.comida===k?{...c,hora:v}:c));
   const addItem = (k)=> setPauta(p=> p.map(c=> c.comida===k?{...c,items:[...c.items,{tipo:'',porcion:''}]}:c));
   const setItem = (k,i,field,val)=> setPauta(p=> p.map(c=> c.comida===k?{...c,items:c.items.map((it,j)=>j===i?{...it,[field]:val}:it)}:c));
   const delItem = (k,i)=> setPauta(p=> p.map(c=> c.comida===k?{...c,items:c.items.filter((_,j)=>j!==i)}:c));
@@ -5256,7 +5253,7 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
     setPlanError('');
     setLoading(true);
     const comidasLimpias = pauta
-      .map(c=>({comida:c.comida, items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())}))
+      .map(c=>({comida:c.comida, hora:c.hora||'', items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())}))
       .filter(c=>c.items.length);
     const recomendaciones = {
       v: 2,
@@ -5410,9 +5407,14 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                 const meta = PAUTA_COMIDAS.find(m=>m.k===c.comida) || {icon:'🍽️',color:'#8E8E93'};
                 return (
                   <div key={c.comida} style={{background:C2.alt,borderRadius:16,padding:'12px 14px',marginBottom:10,border:`1px solid ${C2.border}`}}>
-                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:c.items.length?10:0}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
                       <span style={{fontSize:16}}>{meta.icon}</span>
                       <div style={{flex:1,fontSize:13.5,fontWeight:800,color:meta.color}}>{c.comida}</div>
+                      <div style={{display:'flex',alignItems:'center',gap:5,background:C2.surface,borderRadius:9,padding:'5px 9px',border:`1px solid ${C2.border}`}}>
+                        <span style={{fontSize:12}}>🕐</span>
+                        <input type="time" value={c.hora||''} onChange={e=>setHora(c.comida,e.target.value)}
+                          style={{border:'none',background:'none',color:C2.text,fontSize:12.5,fontWeight:700,fontFamily:F,outline:'none',width:62,padding:0}}/>
+                      </div>
                       <button onClick={()=>removeComida(c.comida)} style={{background:'none',border:'none',color:C2.muted,fontSize:13,cursor:'pointer'}}>✕</button>
                     </div>
                     {c.items.map((it,i)=>(
@@ -5569,6 +5571,7 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
                         <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:6}}>
                           <span style={{fontSize:14}}>{meta.icon}</span>
                           <span style={{fontSize:12.5,fontWeight:800,color:meta.color}}>{c.comida}</span>
+                          {c.hora&&<span style={{marginLeft:'auto',fontSize:11,fontWeight:700,color:meta.color,background:meta.color+'18',borderRadius:8,padding:'2px 8px'}}>🕐 {c.hora}</span>}
                         </div>
                         {(c.items||[]).map((it,i)=>(
                           <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderTop:i>0?`1px solid ${dark?'rgba(255,255,255,0.06)':'#E5E5EA'}`:'none'}}>
@@ -10007,15 +10010,23 @@ function AppCore() {
         recsPlan.forEach((rec, idx) => {
           const recKey = `rec_${idx}`;
           if(sentRecs[recKey]) return;
-          // Distribuir recordatorios: fruta→11:30, verdura→13:30, agua→10:00, otros→random entre 10-17h
           const tipo = (rec.tipo||'').toLowerCase();
           let targetMin = 600; // 10:00 default
-          if(tipo.includes('fruta'))   targetMin = 11*60+30;
-          if(tipo.includes('verdura')) targetMin = 13*60+30;
-          if(tipo.includes('agua'))    targetMin = 10*60;
-          if(tipo.includes('legumbre'))targetMin = 12*60;
+          // Si el nutricionista prescribió una hora para esa comida, usarla
+          if(rec.hora && /^\d{1,2}:\d{2}$/.test(rec.hora)){
+            const [hh,mm] = rec.hora.split(':').map(Number);
+            targetMin = hh*60+mm;
+          } else {
+            if(tipo.includes('fruta'))   targetMin = 11*60+30;
+            if(tipo.includes('verdura')) targetMin = 13*60+30;
+            if(tipo.includes('agua'))    targetMin = 10*60;
+            if(tipo.includes('legumbre'))targetMin = 12*60;
+          }
           if(hora>=targetMin && hora<targetMin+30) {
-            const msgs = [
+            const msgs = rec.hora ? [
+              `🕐 ${rec.comida||'Comida'} (${rec.hora}): ${rec.tipo} — ${rec.porcion}`,
+              `👩‍⚕️ Es hora de tu ${(rec.comida||'comida').toLowerCase()}: ${rec.tipo} (${rec.porcion})`,
+            ] : [
               `🌿 Tu nutricionista recomienda: ${rec.porcion} de ${rec.tipo} hoy`,
               `💡 Recuerda tu meta de ${rec.tipo} — ${rec.porcion}`,
               `👩‍⚕️ ¿Ya cumpliste tu porción de ${rec.tipo}? Meta: ${rec.porcion}`,
@@ -11296,7 +11307,7 @@ function AppCore() {
                     }).map((r,i)=>(
                       <div key={i} style={{background:'white',borderRadius:10,padding:'5px 10px',border:'1px solid #1D355720'}}>
                         <div style={{fontSize:11,fontWeight:700,color:'#1D3557'}}>{r.tipo}</div>
-                        <div style={{fontSize:9,color:C.textSec}}>{r.porcion}</div>
+                        <div style={{fontSize:9,color:C.textSec}}>{r.porcion}{r.hora?` · 🕐 ${r.hora}`:''}</div>
                       </div>
                     ))}
                   </div>
