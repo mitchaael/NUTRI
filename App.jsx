@@ -5,7 +5,7 @@ import { supabase, syncProfile, syncSettings, syncDay, syncWeight, restoreFromSu
    BASE DE DATOS — 300+ productos supermercados chilenos
    porcion = gramos de la porción de referencia
 ═══════════════════════════════════════════════════════ */
-const DB = [
+const DB_RAW = [
   /* ── LÁCTEOS ── */
   {id:1,  nombre:"Leche entera Soprole",          marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:160, prot:8,   carbs:12,  grasas:9,   fibra:0, azucar:4.8, sodio:120,   emoji:"🥛", precio:1090, pesoCompra:1000},
   {id:2,  nombre:"Leche semidescremada Soprole",  marca:"Soprole",      cat:"Lácteos",    porcion:250, cal:120, prot:9,   carbs:12,  grasas:4.5, fibra:0, azucar:4.8, sodio:130,   emoji:"🥛"},
@@ -635,6 +635,27 @@ const DB = [
   {id:514,nombre:"Batata / Camote cocido",      marca:"Natural",     cat:"Verduras",   porcion:130, cal:112, prot:2,   carbs:26,  grasas:0.1, fibra:3.8, azucar:5.4,sodio:72,  emoji:"🍠"},
   {id:515,nombre:"Kéfir natural",               marca:"Genérico",    cat:"Lácteos",    porcion:250, cal:150, prot:10,  carbs:12,  grasas:5,   fibra:0,   azucar:8,  sodio:90,  emoji:"🥛"},
 ];
+
+/* ── Saneamiento nutricional ──
+   Corrige invariantes físicamente imposibles en los datos de la base
+   (p.ej. azúcar > carbohidratos, o fibra > carbohidratos), que aparecían
+   en algunos productos por valores placeholder. Se aplica una sola vez al
+   cargar la app, así toda la app (búsqueda, totales, tips, sellos) usa
+   datos coherentes sin tener que editar cada producto a mano. */
+const sanitizeFoodData = (f) => {
+  const carbs = typeof f.carbs === 'number' ? Math.max(0, f.carbs) : f.carbs;
+  let azucar = f.azucar, fibra = f.fibra;
+  if(typeof azucar === 'number'){
+    azucar = Math.max(0, azucar);
+    if(typeof carbs === 'number') azucar = Math.min(azucar, carbs); // azúcar ≤ carbohidratos
+  }
+  if(typeof fibra === 'number'){
+    fibra = Math.max(0, fibra);
+    if(typeof carbs === 'number') fibra = Math.min(fibra, carbs);   // fibra ≤ carbohidratos
+  }
+  return {...f, carbs, azucar, fibra};
+};
+const DB = DB_RAW.map(sanitizeFoodData);
 
 
 /* ═══════════════════════════════════════════════════════
@@ -4923,6 +4944,8 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   const [showNuevoPlan, setShowNuevoPlan] = React.useState(false);
   const [selectedPaciente, setSelectedPaciente] = React.useState(null);
   const [codigoPro, setCodigoPro] = React.useState(()=>LS.get('professional_code',''));
+  const [copiado, setCopiado] = React.useState(false);
+  const [editPlan, setEditPlan] = React.useState(null);
 
   // Verificación server-side de suscripción al montar (segunda capa de seguridad)
   React.useEffect(()=>{
@@ -4977,13 +5000,16 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   },[supabaseUser?.id]);
 
   const hoy = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+  const objLabels = {bajar:'Bajar peso',mantener:'Mantener peso',subir:'Ganar músculo',salud:'Salud general'};
 
-  const getStatusColor = (plan) => {
-    if(!plan.ultima_actividad) return '#C7C7CC';
+  // Estado real del paciente: distingue "sin vincular" de "inactivo"
+  const getStatus = (plan) => {
+    if(!plan.paciente_id) return {color:'#C7C7CC', label:'Sin vincular'};
+    if(!plan.ultima_actividad) return {color:'#C7C7CC', label:'Sin registros'};
     const diff = (Date.now() - new Date(plan.ultima_actividad).getTime()) / 86400000;
-    if(diff < 1) return '#34C759';
-    if(diff < 2) return '#FF9500';
-    return '#FF3B30';
+    if(diff < 1.5) return {color:'#34C759', label:'Al día'};
+    if(diff < 3)   return {color:'#FF9500', label:'Hace días'};
+    return {color:'#FF3B30', label:'Inactivo'};
   };
 
   if(!supabaseUser) {
@@ -5025,9 +5051,9 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         {/* Stats rápidas */}
         <div style={{display:'flex',gap:1,padding:'10px 16px 14px'}}>
           {[
-            {l:'Al día',   v:pacientes.filter(p=>getStatusColor(p)==='#34C759').length, c:'#34C759'},
-            {l:'Alerta',   v:pacientes.filter(p=>getStatusColor(p)==='#FF9500').length, c:'#FF9500'},
-            {l:'Inactivos',v:pacientes.filter(p=>getStatusColor(p)==='#FF3B30'||getStatusColor(p)==='#C7C7CC').length, c:'#FF3B30'},
+            {l:'Al día',     v:pacientes.filter(p=>getStatus(p).color==='#34C759').length, c:'#34C759'},
+            {l:'Sin vincular',v:pacientes.filter(p=>!p.paciente_id).length, c:'#C7C7CC'},
+            {l:'Inactivos',  v:pacientes.filter(p=>getStatus(p).color==='#FF3B30').length, c:'#FF3B30'},
           ].map(({l,v,c})=>(
             <div key={l} style={{flex:1,textAlign:'center'}}>
               <div style={{fontSize:22,fontWeight:800,color:c,lineHeight:1}}>{v}</div>
@@ -5041,49 +5067,70 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         {/* Código de invitación */}
         <div style={{background:dark?'#1C1C1E':'white',borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)'}`}}>
           <div style={{fontSize:11,color:dark?'rgba(255,255,255,0.5)':'#8E8E93',marginBottom:6,fontWeight:600}}>Tu código para pacientes</div>
-          <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
             <div style={{fontSize:22,fontWeight:800,color:'#D42020',letterSpacing:2,flex:1}}>{codigoPro}</div>
-            <button onClick={()=>{navigator.clipboard?.writeText(codigoPro);haptic('light');}} style={{background:'#D4202018',border:'none',borderRadius:10,padding:'8px 12px',cursor:'pointer',fontFamily:F,fontSize:11,fontWeight:700,color:'#D42020'}}>
-              Copiar
+            <button onClick={()=>{navigator.clipboard?.writeText(codigoPro);haptic('light');setCopiado(true);setTimeout(()=>setCopiado(false),1500);}} style={{background:'#D4202018',border:'none',borderRadius:10,padding:'8px 12px',cursor:'pointer',fontFamily:F,fontSize:11,fontWeight:700,color:'#D42020'}}>
+              {copiado?'✓ Copiado':'Copiar'}
+            </button>
+            <button onClick={()=>{
+              const txt = `¡Hola! Te invito a usar Calorú conmigo para seguir tu nutrición. Descarga la app, crea tu cuenta y en Perfil → Ajustes ingresa mi código de nutricionista: ${codigoPro} — así activas Pro gratis y yo puedo ver tu progreso. 🥗`;
+              window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+              haptic('light');
+            }} style={{background:'#25D366',border:'none',borderRadius:10,padding:'8px 12px',cursor:'pointer',fontFamily:F,fontSize:11,fontWeight:700,color:'white',display:'flex',alignItems:'center',gap:4}}>
+              📲 Invitar
             </button>
           </div>
-          <div style={{fontSize:10,color:dark?'rgba(255,255,255,0.3)':'#C7C7CC',marginTop:4}}>El paciente ingresa este código en su perfil para vincularse contigo</div>
+          <div style={{fontSize:10,color:dark?'rgba(255,255,255,0.3)':'#C7C7CC',marginTop:6,lineHeight:1.4}}>El paciente ingresa este código en <strong>Perfil → Ajustes</strong> para vincularse contigo y activar Pro gratis</div>
         </div>
 
         {/* Lista de pacientes */}
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
           <div style={{fontSize:13,fontWeight:700,color:dark?'white':'#1C1C1E'}}>Mis pacientes</div>
-          <button onClick={()=>setShowNuevoPlan(true)} style={{background:'#D42020',border:'none',borderRadius:10,padding:'6px 14px',cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,color:'white'}}>
-            + Nuevo plan
+          <button onClick={()=>{setEditPlan(null);setShowNuevoPlan(true);}} style={{background:'#D42020',border:'none',borderRadius:10,padding:'6px 14px',cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,color:'white'}}>
+            + Nuevo paciente
           </button>
         </div>
 
         {loading&&<div style={{textAlign:'center',padding:30,color:dark?'rgba(255,255,255,0.4)':'#C7C7CC',fontSize:13}}>Cargando pacientes...</div>}
 
         {!loading&&pacientes.length===0&&(
-          <div style={{textAlign:'center',padding:'40px 20px',background:dark?'#1C1C1E':'white',borderRadius:20,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}`}}>
-            <div style={{fontSize:44,marginBottom:12}}>👥</div>
-            <div style={{fontSize:15,fontWeight:700,color:dark?'white':'#1C1C1E',marginBottom:8}}>Sin pacientes aún</div>
-            <div style={{fontSize:12,color:dark?'rgba(255,255,255,0.4)':'#8E8E93',lineHeight:1.5,marginBottom:20}}>Comparte tu código <strong style={{color:'#D42020'}}>{codigoPro}</strong> con tus pacientes para que se vinculen a ti</div>
-            <button onClick={()=>setShowNuevoPlan(true)} style={{background:'#D42020',border:'none',borderRadius:14,padding:'12px 24px',cursor:'pointer',fontFamily:F,fontSize:13,fontWeight:700,color:'white'}}>
-              Crear primer plan
+          <div style={{padding:'28px 20px',background:dark?'#1C1C1E':'white',borderRadius:20,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}`}}>
+            <div style={{textAlign:'center',fontSize:44,marginBottom:10}}>👥</div>
+            <div style={{textAlign:'center',fontSize:15,fontWeight:800,color:dark?'white':'#1C1C1E',marginBottom:14}}>Empieza con tu primer paciente</div>
+            <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:18}}>
+              {[
+                {n:'1',t:'Crea el paciente',s:'Agrega su nombre, email y sus metas (calorías, objetivo, recomendaciones).'},
+                {n:'2',t:'Comparte tu código',s:<>Envíale tu código <strong style={{color:'#D42020'}}>{codigoPro}</strong> por WhatsApp con el botón de arriba.</>},
+                {n:'3',t:'Sigue su progreso',s:'Cuando se vincule, verás su actividad y podrás ajustar su plan cuando quieras.'},
+              ].map(({n,t,s})=>(
+                <div key={n} style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                  <div style={{width:24,height:24,borderRadius:12,background:'#D42020',color:'white',fontSize:12,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{n}</div>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,color:dark?'white':'#1C1C1E'}}>{t}</div>
+                    <div style={{fontSize:11.5,color:dark?'rgba(255,255,255,0.45)':'#8E8E93',lineHeight:1.45,marginTop:1}}>{s}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={()=>{setEditPlan(null);setShowNuevoPlan(true);}} style={{width:'100%',background:'#D42020',border:'none',borderRadius:14,padding:'13px',cursor:'pointer',fontFamily:F,fontSize:14,fontWeight:800,color:'white'}}>
+              + Agregar primer paciente
             </button>
           </div>
         )}
 
         {!loading&&pacientes.map((plan)=>{
-          const statusColor = getStatusColor(plan);
-          const nombrePaciente = plan.paciente?.nombre || 'Paciente';
+          const st = getStatus(plan);
+          const nombrePaciente = plan.nombre || 'Paciente';
           return(
             <div key={plan.id} onClick={()=>setSelectedPaciente(plan)} style={{background:dark?'#1C1C1E':'white',borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1.5px solid ${dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}`,cursor:'pointer'}}>
               <div style={{display:'flex',alignItems:'center',gap:12}}>
-                <div style={{width:10,height:10,borderRadius:5,background:statusColor,flexShrink:0}}/>
+                <div style={{width:10,height:10,borderRadius:5,background:st.color,flexShrink:0}}/>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:700,color:dark?'white':'#1C1C1E'}}>{nombrePaciente}</div>
-                  <div style={{fontSize:11,color:dark?'rgba(255,255,255,0.4)':'#8E8E93',marginTop:2}}>{plan.nombre} · {plan.calorias_meta} kcal/día</div>
+                  <div style={{fontSize:11,color:dark?'rgba(255,255,255,0.4)':'#8E8E93',marginTop:2}}>{objLabels[plan.objetivo]||plan.objetivo} · {plan.calorias_meta} kcal/día</div>
                 </div>
                 <div style={{textAlign:'right'}}>
-                  <div style={{fontSize:10,color:statusColor,fontWeight:700}}>{statusColor==='#34C759'?'Al día':statusColor==='#FF9500'?'Ayer':statusColor==='#FF3B30'?'Inactivo':'Sin datos'}</div>
+                  <div style={{fontSize:10,color:st.color,fontWeight:700}}>{st.label}</div>
                 </div>
               </div>
             </div>
@@ -5096,40 +5143,58 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         </div>
       </div>
 
-      {/* Modal Nuevo Plan */}
-      {showNuevoPlan&&<NuevoPlanModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} onClose={()=>setShowNuevoPlan(false)} onCreated={(plan)=>{setPacientes(prev=>[plan,...prev]);setShowNuevoPlan(false);}}/>}
+      {/* Modal Nuevo / Editar Plan */}
+      {showNuevoPlan&&<NuevoPlanModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} editPlan={editPlan} onClose={()=>{setShowNuevoPlan(false);setEditPlan(null);}}
+        onCreated={(plan)=>{setPacientes(prev=>[plan,...prev]);setShowNuevoPlan(false);setEditPlan(null);}}
+        onUpdated={(plan)=>{setPacientes(prev=>prev.map(p=>p.id===plan.id?plan:p));setShowNuevoPlan(false);setEditPlan(null);setSelectedPaciente(s=>s&&s.id===plan.id?plan:s);}}/>}
       {/* Modal Detalle Paciente */}
-      {selectedPaciente&&<DetallePacienteModal C={C} F={F} dark={dark} plan={selectedPaciente} onClose={()=>setSelectedPaciente(null)} onDelete={(id)=>{setPacientes(prev=>prev.filter(p=>p.id!==id));setSelectedPaciente(null);}}/>}
+      {selectedPaciente&&<DetallePacienteModal C={C} F={F} dark={dark} plan={selectedPaciente}
+        onEdit={(plan)=>{setSelectedPaciente(null);setEditPlan(plan);setShowNuevoPlan(true);}}
+        onClose={()=>setSelectedPaciente(null)} onDelete={(id)=>{setPacientes(prev=>prev.filter(p=>p.id!==id));setSelectedPaciente(null);}}/>}
     </div>
   );
 }
 
 /* ─── Modal Nuevo Plan Nutricional ─── */
-function NuevoPlanModal({C, F, dark, supabaseUser, onClose, onCreated}) {
-  const [nombre, setNombre] = React.useState('');
-  const [email,  setEmail]  = React.useState('');
-  const [cal,    setCal]    = React.useState('1800');
-  const [obj,    setObj]    = React.useState('bajar');
-  const [msg,    setMsg]    = React.useState('');
-  const [recs,   setRecs]   = React.useState([{tipo:'fruta',porcion:'2 porciones/día'},{tipo:'verdura',porcion:'3 porciones/día'},{tipo:'agua',porcion:'8 vasos/día'}]);
+function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCreated, onUpdated}) {
+  const isEdit = !!editPlan;
+  const [nombre, setNombre] = React.useState(editPlan?.nombre||'');
+  const [email,  setEmail]  = React.useState(editPlan?.paciente_email||'');
+  const [cal,    setCal]    = React.useState(String(editPlan?.calorias_meta||'1800'));
+  const [obj,    setObj]    = React.useState(editPlan?.objetivo||'bajar');
+  const [msg,    setMsg]    = React.useState(editPlan?.mensaje||'');
+  const [recs,   setRecs]   = React.useState(editPlan?.recomendaciones?.length?editPlan.recomendaciones:[{tipo:'fruta',porcion:'2 porciones/día'},{tipo:'verdura',porcion:'3 porciones/día'},{tipo:'agua',porcion:'8 vasos/día'}]);
   const [loading,setLoading]= React.useState(false);
   const [planError,setPlanError]= React.useState('');
 
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const puedeGuardar = nombre.trim() && emailValido;
+
   const guardar = async () => {
-    if(!nombre.trim()) return;
+    if(!puedeGuardar) return;
     setPlanError('');
     setLoading(true);
-    const {data, error} = await supabase.from('nutrition_plans').insert({
-      nutricionista_id: supabaseUser.id,
+    const payload = {
       nombre: nombre.trim(),
       objetivo: obj,
       calorias_meta: parseInt(cal)||1800,
       mensaje: msg.trim(),
       recomendaciones: recs,
-      paciente_email: email.trim().toLowerCase() || null,
+      paciente_email: email.trim().toLowerCase(),
+    };
+    if(isEdit){
+      const {data,error} = await supabase.from('nutrition_plans').update(payload).eq('id',editPlan.id).select().single();
+      if(error){ setPlanError('Error al guardar los cambios. Inténtalo de nuevo.'); setLoading(false); return; }
+      if(data){ haptic('success'); onUpdated&&onUpdated(data); }
+      setLoading(false);
+      return;
+    }
+    const {data, error} = await supabase.from('nutrition_plans').insert({
+      nutricionista_id: supabaseUser.id,
+      ...payload,
     }).select().single();
     if(error) { setPlanError('Error al guardar el plan. Inténtalo de nuevo.'); setLoading(false); return; }
-    if(data) onCreated(data);
+    if(data){ haptic('success'); onCreated(data); }
     setLoading(false);
   };
 
@@ -5139,18 +5204,28 @@ function NuevoPlanModal({C, F, dark, supabaseUser, onClose, onCreated}) {
         <div style={{display:'flex',justifyContent:'center',marginBottom:12}}>
           <div style={{width:36,height:4,borderRadius:2,background:dark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'}}/>
         </div>
-        <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:16}}>Nuevo plan nutricional</div>
-        {[
-          {label:'Nombre del paciente',val:nombre,set:setNombre,ph:'Ej: María González',type:'text'},
-          {label:'Email del paciente (opcional)',val:email,set:setEmail,ph:'Ej: maria@gmail.com',type:'email'},
-          {label:'Calorías meta/día',val:cal,set:setCal,ph:'1800',type:'number'},
-        ].map(({label,val,set,ph,type})=>(
-          <div key={label} style={{marginBottom:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>{label}</div>
-            <input value={val} onChange={e=>set(e.target.value)} placeholder={ph} type={type}
-              style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+        <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:16}}>{isEdit?'Editar plan':'Nuevo paciente'}</div>
+        {/* Nombre */}
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Nombre del paciente</div>
+          <input value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: María González" type="text"
+            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+        </div>
+        {/* Email — obligatorio para la vinculación */}
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Email del paciente</div>
+          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Ej: maria@gmail.com" type="email" inputMode="email" autoCapitalize="none"
+            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${email&&!emailValido?'#FF3B30':C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+          <div style={{fontSize:11,color:email&&!emailValido?'#FF3B30':C.textMuted,marginTop:5,lineHeight:1.4}}>
+            {email&&!emailValido?'Ingresa un email válido.':'⚠️ Debe ser el MISMO correo con que tu paciente se registra en Calorú — así se vincula automáticamente.'}
           </div>
-        ))}
+        </div>
+        {/* Calorías */}
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:6}}>Calorías meta/día</div>
+          <input value={cal} onChange={e=>setCal(e.target.value)} placeholder="1800" type="number" inputMode="numeric"
+            style={{width:'100%',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,fontSize:15,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+        </div>
         <div style={{marginBottom:12}}>
           <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Objetivo</div>
           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
@@ -5183,8 +5258,8 @@ function NuevoPlanModal({C, F, dark, supabaseUser, onClose, onCreated}) {
         {planError&&<div style={{color:'#FF3B30',fontSize:12,fontWeight:600,marginBottom:10,textAlign:'center',padding:'8px 12px',background:'#FF3B3010',borderRadius:10}}>{planError}</div>}
         <div style={{display:'flex',gap:10}}>
           <button onClick={onClose} style={{flex:1,padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'none',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>Cancelar</button>
-          <button onClick={guardar} disabled={loading||!nombre.trim()} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:nombre.trim()?'#D42020':'#C7C7CC',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
-            {loading?'Guardando...':'Crear plan ✓'}
+          <button onClick={guardar} disabled={loading||!puedeGuardar} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:puedeGuardar?'#D42020':'#C7C7CC',color:'white',fontFamily:F,cursor:puedeGuardar?'pointer':'default',fontSize:14,fontWeight:800}}>
+            {loading?'Guardando...':isEdit?'Guardar cambios ✓':'Crear paciente ✓'}
           </button>
         </div>
       </div>
@@ -5193,7 +5268,7 @@ function NuevoPlanModal({C, F, dark, supabaseUser, onClose, onCreated}) {
 }
 
 /* ─── Modal Detalle Paciente ─── */
-function DetallePacienteModal({C, F, dark, plan, onClose, onDelete}) {
+function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
   const [deleting, setDeleting] = React.useState(false);
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener peso',subir:'Ganar músculo',salud:'Salud general'};
 
@@ -5235,14 +5310,22 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete}) {
         {plan.paciente_email&&(
           <div style={{background:dark?'rgba(255,255,255,0.06)':'#F2F2F7',borderRadius:14,padding:'10px 14px',marginBottom:12,display:'flex',gap:10,alignItems:'center'}}>
             <span style={{fontSize:16}}>📧</span>
-            <div>
+            <div style={{minWidth:0}}>
               <div style={{fontSize:11,fontWeight:700,color:C.textSec}}>Email</div>
-              <div style={{fontSize:12,color:C.text,fontWeight:600}}>{plan.paciente_email}</div>
+              <div style={{fontSize:12,color:C.text,fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{plan.paciente_email}</div>
             </div>
-            <div style={{marginLeft:'auto'}}>
+            <div style={{marginLeft:'auto',flexShrink:0}}>
               <div style={{fontSize:10,fontWeight:700,color:plan.paciente_id?'#34C759':'#FF9500'}}>
                 {plan.paciente_id?'✓ Vinculado':'Esperando vinculación'}
               </div>
+            </div>
+          </div>
+        )}
+        {/* Aviso si aún no se vincula */}
+        {!plan.paciente_id&&(
+          <div style={{background:'#FF950012',border:'1px solid #FF950030',borderRadius:14,padding:'10px 14px',marginBottom:12}}>
+            <div style={{fontSize:11.5,color:'#B36A00',lineHeight:1.5}}>
+              Tu paciente aún no se vincula. Pídele que cree su cuenta en Calorú con <strong>{plan.paciente_email||'el email indicado'}</strong> e ingrese tu código en <strong>Perfil → Ajustes</strong>. El email debe coincidir exactamente.
             </div>
           </div>
         )}
@@ -5270,9 +5353,14 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete}) {
           </div>
         )}
 
-        <button onClick={handleDelete} disabled={deleting} style={{width:'100%',padding:'12px',borderRadius:14,border:'1px solid #FF3B30',background:'none',color:'#FF3B30',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
-          {deleting?'Eliminando...':'🗑 Eliminar plan'}
-        </button>
+        <div style={{display:'flex',gap:10}}>
+          <button onClick={()=>onEdit&&onEdit(plan)} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
+            ✏️ Editar plan
+          </button>
+          <button onClick={handleDelete} disabled={deleting} style={{flex:1,padding:'13px',borderRadius:14,border:'1px solid #FF3B30',background:'none',color:'#FF3B30',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
+            {deleting?'...':'🗑'}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -9270,6 +9358,25 @@ function AppCore() {
           setIsPro(bySub || byNutri);
           setSubscriptionStatus(data.subscription_status||'free');
           if(byNutri && data.linked_nutricionista_nombre) setProSource('nutricionista:'+data.linked_nutricionista_nombre);
+          // Refrescar el plan del nutricionista por si actualizó mensaje/metas/recomendaciones
+          if(byNutri && supabaseUser.email){
+            supabase.from('nutrition_plans')
+              .select('calorias_meta,mensaje,recomendaciones,objetivo')
+              .eq('nutricionista_id', data.linked_nutricionista_id)
+              .eq('paciente_email', supabaseUser.email.toLowerCase())
+              .limit(1).maybeSingle()
+              .then(({data:plan})=>{
+                if(plan){
+                  const fresh = {
+                    nutricionista_nombre: data.linked_nutricionista_nombre,
+                    calorias_meta: plan.calorias_meta||null,
+                    mensaje: plan.mensaje||null,
+                    recomendaciones: plan.recomendaciones||[],
+                  };
+                  setNutriPlan(fresh); LS.set('nutriPlan', fresh);
+                }
+              }, ()=>{});
+          }
         }
       });
   },[supabaseUser?.id]);
@@ -9851,7 +9958,17 @@ function AppCore() {
     syncTimer.current = setTimeout(()=>{
       setSyncStatus('syncing');
       syncDay(supabaseUser.id, todayKey(), log, agua, exercises)
-        .then(()=>{ if(!cancelled){ setSyncStatus('done'); setTimeout(()=>setSyncStatus('idle'),1500); }})
+        .then(()=>{
+          if(!cancelled){ setSyncStatus('done'); setTimeout(()=>setSyncStatus('idle'),1500); }
+          // Si el paciente está vinculado a un nutricionista, registrar su actividad
+          // para que el panel profesional muestre el estado real (no fantasma).
+          if(nutriPlan && log.length>0){
+            supabase.from('nutrition_plans')
+              .update({ultima_actividad:new Date().toISOString()})
+              .eq('paciente_id', supabaseUser.id)
+              .then(()=>{}, ()=>{});
+          }
+        })
         .catch(()=>{ if(!cancelled) setSyncStatus('error'); });
     }, 2000); // debounce 2s
     return ()=>{ cancelled = true; };
