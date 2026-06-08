@@ -1442,8 +1442,27 @@ function Splash({onDone}) {
 
 /* ═══════════════════════════════════════════════════════
    NUTRIBOT — Mascota animada de Calorú con outfits
-   outfit: 'chef' | 'crown' | 'sport' | 'huaso' | 'llama' | 'none'
+   outfit: 'chef' | 'crown' | 'sport' | 'huaso' | 'llama' |
+           'gorro' | 'navidad' | 'doctor' | 'grad' | 'super' |
+           'playa' | 'mago' | 'none'
 ═══════════════════════════════════════════════════════ */
+// Catálogo de vestimentas (para el vestidor de NutriBot)
+const NUTRIBOT_OUTFITS = [
+  {id:'auto',    emoji:'✨', name:'Automático', desc:'Cambia según tu racha, Pro y fechas especiales'},
+  {id:'chef',    emoji:'👨‍🍳', name:'Chef',        desc:'El clásico nutricionista'},
+  {id:'crown',   emoji:'👑', name:'Realeza Pro',  desc:'Corona y capa de suscriptor'},
+  {id:'sport',   emoji:'🏃', name:'Deportista',   desc:'Camiseta y banda de campeón'},
+  {id:'huaso',   emoji:'🇨🇱', name:'Huaso',        desc:'Para las Fiestas Patrias'},
+  {id:'llama',   emoji:'🔥', name:'En llamas',    desc:'Racha épica ardiente'},
+  {id:'gorro',   emoji:'🧣', name:'Invierno',     desc:'Gorro de lana y bufanda'},
+  {id:'navidad', emoji:'🎅', name:'Navidad',      desc:'Gorro de Pascuero'},
+  {id:'doctor',  emoji:'🩺', name:'Doctor',       desc:'Bata y estetoscopio'},
+  {id:'grad',    emoji:'🎓', name:'Graduado',     desc:'Birrete de graduación'},
+  {id:'super',   emoji:'🦸', name:'Superhéroe',   desc:'Capa y antifaz heroico'},
+  {id:'playa',   emoji:'😎', name:'Verano',       desc:'Lentes de sol y flotador'},
+  {id:'mago',    emoji:'🧙', name:'Mago',         desc:'Sombrero mágico estrellado'},
+  {id:'none',    emoji:'🤖', name:'Sin atuendo',  desc:'NutriBot al natural'},
+];
 function NutriBot({state='idle', size=60, outfit='chef'}) {
   const uid = `nb${size}${outfit}`; // IDs únicos para gradients por instancia
   return (
@@ -1502,6 +1521,13 @@ function NutriBot({state='idle', size=60, outfit='chef'}) {
         {outfit==='crown'&&(
           <path d="M10 25 Q10 52 30 56 Q50 52 50 25 Z" fill="#6B21A8" opacity={0.7}/>
         )}
+        {/* Capa de superhéroe — detrás del cuerpo */}
+        {outfit==='super'&&(
+          <>
+            <path d="M12 20 Q6 46 14 56 L20 50 Q16 34 20 22 Z" fill="#1E5FD4" opacity={0.9}/>
+            <path d="M48 20 Q54 46 46 56 L40 50 Q44 34 40 22 Z" fill="#1E5FD4" opacity={0.9}/>
+          </>
+        )}
 
         {/* ── Antena base ── */}
         <rect x={28} y={6} width={4} height={9} rx={2} fill="#9B1515"/>
@@ -1554,6 +1580,52 @@ function NutriBot({state='idle', size=60, outfit='chef'}) {
             <circle cx={30} cy={34} r={7} fill={`url(#${uid}-gold)`}/>
             <circle cx={30} cy={34} r={7} fill="none" stroke="#FFE566" strokeWidth={0.8}/>
             <text x={30} y={37.5} textAnchor="middle" fill="#6B21A8" fontSize={7} fontWeight={800} fontFamily="system-ui">PRO</text>
+          </>
+        )}
+
+        {/* Bata de doctor + estetoscopio */}
+        {outfit==='doctor'&&(
+          <>
+            {/* Bata blanca */}
+            <path d="M16 26 L16 48 L26 48 L26 30 L30 33 L34 30 L34 48 L44 48 L44 26 Z" fill="white" opacity={0.95}/>
+            <path d="M16 26 L16 48 L26 48 L26 30 L30 33 L34 30 L34 48 L44 48 L44 26 Z" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth={0.7}/>
+            {/* Estetoscopio */}
+            <path d="M25 27 Q25 40 30 42 Q35 40 35 27" stroke="#2C3E50" strokeWidth={1.6} fill="none" strokeLinecap="round"/>
+            <circle cx={30} cy={44} r={2.6} fill="#5AC8FA"/>
+            <circle cx={30} cy={44} r={2.6} fill="none" stroke="#2C3E50" strokeWidth={0.8}/>
+            {/* Bolsillo con lápiz */}
+            <rect x={36} y={36} width={6} height={7} rx={1} fill="rgba(0,0,0,0.05)"/>
+            <rect x={38} y={33} width={1.4} height={5} rx={0.6} fill="#D42020"/>
+          </>
+        )}
+
+        {/* Bufanda de invierno */}
+        {outfit==='gorro'&&(
+          <>
+            <rect x={16} y={40} width={28} height={6} rx={3} fill="#1E5FD4" opacity={0.92}/>
+            <rect x={16} y={42} width={28} height={1.5} fill="white" opacity={0.4}/>
+            <path d="M22 45 L20 53 L25 53 L26 45 Z" fill="#1E5FD4" opacity={0.92}/>
+            <rect x={20} y={51} width={5} height={2} fill="#163F8C"/>
+          </>
+        )}
+
+        {/* Emblema de superhéroe */}
+        {outfit==='super'&&(
+          <>
+            <circle cx={30} cy={34} r={7} fill="#FFD60A"/>
+            <circle cx={30} cy={34} r={7} fill="none" stroke="#fff" strokeWidth={0.8}/>
+            <path d="M30 29 L33 34 L31 34 L32 39 L27 33 L29 33 Z" fill="#1E5FD4"/>
+          </>
+        )}
+
+        {/* Flotador de verano */}
+        {outfit==='playa'&&(
+          <>
+            <ellipse cx={30} cy={44} rx={16} ry={6} fill="#FF6B6B" opacity={0.9}/>
+            <ellipse cx={30} cy={44} rx={16} ry={6} fill="none" stroke="white" strokeWidth={0.8} strokeOpacity={0.5}/>
+            <rect x={21} y={41} width={6} height={6} rx={1} fill="white" opacity={0.85}/>
+            <rect x={33} y={41} width={6} height={6} rx={1} fill="white" opacity={0.85}/>
+            <ellipse cx={30} cy={43} rx={6} ry={2.4} fill={`url(#${uid}-screen)`} opacity={0.25}/>
           </>
         )}
 
@@ -1701,7 +1773,154 @@ function NutriBot({state='idle', size=60, outfit='chef'}) {
             <text x={30} y={11} textAnchor="middle" fill="#FF3B00" fontSize={6} fontWeight={800} fontFamily="system-ui">🔥</text>
           </>
         )}
+
+        {/* Gorro de lana (invierno) */}
+        {outfit==='gorro'&&(
+          <>
+            <path d="M15 15 Q15 2 30 2 Q45 2 45 15 Z" fill="#1E5FD4"/>
+            <path d="M15 15 Q15 2 30 2 Q45 2 45 15 Z" fill="none" stroke="#163F8C" strokeWidth={0.6}/>
+            {/* Tejido */}
+            <path d="M19 14 Q19 6 23 5" stroke="#163F8C" strokeWidth={0.7} fill="none" opacity={0.5}/>
+            <path d="M30 14 Q30 5 30 4" stroke="#163F8C" strokeWidth={0.7} fill="none" opacity={0.5}/>
+            <path d="M41 14 Q41 6 37 5" stroke="#163F8C" strokeWidth={0.7} fill="none" opacity={0.5}/>
+            {/* Vuelta del gorro */}
+            <rect x={13} y={13} width={34} height={5} rx={2.5} fill="#2E6FE4"/>
+            <rect x={13} y={13} width={34} height={5} rx={2.5} fill="none" stroke="#163F8C" strokeWidth={0.5}/>
+            {/* Pompón */}
+            <circle cx={30} cy={1} r={3.5} fill="white"/>
+          </>
+        )}
+
+        {/* Gorro de Pascuero (navidad) */}
+        {outfit==='navidad'&&(
+          <>
+            <path d="M14 16 Q16 2 40 1 L44 14 Z" fill="#D42020"/>
+            <path d="M14 16 Q16 2 40 1 L44 14 Z" fill="none" stroke="#9B1515" strokeWidth={0.5}/>
+            {/* Sombra */}
+            <path d="M40 1 L44 14 L36 14 Q40 7 40 1 Z" fill="#9B1515" opacity={0.4}/>
+            {/* Vuelta blanca */}
+            <rect x={12} y={13} width={34} height={5} rx={2.5} fill="white"/>
+            {/* Pompón */}
+            <circle cx={43} cy={2} r={3.5} fill="white"/>
+          </>
+        )}
+
+        {/* Birrete de graduación */}
+        {outfit==='grad'&&(
+          <>
+            <rect x={24} y={9} width={12} height={5} rx={1.5} fill="#1C1C2E"/>
+            <path d="M14 11 L30 6 L46 11 L30 16 Z" fill="#0A0A18"/>
+            <path d="M14 11 L30 6 L46 11 L30 16 Z" fill="none" stroke="#2C2C44" strokeWidth={0.5}/>
+            {/* Botón y borla */}
+            <circle cx={30} cy={11} r={1.6} fill="#FFD60A"/>
+            <path d="M30 11 L40 11 L40 18" stroke="#FFD60A" strokeWidth={1} fill="none"/>
+            <path d="M38.5 17 L41.5 17 L40 21 Z" fill="#FFD60A"/>
+          </>
+        )}
+
+        {/* Sombrero de mago */}
+        {outfit==='mago'&&(
+          <>
+            <path d="M30 -6 L42 14 L18 14 Z" fill="#3B2C7A"/>
+            <path d="M30 -6 L42 14 L18 14 Z" fill="none" stroke="#2A1F5C" strokeWidth={0.5}/>
+            <ellipse cx={30} cy={14} rx={18} ry={3.5} fill="#3B2C7A"/>
+            <ellipse cx={30} cy={14} rx={18} ry={3.5} fill="none" stroke="#2A1F5C" strokeWidth={0.5}/>
+            <rect x={20} y={11} width={20} height={3} rx={1} fill="#FFD60A" opacity={0.9}/>
+            {/* Estrellas */}
+            <text x={30} y={6} textAnchor="middle" fill="#FFD60A" fontSize={5} style={{animation:'bot-star 2s ease-in-out infinite'}}>★</text>
+            <text x={26} y={11} textAnchor="middle" fill="#FFE566" fontSize={3}>★</text>
+            <text x={35} y={10} textAnchor="middle" fill="#FFE566" fontSize={2.5}>★</text>
+          </>
+        )}
+
+        {/* Antifaz de superhéroe (sobre la cara) */}
+        {outfit==='super'&&(
+          <>
+            <path d="M14 26 Q30 21 46 26 L46 31 Q40 35 36 31 Q33 28 30 28 Q27 28 24 31 Q20 35 14 31 Z" fill="#1E5FD4" opacity={0.95}/>
+            <ellipse cx={22} cy={29} rx={3} ry={2.4} fill="#0A0A18"/>
+            <ellipse cx={38} cy={29} rx={3} ry={2.4} fill="#0A0A18"/>
+          </>
+        )}
+
+        {/* Lentes de sol (sobre la cara) */}
+        {outfit==='playa'&&(
+          <>
+            <rect x={16} y={26} width={11} height={8} rx={3} fill="#1C1C2E"/>
+            <rect x={33} y={26} width={11} height={8} rx={3} fill="#1C1C2E"/>
+            <rect x={26} y={28} width={8} height={2} rx={1} fill="#1C1C2E"/>
+            <rect x={9} y={28} width={7} height={2} rx={1} fill="#1C1C2E"/>
+            <rect x={44} y={28} width={7} height={2} rx={1} fill="#1C1C2E"/>
+            {/* Reflejo */}
+            <path d="M18 28 L21 28 L19 32 L16 32 Z" fill="#5AC8FA" opacity={0.6}/>
+            <path d="M35 28 L38 28 L36 32 L33 32 Z" fill="#5AC8FA" opacity={0.6}/>
+          </>
+        )}
       </svg>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   VESTIDOR DE NUTRIBOT — elegir vestimenta
+═══════════════════════════════════════════════════════ */
+function OutfitPicker({C, F, current='auto', onPick, onClose}){
+  return (
+    <div onClick={onClose} style={{
+      position:'fixed',inset:0,zIndex:200,background:'rgba(0,0,0,0.5)',
+      backdropFilter:'blur(4px)',display:'flex',alignItems:'flex-end',justifyContent:'center',
+      animation:'slideUp .2s ease',
+    }}>
+      <div onClick={e=>e.stopPropagation()} style={{
+        width:'100%',maxWidth:480,background:C.bg,borderRadius:'26px 26px 0 0',
+        padding:'18px 18px calc(24px + env(safe-area-inset-bottom))',
+        maxHeight:'82vh',overflowY:'auto',animation:'modalIn .3s cubic-bezier(.16,1,.3,1)',
+      }}>
+        <div style={{width:38,height:4,borderRadius:2,background:C.border,margin:'0 auto 16px'}}/>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
+          <span style={{fontSize:22}}>👕</span>
+          <div>
+            <div style={{fontSize:18,fontWeight:800,color:C.text,letterSpacing:'-.3px',fontFamily:F}}>Vestidor de NutriBot</div>
+            <div style={{fontSize:12,color:C.textSec,fontFamily:F}}>Elige cómo se viste tu mascota</div>
+          </div>
+        </div>
+        <div style={{
+          display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginTop:16,
+        }}>
+          {NUTRIBOT_OUTFITS.map(o=>{
+            const active = current===o.id;
+            return (
+              <button key={o.id} className="tap" onClick={()=>{onPick(o.id);haptic('success');}} style={{
+                background:active?`${C.primary}14`:C.surface,
+                border:`2px solid ${active?C.primary:C.border}`,
+                borderRadius:18,padding:'12px 6px 10px',cursor:'pointer',fontFamily:F,
+                display:'flex',flexDirection:'column',alignItems:'center',gap:4,
+                transition:'all .15s',position:'relative',
+              }}>
+                {active&&<div style={{
+                  position:'absolute',top:6,right:6,width:18,height:18,borderRadius:9,
+                  background:C.primary,color:'#fff',fontSize:11,fontWeight:800,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                }}>✓</div>}
+                <div style={{height:54,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  {o.id==='auto'
+                    ? <span style={{fontSize:34}}>✨</span>
+                    : o.id==='none'
+                      ? <NutriBot state="idle" size={50} outfit="none"/>
+                      : <NutriBot state="idle" size={50} outfit={o.id}/>}
+                </div>
+                <div style={{fontSize:11.5,fontWeight:700,color:active?C.primary:C.text,textAlign:'center',lineHeight:1.2}}>{o.name}</div>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{fontSize:11,color:C.textMuted,textAlign:'center',marginTop:14,fontFamily:F,lineHeight:1.4}}>
+          {NUTRIBOT_OUTFITS.find(o=>o.id===current)?.desc || ''}
+        </div>
+        <button className="tap" onClick={onClose} style={{
+          width:'100%',marginTop:14,padding:'14px',borderRadius:15,border:'none',
+          background:C.primary,color:'#fff',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F,
+        }}>Listo</button>
+      </div>
     </div>
   );
 }
@@ -9011,15 +9230,20 @@ function AppCore() {
   const [confetti,setConfetti]     = useState(false);
   const [nutribotHappy,setNutribotHappy] = useState(false);
 
-  // Auto-outfit: cambia según contexto del usuario
+  // Vestidor: el usuario puede elegir un outfit fijo o dejarlo en automático
+  const [botOutfitChoice,setBotOutfitChoice] = useState(()=>LS.get('botOutfit','auto'));
+  const [showOutfitPicker,setShowOutfitPicker] = useState(false);
+  // Auto-outfit: cambia según contexto del usuario (solo si la elección es 'auto')
   const nutribotOutfit = useMemo(()=>{
+    if(botOutfitChoice && botOutfitChoice!=='auto') return botOutfitChoice;
     const mes = new Date().getMonth(); // 0-based, 8 = septiembre
     if(mes===8||mes===9) return 'huaso';          // Fiestas Patrias sept-oct
+    if(mes===11) return 'navidad';                 // Diciembre — Navidad
     if(isPro) return 'crown';                      // Suscriptores Pro
     if(streak.days>=30) return 'llama';            // Racha épica 30+ días
     if(streak.days>=7) return 'sport';             // Racha 7+ días
     return 'chef';                                 // Default: nutricionista
-  },[isPro, streak.days]);
+  },[isPro, streak.days, botOutfitChoice]);
   const [notifEnabled,setNotifEnabled] = useState(()=>LS.get('notif',false));
   const [lastPct,setLastPct]       = useState(0);
   const [newAchiev,setNewAchiev]   = useState(null);
@@ -9376,7 +9600,7 @@ function AppCore() {
   useEffect(()=>{LS.set('logrosVis',logrosVis);},[logrosVis]);
   // Banner rotativo
   useEffect(()=>{
-    const t = setInterval(()=>setBannerIdx(i=>(i+1)%4),5000);
+    const t = setInterval(()=>setBannerIdx(i=>(i+1)%3),5000);
     return ()=>clearInterval(t);
   },[]);
   useEffect(()=>{LS.set('nutriPlan',nutriPlan);},[nutriPlan]);
@@ -10179,6 +10403,9 @@ function AppCore() {
       )}
 
       {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'} perfil={perfil} agua={agua} exercises={exercises} saludScore={saludScore} nutriPlan={nutriPlan} botOutfit={nutribotOutfit}/>}
+      {showOutfitPicker&&<OutfitPicker C={C} F={F} current={botOutfitChoice}
+        onPick={(id)=>{setBotOutfitChoice(id);LS.set('botOutfit',id);}}
+        onClose={()=>setShowOutfitPicker(false)}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -10429,10 +10656,34 @@ function AppCore() {
             </button>
           )}
 
+          {/* Banner fijo: escanear plato con IA */}
+          <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); haptic('light'); }} style={{
+            width:'100%',textAlign:'left',marginBottom:12,padding:'14px 16px',cursor:'pointer',fontFamily:F,
+            background:'linear-gradient(135deg,#D42020,#FF6B35)',borderRadius:20,border:'none',
+            display:'flex',alignItems:'center',gap:14,position:'relative',overflow:'hidden',
+            boxShadow:'0 4px 16px rgba(212,32,32,0.28)',
+          }}>
+            {/* Brillo decorativo */}
+            <div style={{position:'absolute',top:-30,right:-20,width:120,height:120,borderRadius:'50%',background:'rgba(255,255,255,0.12)'}}/>
+            <div style={{
+              width:50,height:50,borderRadius:15,flexShrink:0,zIndex:1,
+              background:'rgba(255,255,255,0.2)',border:'1px solid rgba(255,255,255,0.3)',
+              display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,
+            }}>📸</div>
+            <div style={{flex:1,minWidth:0,zIndex:1}}>
+              <div style={{fontSize:9,color:'rgba(255,255,255,0.8)',fontWeight:800,letterSpacing:1,textTransform:'uppercase',marginBottom:2}}>Solo en Calorú 🇨🇱{!isPro?' · PRO':''}</div>
+              <div style={{fontSize:15.5,fontWeight:800,color:'white',lineHeight:1.15}}>Escanea tu plato con IA</div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.85)',marginTop:2}}>Foto → calorías y macros en segundos</div>
+            </div>
+            <span style={{
+              zIndex:1,flexShrink:0,background:'white',color:'#D42020',
+              borderRadius:11,padding:'8px 12px',fontSize:12,fontWeight:800,
+            }}>Probar →</span>
+          </button>
+
           {/* Banner rotativo diferenciadores */}
           {(()=>{
             const banners = [
-              {bg:'linear-gradient(135deg,#D42020,#FF6B35)', tag:'SOLO EN CALORÚ 🇨🇱', titulo:'Escanea tu plato con IA', sub:'Foto → calorías en segundos, sin escribir nada', btn:'📸 Probar', action:()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); }},
               {bg:'linear-gradient(135deg,#1D3557,#2E6DA4)', tag:'INTELIGENCIA ARTIFICIAL', titulo:'Registra hablando naturalmente', sub:'"Me comí un completo con todo" — y listo', btn:'🤖 Hablar con Nutri', action:()=>setShowAI(true)},
               {bg:'linear-gradient(135deg,#28B044,#1a7a36)', tag:'475+ PRODUCTOS CHILENOS', titulo:'Tu comida real, tus macros exactos', sub:'Cazuela, marraqueta, sopaipilla y mucho más', btn:'🇨🇱 Buscar alimento', action:()=>setTab(1)},
               {bg:'linear-gradient(135deg,#5856D6,#AF52DE)', tag:'PLAN NUTRICIONAL', titulo:'Tu nutricionista en el bolsillo', sub:'Vincula tu plan profesional y sigue tus metas', btn:'👩‍⚕️ Ver plan', action:()=>setTab(4)},
@@ -11529,6 +11780,27 @@ function AppCore() {
 
           {/* ════ SUB-TAB 0: MI PERFIL ════ */}
           {perfilSubTab===0&&(<>
+          {/* Vestuario de NutriBot */}
+          <button className="tap" onClick={()=>{setShowOutfitPicker(true);haptic('light');}} style={{
+            width:'100%',textAlign:'left',background:C.surface,borderRadius:22,padding:'14px 16px',marginBottom:12,
+            border:`1px solid ${C.border}`,cursor:'pointer',fontFamily:F,
+            display:'flex',alignItems:'center',gap:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`,
+          }}>
+            <div style={{
+              width:54,height:54,borderRadius:16,flexShrink:0,
+              background:`linear-gradient(135deg,${C.primary}18,${C.surfaceAlt})`,
+              display:'flex',alignItems:'center',justifyContent:'center',
+            }}>
+              <NutriBot state="idle" size={46} outfit={nutribotOutfit}/>
+            </div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:15,fontWeight:800,color:C.text,letterSpacing:'-.2px'}}>Vestuario de NutriBot 👕</div>
+              <div style={{fontSize:12,color:C.textSec,marginTop:2}}>
+                {botOutfitChoice==='auto'?'Automático — cambia según tu racha':`Atuendo: ${NUTRIBOT_OUTFITS.find(o=>o.id===botOutfitChoice)?.name||botOutfitChoice}`}
+              </div>
+            </div>
+            <span style={{fontSize:18,color:C.textMuted}}>›</span>
+          </button>
           <div style={{background:C.surface,borderRadius:22,padding:'18px',marginBottom:12,boxShadow:`0 2px 14px rgba(0,0,0,${dark?.15:.07})`}}>
             {/* Avatar + nombre */}
             <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:18}}>
