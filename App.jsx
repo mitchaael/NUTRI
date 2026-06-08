@@ -5481,7 +5481,9 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
 function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
   const [deleting, setDeleting] = React.useState(false);
   const [pLogs, setPLogs] = React.useState(null); // null = cargando
+  const [selDia, setSelDia] = React.useState(null); // día seleccionado para ver detalle
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener peso',subir:'Ganar músculo',salud:'Salud general'};
+  const planMac = normalizeRecs(plan.recomendaciones).macros||{};
 
   // Cargar progreso del paciente (últimos 7 días) si está vinculado
   React.useEffect(()=>{
@@ -5557,7 +5559,7 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
         {/* Progreso del paciente (últimos 7 días) */}
         {plan.paciente_id&&(()=>{
           const calTarget = plan.calorias_meta || 0;
-          const dias = (pLogs||[]).map(r=>({date:r.date, cal:Math.round(sumLog(r.log||[]).cal)})).filter(d=>d.cal>0);
+          const dias = (pLogs||[]).map(r=>({date:r.date, log:r.log||[], cal:Math.round(sumLog(r.log||[]).cal)})).filter(d=>d.cal>0);
           const enMeta = calTarget>0 ? dias.filter(d=>d.cal>=calTarget*0.9 && d.cal<=calTarget*1.1).length : 0;
           const maxCal = Math.max(calTarget, ...dias.map(d=>d.cal), 1);
           return (
@@ -5576,13 +5578,14 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
                         const col = calTarget===0?'#1D3557':(d.cal>=calTarget*0.9&&d.cal<=calTarget*1.1)?'#34C759':d.cal<calTarget*0.9?'#FF9500':'#FF3B30';
                         const fecha = new Date(d.date+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric'});
                         return (
-                          <div key={i} style={{display:'flex',alignItems:'center',gap:10,marginBottom:i<dias.length-1?8:0}}>
-                            <div style={{width:52,fontSize:11,color:C.textSec,fontWeight:600,textTransform:'capitalize',flexShrink:0}}>{fecha}</div>
+                          <button key={i} className="tap" onClick={()=>{setSelDia(d);haptic('light');}} style={{width:'100%',display:'flex',alignItems:'center',gap:10,marginBottom:i<dias.length-1?8:0,background:'none',border:'none',cursor:'pointer',fontFamily:F,padding:0}}>
+                            <div style={{width:52,fontSize:11,color:C.textSec,fontWeight:600,textTransform:'capitalize',flexShrink:0,textAlign:'left'}}>{fecha}</div>
                             <div style={{flex:1,height:8,borderRadius:4,background:dark?'rgba(255,255,255,0.08)':'#E5E5EA',overflow:'hidden'}}>
                               <div style={{width:`${Math.min((d.cal/maxCal)*100,100)}%`,height:'100%',background:col,borderRadius:4}}/>
                             </div>
-                            <div style={{width:62,textAlign:'right',fontSize:11,fontWeight:700,color:col,flexShrink:0}}>{d.cal} kcal</div>
-                          </div>
+                            <div style={{width:58,textAlign:'right',fontSize:11,fontWeight:700,color:col,flexShrink:0}}>{d.cal} kcal</div>
+                            <span style={{fontSize:13,color:C.textMuted,flexShrink:0}}>›</span>
+                          </button>
                         );
                       })}
                       {calTarget>0&&<div style={{fontSize:10,color:C.textMuted,marginTop:8,textAlign:'center'}}>Meta: {calTarget} kcal/día · 🟢 en meta · 🟠 bajo · 🔴 sobre</div>}
@@ -5657,6 +5660,78 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
           </button>
         </div>
       </div>
+
+      {/* ── Detalle de un día: qué comió el paciente ── */}
+      {selDia&&(()=>{
+        const t = sumLog(selDia.log);
+        const fechaFull = new Date(selDia.date+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+        const calTarget = plan.calorias_meta||0;
+        const calCol = calTarget===0?'#1D3557':(t.cal>=calTarget*0.9&&t.cal<=calTarget*1.1)?'#34C759':t.cal<calTarget*0.9?'#FF9500':'#FF3B30';
+        const macroCards = [
+          {l:'Proteínas',v:t.prot,  meta:planMac.prot,  u:'g', c:'#34C759'},
+          {l:'Carbohid.',v:t.carbs, meta:planMac.carbs, u:'g', c:'#FF9500'},
+          {l:'Lípidos',  v:t.grasas,meta:planMac.grasas,u:'g', c:'#5856D6'},
+          {l:'Fibra',    v:t.fibra, meta:null, u:'g', c:'#A2845E'},
+          {l:'Azúcar',   v:t.azucar,meta:null, u:'g', c:'#FF2D55'},
+          {l:'Sodio',    v:t.sodio, meta:null, u:'mg',c:'#5AC8FA'},
+        ];
+        return (
+          <div style={{position:'fixed',inset:0,zIndex:10000,background:dark?'#0D0D0D':'#F2F2F7',display:'flex',flexDirection:'column',fontFamily:F,animation:'fadeUp .25s ease'}}>
+            <div style={{display:'flex',alignItems:'center',padding:'14px 16px',paddingTop:'calc(14px + env(safe-area-inset-top))',borderBottom:`1px solid ${dark?'rgba(255,255,255,0.08)':'#E5E5EA'}`,background:dark?'#1C1C1E':'white'}}>
+              <button onClick={()=>setSelDia(null)} style={{background:'none',border:'none',color:'#D42020',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F}}>‹ Volver</button>
+              <div style={{flex:1,textAlign:'center',fontSize:14,fontWeight:800,color:dark?'white':'#1C1C1E',textTransform:'capitalize'}}>{fechaFull}</div>
+              <div style={{width:60}}/>
+            </div>
+            <div style={{flex:1,overflowY:'auto',padding:'14px 16px calc(24px + env(safe-area-inset-bottom))'}}>
+              {/* Total + meta */}
+              <div style={{background:dark?'#1C1C1E':'white',borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'#E5E5EA'}`,textAlign:'center'}}>
+                <div style={{fontSize:30,fontWeight:800,color:calCol,lineHeight:1}}>{Math.round(t.cal)}<span style={{fontSize:13,color:C.textSec,fontWeight:600}}> kcal</span></div>
+                {calTarget>0&&<div style={{fontSize:11,color:C.textSec,marginTop:4}}>Meta: {calTarget} kcal · {t.cal>=calTarget*0.9&&t.cal<=calTarget*1.1?'🟢 en meta':t.cal<calTarget*0.9?`🟠 ${Math.round(calTarget-t.cal)} bajo la meta`:`🔴 ${Math.round(t.cal-calTarget)} sobre la meta`}</div>}
+              </div>
+              {/* Macros + micros */}
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:14}}>
+                {macroCards.map(({l,v,meta,u,c})=>(
+                  <div key={l} style={{background:dark?'#1C1C1E':'white',borderRadius:14,padding:'10px 6px',textAlign:'center',border:`1px solid ${dark?'rgba(255,255,255,0.08)':'#E5E5EA'}`,borderTop:`3px solid ${c}`}}>
+                    <div style={{fontSize:15,fontWeight:800,color:dark?'white':'#1C1C1E'}}>{Math.round(v||0)}<span style={{fontSize:9,color:C.textSec,fontWeight:600}}>{u}</span></div>
+                    <div style={{fontSize:9.5,color:C.textSec,fontWeight:600,marginTop:1}}>{l}</div>
+                    {meta!=null&&<div style={{fontSize:8.5,color:C.textMuted,marginTop:1}}>meta {meta}{u}</div>}
+                  </div>
+                ))}
+              </div>
+              {/* Comidas con alimentos */}
+              <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Lo que comió</div>
+              {['Desayuno','Almuerzo','Once','Cena','Snack'].map(m=>{
+                const items=(selDia.log||[]).filter(r=>r.comida===m);
+                if(!items.length) return null;
+                const mCal=items.reduce((s,it)=>s+it.cal*itemRatio(it)*it.qty,0);
+                return (
+                  <div key={m} style={{background:dark?'#1C1C1E':'white',borderRadius:16,padding:'12px 14px',marginBottom:10,border:`1px solid ${dark?'rgba(255,255,255,0.08)':'#E5E5EA'}`}}>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                      <span style={{fontSize:13,fontWeight:800,color:dark?'white':'#1C1C1E'}}>{MI[m]} {m}</span>
+                      <span style={{fontSize:11,fontWeight:700,color:C.textSec}}>{Math.round(mCal)} kcal</span>
+                    </div>
+                    {items.map((it,i)=>{
+                      const r=itemRatio(it), q=it.qty;
+                      const porc = it.grams?`${it.grams}g`:`${it.porcion||100}g`;
+                      return (
+                        <div key={i} style={{padding:'6px 0',borderTop:i>0?`1px solid ${dark?'rgba(255,255,255,0.06)':'#F2F2F7'}`:'none'}}>
+                          <div style={{display:'flex',justifyContent:'space-between',gap:8}}>
+                            <span style={{fontSize:12.5,color:dark?'white':'#1C1C1E',fontWeight:600}}>{it.emoji} {it.nombre}{q>1?` ×${q}`:''}</span>
+                            <span style={{fontSize:12,color:C.textSec,fontWeight:700,flexShrink:0}}>{Math.round(it.cal*r*q)} kcal</span>
+                          </div>
+                          <div style={{fontSize:10,color:C.textSec,marginTop:2}}>
+                            {porc} · P {Math.round(it.prot*r*q)}g · C {Math.round(it.carbs*r*q)}g · G {Math.round(it.grasas*r*q)}g{it.azucar?` · Az ${Math.round((it.azucar||0)*r*q)}g`:''}{it.sodio?` · Na ${Math.round((it.sodio||0)*r*q)}mg`:''}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
