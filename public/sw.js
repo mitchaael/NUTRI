@@ -1,4 +1,4 @@
-const CACHE = 'caloru-v3';
+const CACHE = 'caloru-v4';
 const ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', e => {
@@ -19,11 +19,43 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Network-first SOLO para el HTML/navegación, con timeout corto y fallback
+// a caché. Esto evita que la app quede "atrapada" en una versión vieja
+// cacheada (que era lo que hacía que un deploy nuevo no tomara efecto y la
+// app siguiera lenta). Si la red está caída o muy lenta, servimos la caché
+// rápido para no bloquear el arranque.
+const NAV_TIMEOUT = 3000;
+function networkFirstNav(request) {
+  return new Promise(resolve => {
+    let settled = false;
+    const fallback = () => caches.match('/index.html').then(c => c || caches.match('/')).then(c => c || fetch(request).catch(() => Response.error()));
+    const timer = setTimeout(() => {
+      if (settled) return; settled = true;
+      fallback().then(resolve);
+    }, NAV_TIMEOUT);
+    fetch(request).then(res => {
+      if (settled) return; settled = true; clearTimeout(timer);
+      if (res && res.ok) caches.open(CACHE).then(c => c.put('/index.html', res.clone())).catch(() => {});
+      resolve(res);
+    }).catch(() => {
+      if (settled) return; settled = true; clearTimeout(timer);
+      fallback().then(resolve);
+    });
+  });
+}
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
 
+  // HTML / navegación → network-first (siempre la última versión si hay red)
+  if (e.request.mode === 'navigate' || e.request.destination === 'document') {
+    e.respondWith(networkFirstNav(e.request));
+    return;
+  }
+
+  // Assets con hash (JS/CSS/imágenes) → stale-while-revalidate (son inmutables)
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {

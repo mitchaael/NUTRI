@@ -57,7 +57,18 @@
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function() {
-        navigator.serviceWorker.register("/sw.js").catch(function() {});
+        navigator.serviceWorker.register("/sw.js").then(function(reg) {
+          // Buscar actualizaciones al abrir la app
+          reg.update().catch(function(){});
+        }).catch(function() {});
+      });
+      // Cuando un nuevo service worker toma control, recargar UNA vez para
+      // aplicar la versión más reciente (evita quedar en una versión vieja).
+      var swRefreshed = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function() {
+        if (swRefreshed) return;
+        swRefreshed = true;
+        window.location.reload();
       });
     }
   </script>
