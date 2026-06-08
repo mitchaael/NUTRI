@@ -5020,7 +5020,9 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         if(!codeToSave){
           const arr = new Uint8Array(4);
           crypto.getRandomValues(arr);
-          codeToSave = 'NUT-'+Array.from(arr).map(b=>b.toString(36).padStart(2,'0')).join('').toUpperCase().slice(0,6);
+          // Evitar caracteres ambiguos en el código (O/I/L) para que no se
+          // confundan con 0/1 al copiarlo.
+          codeToSave = 'NUT-'+Array.from(arr).map(b=>b.toString(36).padStart(2,'0')).join('').toUpperCase().replace(/O/g,'0').replace(/[IL]/g,'1').slice(0,6);
         }
         const nombreSeguro = nombre?.trim() || supabaseUser.email?.split('@')[0] || 'Nutricionista';
         await supabase.from('nutricionista_codes').upsert(
@@ -12866,7 +12868,7 @@ function AppCore({onRequestAuth}) {
               </div>
               {!nutriPlan&&(
                 <div style={{display:'flex',gap:8,marginTop:10}}>
-                  <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase())} placeholder="NUT-XXXXX" style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
+                  <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase().replace(/O/g,'0').replace(/[IL]/g,'1'))} placeholder="NUT-XXXXX" style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
                   <button onClick={async()=>{
                     if(loadingNutriCode) return;
                     // Para vincularse, el paciente DEBE tener cuenta (la búsqueda del
@@ -12880,7 +12882,9 @@ function AppCore({onRequestAuth}) {
                     if(!nutriCode.trim()){ haptic('error'); setToast('Ingresa el código que te dio tu nutricionista (NUT-XXXXX).'); return; }
                     setLoadingNutriCode(true);
                     try {
-                      const {data:nutrData, error:codeErr} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',nutriCode.trim()).maybeSingle();
+                      // Normalizar caracteres ambiguos (O→0, I/L→1) por si los confundieron al copiar
+                      const codeNorm = nutriCode.trim().toUpperCase().replace(/O/g,'0').replace(/[IL]/g,'1');
+                      const {data:nutrData, error:codeErr} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',codeNorm).maybeSingle();
                       if(codeErr){ haptic('error'); setToast('Error de conexión. Revisa tu internet e intenta de nuevo.'); setLoadingNutriCode(false); return; }
                       if(nutrData) {
                         // 1. Vincular en profiles
