@@ -5007,24 +5007,30 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
     if(!supabaseUser) return;
     (async()=>{
       const {data:existing} = await supabase.from('nutricionista_codes')
-        .select('code').eq('nutricionista_id', supabaseUser.id).single();
+        .select('code').eq('nutricionista_id', supabaseUser.id).maybeSingle();
       if(existing?.code) {
         setCodigoPro(existing.code);
         LS.set('professional_code', existing.code);
       } else {
-        // Código criptográficamente seguro — no usar Math.random() (predecible)
-        const arr = new Uint8Array(4);
-        crypto.getRandomValues(arr);
-        const newCode = 'NUT-'+Array.from(arr).map(b=>b.toString(36).padStart(2,'0')).join('').toUpperCase().slice(0,6);
+        // Si ya teníamos un código en caché (que pudo no haberse guardado antes
+        // por falta de permisos), persistir ESE mismo para no cambiarlo. Si no,
+        // generar uno nuevo criptográficamente seguro.
+        const cached = LS.get('professional_code','');
+        let codeToSave = /^NUT-[A-Z0-9]{4,}$/.test(cached) ? cached : '';
+        if(!codeToSave){
+          const arr = new Uint8Array(4);
+          crypto.getRandomValues(arr);
+          codeToSave = 'NUT-'+Array.from(arr).map(b=>b.toString(36).padStart(2,'0')).join('').toUpperCase().slice(0,6);
+        }
         const nombreSeguro = nombre?.trim() || supabaseUser.email?.split('@')[0] || 'Nutricionista';
         await supabase.from('nutricionista_codes').upsert(
-          {nutricionista_id:supabaseUser.id, code:newCode, nombre:nombreSeguro},
-          {onConflict:'nutricionista_id', ignoreDuplicates:true}
+          {nutricionista_id:supabaseUser.id, code:codeToSave, nombre:nombreSeguro},
+          {onConflict:'nutricionista_id'}
         );
         // Leer de vuelta el código canónico de la DB
         const {data:fresh} = await supabase.from('nutricionista_codes')
-          .select('code').eq('nutricionista_id', supabaseUser.id).single();
-        const finalCode = fresh?.code || newCode;
+          .select('code').eq('nutricionista_id', supabaseUser.id).maybeSingle();
+        const finalCode = fresh?.code || codeToSave;
         setCodigoPro(finalCode);
         LS.set('professional_code', finalCode);
       }
