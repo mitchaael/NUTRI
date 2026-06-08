@@ -1926,6 +1926,145 @@ function OutfitPicker({C, F, current='auto', onPick, onClose}){
 }
 
 /* ═══════════════════════════════════════════════════════
+   EDITOR DE DÍA PASADO — registrar comidas olvidadas
+═══════════════════════════════════════════════════════ */
+function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogChange}){
+  const [curKey,setCurKey] = useState(dateKey);
+  const [dayLog,setDayLog] = useState(()=>
+    (LS.get('log_'+dateKey,[])||[]).map(it=>it.uid?it:{...it,uid:Date.now()+Math.random()})
+  );
+  const [meal,setMeal] = useState('Almuerzo');
+  const [q,setQ]       = useState('');
+  const [grams,setGrams] = useState('');
+  const d = new Date(curKey+'T12:00:00');
+  const isToday = curKey===todayKey();
+  const results = q.trim().length>1 ? filterWithSynonyms(allFoods, q.trim()).slice(0,14) : [];
+
+  // Navegar entre días (no permite futuro)
+  const goDay = (delta)=>{
+    const nd=new Date(curKey+'T12:00:00'); nd.setDate(nd.getDate()+delta);
+    const nk=dateToKey(nd);
+    if(nk>todayKey()) return; // no futuro
+    setCurKey(nk); setQ(''); setGrams('');
+    setDayLog((LS.get('log_'+nk,[])||[]).map(it=>it.uid?it:{...it,uid:Date.now()+Math.random()}));
+    haptic('light');
+  };
+
+  const persist = (newLog)=>{
+    setDayLog(newLog);
+    LS.set('log_'+curKey, newLog);
+    if(supabaseUser){
+      try{ syncDay(supabaseUser.id, curKey, newLog, LS.get('agua_'+curKey,0), LS.get('ex_'+curKey,[])); }catch(_){}
+    }
+    onLogChange && onLogChange(curKey, newLog);
+  };
+  const addItem = (a)=>{
+    const g = grams!==''&&+grams>0 ? +grams : null;
+    const targetGrams = (g && g!==a.porcion) ? g : null;
+    persist([...dayLog, {...a, comida:meal, qty:1, uid:Date.now()+Math.random(), grams:targetGrams}]);
+    haptic('add'); setQ(''); setGrams('');
+  };
+  const delItem = (uid)=>{ persist(dayLog.filter(r=>r.uid!==uid)); haptic('light'); };
+  const tot = sumLog(dayLog);
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',animation:'fadeUp .3s ease'}}>
+      <div style={modalHeaderStyle(C)}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+          <button onClick={()=>goDay(-1)} style={{background:'none',border:'none',color:C.textSec,fontSize:20,cursor:'pointer',padding:'2px 6px',lineHeight:1}}>‹</button>
+          <div style={{fontSize:13.5,fontWeight:700,color:C.text,textAlign:'center',textTransform:'capitalize',minWidth:140}}>
+            {isToday?'Hoy':d.toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'})}
+          </div>
+          <button onClick={()=>goDay(1)} disabled={isToday} style={{background:'none',border:'none',color:isToday?C.border:C.textSec,fontSize:20,cursor:isToday?'default':'pointer',padding:'2px 6px',lineHeight:1}}>›</button>
+        </div>
+        <div style={{minWidth:60}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
+        {/* Resumen del día */}
+        <div style={{background:C.surface,borderRadius:16,padding:'12px 16px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between',border:`1px solid ${C.border}`}}>
+          <div style={{fontSize:12,color:C.textSec,fontWeight:600}}>Total registrado ese día</div>
+          <div style={{fontSize:17,fontWeight:800,color:'#D42020'}}>{Math.round(tot.cal)} kcal</div>
+        </div>
+
+        {/* Selector de comida */}
+        <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>¿En qué comida?</div>
+        <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
+          {['Desayuno','Almuerzo','Once','Cena','Snack'].map(m=>(
+            <button key={m} className="tap" onClick={()=>{setMeal(m);haptic('light');}} style={{
+              flex:'1 1 0',minWidth:64,padding:'9px 6px',borderRadius:12,cursor:'pointer',fontFamily:F,
+              border:`1.5px solid ${meal===m?'#D42020':C.border}`,
+              background:meal===m?'#D4202012':C.surface,
+              color:meal===m?'#D42020':C.textSec,fontSize:11.5,fontWeight:meal===m?800:600,
+            }}>{MI[m]} {m}</button>
+          ))}
+        </div>
+
+        {/* Buscador */}
+        <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Agregar alimento olvidado</div>
+        <div style={{display:'flex',gap:8,marginBottom:10}}>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar comida…" autoFocus
+            style={{flex:1,padding:'12px 14px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:15,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
+          <input value={grams} onChange={e=>setGrams(e.target.value.replace(/[^0-9]/g,''))} placeholder="g" inputMode="numeric"
+            style={{width:64,padding:'12px 8px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:15,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',textAlign:'center'}}/>
+        </div>
+        {results.length>0&&(
+          <div style={{marginBottom:18}}>
+            {results.map(a=>(
+              <button key={a.id} className="tap" onClick={()=>addItem(a)} style={{
+                width:'100%',textAlign:'left',display:'flex',alignItems:'center',gap:10,
+                padding:'10px 12px',marginBottom:6,borderRadius:13,cursor:'pointer',fontFamily:F,
+                background:C.surface,border:`1px solid ${C.border}`,
+              }}>
+                <span style={{fontSize:20}}>{a.emoji}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{a.nombre}</div>
+                  <div style={{fontSize:11,color:C.textSec}}>{a.cal} kcal · {a.porcion||100}g{a.marca&&a.marca!=='Manual'?` · ${a.marca}`:''}</div>
+                </div>
+                <span style={{fontSize:18,color:'#D42020',fontWeight:800}}>＋</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {q.trim().length>1&&results.length===0&&(
+          <div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'14px 0',marginBottom:8}}>Sin resultados para "{q}"</div>
+        )}
+
+        {/* Comidas ya registradas ese día */}
+        <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,margin:'8px 0 8px'}}>Registrado ese día</div>
+        {dayLog.length===0
+          ? <div style={{fontSize:13,color:C.textMuted,textAlign:'center',padding:'24px 0'}}>No hay nada registrado todavía.</div>
+          : ['Desayuno','Almuerzo','Once','Cena','Snack'].map(m=>{
+              const items=dayLog.filter(r=>r.comida===m);
+              if(!items.length) return null;
+              return(
+                <div key={m} style={{marginBottom:10}}>
+                  <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>{MI[m]} {m}</div>
+                  {items.map(it=>(
+                    <div key={it.uid} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 12px',marginBottom:5,background:C.surface,borderRadius:12,border:`1px solid ${C.border}`}}>
+                      <span style={{fontSize:17}}>{it.emoji}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:12.5,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{it.nombre}{it.qty>1?` ×${it.qty}`:''}</div>
+                        <div style={{fontSize:11,color:C.textSec}}>{Math.round(it.cal*itemRatio(it)*it.qty)} kcal</div>
+                      </div>
+                      <button className="tap" onClick={()=>delItem(it.uid)} style={{
+                        width:28,height:28,borderRadius:9,border:`1px solid ${C.border}`,background:C.surfaceAlt,
+                        color:C.textMuted,fontSize:13,cursor:'pointer',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
+                      }}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+      </div>
+      <div style={{padding:'12px 16px calc(16px + env(safe-area-inset-bottom))',borderTop:`1px solid ${C.border}`,background:C.bg}}>
+        <button className="tap" onClick={onClose} style={{width:'100%',padding:'14px',borderRadius:15,border:'none',background:'#D42020',color:'#fff',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F}}>Listo ✓</button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
    ONBOARDING
 ═══════════════════════════════════════════════════════ */
 function Onboarding({onDone}) {
@@ -5272,7 +5411,9 @@ function DailyChallengeCard({C, F, log, agua}) {
 }
 
 
-function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna', perfil={}, agua=0, exercises=[], saludScore=0, nutriPlan=null, botOutfit='chef'}) {
+function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userAllergens=[], veganMode=false, iaMemoria={gustos:[],disgustos:[],patrones:[]}, onIaMemoriaUpdate=null, isPro=false, meseta=null, onAddFood=null, meal='Desayuno', condicion='ninguna', condiciones=null, perfil={}, agua=0, exercises=[], saludScore=0, nutriPlan=null, botOutfit='chef'}) {
+  // Normaliza condiciones a array (soporta múltiples)
+  const conds = Array.isArray(condiciones)&&condiciones.length ? condiciones : (condicion&&condicion!=='ninguna'?[condicion]:[]);
   const chatKey = 'nutri_chat_' + new Date().toISOString().split('T')[0];
   const [msgs, setMsgs] = useState(()=>{
     const saved = LS.get(chatKey, []);
@@ -5302,7 +5443,7 @@ function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userA
 Nombre: ${nombre} | Objetivo: ${objLabels[obj]||obj} | Racha: ${streak.days} días 🔥
 ${perfil.peso?`Físico: ${perfil.sexo==='M'?'Hombre':'Mujer'}, ${perfil.edad} años, ${perfil.peso}kg, ${perfil.altura}cm${imc?` | IMC: ${imc} (${imcLabel})`:''}`:''}
 ${perfil.act?`Actividad: ${actLabels[String(perfil.act)]||perfil.act}`:''}
-Condición médica: ${condicion==='ninguna'?'Sin condición especial':condicion}
+Condición médica: ${conds.length?conds.join(', '):'Sin condición especial'}
 ${veganMode?'🌱 Modo vegano activo.':''}
 ${userAllergens.length>0?`🚫 Alergias: ${userAllergens.join(', ')} — NUNCA sugerir estos.`:''}
 ${nutriPlan?`👩‍⚕️ Nutricionista: ${nutriPlan.nutricionista_nombre}${nutriPlan.calorias_meta?` (meta: ${nutriPlan.calorias_meta} kcal/día)`:''}`:'Sin nutricionista vinculado.'}
@@ -5315,7 +5456,7 @@ Prot: ${Math.round(tot.prot)}/${metas.prot}g | Carbs: ${Math.round(tot.carbs)}/$
 Agua: ${agua}/8 vasos | Ejercicio: ${totalBurn>0?`${totalBurn} kcal quemadas (${(exercises||[]).map(e=>e.nombre).join(', ')})`:'Sin ejercicio hoy'}
 Comidas (${log.length}): ${todayFoods}
 ${meseta?'⚠️ Posible meseta detectada — el peso no ha bajado en días.':''}
-${condicion==='diabetes'?'⚠️ DIABETES: bajo IG, sin azúcares simples.':''}${condicion==='hipertension'?'⚠️ HIPERTENSIÓN: máx 2000mg sodio/día.':''}${condicion==='colesterol'?'⚠️ COLESTEROL: sin grasas sat/trans.':''}${condicion==='celiaco'?'⚠️ CELIAQUÍA: sin gluten.':''}
+${conds.includes('diabetes')?'⚠️ DIABETES: bajo IG, sin azúcares simples.':''}${conds.includes('hipertension')?'⚠️ HIPERTENSIÓN: máx 2000mg sodio/día.':''}${conds.includes('colesterol')?'⚠️ COLESTEROL: sin grasas sat/trans.':''}${conds.includes('celiaco')?'⚠️ CELIAQUÍA: sin gluten.':''}
 ${isPro&&iaMemoria?.gustos?.length>0?`❤️ Le gusta: ${iaMemoria.gustos.join(', ')}.`:''}
 ${isPro&&iaMemoria?.disgustos?.length>0?`🚫 No le gusta: ${iaMemoria.disgustos.join(', ')}.`:''}
 
@@ -6971,7 +7112,8 @@ function RecordatoriosModal({C, F, dark, onClose}) {
 /* ══════════════════════════════════════════════
    PLAN SEMANAL AUTOMÁTICO IA PRO
 ══════════════════════════════════════════════ */
-function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, userAllergens, veganMode, condicion='ninguna', onClose}) {
+function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, userAllergens, veganMode, condicion='ninguna', condiciones=null, onClose}) {
+  const conds = Array.isArray(condiciones)&&condiciones.length ? condiciones : (condicion&&condicion!=='ninguna'?[condicion]:[]);
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState(null);
   const [diaActivo, setDiaActivo] = useState(0);
@@ -6984,7 +7126,8 @@ function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, user
       const ritmoTexto = RITMOS[ritmo]?.label || 'Normal';
       const alerg = userAllergens.length>0 ? `Alergias: ${userAllergens.join(', ')}.` : '';
       const vegan = veganMode ? 'Es VEGANO.' : '';
-      const condTexto = condicion==='diabetes'?'TIENE DIABETES TIPO 2: bajo índice glucémico, sin azúcares simples.':condicion==='hipertension'?'TIENE HIPERTENSIÓN: máx 2000mg sodio/día.':condicion==='colesterol'?'TIENE COLESTEROL ALTO: sin grasas saturadas ni trans.':condicion==='celiaco'?'TIENE CELIAQUÍA: sin gluten.':'';
+      const condMap = {diabetes:'TIENE DIABETES TIPO 2: bajo índice glucémico, sin azúcares simples.',hipertension:'TIENE HIPERTENSIÓN: máx 2000mg sodio/día.',colesterol:'TIENE COLESTEROL ALTO: sin grasas saturadas ni trans.',celiaco:'TIENE CELIAQUÍA: sin gluten.'};
+      const condTexto = conds.map(c=>condMap[c]).filter(Boolean).join(' ');
       const prompt = `Crea un plan de alimentación semanal completo para ${nombre}.
 Objetivo: ${objTexto}. Ritmo: ${ritmoTexto}. Calorías diarias: ${metas.cal} kcal. Proteínas: ${metas.prot}g. ${alerg} ${vegan} ${condTexto}
 Usa ingredientes disponibles en supermercados chilenos (Jumbo, Lider, Santa Isabel).
@@ -8703,7 +8846,8 @@ Responde SOLO con este JSON:
    Genera plan semanal basado en presupuesto en CLP
 ═══════════════════════════════════════════════════════ */
 const generarPlanFeria = (presupuesto, metas, db, prefs = {}) => {
-  const { veganMode=false, allergens=[], favIds=new Set(), recentIds=new Set(), obj='mantener', condicion='ninguna' } = prefs;
+  const { veganMode=false, allergens=[], favIds=new Set(), recentIds=new Set(), obj='mantener', condicion='ninguna', condiciones=null } = prefs;
+  const conds = Array.isArray(condiciones)&&condiciones.length ? condiciones : (condicion&&condicion!=='ninguna'?[condicion]:[]);
 
   // Solo productos con precio definido
   let conPrecio = db.filter(f => f.precio && f.pesoCompra);
@@ -8715,10 +8859,16 @@ const generarPlanFeria = (presupuesto, metas, db, prefs = {}) => {
   if(allergens.length) conPrecio = conPrecio.filter(f => !getFoodAllergens(f).some(a => allergens.includes(a)));
 
   // Filtrar para hipertensión (bajo sodio: < 400mg/100g)
-  if(condicion === 'hipertension') conPrecio = conPrecio.filter(f => ((f.sodio||0)/(f.porcion||100))*100 < 400);
+  if(conds.includes('hipertension')) conPrecio = conPrecio.filter(f => ((f.sodio||0)/(f.porcion||100))*100 < 400);
 
   // Filtrar para diabetes (bajo azúcar: < 15g/100g)
-  if(condicion === 'diabetes') conPrecio = conPrecio.filter(f => ((f.azucar||0)/(f.porcion||100))*100 < 15);
+  if(conds.includes('diabetes')) conPrecio = conPrecio.filter(f => ((f.azucar||0)/(f.porcion||100))*100 < 15);
+
+  // Filtrar para colesterol (baja grasa saturada / grasas: priorizar < 10g grasa/100g)
+  if(conds.includes('colesterol')) conPrecio = conPrecio.filter(f => ((f.grasas||0)/(f.porcion||100))*100 < 12);
+
+  // Filtrar para celiaquía (sin gluten)
+  if(conds.includes('celiaco')) conPrecio = conPrecio.filter(f => !getFoodAllergens(f).includes('gluten'));
 
   // Calcular valor nutricional por peso (score) con preferencias
   const scored = conPrecio.map(f => {
@@ -8854,12 +9004,13 @@ const calcPrediccionSemanal = (db) => {
   return { topFoods, avgCal, avgReciente, tendencia, diasAnalizados:dias.length, topByMeal };
 };
 
-function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[], favorites=[], recent=[], obj='mantener', condicion='ninguna', nombre=''}) {
+function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[], favorites=[], recent=[], obj='mantener', condicion='ninguna', condiciones=null, nombre=''}) {
   const [presupuesto, setPresupuesto] = useState(15000);
   const [plan, setPlan] = useState(null);
   const [generando, setGenerando] = useState(false);
   const [tab, setTab] = useState('feria'); // 'feria' | 'prediccion'
   const prediccion = useMemo(()=>calcPrediccionSemanal(DB),[]);
+  const conds = Array.isArray(condiciones)&&condiciones.length ? condiciones : (condicion&&condicion!=='ninguna'?[condicion]:[]);
 
   const generar = () => {
     setGenerando(true);
@@ -8867,7 +9018,7 @@ function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[],
       const favIds   = new Set(favorites.map(f=>f.id));
       const recentIds = new Set(recent.map(f=>f.id));
       setPlan(generarPlanFeria(presupuesto, metas, DB, {
-        veganMode, allergens:userAllergens, favIds, recentIds, obj, condicion
+        veganMode, allergens:userAllergens, favIds, recentIds, obj, condicion, condiciones
       }));
       setGenerando(false);
     }, 600);
@@ -8972,12 +9123,14 @@ function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[],
         {/* ── TAB MODO FERIA ── */}
         {tab==='feria' && <>
         {/* Indicadores de personalización activos */}
-        {(veganMode || userAllergens.length > 0 || condicion !== 'ninguna') && (
+        {(veganMode || userAllergens.length > 0 || conds.length > 0) && (
           <div style={{background:'rgba(52,199,89,0.08)',border:'1px solid rgba(52,199,89,0.2)',borderRadius:12,padding:'8px 12px',marginBottom:12,display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
             <span style={{fontSize:10,fontWeight:700,color:'#34C759'}}>✓ Personalizado para ti:</span>
             {veganMode && <span style={{fontSize:10,background:'#34C75920',color:'#34C759',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🌱 Vegano</span>}
-            {condicion==='diabetes' && <span style={{fontSize:10,background:'#FF950020',color:'#FF9500',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🩺 Bajo azúcar</span>}
-            {condicion==='hipertension' && <span style={{fontSize:10,background:'#5856D620',color:'#5856D6',padding:'2px 8px',borderRadius:8,fontWeight:600}}>💊 Bajo sodio</span>}
+            {conds.includes('diabetes') && <span style={{fontSize:10,background:'#FF950020',color:'#FF9500',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🩺 Bajo azúcar</span>}
+            {conds.includes('hipertension') && <span style={{fontSize:10,background:'#5856D620',color:'#5856D6',padding:'2px 8px',borderRadius:8,fontWeight:600}}>💊 Bajo sodio</span>}
+            {conds.includes('colesterol') && <span style={{fontSize:10,background:'#FF2D5520',color:'#FF2D55',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🫀 Baja grasa</span>}
+            {conds.includes('celiaco') && <span style={{fontSize:10,background:'#C8960A20',color:'#C8960A',padding:'2px 8px',borderRadius:8,fontWeight:600}}>🌾 Sin gluten</span>}
             {userAllergens.length>0 && <span style={{fontSize:10,background:'#FF3B3020',color:'#FF3B30',padding:'2px 8px',borderRadius:8,fontWeight:600}}>⚠️ Sin alérgenos</span>}
           </div>
         )}
@@ -9206,6 +9359,7 @@ function AppCore() {
   const [showFilter,setShowFilter]  = useState(false);
   const [showHistory,setShowHistory] = useState(false);
   const [historyDay,setHistoryDay]   = useState(null);
+  const [editDayKey,setEditDayKey]   = useState(null);
   const [showWeekly,setShowWeekly]   = useState(false);
   const [showShare,setShowShare]     = useState(false);
   const [pendingAchievement,setPendingAchievement] = useState(null); // {key, nombre, valor}
@@ -10073,6 +10227,10 @@ function AppCore() {
   };
 
   const allFoods = [...DB,...customFoods];
+  // Condiciones de salud normalizadas a array (soporta selección múltiple, con retrocompat)
+  const condiciones = Array.isArray(perfil.condiciones)
+    ? perfil.condiciones
+    : (perfil.condicion&&perfil.condicion!=='ninguna' ? [perfil.condicion] : []);
   const fastElapsed = fastStart ? Math.floor((fastNow-fastStart)/3600000) : 0;
   const fastPct = fastGoal>0 ? Math.min(fastElapsed/fastGoal,1) : 0;
   const fastDone = fastElapsed >= fastGoal;
@@ -10346,7 +10504,7 @@ function AppCore() {
                       </div>
                       <div style={{fontSize:14,color:C.textMuted,transform:isSel?'rotate(180deg)':'none',transition:'transform .2s'}}>▾</div>
                     </div>
-                    {isSel&&dayLog.length>0&&(
+                    {isSel&&(
                       <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${C.border}`,animation:'fadeUp .2s ease'}}>
                         {['Desayuno','Almuerzo','Once','Cena','Snack'].map(m=>{
                           const items=dayLog.filter(r=>r.comida===m);
@@ -10365,14 +10523,22 @@ function AppCore() {
                           );
                         })}
                         {note&&<div style={{marginTop:8,padding:'8px 12px',background:C.surfaceAlt,borderRadius:10,fontSize:12,color:C.textSec,fontStyle:'italic'}}>📝 {note}</div>}
-                        <button className="tap" onClick={()=>{
-                          setLog(dayLog.map(it=>({...it,uid:Date.now()+Math.random()})));
-                          setShowHistory(false);
-                          haptic('success');
-                          setToast('📋 Comidas copiadas al día de hoy');
-                        }} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
-                          📋 Copiar estas comidas a hoy
-                        </button>
+                        {dayLog.length===0&&<div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'4px 0 2px'}}>No registraste nada este día. ¿Olvidaste una comida?</div>}
+                        <div style={{display:'flex',gap:8,marginTop:12}}>
+                          <button className="tap" onClick={()=>{setEditDayKey(key);haptic('light');}} style={{flex:1,padding:'11px',borderRadius:14,border:`1.5px solid #D42020`,background:'transparent',color:'#D42020',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+                            ✏️ Editar este día
+                          </button>
+                          {dayLog.length>0&&(
+                            <button className="tap" onClick={()=>{
+                              setLog(dayLog.map(it=>({...it,uid:Date.now()+Math.random()})));
+                              setShowHistory(false);
+                              haptic('success');
+                              setToast('📋 Comidas copiadas al día de hoy');
+                            }} style={{flex:1,padding:'11px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+                              📋 Copiar a hoy
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -10402,10 +10568,13 @@ function AppCore() {
         </div>
       )}
 
-      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'} perfil={perfil} agua={agua} exercises={exercises} saludScore={saludScore} nutriPlan={nutriPlan} botOutfit={nutribotOutfit}/>}
+      {showAI&&<AIAssistant C={C} F={F} nombre={nombre} tot={tot} metas={metas} obj={obj} log={log} streak={streak} userAllergens={userAllergens} veganMode={veganMode} iaMemoria={iaMemoria} onIaMemoriaUpdate={setIaMemoria} isPro={isPro} meseta={detectarMeseta} onClose={()=>setShowAI(false)} onAddFood={(food)=>addFood(food)} meal={meal} condicion={perfil.condicion||'ninguna'} condiciones={condiciones} perfil={perfil} agua={agua} exercises={exercises} saludScore={saludScore} nutriPlan={nutriPlan} botOutfit={nutribotOutfit}/>}
       {showOutfitPicker&&<OutfitPicker C={C} F={F} current={botOutfitChoice}
         onPick={(id)=>{setBotOutfitChoice(id);LS.set('botOutfit',id);}}
         onClose={()=>setShowOutfitPicker(false)}/>}
+      {editDayKey&&<PastDayEditor C={C} F={F} dateKey={editDayKey} allFoods={allFoods} supabaseUser={supabaseUser}
+        onClose={()=>setEditDayKey(null)}
+        onLogChange={(key,newLog)=>{ if(key===todayKey()) setLog(newLog); }}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -10418,7 +10587,7 @@ function AppCore() {
       {showPlanesDescargables&&<PlanesDescargablesModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanesDescargables(false)}/>}
       {showMarketplace&&<MarketplaceNutricionistasModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} onClose={()=>setShowMarketplace(false)}/>}
       {showRecetasTemporada&&<RecetasTemporadaModal C={C} F={F} dark={dark} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasTemporada(false)}/>}
-      {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} condicion={perfil.condicion||'ninguna'} onClose={()=>setShowPlanSemanal(false)}/>}
+      {showPlanSemanal&&<PlanSemanalIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} condicion={perfil.condicion||'ninguna'} condiciones={condiciones} onClose={()=>setShowPlanSemanal(false)}/>}
       {showPredicionPeso&&<PredicionPesoModal C={C} F={F} dark={dark} weightHistory={weightHistory} perfil={perfil} obj={obj} metas={metas} onClose={()=>setShowPredicionPeso(false)}/>}
       {showModoSalud&&<ModoSaludEspecialModal C={C} F={F} dark={dark} log={log} onClose={()=>setShowModoSalud(false)}/>}
       {showReporteSemanal&&<ReporteSemanalModal C={C} F={F} dark={dark} isPro={isPro} onClose={()=>setShowReporteSemanal(false)}/>}
@@ -10497,7 +10666,7 @@ function AppCore() {
       <Confetti active={confetti}/>
 
       {/* ══ MODO FERIA ══ */}
-      {showModFeria&&<ModFeriaModal C={C} F={F} metas={metas} veganMode={veganMode} userAllergens={userAllergens} favorites={favorites} recent={recent} obj={obj} condicion={perfil.condicion} nombre={nombre} onClose={()=>setShowModFeria(false)}/>}
+      {showModFeria&&<ModFeriaModal C={C} F={F} metas={metas} veganMode={veganMode} userAllergens={userAllergens} favorites={favorites} recent={recent} obj={obj} condicion={perfil.condicion} condiciones={condiciones} nombre={nombre} onClose={()=>setShowModFeria(false)}/>}
 
       {/* ══ BARCODE SCANNER ══ */}
       {showScanner&&<BarcodeScanner C={C} F={F} supabaseUser={supabaseUser} onClose={()=>setShowScanner(false)} onFound={(food)=>{
@@ -11566,6 +11735,7 @@ function AppCore() {
           <div style={{display:'flex',gap:8,marginBottom:14}}>
             {[
               {icon:'📅',l:'Historial',fn:()=>setShowHistory(true)},
+              {icon:'✏️',l:'Editar día',fn:()=>{const d=new Date();d.setDate(d.getDate()-1);setEditDayKey(dateToKey(d));haptic('light');}},
               {icon:'📊',l:'Semana',fn:()=>setShowWeekly(true)},
               {icon:'📤',l:'Compartir',fn:()=>setShowShare(true)},
             ].map(({icon,l,fn})=>(
@@ -11916,34 +12086,63 @@ function AppCore() {
                 ))}
               </div>
             </div>
-            {/* 🏥 Condición de salud */}
-            <div style={{marginTop:12}}>
-              <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:8,fontFamily:F}}>Condición de salud</div>
-              <div style={{display:'flex',flexDirection:'column',gap:5}}>
-                {[
-                  {v:'ninguna',   l:'✅ Sin condición especial'},
-                  {v:'diabetes',  l:'🩸 Diabetes tipo 2'},
-                  {v:'hipertension', l:'💊 Hipertensión'},
-                  {v:'colesterol',l:'🫀 Colesterol alto'},
-                  {v:'celiaco',   l:'🌾 Enfermedad celíaca'},
-                ].map(({v,l})=>(
-                  <button key={v} className="tap" onClick={()=>setPerfil({...perfil,condicion:v})}
-                    style={{padding:'11px 14px',borderRadius:13,textAlign:'left',border:`1.5px solid ${perfil.condicion===v?'#FF3B30':C.border}`,background:perfil.condicion===v?'rgba(255,59,48,0.08)':C.surfaceAlt,color:perfil.condicion===v?'#FF3B30':C.textSec,fontSize:12,fontWeight:perfil.condicion===v?700:500,cursor:'pointer',fontFamily:F,transition:'all .15s'}}>
-                    {l}
-                  </button>
-                ))}
-              </div>
-              {perfil.condicion&&perfil.condicion!=='ninguna'&&(
-                <div style={{marginTop:8,padding:'10px 12px',borderRadius:12,background:'rgba(255,59,48,0.06)',border:'1px solid rgba(255,59,48,0.15)'}}>
-                  <div style={{fontSize:11,color:'#FF3B30',lineHeight:1.5}}>
-                    {perfil.condicion==='diabetes'&&'La IA limitará azúcares y carbohidratos refinados en tus planes y recomendaciones.'}
-                    {perfil.condicion==='hipertension'&&'La IA priorizará alimentos bajos en sodio y te alertará cuando registres comidas con alto contenido de sal.'}
-                    {perfil.condicion==='colesterol'&&'La IA reducirá grasas saturadas y trans en tus planes, y priorizará grasas saludables.'}
-                    {perfil.condicion==='celiaco'&&'La IA excluirá gluten de todos los planes y recetas generados para ti.'}
-                  </div>
+            {/* 🏥 Condiciones de salud (selección múltiple) */}
+            {(()=>{
+              const conds = Array.isArray(perfil.condiciones)
+                ? perfil.condiciones
+                : (perfil.condicion&&perfil.condicion!=='ninguna' ? [perfil.condicion] : []);
+              const setConds = (arr)=>{
+                setPerfil({...perfil, condiciones:arr, condicion:arr[0]||'ninguna'});
+              };
+              const toggle = (v)=>{
+                if(v==='ninguna'){ setConds([]); haptic('light'); return; }
+                setConds(conds.includes(v) ? conds.filter(x=>x!==v) : [...conds,v]);
+                haptic('light');
+              };
+              const DESC = {
+                diabetes:'limitará azúcares y carbohidratos refinados',
+                hipertension:'priorizará alimentos bajos en sodio y te alertará con comidas saladas',
+                colesterol:'reducirá grasas saturadas y trans, priorizando grasas saludables',
+                celiaco:'excluirá el gluten de todos los planes y recetas',
+              };
+              return (
+              <div style={{marginTop:12}}>
+                <div style={{fontSize:10,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:4,fontFamily:F}}>Condiciones de salud</div>
+                <div style={{fontSize:11,color:C.textMuted,marginBottom:8,fontFamily:F}}>Puedes seleccionar más de una</div>
+                <div style={{display:'flex',flexDirection:'column',gap:5}}>
+                  {[
+                    {v:'ninguna',   l:'✅ Sin condición especial'},
+                    {v:'diabetes',  l:'🩸 Diabetes tipo 2'},
+                    {v:'hipertension', l:'💊 Hipertensión'},
+                    {v:'colesterol',l:'🫀 Colesterol alto'},
+                    {v:'celiaco',   l:'🌾 Enfermedad celíaca'},
+                  ].map(({v,l})=>{
+                    const sel = v==='ninguna' ? conds.length===0 : conds.includes(v);
+                    return (
+                      <button key={v} className="tap" onClick={()=>toggle(v)}
+                        style={{padding:'11px 14px',borderRadius:13,textAlign:'left',display:'flex',alignItems:'center',gap:10,border:`1.5px solid ${sel?'#FF3B30':C.border}`,background:sel?'rgba(255,59,48,0.08)':C.surfaceAlt,color:sel?'#FF3B30':C.textSec,fontSize:12,fontWeight:sel?700:500,cursor:'pointer',fontFamily:F,transition:'all .15s'}}>
+                        <span style={{
+                          width:18,height:18,borderRadius:v==='ninguna'?9:6,flexShrink:0,
+                          border:`2px solid ${sel?'#FF3B30':C.border}`,
+                          background:sel?'#FF3B30':'transparent',
+                          color:'#fff',fontSize:11,fontWeight:800,
+                          display:'flex',alignItems:'center',justifyContent:'center',
+                        }}>{sel?'✓':''}</span>
+                        {l}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+                {conds.length>0&&(
+                  <div style={{marginTop:8,padding:'10px 12px',borderRadius:12,background:'rgba(255,59,48,0.06)',border:'1px solid rgba(255,59,48,0.15)'}}>
+                    <div style={{fontSize:11,color:'#FF3B30',lineHeight:1.5}}>
+                      La IA {conds.map(c=>DESC[c]).filter(Boolean).join('; ')}.
+                    </div>
+                  </div>
+                )}
+              </div>
+              );
+            })()}
             {/* ── Cuenta en la nube ── */}
             <div style={{marginTop:12,background:supabaseUser?'#34C75910':C.surfaceAlt,borderRadius:16,padding:'14px',border:`1px solid ${supabaseUser?'#34C75940':C.border}`}}>
               {supabaseUser?(
