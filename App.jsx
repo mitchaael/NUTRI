@@ -9560,7 +9560,7 @@ function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[],
   );
 }
 
-function AppCore() {
+function AppCore({onRequestAuth}) {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
   const [authChecked, setAuthChecked]  = useState(false);
@@ -12847,7 +12847,7 @@ function AppCore() {
                 <div style={{fontSize:28,flexShrink:0}}>👩‍⚕️</div>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.2}}>{nutriPlan?`Vinculado con ${nutriPlan.nutricionista_nombre||'tu nutricionista'}`:'Vincular con nutricionista'}</div>
-                  <div style={{fontSize:11,color:nutriPlan?'#34C759':C.textSec,marginTop:2,fontWeight:nutriPlan?700:400}}>{nutriPlan?'⭐ Pro activado por tu nutricionista':'Ingresa el código que te dio tu nutricionista'}</div>
+                  <div style={{fontSize:11,color:nutriPlan?'#34C759':C.textSec,marginTop:2,fontWeight:nutriPlan?700:400}}>{nutriPlan?'⭐ Pro activado por tu nutricionista':!supabaseUser?'Necesitas una cuenta para vincularte':'Ingresa el código que te dio tu nutricionista'}</div>
                 </div>
                 {nutriPlan&&<button onClick={async()=>{
                   setNutriPlan(null); LS.set('nutriPlan',null); setProSource('');
@@ -12862,9 +12862,19 @@ function AppCore() {
                 <div style={{display:'flex',gap:8,marginTop:10}}>
                   <input value={nutriCode} onChange={e=>setNutriCode(e.target.value.toUpperCase())} placeholder="NUT-XXXXX" style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C.border}`,fontSize:14,fontWeight:700,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,letterSpacing:2}}/>
                   <button onClick={async()=>{
-                    if(!nutriCode.trim()||loadingNutriCode||!supabaseUser) return;
+                    if(loadingNutriCode) return;
+                    // Para vincularse, el paciente DEBE tener cuenta (la búsqueda del
+                    // código y el guardado requieren sesión). Si es invitado, avisar.
+                    if(!supabaseUser){
+                      haptic('error');
+                      showToast('Primero crea tu cuenta o inicia sesión para vincularte con tu nutricionista 👩‍⚕️');
+                      onRequestAuth && onRequestAuth();
+                      return;
+                    }
+                    if(!nutriCode.trim()){ haptic('error'); showToast('Ingresa el código que te dio tu nutricionista (NUT-XXXXX).'); return; }
                     setLoadingNutriCode(true);
-                    const {data:nutrData} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',nutriCode.trim()).single();
+                    const {data:nutrData, error:codeErr} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',nutriCode.trim()).maybeSingle();
+                    if(codeErr){ haptic('error'); showToast('Error de conexión. Revisa tu internet e intenta de nuevo.'); setLoadingNutriCode(false); return; }
                     if(nutrData) {
                       // 1. Vincular en profiles
                       await supabase.from('profiles').update({
@@ -13336,7 +13346,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <AppCore/>
+      <AppCore onRequestAuth={()=>setShowAuth(true)}/>
     </ErrorBoundary>
   );
 }
