@@ -868,6 +868,109 @@ const PAUTA_COMIDAS = [
 ];
 const horaDeComida = (k)=> (PAUTA_COMIDAS.find(m=>m.k===k)||{}).hora || '';
 const MACRO_KCAL = {prot:4, carbs:4, grasas:9};
+
+/* ═══════════════════════════════════════════════════════
+   MICRONUTRIENTES — vitaminas y minerales
+   Híbrido: datos reales (por 100g) para alimentos comunes +
+   estimación por categoría para el resto. RDA = valor diario
+   recomendado adulto (referencia).
+═══════════════════════════════════════════════════════ */
+const MICROS = [
+  {k:'calcio',  l:'Calcio',       u:'mg', rda:1000, e:'🦴'},
+  {k:'hierro',  l:'Hierro',       u:'mg', rda:14,   e:'🩸'},
+  {k:'potasio', l:'Potasio',      u:'mg', rda:3500, e:'🍌'},
+  {k:'magnesio',l:'Magnesio',     u:'mg', rda:400,  e:'✨'},
+  {k:'zinc',    l:'Zinc',         u:'mg', rda:11,   e:'🛡️'},
+  {k:'vitA',    l:'Vitamina A',   u:'µg', rda:800,  e:'🥕'},
+  {k:'vitC',    l:'Vitamina C',   u:'mg', rda:80,   e:'🍊'},
+  {k:'vitD',    l:'Vitamina D',   u:'µg', rda:15,   e:'☀️'},
+  {k:'b12',     l:'Vitamina B12', u:'µg', rda:2.4,  e:'🧬'},
+  {k:'folato',  l:'Folato',       u:'µg', rda:400,  e:'🌿'},
+];
+// Helper para escribir valores [calcio,hierro,potasio,magnesio,zinc,vitA,vitC,vitD,b12,folato]
+const _mc = (a)=>({calcio:a[0],hierro:a[1],potasio:a[2],magnesio:a[3],zinc:a[4],vitA:a[5],vitC:a[6],vitD:a[7],b12:a[8],folato:a[9]});
+// Datos REALES por 100 g, asociados por palabra clave en el nombre del alimento
+const MICROS_REAL = {
+  //                    Ca   Fe   K    Mg   Zn   A    C    D    B12  Folato
+  'leche':       _mc([120, 0.03,150, 11,  0.4, 46,  0,   1.3, 0.45,5]),
+  'yogur':       _mc([110, 0.05,155, 11,  0.6, 27,  0.5, 0,   0.4, 7]),
+  'yoghurt':     _mc([110, 0.05,155, 11,  0.6, 27,  0.5, 0,   0.4, 7]),
+  'queso':       _mc([700, 0.2, 120, 29,  3.9, 165, 0,   0.5, 1.5, 21]),
+  'huevo':       _mc([56,  1.75,138, 12,  1.3, 160, 0,   2,   0.9, 47]),
+  'pollo':       _mc([12,  0.7, 256, 27,  0.9, 9,   0,   0.1, 0.3, 4]),
+  'pavo':        _mc([12,  1.4, 250, 28,  1.7, 0,   0,   0.1, 1.6, 9]),
+  'vacuno':      _mc([12,  2.6, 320, 21,  4.8, 0,   0,   0.1, 2.6, 6]),
+  'carne':       _mc([12,  2.6, 320, 21,  4.8, 0,   0,   0.1, 2.6, 6]),
+  'cerdo':       _mc([14,  0.9, 350, 25,  2.4, 2,   0.7, 0.7, 0.7, 5]),
+  'salmón':      _mc([12,  0.4, 363, 29,  0.4, 12,  0,   11,  3.2, 26]),
+  'atún':        _mc([8,   1,   250, 50,  0.6, 17,  0,   1.7, 2.2, 2]),
+  'merluza':     _mc([20,  0.4, 350, 30,  0.4, 10,  0,   1,   1,   7]),
+  'reineta':     _mc([20,  0.5, 350, 30,  0.5, 10,  0,   2,   1.5, 7]),
+  'palta':       _mc([12,  0.55,485, 29,  0.6, 7,   10,  0,   0,   81]),
+  'plátano':     _mc([5,   0.26,358, 27,  0.15,3,   8.7, 0,   0,   20]),
+  'naranja':     _mc([40,  0.1, 181, 10,  0.07,11,  53,  0,   0,   30]),
+  'manzana':     _mc([6,   0.12,107, 5,   0.04,3,   4.6, 0,   0,   3]),
+  'frutilla':    _mc([16,  0.41,153, 13,  0.14,1,   59,  0,   0,   24]),
+  'espinaca':    _mc([99,  2.7, 558, 79,  0.5, 469, 28,  0,   0,   194]),
+  'acelga':      _mc([51,  1.8, 379, 81,  0.4, 306, 30,  0,   0,   14]),
+  'tomate':      _mc([10,  0.27,237, 11,  0.17,42,  14,  0,   0,   15]),
+  'zanahoria':   _mc([33,  0.3, 320, 12,  0.24,835, 5.9, 0,   0,   19]),
+  'brócoli':     _mc([47,  0.73,316, 21,  0.41,31,  89,  0,   0,   63]),
+  'lechuga':     _mc([36,  0.86,194, 13,  0.18,370, 9,   0,   0,   38]),
+  'lenteja':     _mc([19,  3.3, 369, 36,  1.3, 0,   1.5, 0,   0,   181]),
+  'poroto':      _mc([35,  2.1, 405, 45,  1,   0,   0,   0,   0,   130]),
+  'garbanzo':    _mc([49,  2.9, 291, 48,  1.5, 1,   1.3, 0,   0,   172]),
+  'arroz':       _mc([10,  0.2, 35,  12,  0.5, 0,   0,   0,   0,   3]),
+  'marraqueta':  _mc([30,  1.5, 120, 25,  0.7, 0,   0,   0,   0,   30]),
+  'hallulla':    _mc([30,  1.5, 110, 24,  0.7, 0,   0,   0,   0,   28]),
+  'pan':         _mc([30,  1.5, 120, 25,  0.7, 0,   0,   0,   0,   30]),
+  'avena':       _mc([54,  4.7, 429, 177, 4,   0,   0,   0,   0,   56]),
+  'almendra':    _mc([269, 3.7, 733, 270, 3.1, 0,   0,   0,   0,   44]),
+  'nuez':        _mc([98,  2.9, 441, 158, 3,   1,   1.3, 0,   0,   98]),
+  'maní':        _mc([92,  4.6, 705, 168, 3.3, 0,   0,   0,   0,   240]),
+  'quínoa':      _mc([17,  1.5, 172, 64,  1.1, 0,   0,   0,   0,   42]),
+  'papa':        _mc([12,  0.8, 421, 23,  0.3, 0,   19.7,0,   0,   15]),
+  'choclo':      _mc([2,   0.5, 270, 37,  0.5, 9,   6.8, 0,   0,   42]),
+};
+// Estimación por CATEGORÍA (por 100 g) para alimentos sin dato real
+const MICRO_BY_CAT = {
+  'Lácteos':   _mc([120, 0.1, 150, 12,  0.5, 40,  1,   0.8, 0.5, 6]),
+  'Carnes':    _mc([12,  2.3, 310, 22,  4,   3,   0,   0.2, 2,   6]),
+  'Cecinas':   _mc([10,  1.4, 250, 18,  2,   2,   0,   0.4, 1,   4]),
+  'Pescados':  _mc([18,  0.6, 340, 30,  0.5, 12,  0,   4,   2.5, 8]),
+  'Huevos':    _mc([56,  1.75,138, 12,  1.3, 160, 0,   2,   0.9, 47]),
+  'Verduras':  _mc([40,  1.2, 300, 25,  0.4, 150, 25,  0,   0,   60]),
+  'Frutas':    _mc([14,  0.3, 200, 12,  0.1, 30,  25,  0,   0,   20]),
+  'Legumbres': _mc([35,  2.8, 380, 43,  1.3, 1,   1,   0,   0,   160]),
+  'Cereales':  _mc([25,  1.5, 120, 40,  1,   0,   0,   0,   0,   25]),
+  'Panes':     _mc([30,  1.5, 120, 25,  0.7, 0,   0,   0,   0,   30]),
+  'Granos':    _mc([15,  1,   120, 30,  0.8, 0,   0,   0,   0,   15]),
+  'Frutos secos':_mc([120,3,  600, 180, 3,   1,   0,   0,   0,   60]),
+  'Snacks':    _mc([40,  1,   250, 50,  1,   5,   2,   0,   0,   30]),
+  'Bebidas':   _mc([8,   0.1, 30,  3,   0.05,0,   2,   0,   0,   2]),
+  'Aceites':   _mc([1,   0.1, 1,   0,   0,   0,   0,   0,   0,   0]),
+  'Condimentos':_mc([20, 1,   100, 15,  0.3, 20,  5,   0,   0,   10]),
+  'Salsas':    _mc([15,  0.6, 150, 12,  0.2, 30,  6,   0,   0,   8]),
+  '_default':  _mc([20,  0.7, 150, 18,  0.5, 20,  3,   0,   0.1, 15]),
+};
+const getMicros100 = (food) => {
+  const nameL = (food && food.nombre ? food.nombre : '').toLowerCase();
+  for(const kw in MICROS_REAL){ if(nameL.includes(kw)) return {m:MICROS_REAL[kw], real:true}; }
+  return {m: MICRO_BY_CAT[food && food.cat] || MICRO_BY_CAT._default, real:false};
+};
+// Suma de micros sobre un log (escala por gramos realmente consumidos)
+const sumMicros = (log) => {
+  const acc = {}; MICROS.forEach(x=>acc[x.k]=0);
+  let anyEst=false, anyReal=false;
+  (log||[]).forEach(it=>{
+    const {m,real} = getMicros100(it);
+    const g = (it.grams || it.porcion || 100) * (it.qty || 1);
+    MICROS.forEach(x=>{ acc[x.k] += (m[x.k]||0) * g / 100; });
+    if(real) anyReal=true; else anyEst=true;
+  });
+  acc._anyEst = anyEst; acc._anyReal = anyReal;
+  return acc;
+};
 const macrosToKcal = (mac={}) =>
   Math.round((+mac.prot||0)*4 + (+mac.carbs||0)*4 + (+mac.grasas||0)*9);
 
@@ -5698,6 +5801,37 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
                   </div>
                 ))}
               </div>
+              {/* Micronutrientes (vitaminas y minerales) */}
+              {(()=>{
+                const mic = sumMicros(selDia.log);
+                return (
+                  <div style={{marginBottom:14}}>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                      <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5}}>Vitaminas y minerales</div>
+                      {mic._anyEst&&<span style={{fontSize:9,color:C.textMuted}}>~ algunos estimados</span>}
+                    </div>
+                    <div style={{background:dark?'#1C1C1E':'white',borderRadius:16,padding:'12px 14px',border:`1px solid ${dark?'rgba(255,255,255,0.08)':'#E5E5EA'}`}}>
+                      {MICROS.map((x,i)=>{
+                        const v = mic[x.k]||0; const pct = Math.min(Math.round((v/x.rda)*100),100);
+                        const col = pct>=70?'#34C759':pct>=35?'#FF9500':'#FF3B30';
+                        return (
+                          <div key={x.k} style={{display:'flex',alignItems:'center',gap:10,marginBottom:i<MICROS.length-1?9:0}}>
+                            <span style={{fontSize:14,width:18,flexShrink:0}}>{x.e}</span>
+                            <div style={{width:96,fontSize:11.5,color:dark?'white':'#1C1C1E',fontWeight:600,flexShrink:0}}>{x.l}</div>
+                            <div style={{flex:1,height:7,borderRadius:4,background:dark?'rgba(255,255,255,0.08)':'#F2F2F7',overflow:'hidden'}}>
+                              <div style={{width:`${pct}%`,height:'100%',background:col,borderRadius:4}}/>
+                            </div>
+                            <div style={{width:78,textAlign:'right',fontSize:11,fontWeight:700,color:dark?'white':'#1C1C1E',flexShrink:0}}>{v>=100?Math.round(v):v.toFixed(1)}<span style={{fontSize:9,color:C.textSec}}>{x.u}</span></div>
+                            <div style={{width:34,textAlign:'right',fontSize:10,fontWeight:700,color:col,flexShrink:0}}>{pct}%</div>
+                          </div>
+                        );
+                      })}
+                      <div style={{fontSize:9,color:C.textMuted,marginTop:10,textAlign:'center'}}>% del valor diario recomendado (adulto)</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Comidas con alimentos */}
               <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Lo que comió</div>
               {['Desayuno','Almuerzo','Once','Cena','Snack'].map(m=>{
@@ -9020,6 +9154,7 @@ function MicronutrientesModal({C, F, log, onClose}) {
               <div style={{fontSize:13,color:C.textSec,marginBottom:4}}>Resumen de hoy vs metas recomendadas</div>
               <div style={{fontSize:11,color:C.textMuted}}>Basado en valores diarios recomendados para adultos</div>
             </div>
+            <div style={{fontSize:12,fontWeight:800,color:C.text,textTransform:'uppercase',letterSpacing:.5,marginBottom:10}}>Macronutrientes</div>
             {items.map(({label,val,meta,unit,emoji,color})=>{
               const pct = Math.min(100, Math.round((val/meta)*100));
               const over = val > meta;
@@ -9044,6 +9179,33 @@ function MicronutrientesModal({C, F, log, onClose}) {
                 </div>
               );
             })}
+            {/* Vitaminas y minerales (reales + estimados) */}
+            {(()=>{
+              const mic = sumMicros(log);
+              return (<>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',margin:'18px 0 10px'}}>
+                  <div style={{fontSize:12,fontWeight:800,color:C.text,textTransform:'uppercase',letterSpacing:.5}}>Vitaminas y minerales</div>
+                  {mic._anyEst&&<span style={{fontSize:9,color:C.textMuted}}>~ algunos estimados</span>}
+                </div>
+                <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',border:`1px solid ${C.border}`}}>
+                  {MICROS.map((x,i)=>{
+                    const v=mic[x.k]||0; const pct=Math.min(Math.round((v/x.rda)*100),100);
+                    const col=pct>=70?'#34C759':pct>=35?'#FF9500':'#FF3B30';
+                    return (
+                      <div key={x.k} style={{display:'flex',alignItems:'center',gap:10,marginBottom:i<MICROS.length-1?11:0}}>
+                        <span style={{fontSize:15,width:20,flexShrink:0}}>{x.e}</span>
+                        <div style={{width:104,fontSize:12.5,color:C.text,fontWeight:600,flexShrink:0}}>{x.l}</div>
+                        <div style={{flex:1,height:7,borderRadius:4,background:C.surfaceAlt,overflow:'hidden'}}>
+                          <div style={{width:`${pct}%`,height:'100%',background:col,borderRadius:4}}/>
+                        </div>
+                        <div style={{width:74,textAlign:'right',fontSize:12,fontWeight:700,color:C.text,flexShrink:0}}>{v>=100?Math.round(v):v.toFixed(1)}<span style={{fontSize:9,color:C.textSec}}>{x.u}</span></div>
+                      </div>
+                    );
+                  })}
+                  <div style={{fontSize:10,color:C.textMuted,marginTop:12,textAlign:'center',lineHeight:1.4}}>% no mostrado por simplicidad · objetivo: acercarte al 100% del valor diario.<br/>Datos reales para alimentos comunes; el resto estimado por categoría.</div>
+                </div>
+              </>);
+            })()}
           </>
         )}
       </div>
