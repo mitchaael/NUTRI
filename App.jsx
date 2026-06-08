@@ -12867,52 +12867,59 @@ function AppCore({onRequestAuth}) {
                     // código y el guardado requieren sesión). Si es invitado, avisar.
                     if(!supabaseUser){
                       haptic('error');
-                      showToast('Primero crea tu cuenta o inicia sesión para vincularte con tu nutricionista 👩‍⚕️');
+                      setToast('Primero crea tu cuenta o inicia sesión para vincularte con tu nutricionista 👩‍⚕️');
                       onRequestAuth && onRequestAuth();
                       return;
                     }
-                    if(!nutriCode.trim()){ haptic('error'); showToast('Ingresa el código que te dio tu nutricionista (NUT-XXXXX).'); return; }
+                    if(!nutriCode.trim()){ haptic('error'); setToast('Ingresa el código que te dio tu nutricionista (NUT-XXXXX).'); return; }
                     setLoadingNutriCode(true);
-                    const {data:nutrData, error:codeErr} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',nutriCode.trim()).maybeSingle();
-                    if(codeErr){ haptic('error'); showToast('Error de conexión. Revisa tu internet e intenta de nuevo.'); setLoadingNutriCode(false); return; }
-                    if(nutrData) {
-                      // 1. Vincular en profiles
-                      await supabase.from('profiles').update({
-                        linked_nutricionista_id: nutrData.nutricionista_id,
-                        linked_nutricionista_nombre: nutrData.nombre,
-                      }).eq('id', supabaseUser.id);
-                      // 2. Buscar plan del nutricionista asignado a este paciente (por email)
-                      let planRow = null;
-                      if(supabaseUser.email) {
-                        const {data:found} = await supabase.from('nutrition_plans')
-                          .select('*')
-                          .eq('nutricionista_id', nutrData.nutricionista_id)
-                          .eq('paciente_email', supabaseUser.email.toLowerCase())
-                          .limit(1)
-                          .maybeSingle();
-                        if(found) {
-                          planRow = found;
-                          // 3. Asignar paciente_id y registrar actividad
-                          await supabase.from('nutrition_plans').update({
-                            paciente_id: supabaseUser.id,
-                            ultima_actividad: new Date().toISOString(),
-                          }).eq('id', found.id);
+                    try {
+                      const {data:nutrData, error:codeErr} = await supabase.from('nutricionista_codes').select('nutricionista_id,nombre').eq('code',nutriCode.trim()).maybeSingle();
+                      if(codeErr){ haptic('error'); setToast('Error de conexión. Revisa tu internet e intenta de nuevo.'); setLoadingNutriCode(false); return; }
+                      if(nutrData) {
+                        // 1. Vincular en profiles
+                        await supabase.from('profiles').update({
+                          linked_nutricionista_id: nutrData.nutricionista_id,
+                          linked_nutricionista_nombre: nutrData.nombre,
+                        }).eq('id', supabaseUser.id);
+                        // 2. Buscar plan del nutricionista asignado a este paciente (por email)
+                        let planRow = null;
+                        if(supabaseUser.email) {
+                          const {data:found} = await supabase.from('nutrition_plans')
+                            .select('*')
+                            .eq('nutricionista_id', nutrData.nutricionista_id)
+                            .eq('paciente_email', supabaseUser.email.toLowerCase())
+                            .limit(1)
+                            .maybeSingle();
+                          if(found) {
+                            planRow = found;
+                            // 3. Asignar paciente_id y registrar actividad
+                            await supabase.from('nutrition_plans').update({
+                              paciente_id: supabaseUser.id,
+                              ultima_actividad: new Date().toISOString(),
+                            }).eq('id', found.id);
+                          }
                         }
-                      }
-                      // 4. Guardar nutriPlan con datos completos del plan (si existe)
-                      const plan = {
-                        nutricionista_nombre: nutrData.nombre,
-                        calorias_meta: planRow?.calorias_meta || null,
-                        mensaje: planRow?.mensaje || null,
-                        recomendaciones: planRow?.recomendaciones || [],
-                      };
-                      setNutriPlan(plan); LS.set('nutriPlan', plan);
-                      setIsPro(true);
-                      setProSource('nutricionista:'+nutrData.nombre);
-                      haptic('success');
-                      showToast('✅ Vinculado con '+nutrData.nombre+'. ¡Pro activado!');
-                    } else { haptic('error'); showToast('Código no encontrado. Verifica con tu nutricionista.'); }
-                    setLoadingNutriCode(false);
+                        // 4. Guardar nutriPlan con datos completos del plan (si existe)
+                        const plan = {
+                          nutricionista_nombre: nutrData.nombre,
+                          calorias_meta: planRow?.calorias_meta || null,
+                          mensaje: planRow?.mensaje || null,
+                          recomendaciones: planRow?.recomendaciones || [],
+                        };
+                        setNutriPlan(plan); LS.set('nutriPlan', plan);
+                        setIsPro(true);
+                        setProSource('nutricionista:'+nutrData.nombre);
+                        haptic('success');
+                        setToast(planRow
+                          ? '✅ Vinculado con '+nutrData.nombre+'. ¡Pro activado!'
+                          : '✅ Vinculado con '+nutrData.nombre+'. ¡Pro activado! (aún sin pauta asignada a tu email)');
+                      } else { haptic('error'); setToast('Código no encontrado. Verifica que esté bien escrito (NUT-XXXXX).'); }
+                    } catch(err){
+                      haptic('error'); setToast('No se pudo vincular. Revisa tu conexión e intenta de nuevo.');
+                    } finally {
+                      setLoadingNutriCode(false);
+                    }
                   }} disabled={loadingNutriCode} style={{padding:'10px 14px',borderRadius:12,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:700,flexShrink:0}}>
                     {loadingNutriCode?'...':'Vincular'}
                   </button>
