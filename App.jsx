@@ -9568,6 +9568,120 @@ function ModFeriaModal({C, F, metas, onClose, veganMode=false, userAllergens=[],
   );
 }
 
+/* ─── Mi Pauta (vista del paciente: pauta + adherencia) ─── */
+function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
+  const norm = normalizeRecs(nutriPlan?.recomendaciones);
+  const mac = norm.macros||{};
+  const calTarget   = nutriPlan?.calorias_meta || metas.cal || 0;
+  const protTarget  = mac.prot  ?? metas.prot;
+  const carbTarget  = mac.carbs ?? metas.carbs;
+  const grasaTarget = mac.grasas?? metas.grasas;
+
+  const dayK = todayKey();
+  const [checks,setChecks] = React.useState(()=>LS.get('pautaCheck_'+dayK, {}));
+  const toggle = (k)=>{ const n={...checks,[k]:!checks[k]}; setChecks(n); LS.set('pautaCheck_'+dayK,n); haptic('light'); };
+
+  // Estado de adherencia de un valor vs su meta
+  const adh = (cur, target) => {
+    if(!target) return {label:'Sin meta', color:C.textMuted, p:0};
+    const p = cur/target;
+    if(p>=0.9 && p<=1.1) return {label:'En meta', color:'#34C759', p:Math.min(p,1)};
+    if(p<0.9)  return {label:`Faltan ${Math.round(target-cur)}`, color:'#FF9500', p};
+    return {label:`+${Math.round(cur-target)} de más`, color:'#FF3B30', p:1};
+  };
+  const calAdh = adh(tot.cal, calTarget);
+
+  const comidas = norm.comidas||[];
+  const totalComidas = comidas.length;
+  const hechas = comidas.filter(c=>checks[c.comida]).length;
+  const cumplPct = totalComidas>0 ? Math.round((hechas/totalComidas)*100) : 0;
+
+  const Bar = ({cur, target, color}) => (
+    <div style={{height:7,borderRadius:4,background:dark?'rgba(255,255,255,0.1)':'#E5E5EA',overflow:'hidden'}}>
+      <div style={{width:`${target>0?Math.min((cur/target)*100,100):0}%`,height:'100%',background:color,borderRadius:4,transition:'width .3s'}}/>
+    </div>
+  );
+
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:95,display:'flex',flexDirection:'column',animation:'fadeUp .3s ease'}}>
+      <div style={modalHeaderStyle(C)}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>👩‍⚕️ Mi pauta</div>
+        <div style={{minWidth:70}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
+        {/* Nutricionista + mensaje */}
+        <div style={{background:'#1D355710',borderRadius:18,padding:'12px 14px',marginBottom:14,border:'1px solid #1D355730'}}>
+          <div style={{fontSize:13,fontWeight:800,color:'#1D3557'}}>{nutriPlan?.nutricionista_nombre||'Tu nutricionista'}</div>
+          {nutriPlan?.mensaje&&<div style={{fontSize:12,color:'#1D3557',lineHeight:1.5,fontStyle:'italic',marginTop:4}}>"{nutriPlan.mensaje}"</div>}
+        </div>
+
+        {/* Adherencia de hoy */}
+        <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Tu progreso de hoy</div>
+        <div style={{background:C.surface,borderRadius:18,padding:'16px',marginBottom:12,border:`1px solid ${C.border}`}}>
+          {/* Calorías */}
+          <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:6}}>
+            <span style={{fontSize:13,fontWeight:700,color:C.text}}>Calorías</span>
+            <span style={{fontSize:12,fontWeight:700,color:calAdh.color}}>{Math.round(tot.cal)} / {calTarget} kcal · {calAdh.label}</span>
+          </div>
+          <Bar cur={tot.cal} target={calTarget} color={calAdh.color}/>
+          {/* Macros */}
+          <div style={{display:'flex',gap:10,marginTop:14}}>
+            {[{l:'Proteínas',cur:tot.prot,t:protTarget,c:'#34C759'},{l:'Carbohid.',cur:tot.carbs,t:carbTarget,c:'#FF9500'},{l:'Lípidos',cur:tot.grasas,t:grasaTarget,c:'#5856D6'}].map(({l,cur,t,c})=>{
+              const a=adh(cur,t);
+              return (
+                <div key={l} style={{flex:1}}>
+                  <div style={{fontSize:10,color:C.textSec,fontWeight:600,marginBottom:3}}>{l}</div>
+                  <div style={{fontSize:13,fontWeight:800,color:C.text,marginBottom:4}}>{Math.round(cur)}<span style={{fontSize:9,color:C.textSec}}>/{t||'—'}g</span></div>
+                  <Bar cur={cur} target={t} color={a.color}/>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Pauta por comida con check */}
+        {totalComidas>0&&(
+          <>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5}}>Pauta de comidas</div>
+              <div style={{fontSize:12,fontWeight:800,color:cumplPct>=100?'#34C759':cumplPct>0?'#FF9500':C.textMuted}}>{hechas}/{totalComidas} ✓ ({cumplPct}%)</div>
+            </div>
+            {comidas.map((c,ci)=>{
+              const meta = PAUTA_COMIDAS.find(m=>m.k===c.comida)||{icon:'🍽️',color:'#8E8E93'};
+              const done = !!checks[c.comida];
+              return (
+                <div key={ci} style={{background:C.surface,borderRadius:16,padding:'12px 14px',marginBottom:10,border:`1.5px solid ${done?'#34C759':C.border}`}}>
+                  <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:(c.items||[]).length?8:0}}>
+                    <span style={{fontSize:15}}>{meta.icon}</span>
+                    <span style={{fontSize:13,fontWeight:800,color:meta.color}}>{c.comida}</span>
+                    {c.hora&&<span style={{fontSize:11,fontWeight:700,color:meta.color,background:meta.color+'18',borderRadius:8,padding:'2px 8px'}}>🕐 {c.hora}</span>}
+                    <button onClick={()=>toggle(c.comida)} style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:5,border:`1.5px solid ${done?'#34C759':C.border}`,background:done?'#34C75915':'transparent',borderRadius:10,padding:'5px 10px',cursor:'pointer',fontFamily:F}}>
+                      <span style={{width:16,height:16,borderRadius:5,background:done?'#34C759':'transparent',border:`2px solid ${done?'#34C759':C.border}`,color:'#fff',fontSize:11,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center'}}>{done?'✓':''}</span>
+                      <span style={{fontSize:11,fontWeight:700,color:done?'#34C759':C.textSec}}>{done?'Cumplido':'Marcar'}</span>
+                    </button>
+                  </div>
+                  {(c.items||[]).map((it,i)=>(
+                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderTop:i>0?`1px solid ${C.border}`:'none'}}>
+                      <span style={{fontSize:12.5,color:C.text}}>{it.tipo}</span>
+                      <span style={{fontSize:11,color:C.textSec,fontWeight:600}}>{it.porcion}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </>
+        )}
+        {totalComidas===0&&(
+          <div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'20px 0',lineHeight:1.5}}>
+            Tu nutricionista aún no cargó una pauta de comidas detallada.<br/>Sigue tus metas de calorías y macros de arriba.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AppCore({onRequestAuth}) {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
@@ -9714,6 +9828,7 @@ function AppCore({onRequestAuth}) {
   const [showHistory,setShowHistory] = useState(false);
   const [historyDay,setHistoryDay]   = useState(null);
   const [editDayKey,setEditDayKey]   = useState(null);
+  const [showMiPauta,setShowMiPauta] = useState(false);
   const [showWeekly,setShowWeekly]   = useState(false);
   const [showShare,setShowShare]     = useState(false);
   const [pendingAchievement,setPendingAchievement] = useState(null); // {key, nombre, valor}
@@ -10970,6 +11085,7 @@ function AppCore({onRequestAuth}) {
       {editDayKey&&<PastDayEditor C={C} F={F} dateKey={editDayKey} allFoods={allFoods} supabaseUser={supabaseUser}
         onClose={()=>setEditDayKey(null)}
         onLogChange={(key,newLog)=>{ if(key===todayKey()) setLog(newLog); }}/>}
+      {showMiPauta&&<MiPautaModal C={C} F={F} dark={dark} nutriPlan={nutriPlan} tot={tot} metas={metas} onClose={()=>setShowMiPauta(false)}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -11326,6 +11442,12 @@ function AppCore({onRequestAuth}) {
                   )}
                 </div>
               )}
+              <button className="tap" onClick={()=>{setShowMiPauta(true);haptic('light');}} style={{
+                width:'100%',marginTop:10,padding:'11px',borderRadius:13,border:'none',
+                background:'#1D3557',color:'white',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:F,
+              }}>
+                📋 Ver mi pauta y progreso →
+              </button>
             </div>
           )}
 
