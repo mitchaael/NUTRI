@@ -9387,7 +9387,11 @@ function AppCore() {
     const off = ()=>setIsOnline(false);
     window.addEventListener('online', on);
     window.addEventListener('offline', off);
-    return ()=>{ window.removeEventListener('online',on); window.removeEventListener('offline',off); };
+    // En Android WebView/TWA navigator.onLine puede reportar false por error
+    // en el arranque en frío. Re-chequeamos a los 2s para no dejar al usuario
+    // atrapado en la pantalla "Sin conexión" cuando sí hay internet.
+    const recheck = setTimeout(()=>{ if(navigator.onLine) setIsOnline(true); }, 2000);
+    return ()=>{ clearTimeout(recheck); window.removeEventListener('online',on); window.removeEventListener('offline',off); };
   },[]);
 
   /* ── Auth listener ── */
@@ -9870,16 +9874,27 @@ function AppCore() {
   /* ── Sync bidireccional al hacer login ── */
   useEffect(()=>{
     if(!supabaseUser) return;
+    let watchdog = null;
     (async()=>{
-      setRestoringData(true);
+      // Solo bloqueamos la UI si NO sabemos aún si el usuario tiene cuenta
+      // (primera vez en este dispositivo). Si ya está onboarded localmente,
+      // la app es 100% usable desde localStorage → renderizamos al tiro y
+      // sincronizamos en segundo plano.
+      const localOnboarded = LS.get('onboarded', false);
+      const blockUI = !localOnboarded;
+      if(blockUI){
+        setRestoringData(true);
+        // Red de seguridad: nunca dejar la app congelada en la pantalla de
+        // carga. Si la red está lenta o falla, igual entramos a los 6s.
+        watchdog = setTimeout(()=>setRestoringData(false), 6000);
+      }
       setSyncStatus('syncing');
       try {
-        // 1. Leer qué hay en Supabase
+        // 1. Leer qué hay en Supabase (descarga)
         const remote = await restoreFromSupabase(supabaseUser.id);
 
         // 2. Leer qué hay localmente
         const localNombre    = LS.get('nombre','');
-        const localOnboarded = LS.get('onboarded', false);
         const localPerfil    = LS.get('perfil', null);
         const localObj       = LS.get('obj','mantener');
         const localWeight    = LS.get('weightHistory',[]);
@@ -9918,23 +9933,33 @@ function AppCore() {
           setWeightHistory(wh); LS.set('weightHistory', wh);
         }
 
+        // ★ Desbloquear la UI AHORA: ya tenemos el estado de la cuenta.
+        // La subida (push) de abajo es solo upload y no afecta lo que ve
+        // el usuario, así que va en segundo plano.
+        if(watchdog){ clearTimeout(watchdog); watchdog=null; }
+        setRestoringData(false);
+
         // 4. Si este dispositivo tiene datos que Supabase NO tiene → subir
+        //    (en paralelo y sin bloquear el render)
         const needsPush = !remote.profile?.nombre && localOnboarded && localNombre.length > 0;
         if(needsPush){
-          await syncProfile(supabaseUser.id, { nombre:localNombre, perfil:localPerfil, obj:localObj });
-          await syncSettings(supabaseUser.id, {
-            allergens:userAllergens, veganMode, darkMode:dark,
-            notifEnabled, streak:LS.get('streak',{}), challenge21:LS.get('challenge21',null),
-          });
+          const tasks = [
+            syncProfile(supabaseUser.id, { nombre:localNombre, perfil:localPerfil, obj:localObj }),
+            syncSettings(supabaseUser.id, {
+              allergens:userAllergens, veganMode, darkMode:dark,
+              notifEnabled, streak:LS.get('streak',{}), challenge21:LS.get('challenge21',null),
+            }),
+          ];
           for(let i=0;i<30;i++){
             const d=new Date(); d.setDate(d.getDate()-i);
             const key=dateToKey(d);
             const dl=LS.get('log_'+key,[]);
             const da=LS.get('agua_'+key,0);
             const de=LS.get('ex_'+key,[]);
-            if(dl.length||da||de.length) await syncDay(supabaseUser.id, key, dl, da, de);
+            if(dl.length||da||de.length) tasks.push(syncDay(supabaseUser.id, key, dl, da, de));
           }
-          if(localWeight.length) await syncWeight(supabaseUser.id, localWeight);
+          if(localWeight.length) tasks.push(syncWeight(supabaseUser.id, localWeight));
+          await Promise.all(tasks);
         }
 
         setSyncStatus('done');
@@ -9942,11 +9967,12 @@ function AppCore() {
       } catch(e){
         console.error('Sync error:',e);
         setSyncStatus('error');
-        setToast('⚠️ Error de sincronización. Revisa tu conexión.');
       } finally {
+        if(watchdog){ clearTimeout(watchdog); watchdog=null; }
         setRestoringData(false);
       }
     })();
+    return ()=>{ if(watchdog) clearTimeout(watchdog); };
   },[supabaseUser?.id]);
 
 
