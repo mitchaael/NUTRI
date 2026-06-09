@@ -931,6 +931,33 @@ const MICROS_REAL = {
   'quínoa':      _mc([17,  1.5, 172, 64,  1.1, 0,   0,   0,   0,   42]),
   'papa':        _mc([12,  0.8, 421, 23,  0.3, 0,   19.7,0,   0,   15]),
   'choclo':      _mc([2,   0.5, 270, 37,  0.5, 9,   6.8, 0,   0,   42]),
+  //                    Ca   Fe   K    Mg   Zn   A    C    D    B12  Folato
+  'camote':      _mc([30,  0.61,337, 25,  0.3, 709, 2.4, 0,   0,   11]),
+  'zapallo':     _mc([21,  0.8, 340, 12,  0.32,426, 9,   0,   0,   16]),
+  'betarraga':   _mc([16,  0.8, 325, 23,  0.35,2,   4.9, 0,   0,   109]),
+  'cebolla':     _mc([23,  0.21,146, 10,  0.17,0,   7.4, 0,   0,   19]),
+  'pimentón':    _mc([7,   0.43,211, 12,  0.25,157, 128, 0,   0,   46]),
+  'pimiento':    _mc([7,   0.43,211, 12,  0.25,157, 128, 0,   0,   46]),
+  'pepino':      _mc([16,  0.28,147, 13,  0.2, 5,   2.8, 0,   0,   7]),
+  'champiñ':     _mc([3,   0.5, 318, 9,   0.52,0,   2.1, 0.2, 0,   17]),
+  'champignon':  _mc([3,   0.5, 318, 9,   0.52,0,   2.1, 0.2, 0,   17]),
+  'arveja':      _mc([25,  1.5, 244, 33,  1.2, 38,  40,  0,   0,   65]),
+  'apio':        _mc([40,  0.2, 260, 11,  0.13,22,  3.1, 0,   0,   36]),
+  'pera':        _mc([9,   0.18,116, 7,   0.1, 1,   4.3, 0,   0,   7]),
+  'uva':         _mc([10,  0.36,191, 7,   0.07,3,   3.2, 0,   0,   2]),
+  'sandía':      _mc([7,   0.24,112, 10,  0.1, 28,  8.1, 0,   0,   3]),
+  'melón':       _mc([9,   0.21,267, 12,  0.18,169, 36.7,0,   0,   21]),
+  'durazno':     _mc([6,   0.25,190, 9,   0.17,16,  6.6, 0,   0,   4]),
+  'damasco':     _mc([13,  0.39,259, 10,  0.2, 96,  10,  0,   0,   9]),
+  'kiwi':        _mc([34,  0.31,312, 17,  0.14,4,   92.7,0,   0,   25]),
+  'piña':        _mc([13,  0.29,109, 12,  0.12,3,   47.8,0,   0,   18]),
+  'frambuesa':   _mc([25,  0.69,151, 22,  0.42,2,   26,  0,   0,   21]),
+  'mango':       _mc([11,  0.16,168, 10,  0.09,54,  36.4,0,   0,   43]),
+  'mandarina':   _mc([37,  0.15,166, 12,  0.07,34,  26.7,0,   0,   16]),
+  'jurel':       _mc([30,  1,   350, 30,  0.6, 30,  0,   5,   5,   8]),
+  'jamón':       _mc([6,   0.9, 280, 18,  1.5, 0,   0,   0.6, 0.6, 3]),
+  'mantequilla': _mc([24,  0.02,24,  2,   0.09,684, 0,   1.5, 0.2, 3]),
+  'lúcuma':      _mc([16,  0.4, 290, 25,  0.3, 5,   5,   0,   0,   14]),
 };
 // Estimación por CATEGORÍA (por 100 g) para alimentos sin dato real
 const MICRO_BY_CAT = {
@@ -5328,6 +5355,26 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
   });
   const [loading,setLoading]= React.useState(false);
   const [planError,setPlanError]= React.useState('');
+  const [templates,setTemplates] = React.useState(()=>LS.get('nutriTemplates',[]));
+
+  const guardarPlantilla = () => {
+    const nombrePlantilla = (window.prompt('Nombre de la plantilla:','Pauta '+(templates.length+1))||'').trim();
+    if(!nombrePlantilla) return;
+    const tpl = {
+      nombre: nombrePlantilla, objetivo: obj,
+      macros: {...macros},
+      comidas: pauta.map(c=>({comida:c.comida, hora:c.hora, items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())})),
+    };
+    const next = [tpl, ...templates].slice(0,12);
+    setTemplates(next); LS.set('nutriTemplates', next); haptic('success');
+  };
+  const cargarPlantilla = (tpl) => {
+    setObj(tpl.objetivo||obj);
+    if(tpl.macros) setMacros({prot:tpl.macros.prot??null, carbs:tpl.macros.carbs??null, grasas:tpl.macros.grasas??null});
+    if(tpl.comidas?.length) setPauta(tpl.comidas.map(c=>({comida:c.comida, hora:c.hora||horaDeComida(c.comida), items:(c.items||[]).map(it=>({...it}))})));
+    haptic('light');
+  };
+  const borrarPlantilla = (i) => { const next=templates.filter((_,j)=>j!==i); setTemplates(next); LS.set('nutriTemplates',next); haptic('light'); };
 
   const C2 = {surface:dark?'#1C1C1E':C.surface, alt:dark?'rgba(255,255,255,0.05)':'#F2F2F7', border:dark?'rgba(255,255,255,0.1)':'#E5E5EA', text:dark?'#fff':'#1C1C1E', sec:dark?'rgba(255,255,255,0.5)':'#8E8E93', muted:dark?'rgba(255,255,255,0.3)':'#C7C7CC'};
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener',subir:'Ganar músculo',salud:'Salud general'};
@@ -5513,6 +5560,20 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
           {/* ── PASO 3: Pauta por tiempos de comida ── */}
           {step===2&&(
             <div style={{animation:'fadeUp .25s ease'}}>
+              {/* Plantillas reutilizables */}
+              {templates.length>0&&(
+                <div style={{marginBottom:14}}>
+                  <div style={{...lbl,marginBottom:6}}>Usar una plantilla</div>
+                  <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                    {templates.map((tpl,i)=>(
+                      <div key={i} style={{display:'flex',alignItems:'center',background:C2.alt,border:`1px solid ${C2.border}`,borderRadius:11,overflow:'hidden'}}>
+                        <button onClick={()=>cargarPlantilla(tpl)} style={{padding:'7px 10px',background:'none',border:'none',color:C2.text,fontFamily:F,cursor:'pointer',fontSize:11.5,fontWeight:700}}>📋 {tpl.nombre}</button>
+                        <button onClick={()=>borrarPlantilla(i)} style={{padding:'7px 8px',background:'none',border:'none',borderLeft:`1px solid ${C2.border}`,color:C2.muted,cursor:'pointer',fontSize:11}}>✕</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div style={{...lbl,marginBottom:10}}>Pauta alimentaria por tiempo de comida</div>
               {pauta.map(c=>{
                 const meta = PAUTA_COMIDAS.find(m=>m.k===c.comida) || {icon:'🍽️',color:'#8E8E93'};
@@ -5557,6 +5618,9 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                 <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Beber 2 L de agua al día, evitar frituras, caminar 30 min..."
                   style={{...inp,fontSize:13,fontWeight:500,minHeight:80,resize:'none'}}/>
               </div>
+              <button onClick={guardarPlantilla} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:13,border:`1.5px dashed ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:700}}>
+                💾 Guardar esta pauta como plantilla
+              </button>
             </div>
           )}
 
@@ -5584,11 +5648,13 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
 function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
   const [deleting, setDeleting] = React.useState(false);
   const [pLogs, setPLogs] = React.useState(null); // null = cargando
+  const [pWeights, setPWeights] = React.useState([]);
   const [selDia, setSelDia] = React.useState(null); // día seleccionado para ver detalle
+  const [showChat, setShowChat] = React.useState(false);
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener peso',subir:'Ganar músculo',salud:'Salud general'};
   const planMac = normalizeRecs(plan.recomendaciones).macros||{};
 
-  // Cargar progreso del paciente (últimos 7 días) si está vinculado
+  // Cargar progreso (logs) y peso del paciente si está vinculado
   React.useEffect(()=>{
     if(!plan.paciente_id){ setPLogs([]); return; }
     let cancel=false;
@@ -5598,8 +5664,42 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
       .order('date',{ascending:false})
       .limit(7)
       .then(({data})=>{ if(!cancel) setPLogs(data||[]); }, ()=>{ if(!cancel) setPLogs([]); });
+    supabase.from('weight_history')
+      .select('date,weight')
+      .eq('user_id', plan.paciente_id)
+      .order('date',{ascending:true})
+      .then(({data})=>{ if(!cancel) setPWeights(data||[]); }, ()=>{});
     return ()=>{ cancel=true; };
   },[plan.paciente_id]);
+
+  // Exportar / imprimir reporte (el navegador permite guardar como PDF)
+  const exportarPDF = () => {
+    const norm = normalizeRecs(plan.recomendaciones);
+    const dias = (pLogs||[]).map(r=>({date:r.date, cal:Math.round(sumLog(r.log||[]).cal)})).filter(d=>d.cal>0);
+    const esc = (s)=>String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    const filaPeso = pWeights.length ? `${pWeights[0].weight} kg → ${pWeights[pWeights.length-1].weight} kg` : 'Sin registros';
+    const comidasHtml = norm.comidas.map(c=>`<div style="margin:6px 0"><b>${esc(c.comida)}${c.hora?` (${esc(c.hora)})`:''}</b><br>${(c.items||[]).map(it=>`• ${esc(it.tipo)} — ${esc(it.porcion)}`).join('<br>')}</div>`).join('');
+    const macHtml = ['prot','carbs','grasas'].map(k=>norm.macros[k]!=null?`${({prot:'Proteínas',carbs:'Carbohidratos',grasas:'Lípidos'})[k]}: ${norm.macros[k]} g`:'').filter(Boolean).join(' · ');
+    const diasHtml = dias.map(d=>`<tr><td>${esc(new Date(d.date+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'short'}))}</td><td style="text-align:right">${d.cal} kcal</td></tr>`).join('');
+    const html = `<html><head><meta charset="utf8"><title>Ficha ${esc(plan.nombre)}</title>
+      <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1c1c1e;padding:32px;max-width:720px;margin:auto}h1{color:#D42020;margin:0 0 4px}h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#8e8e93;border-bottom:1px solid #eee;padding-bottom:4px;margin-top:24px}table{width:100%;border-collapse:collapse;font-size:13px}td{padding:3px 0;border-bottom:1px solid #f2f2f7}.muted{color:#8e8e93;font-size:12px}</style></head>
+      <body>
+        <h1>${esc(plan.nombre)}</h1>
+        <div class="muted">Ficha nutricional · Calorú · ${esc(new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}))}</div>
+        <h2>Prescripción</h2>
+        <div>Objetivo: <b>${esc(objLabels[plan.objetivo]||plan.objetivo)}</b> · Meta: <b>${esc(plan.calorias_meta)} kcal/día</b></div>
+        ${macHtml?`<div>${macHtml}</div>`:''}
+        ${plan.mensaje?`<h2>Indicaciones</h2><div>${esc(plan.mensaje)}</div>`:''}
+        ${comidasHtml?`<h2>Pauta alimentaria</h2>${comidasHtml}`:''}
+        <h2>Evolución de peso</h2><div>${esc(filaPeso)}</div>
+        <h2>Adherencia · últimos días</h2><table>${diasHtml||'<tr><td class="muted">Sin registros</td></tr>'}</table>
+        <p class="muted" style="margin-top:30px">Generado con Calorú — caloru.cl</p>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    if(!w){ alert('Permite ventanas emergentes para exportar el PDF.'); return; }
+    w.document.write(html); w.document.close();
+    setTimeout(()=>{ w.focus(); w.print(); }, 350);
+  };
 
   const handleDelete = async () => {
     if(!window.confirm('¿Eliminar este plan? Esta acción no se puede deshacer.')) return;
@@ -5698,6 +5798,32 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
           );
         })()}
 
+        {/* Evolución de peso del paciente */}
+        {plan.paciente_id&&pWeights.length>=2&&(()=>{
+          const ws = pWeights.map(w=>parseFloat(w.weight)).filter(v=>v>0);
+          const min=Math.min(...ws), max=Math.max(...ws), rng=(max-min)||1;
+          const delta = ws[ws.length-1]-ws[0];
+          return (
+            <div style={{marginBottom:14}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5}}>Evolución de peso</div>
+                <div style={{fontSize:11,fontWeight:800,color:delta<0?'#34C759':delta>0?'#FF9500':C.textSec}}>{delta>0?'+':''}{delta.toFixed(1)} kg</div>
+              </div>
+              <div style={{background:dark?'#1C1C1E':'white',borderRadius:14,padding:'14px',border:`1px solid ${dark?'rgba(255,255,255,0.08)':'#E5E5EA'}`}}>
+                <svg width="100%" height="70" viewBox="0 0 300 70" preserveAspectRatio="none" style={{display:'block'}}>
+                  <polyline fill="none" stroke="#D42020" strokeWidth="2" points={ws.map((v,i)=>`${ws.length>1?(i/(ws.length-1))*300:0},${60-((v-min)/rng)*50}`).join(' ')}/>
+                  {ws.map((v,i)=>(<circle key={i} cx={ws.length>1?(i/(ws.length-1))*300:0} cy={60-((v-min)/rng)*50} r="2.5" fill="#D42020"/>))}
+                </svg>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:C.textSec,marginTop:6}}>
+                  <span>{ws[0]} kg</span>
+                  <span style={{color:C.textMuted}}>{pWeights.length} registros</span>
+                  <span>{ws[ws.length-1]} kg</span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Mensaje */}
         {plan.mensaje&&(
           <div style={{marginBottom:12}}>
@@ -5754,6 +5880,16 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
           </>);
         })()}
 
+        {plan.paciente_id&&(
+          <div style={{display:'flex',gap:10,marginBottom:10}}>
+            <button onClick={()=>setShowChat(true)} style={{flex:1,padding:'13px',borderRadius:14,border:`1.5px solid #1D3557`,background:'transparent',color:'#1D3557',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:800}}>
+              💬 Mensajes
+            </button>
+            <button onClick={exportarPDF} style={{flex:1,padding:'13px',borderRadius:14,border:`1.5px solid ${C.border}`,background:'transparent',color:C.text,fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:800}}>
+              📄 Exportar PDF
+            </button>
+          </div>
+        )}
         <div style={{display:'flex',gap:10}}>
           <button onClick={()=>onEdit&&onEdit(plan)} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
             ✏️ Editar plan
@@ -5763,6 +5899,9 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
           </button>
         </div>
       </div>
+
+      {/* ── Chat con el paciente ── */}
+      {showChat&&plan.paciente_id&&<ChatNutri C={C} F={F} dark={dark} nutricionista_id={plan.nutricionista_id} paciente_id={plan.paciente_id} sender="nutri" titulo={plan.nombre} onClose={()=>setShowChat(false)}/>}
 
       {/* ── Detalle de un día: qué comió el paciente ── */}
       {selDia&&(()=>{
@@ -9971,6 +10110,61 @@ function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
   );
 }
 
+/* ─── Chat nutri ↔ paciente ─── */
+function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, onClose}){
+  const [msgs,setMsgs] = React.useState(null);
+  const [txt,setTxt]   = React.useState('');
+  const [sending,setSending] = React.useState(false);
+  const endRef = React.useRef(null);
+  const load = React.useCallback(()=>{
+    supabase.from('nutri_messages').select('*')
+      .eq('nutricionista_id', nutricionista_id).eq('paciente_id', paciente_id)
+      .order('created_at',{ascending:true})
+      .then(({data})=>setMsgs(data||[]), ()=>setMsgs([]));
+  },[nutricionista_id, paciente_id]);
+  React.useEffect(()=>{ load(); const t=setInterval(load, 5000); return ()=>clearInterval(t); },[load]);
+  React.useEffect(()=>{ if(endRef.current) endRef.current.scrollIntoView(); },[msgs&&msgs.length]);
+  const send = async()=>{
+    const t = txt.trim(); if(!t||sending) return;
+    setSending(true); setTxt('');
+    setMsgs(m=>[...(m||[]),{id:'tmp'+Date.now(),sender,texto:t,created_at:new Date().toISOString()}]);
+    haptic('light');
+    const {error} = await supabase.from('nutri_messages').insert({nutricionista_id, paciente_id, sender, texto:t});
+    if(!error) load();
+    setSending(false);
+  };
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:10001,background:C.bg,display:'flex',flexDirection:'column',fontFamily:F,animation:'fadeUp .25s ease'}}>
+      <div style={{display:'flex',alignItems:'center',gap:8,padding:'14px 16px',paddingTop:'calc(14px + env(safe-area-inset-top))',borderBottom:`1px solid ${C.border}`,background:C.surface}}>
+        <button onClick={onClose} style={{background:'none',border:'none',color:'#D42020',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F}}>‹ Volver</button>
+        <div style={{flex:1,textAlign:'center',fontSize:15,fontWeight:800,color:C.text}}>💬 {titulo||'Mensajes'}</div>
+        <div style={{width:60}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'14px 16px',display:'flex',flexDirection:'column',gap:8}}>
+        {msgs===null
+          ? <div style={{textAlign:'center',color:C.textMuted,fontSize:13,marginTop:20}}>Cargando…</div>
+          : msgs.length===0
+            ? <div style={{textAlign:'center',color:C.textMuted,fontSize:13,marginTop:30,lineHeight:1.5}}>Aún no hay mensajes.<br/>Escribe el primero 👇</div>
+            : msgs.map(m=>{
+                const mine = m.sender===sender;
+                return (
+                  <div key={m.id} style={{alignSelf:mine?'flex-end':'flex-start',maxWidth:'80%'}}>
+                    <div style={{background:mine?'#D42020':C.surface,color:mine?'white':C.text,border:mine?'none':`1px solid ${C.border}`,borderRadius:mine?'16px 16px 4px 16px':'16px 16px 16px 4px',padding:'9px 13px',fontSize:13.5,lineHeight:1.4,whiteSpace:'pre-wrap',wordBreak:'break-word'}}>{m.texto}</div>
+                    <div style={{fontSize:9,color:C.textMuted,marginTop:2,textAlign:mine?'right':'left'}}>{new Date(m.created_at).toLocaleString('es-CL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+                  </div>
+                );
+              })}
+        <div ref={endRef}/>
+      </div>
+      <div style={{display:'flex',gap:8,padding:'10px 12px calc(12px + env(safe-area-inset-bottom))',borderTop:`1px solid ${C.border}`,background:C.surface}}>
+        <input value={txt} onChange={e=>setTxt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send();}} placeholder="Escribe un mensaje…"
+          style={{flex:1,padding:'11px 14px',borderRadius:20,border:`1.5px solid ${C.border}`,fontSize:14,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F}}/>
+        <button onClick={send} disabled={!txt.trim()||sending} style={{width:44,height:44,borderRadius:22,border:'none',background:txt.trim()?'#D42020':C.border,color:'white',fontSize:18,cursor:'pointer',flexShrink:0}}>➤</button>
+      </div>
+    </div>
+  );
+}
+
 function AppCore({onRequestAuth}) {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
@@ -10015,6 +10209,7 @@ function AppCore({onRequestAuth}) {
                 if(plan){
                   const fresh = {
                     nutricionista_nombre: data.linked_nutricionista_nombre,
+                    nutricionista_id: data.linked_nutricionista_id,
                     calorias_meta: plan.calorias_meta||null,
                     mensaje: plan.mensaje||null,
                     recomendaciones: plan.recomendaciones||[],
@@ -10126,6 +10321,7 @@ function AppCore({onRequestAuth}) {
   const [historyDay,setHistoryDay]   = useState(null);
   const [editDayKey,setEditDayKey]   = useState(null);
   const [showMiPauta,setShowMiPauta] = useState(false);
+  const [showChatPac,setShowChatPac] = useState(false);
   const [showWeekly,setShowWeekly]   = useState(false);
   const [showShare,setShowShare]     = useState(false);
   const [pendingAchievement,setPendingAchievement] = useState(null); // {key, nombre, valor}
@@ -10941,7 +11137,20 @@ function AppCore({onRequestAuth}) {
   const esFinde = [0,6].includes(new Date().getDay()); // 0=domingo, 6=sábado
   const ritmoEfectivo = (modoFinde && isPro && esFinde) ? 'tranquilo' : ritmo;
   const autoMetas = calcMetas(tdee, obj, parseFloat(perfil.peso)||70, ritmoEfectivo);
-  const metas     = customMetas || autoMetas;
+  const metasBase = customMetas || autoMetas;
+  // Si el paciente está vinculado a un nutricionista, su pauta manda:
+  // las calorías/macros prescritos sobreescriben las metas del diario.
+  const metas = useMemo(()=>{
+    if(!nutriPlan) return metasBase;
+    const pm = normalizeRecs(nutriPlan.recomendaciones).macros||{};
+    return {
+      ...metasBase,
+      cal:    nutriPlan.calorias_meta || metasBase.cal,
+      prot:   pm.prot   ?? metasBase.prot,
+      carbs:  pm.carbs  ?? metasBase.carbs,
+      grasas: pm.grasas ?? metasBase.grasas,
+    };
+  },[nutriPlan, metasBase.cal, metasBase.prot, metasBase.carbs, metasBase.grasas]);
   const tot    = useMemo(()=>sumLog(log),[log]);
   const pct    = metas.cal>0?tot.cal/metas.cal:0;
   const tips   = getTips(tot, metas, obj, agua, pct, exercises, streak, waterGoal);
@@ -11383,6 +11592,7 @@ function AppCore({onRequestAuth}) {
         onClose={()=>setEditDayKey(null)}
         onLogChange={(key,newLog)=>{ if(key===todayKey()) setLog(newLog); }}/>}
       {showMiPauta&&<MiPautaModal C={C} F={F} dark={dark} nutriPlan={nutriPlan} tot={tot} metas={metas} onClose={()=>setShowMiPauta(false)}/>}
+      {showChatPac&&nutriPlan?.nutricionista_id&&supabaseUser&&<ChatNutri C={C} F={F} dark={dark} nutricionista_id={nutriPlan.nutricionista_id} paciente_id={supabaseUser.id} sender="paciente" titulo={nutriPlan.nutricionista_nombre||'Tu nutricionista'} onClose={()=>setShowChatPac(false)}/>}
       {showPaywall&&<PaywallModal C={C} F={F} dark={dark} onClose={()=>setShowPaywall(false)} supabaseUser={supabaseUser}/>}
       {showMicronutrientes&&<MicronutrientesModal C={C} F={F} log={log} onClose={()=>setShowMicronutrientes(false)}/>}
       {showRecetasIA&&<RecetasIAModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasIA(false)}/>}
@@ -11739,12 +11949,22 @@ function AppCore({onRequestAuth}) {
                   )}
                 </div>
               )}
-              <button className="tap" onClick={()=>{setShowMiPauta(true);haptic('light');}} style={{
-                width:'100%',marginTop:10,padding:'11px',borderRadius:13,border:'none',
-                background:'#1D3557',color:'white',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:F,
-              }}>
-                📋 Ver mi pauta y progreso →
-              </button>
+              <div style={{display:'flex',gap:8,marginTop:10}}>
+                <button className="tap" onClick={()=>{setShowMiPauta(true);haptic('light');}} style={{
+                  flex:2,padding:'11px',borderRadius:13,border:'none',
+                  background:'#1D3557',color:'white',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:F,
+                }}>
+                  📋 Mi pauta y progreso
+                </button>
+                {nutriPlan.nutricionista_id&&supabaseUser&&(
+                  <button className="tap" onClick={()=>{setShowChatPac(true);haptic('light');}} style={{
+                    flex:1,padding:'11px',borderRadius:13,border:'1.5px solid #1D3557',
+                    background:'transparent',color:'#1D3557',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:F,
+                  }}>
+                    💬 Mensajes
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -13332,6 +13552,7 @@ function AppCore({onRequestAuth}) {
                         // 4. Guardar nutriPlan con datos completos del plan (si existe)
                         const plan = {
                           nutricionista_nombre: nutrData.nombre,
+                          nutricionista_id: nutrData.nutricionista_id,
                           calorias_meta: planRow?.calorias_meta || null,
                           mensaje: planRow?.mensaje || null,
                           recomendaciones: planRow?.recomendaciones || [],
