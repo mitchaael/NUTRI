@@ -10,7 +10,7 @@ export const syncProfile = async (userId, data) => {
     id: userId, nombre: data.nombre, perfil: data.perfil, obj: data.obj,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'id' });
-  if (error) { console.error('syncProfile:', error.message); return false; }
+  if (error) { if(import.meta.env.DEV) console.error('syncProfile:', error.message); return false; }
   return true;
 };
  
@@ -21,7 +21,7 @@ export const syncSettings = async (userId, data) => {
     streak: data.streak||{}, challenge21: data.challenge21||null,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'id' });
-  if (error) { console.error('syncSettings:', error.message); return false; }
+  if (error) { if(import.meta.env.DEV) console.error('syncSettings:', error.message); return false; }
   return true;
 };
  
@@ -30,7 +30,7 @@ export const syncDay = async (userId, date, log, agua, exercises) => {
     user_id: userId, date, log: log||[], agua: agua||0, exercises: exercises||[],
     updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id,date' });
-  if (error) { console.error('syncDay:', date, error.message); return false; }
+  if (error) { if(import.meta.env.DEV) console.error('syncDay:', date, error.message); return false; }
   return true;
 };
  
@@ -42,7 +42,7 @@ export const syncWeight = async (userId, history) => {
   }));
   if (!rows.length) return true;
   const { error } = await supabase.from('weight_history').upsert(rows, { onConflict: 'user_id,date' });
-  if (error) { console.error('syncWeight:', error.message); return false; }
+  if (error) { if(import.meta.env.DEV) console.error('syncWeight:', error.message); return false; }
   return true;
 };
  
@@ -53,10 +53,10 @@ export const restoreFromSupabase = async (userId) => {
     supabase.from('daily_logs').select('*').eq('user_id', userId).order('date',{ascending:false}).limit(60),
     supabase.from('weight_history').select('*').eq('user_id', userId).order('date',{ascending:true}),
   ]);
-  if (pR.error)  console.error('restore/profile:', pR.error.message);
-  if (sR.error)  console.error('restore/settings:', sR.error.message);
-  if (lR.error)  console.error('restore/logs:', lR.error.message);
-  if (wR.error)  console.error('restore/weights:', wR.error.message);
+  if (pR.error && import.meta.env.DEV)  console.error('restore/profile:', pR.error.message);
+  if (sR.error && import.meta.env.DEV)  console.error('restore/settings:', sR.error.message);
+  if (lR.error && import.meta.env.DEV)  console.error('restore/logs:', lR.error.message);
+  if (wR.error && import.meta.env.DEV)  console.error('restore/weights:', wR.error.message);
   return {
     profile:  pR.data ?? null,
     settings: sR.data ?? null,

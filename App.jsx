@@ -655,7 +655,29 @@ const sanitizeFoodData = (f) => {
   }
   return {...f, carbs, azucar, fibra};
 };
-const DB = DB_RAW.map(sanitizeFoodData);
+/* ── Deduplicación ──
+   La base tiene productos repetidos de dos generaciones (ej. "Sopaipilla"
+   2-3 veces con valores distintos). Conservamos la entrada MÁS NUEVA
+   (id mayor → datos de azúcar/sodio realistas) y fusionamos campos útiles
+   de la vieja que falten en la nueva (precio/pesoCompra para Modo Feria). */
+const dedupeFoods = (foods) => {
+  const byName = new Map();
+  for(const f of foods){
+    const key = f.nombre.trim().toLowerCase();
+    const prev = byName.get(key);
+    if(!prev){ byName.set(key, f); continue; }
+    const win  = (f.id > prev.id) ? f : prev;   // gana la más nueva
+    const lose = (f.id > prev.id) ? prev : f;
+    byName.set(key, {
+      ...win,
+      precio:     win.precio     ?? lose.precio,
+      pesoCompra: win.pesoCompra ?? lose.pesoCompra,
+      barcode:    win.barcode    ?? lose.barcode,
+    });
+  }
+  return [...byName.values()];
+};
+const DB = dedupeFoods(DB_RAW.map(sanitizeFoodData));
 
 
 /* ═══════════════════════════════════════════════════════
@@ -5117,6 +5139,7 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   const [codigoPro, setCodigoPro] = React.useState(()=>LS.get('professional_code',''));
   const [copiado, setCopiado] = React.useState(false);
   const [editPlan, setEditPlan] = React.useState(null);
+  const [tourStep, setTourStep] = React.useState(()=>LS.get('nutriTourDone',false)?-1:0);
 
   // Verificación server-side de suscripción al montar (segunda capa de seguridad)
   React.useEffect(()=>{
@@ -5322,6 +5345,35 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
         </div>
       </div>
 
+      {/* Tour de bienvenida (primera vez) */}
+      {tourStep>=0&&(()=>{
+        const pasos = [
+          {e:'👋', t:'¡Bienvenida a tu panel!', s:'Aquí gestionas a tus pacientes: creas sus pautas, sigues su progreso y te comunicas con ellos — todo en la misma app que ellos usan.'},
+          {e:'🔗', t:'Vincula a tus pacientes', s:'Comparte tu código por WhatsApp con el botón "Invitar". Tu paciente lo ingresa en su perfil y queda conectado contigo — y obtiene Pro gratis.'},
+          {e:'📊', t:'Sigue su progreso real', s:'Toca un paciente para ver su adherencia diaria, qué comió (con macros y micronutrientes), su peso, chatear y exportar su ficha en PDF.'},
+        ];
+        const p = pasos[tourStep];
+        return (
+          <div style={{position:'fixed',inset:0,zIndex:10002,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center',padding:28}}>
+            <div style={{background:dark?'#1C1C1E':'white',borderRadius:24,padding:'28px 24px',maxWidth:340,width:'100%',textAlign:'center',fontFamily:F}}>
+              <div style={{fontSize:46,marginBottom:12}}>{p.e}</div>
+              <div style={{fontSize:18,fontWeight:800,color:dark?'white':'#1C1C1E',marginBottom:8}}>{p.t}</div>
+              <div style={{fontSize:13,color:dark?'rgba(255,255,255,0.6)':'#6D6D72',lineHeight:1.55,marginBottom:20}}>{p.s}</div>
+              <div style={{display:'flex',gap:5,justifyContent:'center',marginBottom:18}}>
+                {pasos.map((_,i)=>(<div key={i} style={{width:i===tourStep?18:6,height:6,borderRadius:3,background:i===tourStep?'#D42020':(dark?'rgba(255,255,255,0.2)':'#E5E5EA'),transition:'all .25s'}}/>))}
+              </div>
+              <button onClick={()=>{
+                if(tourStep<pasos.length-1){ setTourStep(tourStep+1); haptic('light'); }
+                else { setTourStep(-1); LS.set('nutriTourDone',true); haptic('success'); }
+              }} style={{width:'100%',padding:'13px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:14,fontWeight:800,cursor:'pointer',fontFamily:F}}>
+                {tourStep<pasos.length-1?'Siguiente ›':'¡Empezar! 🚀'}
+              </button>
+              {tourStep<pasos.length-1&&<button onClick={()=>{setTourStep(-1);LS.set('nutriTourDone',true);}} style={{marginTop:10,background:'none',border:'none',color:dark?'rgba(255,255,255,0.35)':'#C7C7CC',fontSize:12,cursor:'pointer',fontFamily:F}}>Saltar</button>}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Modal Nuevo / Editar Plan */}
       {showNuevoPlan&&<NuevoPlanModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} editPlan={editPlan} onClose={()=>{setShowNuevoPlan(false);setEditPlan(null);}}
         onCreated={(plan)=>{setPacientes(prev=>[plan,...prev]);setShowNuevoPlan(false);setEditPlan(null);}}
@@ -5356,16 +5408,38 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
   const [loading,setLoading]= React.useState(false);
   const [planError,setPlanError]= React.useState('');
   const [templates,setTemplates] = React.useState(()=>LS.get('nutriTemplates',[]));
+  const [askTplName,setAskTplName] = React.useState(false);
+  const [tplName,setTplName] = React.useState('');
 
-  const guardarPlantilla = () => {
-    const nombrePlantilla = (window.prompt('Nombre de la plantilla:','Pauta '+(templates.length+1))||'').trim();
-    if(!nombrePlantilla) return;
+  // Plantillas en la nube: cargar de Supabase (con caché local de respaldo)
+  React.useEffect(()=>{
+    if(!supabaseUser) return;
+    supabase.from('nutri_templates').select('id,nombre,data')
+      .eq('nutricionista_id', supabaseUser.id)
+      .order('created_at',{ascending:false})
+      .then(({data})=>{
+        if(data){
+          const tpls = data.map(r=>({dbId:r.id, nombre:r.nombre, ...r.data}));
+          setTemplates(tpls); LS.set('nutriTemplates', tpls);
+        }
+      }, ()=>{});
+  },[supabaseUser?.id]);
+
+  const guardarPlantilla = async (nombrePlantilla) => {
+    if(!nombrePlantilla.trim()) return;
     const tpl = {
-      nombre: nombrePlantilla, objetivo: obj,
+      nombre: nombrePlantilla.trim(), objetivo: obj,
       macros: {...macros},
       comidas: pauta.map(c=>({comida:c.comida, hora:c.hora, items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())})),
     };
-    const next = [tpl, ...templates].slice(0,12);
+    let dbId = null;
+    if(supabaseUser){
+      const {data} = await supabase.from('nutri_templates')
+        .insert({nutricionista_id:supabaseUser.id, nombre:tpl.nombre, data:{objetivo:tpl.objetivo, macros:tpl.macros, comidas:tpl.comidas}})
+        .select('id').single();
+      dbId = data?.id || null;
+    }
+    const next = [{...tpl, dbId}, ...templates].slice(0,20);
     setTemplates(next); LS.set('nutriTemplates', next); haptic('success');
   };
   const cargarPlantilla = (tpl) => {
@@ -5374,7 +5448,11 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
     if(tpl.comidas?.length) setPauta(tpl.comidas.map(c=>({comida:c.comida, hora:c.hora||horaDeComida(c.comida), items:(c.items||[]).map(it=>({...it}))})));
     haptic('light');
   };
-  const borrarPlantilla = (i) => { const next=templates.filter((_,j)=>j!==i); setTemplates(next); LS.set('nutriTemplates',next); haptic('light'); };
+  const borrarPlantilla = (i) => {
+    const tpl = templates[i];
+    if(tpl?.dbId && supabaseUser) supabase.from('nutri_templates').delete().eq('id', tpl.dbId).then(()=>{},()=>{});
+    const next=templates.filter((_,j)=>j!==i); setTemplates(next); LS.set('nutriTemplates',next); haptic('light');
+  };
 
   const C2 = {surface:dark?'#1C1C1E':C.surface, alt:dark?'rgba(255,255,255,0.05)':'#F2F2F7', border:dark?'rgba(255,255,255,0.1)':'#E5E5EA', text:dark?'#fff':'#1C1C1E', sec:dark?'rgba(255,255,255,0.5)':'#8E8E93', muted:dark?'rgba(255,255,255,0.3)':'#C7C7CC'};
   const objLabels = {bajar:'Bajar peso',mantener:'Mantener',subir:'Ganar músculo',salud:'Salud general'};
@@ -5618,9 +5696,19 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                 <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Beber 2 L de agua al día, evitar frituras, caminar 30 min..."
                   style={{...inp,fontSize:13,fontWeight:500,minHeight:80,resize:'none'}}/>
               </div>
-              <button onClick={guardarPlantilla} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:13,border:`1.5px dashed ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:700}}>
-                💾 Guardar esta pauta como plantilla
-              </button>
+              {!askTplName ? (
+                <button onClick={()=>{setTplName('Pauta '+(templates.length+1));setAskTplName(true);}} style={{width:'100%',marginTop:12,padding:'11px',borderRadius:13,border:`1.5px dashed ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:700}}>
+                  💾 Guardar esta pauta como plantilla
+                </button>
+              ) : (
+                <div style={{display:'flex',gap:8,marginTop:12}}>
+                  <input value={tplName} onChange={e=>setTplName(e.target.value)} autoFocus placeholder="Nombre de la plantilla"
+                    style={{flex:1,padding:'10px 12px',borderRadius:12,border:`1.5px solid ${C2.border}`,fontSize:13,fontWeight:700,color:C2.text,background:C2.alt,outline:'none',fontFamily:F}}/>
+                  <button onClick={()=>{guardarPlantilla(tplName);setAskTplName(false);}} disabled={!tplName.trim()}
+                    style={{padding:'10px 14px',borderRadius:12,border:'none',background:tplName.trim()?'#D42020':'#C7C7CC',color:'white',fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:800,flexShrink:0}}>Guardar</button>
+                  <button onClick={()=>setAskTplName(false)} style={{padding:'10px 12px',borderRadius:12,border:`1px solid ${C2.border}`,background:'none',color:C2.sec,fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:600,flexShrink:0}}>✕</button>
+                </div>
+              )}
             </div>
           )}
 
@@ -5701,8 +5789,10 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
     setTimeout(()=>{ w.focus(); w.print(); }, 350);
   };
 
+  const [confirmDel, setConfirmDel] = React.useState(false);
   const handleDelete = async () => {
-    if(!window.confirm('¿Eliminar este plan? Esta acción no se puede deshacer.')) return;
+    // Doble toque para confirmar (sin window.confirm, que se ve mal en TWA)
+    if(!confirmDel){ setConfirmDel(true); haptic('light'); setTimeout(()=>setConfirmDel(false), 3500); return; }
     setDeleting(true);
     await supabase.from('nutrition_plans').delete().eq('id', plan.id);
     onDelete(plan.id);
@@ -5894,8 +5984,8 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
           <button onClick={()=>onEdit&&onEdit(plan)} style={{flex:2,padding:'13px',borderRadius:14,border:'none',background:'#1D3557',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
             ✏️ Editar plan
           </button>
-          <button onClick={handleDelete} disabled={deleting} style={{flex:1,padding:'13px',borderRadius:14,border:'1px solid #FF3B30',background:'none',color:'#FF3B30',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
-            {deleting?'...':'🗑'}
+          <button onClick={handleDelete} disabled={deleting} style={{flex:confirmDel?2:1,padding:'13px',borderRadius:14,border:'1px solid #FF3B30',background:confirmDel?'#FF3B30':'none',color:confirmDel?'white':'#FF3B30',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700,transition:'all .2s'}}>
+            {deleting?'...':confirmDel?'¿Seguro? Toca de nuevo':'🗑'}
           </button>
         </div>
       </div>
@@ -10122,7 +10212,26 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
       .order('created_at',{ascending:true})
       .then(({data})=>setMsgs(data||[]), ()=>setMsgs([]));
   },[nutricionista_id, paciente_id]);
-  React.useEffect(()=>{ load(); const t=setInterval(load, 5000); return ()=>clearInterval(t); },[load]);
+  React.useEffect(()=>{
+    load();
+    // Realtime: nuevos mensajes llegan al instante por websocket (sin polling)
+    const ch = supabase.channel('chat-'+nutricionista_id+'-'+paciente_id)
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
+        filter:`paciente_id=eq.${paciente_id}`},
+        (payload)=>{
+          const m = payload.new;
+          if(m.nutricionista_id!==nutricionista_id) return;
+          setMsgs(prev=>{
+            if(!prev) return [m];
+            if(prev.some(x=>x.id===m.id)) return prev;
+            // Reemplazar el optimista temporal si corresponde
+            const sinTmp = prev.filter(x=>!(String(x.id).startsWith('tmp')&&x.texto===m.texto&&x.sender===m.sender));
+            return [...sinTmp, m];
+          });
+        })
+      .subscribe();
+    return ()=>{ supabase.removeChannel(ch); };
+  },[load, nutricionista_id, paciente_id]);
   React.useEffect(()=>{ if(endRef.current) endRef.current.scrollIntoView(); },[msgs&&msgs.length]);
   const send = async()=>{
     const t = txt.trim(); if(!t||sending) return;
@@ -10130,7 +10239,7 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
     setMsgs(m=>[...(m||[]),{id:'tmp'+Date.now(),sender,texto:t,created_at:new Date().toISOString()}]);
     haptic('light');
     const {error} = await supabase.from('nutri_messages').insert({nutricionista_id, paciente_id, sender, texto:t});
-    if(!error) load();
+    if(error) load(); // si falló, recargar para reflejar el estado real
     setSending(false);
   };
   return (
@@ -10230,6 +10339,23 @@ function AppCore({onRequestAuth}) {
       });
   },[supabaseUser?.id]);
 
+  /* ── Mensajes nuevos del nutricionista (realtime, mientras la app está abierta) ── */
+  useEffect(()=>{
+    if(!supabaseUser || !nutriPlan?.nutricionista_id) return;
+    const ch = supabase.channel('inbox-'+supabaseUser.id)
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
+        filter:`paciente_id=eq.${supabaseUser.id}`},
+        (payload)=>{
+          const m = payload.new;
+          if(m.sender!=='nutri') return;
+          setUnreadChat(n=>n+1);
+          setToast(`💬 ${nutriPlan.nutricionista_nombre||'Tu nutricionista'}: ${m.texto.slice(0,60)}${m.texto.length>60?'…':''}`);
+          haptic('light');
+        })
+      .subscribe();
+    return ()=>{ supabase.removeChannel(ch); };
+  },[supabaseUser?.id, nutriPlan?.nutricionista_id]);
+
   /* ── Detector de conexión ── */
   useEffect(()=>{
     const on  = ()=>setIsOnline(true);
@@ -10322,6 +10448,7 @@ function AppCore({onRequestAuth}) {
   const [editDayKey,setEditDayKey]   = useState(null);
   const [showMiPauta,setShowMiPauta] = useState(false);
   const [showChatPac,setShowChatPac] = useState(false);
+  const [unreadChat,setUnreadChat]   = useState(0);
   const [showWeekly,setShowWeekly]   = useState(false);
   const [showShare,setShowShare]     = useState(false);
   const [pendingAchievement,setPendingAchievement] = useState(null); // {key, nombre, valor}
@@ -11957,11 +12084,13 @@ function AppCore({onRequestAuth}) {
                   📋 Mi pauta y progreso
                 </button>
                 {nutriPlan.nutricionista_id&&supabaseUser&&(
-                  <button className="tap" onClick={()=>{setShowChatPac(true);haptic('light');}} style={{
+                  <button className="tap" onClick={()=>{setShowChatPac(true);setUnreadChat(0);haptic('light');}} style={{
                     flex:1,padding:'11px',borderRadius:13,border:'1.5px solid #1D3557',
                     background:'transparent',color:'#1D3557',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:F,
+                    position:'relative',
                   }}>
                     💬 Mensajes
+                    {unreadChat>0&&<span style={{position:'absolute',top:-6,right:-6,minWidth:18,height:18,borderRadius:9,background:'#D42020',color:'white',fontSize:10,fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',padding:'0 5px',border:'2px solid white'}}>{unreadChat}</span>}
                   </button>
                 )}
               </div>
