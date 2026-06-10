@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calorú para Nutricionistas</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',-apple-system,Roboto,sans-serif; color:#1C1C1E; }
+  .slide { width:1280px; height:720px; page-break-after:always; position:relative; overflow:hidden; padding:60px 70px; display:flex; flex-direction:column; }
+  .deco { position:absolute; border-radius:50%; opacity:.08; background:#D42020; }
+  .tag { display:inline-block; font-size:13px; font-weight:800; letter-spacing:2.5px; text-transform:uppercase; color:#D42020; margin-bottom:14px; }
+  h1 { font-size:52px; font-weight:800; letter-spacing:-1px; line-height:1.1; }
+  h2 { font-size:38px; font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; }
+  .sub { font-size:19px; color:#6D6D72; line-height:1.5; }
+  .footer { position:absolute; bottom:28px; left:70px; right:70px; display:flex; justify-content:space-between; font-size:13px; color:#A0A0A8; font-weight:600; }
+  .grid { display:grid; gap:22px; flex:1; align-content:center; }
+  .card { background:#F7F7FA; border-radius:20px; padding:26px 28px; border:1px solid #ECECF1; }
+  .card .ico { font-size:34px; margin-bottom:10px; display:block; }
+  .card h3 { font-size:20px; font-weight:800; margin-bottom:6px; }
+  .card p { font-size:14.5px; color:#55555E; line-height:1.5; }
+  .accent { color:#D42020; }
+  .navy { color:#1D3557; }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Portada -->
+<div class="slide" style="background:linear-gradient(135deg,#1D3557 0%,#16263E 100%); color:white; justify-content:center;">
+  <div class="deco" style="width:600px;height:600px;top:-250px;right:-200px;opacity:.15;"></div>
+  <div class="deco" style="width:320px;height:320px;bottom:-120px;left:-80px;opacity:.10;"></div>
+  <div style="display:flex;align-items:center;gap:18px;margin-bottom:36px;">
+    <div style="width:74px;height:74px;border-radius:22px;background:white;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;color:#D42020;">C</div>
+    <div style="font-size:34px;font-weight:800;">Calorú</div>
+  </div>
+  <div class="tag" style="color:#FF8A80;">Para profesionales de la nutrición</div>
+  <h1 style="color:white;max-width:850px;">Tu consulta y tus pacientes,<br>en una misma app <span style="color:#FF8A80;">🇨🇱</span></h1>
+  <p style="font-size:22px;color:rgba(255,255,255,.75);margin-top:22px;max-width:720px;line-height:1.5;">
+    Crea pautas profesionales, sigue la adherencia real de tus pacientes día a día y comunícate con ellos — sin planillas, sin WhatsApp, sin perseguir fotos de comida.
+  </p>
+  <div style="position:absolute;bottom:50px;left:70px;font-size:16px;color:rgba(255,255,255,.6);font-weight:600;">caloru.cl</div>
+</div>
+
+<!-- SLIDE 2: El problema / la solución -->
+<div class="slide">
+  <div class="tag">¿Por qué Calorú?</div>
+  <h2>La única app donde tú y tu paciente<br>trabajan <span class="accent">juntos</span></h2>
+  <p class="sub">Las herramientas profesionales (planillas, software de consulta) no las ve el paciente. Las apps de conteo (MyFitnessPal, Fitia) no las ves tú. Calorú une los dos mundos.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="card"><span class="ico">🇨🇱</span><h3>489 alimentos chilenos reales</h3><p>Marraqueta, cazuela, manjar Colun, sopaipilla. Tu paciente registra lo que realmente come en Chile — no equivalentes gringos.</p></div>
+    <div class="card"><span class="ico">📸</span><h3>Registro sin fricción</h3><p>Escáner de platos con IA, código de barras y registro por voz. Si registrar es fácil, tu paciente lo hace todos los días.</p></div>
+    <div class="card"><span class="ico">⭐</span><h3>Pro gratis para tus pacientes</h3><p>Al vincularse contigo, cada paciente obtiene la versión premium completa sin pagar. Tu servicio gana valor inmediato.</p></div>
+  </div>
+  <div class="footer"><span>Calorú para Nutricionistas</span><span>caloru.cl</span></div>
+</div>
+
+<!-- SLIDE 3: Cómo funciona -->
+<div class="slide">
+  <div class="tag">Cómo funciona</div>
+  <h2>Operativo en <span class="accent">3 pasos</span>, sin instalar nada más</h2>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr; margin-top:10px;">
+    <div class="card" style="border-top:6px solid #D42020;">
+      <div style="font-size:15px;font-weight:800;color:#D42020;margin-bottom:10px;">PASO 1</div>
+      <span class="ico">👩‍⚕️</span><h3>Activa tu panel profesional</h3>
+      <p>Cambia tu cuenta a modo Profesional. Obtienes tu código único de nutricionista (ej: <b>NUT-326H0D</b>) al instante.</p>
+    </div>
+    <div class="card" style="border-top:6px solid #1D3557;">
+      <div style="font-size:15px;font-weight:800;color:#1D3557;margin-bottom:10px;">PASO 2</div>
+      <span class="ico">🔗</span><h3>Vincula a tus pacientes</h3>
+      <p>Crea la ficha del paciente y compártele tu código por WhatsApp con un toque. Él lo ingresa en su perfil y queda conectado contigo — con Pro activado gratis.</p>
+    </div>
+    <div class="card" style="border-top:6px solid #34C759;">
+      <div style="font-size:15px;font-weight:800;color:#2A9D4A;margin-bottom:10px;">PASO 3</div>
+      <span class="ico">📊</span><h3>Prescribe y haz seguimiento</h3>
+      <p>Armas su pauta en minutos y desde ese momento ves su adherencia real, todos los días, sin pedirle nada.</p>
+    </div>
+  </div>
+  <div class="footer"><span>Calorú para Nutricionistas</span><span>caloru.cl</span></div>
+</div>
+
+<!-- SLIDE 4: La pauta profesional -->
+<div class="slide">
+  <div class="tag">Prescripción</div>
+  <h2>Pautas profesionales que el paciente<br><span class="accent">sí cumple</span></h2>
+  <div class="grid" style="grid-template-columns:1fr 1fr; margin-top:6px;">
+    <div class="card"><span class="ico">🎯</span><h3>Prescripción energética y de macros</h3><p>Define kcal/día y distribución de proteínas, carbohidratos y lípidos con asistente interactivo (% y kcal en vivo, distribución automática por objetivo). <b>Tus metas reemplazan automáticamente las del diario del paciente.</b></p></div>
+    <div class="card"><span class="ico">🍽️</span><h3>Pauta por tiempos de comida</h3><p>Desayuno, colación AM, almuerzo, once, cena y colación PM — cada uno con alimentos, porciones y <b>horario prescrito</b>. La app le recuerda al paciente a la hora que tú definiste.</p></div>
+    <div class="card"><span class="ico">📋</span><h3>Plantillas reutilizables</h3><p>Guarda tus pautas tipo (baja en sodio, hipocalórica, deportista…) y aplícalas a un paciente nuevo con un toque. Se guardan en la nube.</p></div>
+    <div class="card"><span class="ico">📄</span><h3>PDF para la ficha clínica</h3><p>Exporta la ficha completa del paciente (prescripción, pauta, evolución de peso y adherencia) lista para imprimir o archivar. El paciente también puede descargar su pauta.</p></div>
+  </div>
+  <div class="footer"><span>Calorú para Nutricionistas</span><span>caloru.cl</span></div>
+</div>
+
+<!-- SLIDE 5: Seguimiento -->
+<div class="slide">
+  <div class="tag">Seguimiento</div>
+  <h2>Ve lo que tu paciente come,<br><span class="accent">sin preguntarle</span></h2>
+  <div class="grid" style="grid-template-columns:1fr 1fr; margin-top:6px;">
+    <div class="card"><span class="ico">🚦</span><h3>Semáforo de adherencia</h3><p>Tu panel muestra de un vistazo quién está al día, quién lleva días sin registrar y quién aún no se vincula. Adherencia calórica de los últimos 7 días con barras por día.</p></div>
+    <div class="card"><span class="ico">🔬</span><h3>Detalle día a día con micronutrientes</h3><p>Toca cualquier día y ve cada alimento que comió, por comida, con calorías, macros, fibra, azúcar, sodio y <b>10 vitaminas y minerales</b> (calcio, hierro, B12, vitamina D…).</p></div>
+    <div class="card"><span class="ico">📉</span><h3>Evolución de peso</h3><p>Gráfico de peso del paciente con delta total, directo en su ficha. Detecta mesetas y ajusta la pauta a tiempo.</p></div>
+    <div class="card"><span class="ico">💬</span><h3>Chat integrado</h3><p>Mensajería directa con cada paciente dentro de la app, en tiempo real. El paciente recibe tus mensajes con notificación — se acabó el WhatsApp personal.</p></div>
+  </div>
+  <div class="footer"><span>Calorú para Nutricionistas</span><span>caloru.cl</span></div>
+</div>
+
+<!-- SLIDE 6: Precios + CTA -->
+<div class="slide" style="background:linear-gradient(135deg,#1D3557 0%,#16263E 100%); color:white;">
+  <div class="deco" style="width:500px;height:500px;top:-200px;left:-150px;opacity:.12;"></div>
+  <div class="tag" style="color:#FF8A80;">Planes</div>
+  <h2 style="color:white;">Elige según el tamaño de tu consulta</h2>
+  <p style="font-size:17px;color:rgba(255,255,255,.65);margin-top:4px;">Todos los planes incluyen el panel completo: pautas, seguimiento, chat, PDF y Pro gratis para cada paciente vinculado.</p>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr; margin-top:18px;">
+    <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:30px 26px;text-align:center;">
+      <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:10px;">Hasta 5 pacientes</div>
+      <div style="font-size:42px;font-weight:800;">$9.990</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.55);">CLP / mes</div>
+    </div>
+    <div style="background:rgba(255,215,0,.12);border:2.5px solid #FFD700;border-radius:20px;padding:30px 26px;text-align:center;position:relative;">
+      <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#FFD700;color:#000;font-size:12px;font-weight:800;padding:4px 14px;border-radius:10px;">MÁS ELEGIDO</div>
+      <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:10px;">Hasta 15 pacientes</div>
+      <div style="font-size:42px;font-weight:800;color:#FFD700;">$14.990</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.55);">CLP / mes</div>
+    </div>
+    <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:30px 26px;text-align:center;">
+      <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:10px;">Pacientes ilimitados</div>
+      <div style="font-size:42px;font-weight:800;">$19.990</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.55);">CLP / mes</div>
+    </div>
+  </div>
+  <div style="background:#D42020;border-radius:18px;padding:20px 28px;margin-top:24px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:20px;font-weight:800;">🎁 Pruébalo con tus pacientes hoy</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.85);margin-top:3px;">Todo usuario nuevo tiene 30 días de Calorú Pro gratis — tus pacientes parten con la experiencia completa.</div>
+    </div>
+    <div style="font-size:22px;font-weight:800;white-space:nowrap;margin-left:24px;">caloru.cl →</div>
+  </div>
+  <div class="footer" style="color:rgba(255,255,255,.45);"><span>Calorú — Tu nutrición, a tu ritmo</span><span>Hecho en Chile 🇨🇱</span></div>
+</div>
+
+</body>
+</html>
