@@ -10407,23 +10407,6 @@ function AppCore({onRequestAuth}) {
       });
   },[supabaseUser?.id]);
 
-  /* ── Mensajes nuevos del nutricionista (realtime, mientras la app está abierta) ── */
-  useEffect(()=>{
-    if(!supabaseUser || !nutriPlan?.nutricionista_id) return;
-    const ch = supabase.channel('inbox-'+supabaseUser.id)
-      .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
-        filter:`paciente_id=eq.${supabaseUser.id}`},
-        (payload)=>{
-          const m = payload.new;
-          if(m.sender!=='nutri') return;
-          setUnreadChat(n=>n+1);
-          setToast(`💬 ${nutriPlan.nutricionista_nombre||'Tu nutricionista'}: ${m.texto.slice(0,60)}${m.texto.length>60?'…':''}`);
-          haptic('light');
-        })
-      .subscribe();
-    return ()=>{ supabase.removeChannel(ch); };
-  },[supabaseUser?.id, nutriPlan?.nutricionista_id]);
-
   /* ── Detector de conexión ── */
   useEffect(()=>{
     const on  = ()=>setIsOnline(true);
@@ -10924,6 +10907,27 @@ function AppCore({onRequestAuth}) {
     return ()=>clearInterval(t);
   },[]);
   useEffect(()=>{LS.set('nutriPlan',nutriPlan);},[nutriPlan]);
+
+  /* ── Mensajes nuevos del nutricionista (realtime, mientras la app está abierta) ──
+     IMPORTANTE: este efecto debe ir DESPUÉS de las declaraciones de nutriPlan,
+     toast y unreadChat — su array de dependencias se evalúa durante el render
+     y leer un const antes de su línea lanza TDZ ("Cannot access ... before
+     initialization") y crashea la app. */
+  useEffect(()=>{
+    if(!supabaseUser || !nutriPlan?.nutricionista_id) return;
+    const ch = supabase.channel('inbox-'+supabaseUser.id)
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
+        filter:`paciente_id=eq.${supabaseUser.id}`},
+        (payload)=>{
+          const m = payload.new;
+          if(m.sender!=='nutri') return;
+          setUnreadChat(n=>n+1);
+          setToast(`💬 ${nutriPlan.nutricionista_nombre||'Tu nutricionista'}: ${m.texto.slice(0,60)}${m.texto.length>60?'…':''}`);
+          haptic('light');
+        })
+      .subscribe();
+    return ()=>{ supabase.removeChannel(ch); };
+  },[supabaseUser?.id, nutriPlan?.nutricionista_id]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
   /* ── Sync bidireccional al hacer login ── */
