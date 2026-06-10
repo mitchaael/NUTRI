@@ -123,9 +123,16 @@ Deno.serve(async (req) => {
     }
 
     // Determinar plan y fecha de expiración
-    const isNutricionista = reason.toLowerCase().includes("nutricionista");
-    const isMonthly = reason.toLowerCase().includes("mensual");
-    const plan = isNutricionista ? "nutricionista" : isMonthly ? "monthly" : "yearly";
+    const reasonL = reason.toLowerCase();
+    const isNutricionista = reasonL.includes("nutricionista");
+    const isMonthly = reasonL.includes("mensual");
+    // El tier del nutricionista queda en subscription_plan para que el
+    // panel limite la cantidad de pacientes según lo contratado.
+    const plan = isNutricionista
+      ? (reasonL.includes("ilimitado") ? "nutricionista_ilim"
+        : reasonL.includes("15")       ? "nutricionista15"
+        : "nutricionista")
+      : isMonthly ? "monthly" : "yearly";
 
     const now = new Date();
     const expiresAt = new Date(now);
@@ -163,7 +170,7 @@ Deno.serve(async (req) => {
     if (status === "authorized") {
       // Pago aprobado → activar Pro (nutricionista tiene su propio status)
       updateData = {
-        subscription_status: plan === "nutricionista" ? "nutricionista" : "pro",
+        subscription_status: isNutricionista ? "nutricionista" : "pro",
         subscription_plan: plan,
         subscription_id: subscriptionId,
         subscription_expires_at: expiresAt.toISOString(),
@@ -205,7 +212,7 @@ Deno.serve(async (req) => {
     console.log(`✅ Usuario ${payerEmail} actualizado a ${updateData.subscription_status}`);
 
     // Si era un nutricionista que canceló → revocar Pro de todos sus pacientes vinculados
-    if (plan === "nutricionista" && (status === "cancelled" || status === "paused")) {
+    if (isNutricionista && (status === "cancelled" || status === "paused")) {
       const revokeRes = await fetch(
         `${SUPABASE_URL}/rest/v1/profiles?linked_nutricionista_id=eq.${userId}`,
         {

@@ -2306,7 +2306,7 @@ function Onboarding({onDone}) {
         {[
           {icon:'🇨🇱', title:'475+ productos chilenos reales', sub:'Lo que ninguna app internacional tiene'},
           {icon:'🤖', title:'IA que registra por ti', sub:'"Me comí un completo con todo" — listo'},
-          {icon:'💰', title:'Pro desde $3.500/mes', sub:'La competencia cobra hasta $20.000/mes'},
+          {icon:'💰', title:'Pro desde $4.990/mes — 1er mes gratis', sub:'La competencia cobra hasta $20.000/mes'},
         ].map(({icon,title,sub})=>(
           <div key={title} style={{display:'flex',alignItems:'center',gap:12,background:'rgba(255,255,255,0.07)',borderRadius:14,padding:'12px 14px'}}>
             <span style={{fontSize:22,flexShrink:0}}>{icon}</span>
@@ -3953,7 +3953,7 @@ function ShareAchievementModal({C, F, achievement, onClose}) {
     haptic('success');
     canvas.toBlob(async(blob)=>{
       try {
-        await navigator.share({files:[new File([blob],'logro-caloru.png',{type:'image/png'})],title:cfg.titulo,text:`${cfg.titulo} en Calorú — Tu nutrición, a tu ritmo 🇨🇱`});
+        await navigator.share({files:[new File([blob],'logro-caloru.png',{type:'image/png'})],title:cfg.titulo,text:`${cfg.titulo} en Calorú — Tu nutrición, a tu ritmo 🇨🇱 https://caloru.cl/?utm_source=share&utm_medium=logro`});
       } catch {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href=url; a.download='logro-caloru.png'; a.click();
@@ -4086,7 +4086,7 @@ function ShareCard({C, F, nombre, tot, metas, obj, streak, exercises, onClose, x
     haptic('success');
     canvas.toBlob(async(blob)=>{
       try{
-        await navigator.share({files:[new File([blob],'caloru.png',{type:'image/png'})],title:'Mi progreso en Calorú'});
+        await navigator.share({files:[new File([blob],'caloru.png',{type:'image/png'})],title:'Mi progreso en Calorú',text:'Mira mi progreso en Calorú 🥗 https://caloru.cl/?utm_source=share&utm_medium=progreso'});
       }catch{
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a'); a.href=url; a.download='caloru-progreso.png'; a.click();
@@ -5140,18 +5140,24 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   const [copiado, setCopiado] = React.useState(false);
   const [editPlan, setEditPlan] = React.useState(null);
   const [tourStep, setTourStep] = React.useState(()=>LS.get('nutriTourDone',false)?-1:0);
+  const [busca, setBusca] = React.useState('');
+  const [tier, setTier] = React.useState('nutricionista');
+  const TIER_LIMITS = {nutricionista:5, nutricionista15:15, nutricionista_ilim:Infinity};
+  const limitePacientes = TIER_LIMITS[tier] ?? 5;
 
   // Verificación server-side de suscripción al montar (segunda capa de seguridad)
   React.useEffect(()=>{
     if(!supabaseUser) return;
     supabase.from('profiles')
-      .select('subscription_status')
+      .select('subscription_status,subscription_plan')
       .eq('id', supabaseUser.id)
       .single()
       .then(({data})=>{
         if(data?.subscription_status !== 'nutricionista') {
           // La suscripción no es válida — redirigir al modo personal
           onSwitchPersonal();
+        } else if(data.subscription_plan) {
+          setTier(data.subscription_plan);
         }
       });
   },[supabaseUser?.id]);
@@ -5287,11 +5293,23 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
 
         {/* Lista de pacientes */}
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-          <div style={{fontSize:13,fontWeight:700,color:dark?'white':'#1C1C1E'}}>Mis pacientes</div>
-          <button onClick={()=>{setEditPlan(null);setShowNuevoPlan(true);}} style={{background:'#D42020',border:'none',borderRadius:10,padding:'6px 14px',cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,color:'white'}}>
+          <div style={{fontSize:13,fontWeight:700,color:dark?'white':'#1C1C1E'}}>Mis pacientes {limitePacientes!==Infinity&&<span style={{fontSize:10,fontWeight:600,color:dark?'rgba(255,255,255,0.4)':'#8E8E93'}}>({pacientes.length}/{limitePacientes})</span>}</div>
+          <button onClick={()=>{
+            if(pacientes.length>=limitePacientes){
+              haptic('error');
+              alert(`Alcanzaste el límite de ${limitePacientes} pacientes de tu plan. Mejora tu plan para agregar más.`);
+              return;
+            }
+            setEditPlan(null);setShowNuevoPlan(true);
+          }} style={{background:pacientes.length>=limitePacientes?'#8E8E93':'#D42020',border:'none',borderRadius:10,padding:'6px 14px',cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,color:'white'}}>
             + Nuevo paciente
           </button>
         </div>
+        {/* Buscador (aparece con 6+ pacientes) */}
+        {pacientes.length>5&&(
+          <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="🔍 Buscar paciente…"
+            style={{width:'100%',marginBottom:10,padding:'10px 14px',borderRadius:13,border:`1.5px solid ${dark?'rgba(255,255,255,0.1)':'#E5E5EA'}`,fontSize:13,color:dark?'white':'#1C1C1E',background:dark?'#1C1C1E':'white',outline:'none',fontFamily:F,boxSizing:'border-box'}}/>
+        )}
 
         {loading&&<div style={{textAlign:'center',padding:30,color:dark?'rgba(255,255,255,0.4)':'#C7C7CC',fontSize:13}}>Cargando pacientes...</div>}
 
@@ -5320,7 +5338,9 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
           </div>
         )}
 
-        {!loading&&pacientes.map((plan)=>{
+        {!loading&&pacientes
+          .filter(p=>!busca.trim()||((p.nombre||'')+' '+(p.paciente_email||'')).toLowerCase().includes(busca.trim().toLowerCase()))
+          .map((plan)=>{
           const st = getStatus(plan);
           const nombrePaciente = plan.nombre || 'Paciente';
           return(
@@ -6296,7 +6316,7 @@ ${isPro&&iaMemoria?.disgustos?.length>0?`🚫 No le gusta: ${iaMemoria.disgustos
 • NUTRICIONISTA: Perfil > Ajustes > "Vincular con nutricionista". Ingresa el código NUT-XXXXX.
 • ALERGIAS: Perfil > Ajustes > Alergias. Filtra productos automáticamente.
 • MODO VEGANO: Perfil > Ajustes. Filtra sugerencias con carne/lácteos.
-• PRO ($3.500/mes): Foto IA, Nutri IA ilimitado, micronutrientes, sin límites.
+• PRO ($4.990/mes, 1er mes gratis): Foto IA, Nutri IA ilimitado, micronutrientes, sin límites.
 • MODO PROFESIONAL (nutricionistas): Requiere plan Profesional ($9.990/mes). Gestiona pacientes.
 • MODO SIN CALORÍAS: Perfil > Ajustes. Muestra semáforos en vez de números.
 • TEMA: Auto (oscuro 20:00–07:00), claro u oscuro. Perfil > Ajustes.
@@ -9321,14 +9341,14 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
             <button onClick={()=>handleSubscribe('monthly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'transparent',color:'#D42020',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13}}>
               <div style={{fontSize:18,marginBottom:2}}>📅</div>
               <div>Mensual</div>
-              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$3.500 CLP</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$4.990 CLP</div>
               <div style={{fontSize:10,color:C.textSec,marginTop:1}}>/ mes</div>
             </button>
             <button onClick={()=>handleSubscribe('yearly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13,position:'relative'}}>
-              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 30%</div>
+              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 33%</div>
               <div style={{fontSize:18,marginBottom:2}}>🗓️</div>
               <div>Anual</div>
-              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$29.900 CLP</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$39.990 CLP</div>
               <div style={{fontSize:10,opacity:0.8,marginTop:1}}>/ año</div>
             </button>
           </div>
@@ -10195,6 +10215,29 @@ function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
             Tu nutricionista aún no cargó una pauta de comidas detallada.<br/>Sigue tus metas de calorías y macros de arriba.
           </div>
         )}
+        {/* Descargar pauta en PDF */}
+        {totalComidas>0&&(
+          <button className="tap" onClick={()=>{
+            const esc = (s)=>String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+            const comidasHtml = comidas.map(c=>`<div style="margin:10px 0"><b style="color:#D42020">${esc(c.comida)}${c.hora?` · ${esc(c.hora)}`:''}</b><br>${(c.items||[]).map(it=>`• ${esc(it.tipo)} — ${esc(it.porcion)}`).join('<br>')}</div>`).join('');
+            const macHtml = [['Proteínas',protTarget],['Carbohidratos',carbTarget],['Lípidos',grasaTarget]].filter(([,v])=>v).map(([l,v])=>`${l}: ${v} g`).join(' · ');
+            const html = `<html><head><meta charset="utf8"><title>Mi pauta — Calorú</title>
+              <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1c1c1e;padding:32px;max-width:680px;margin:auto}h1{color:#D42020;margin:0 0 4px}h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#8e8e93;border-bottom:1px solid #eee;padding-bottom:4px;margin-top:22px}.muted{color:#8e8e93;font-size:12px}</style></head>
+              <body><h1>Mi pauta nutricional</h1>
+              <div class="muted">Prescrita por ${esc(nutriPlan?.nutricionista_nombre||'tu nutricionista')} · Calorú · ${esc(new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}))}</div>
+              <h2>Metas diarias</h2><div><b>${calTarget} kcal/día</b>${macHtml?` · ${macHtml}`:''}</div>
+              ${nutriPlan?.mensaje?`<h2>Indicaciones</h2><div>${esc(nutriPlan.mensaje)}</div>`:''}
+              <h2>Comidas</h2>${comidasHtml}
+              <p class="muted" style="margin-top:28px">Generado con Calorú — caloru.cl</p></body></html>`;
+            const w = window.open('','_blank');
+            if(!w){ haptic('error'); return; }
+            w.document.write(html); w.document.close();
+            setTimeout(()=>{ w.focus(); w.print(); }, 350);
+            haptic('light');
+          }} style={{width:'100%',marginTop:4,marginBottom:8,padding:'12px',borderRadius:14,border:`1.5px solid ${C.border}`,background:C.surface,color:C.text,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:F}}>
+            📄 Descargar mi pauta (PDF)
+          </button>
+        )}
       </div>
     </div>
   );
@@ -10283,6 +10326,7 @@ function AppCore({onRequestAuth}) {
   const [isOnline, setIsOnline]           = useState(navigator.onLine);
   const syncTimer = useRef(null);
   const [isPro, setIsPro] = useState(false);
+  // (el trial activa isPro más abajo, una vez calculado trialActive)
   const [proSource, setProSource] = useState('');
   const [subscriptionStatus, setSubscriptionStatus] = useState(''); // '' | 'free' | 'pro' | 'nutricionista'
   const [showPaywall, setShowPaywall] = useState(false);
@@ -10296,6 +10340,29 @@ function AppCore({onRequestAuth}) {
 
   /* Service Worker ya se registra en index.html — no duplicar aquí */
 
+  /* ── Trial 30 días (campaña de lanzamiento) ──
+     Anclado a la cuenta: max(creación de cuenta, inicio de campaña) + 30 días.
+     Usuarios existentes también lo reciben (relanzamiento). Invitados: anclado
+     al primer uso del dispositivo. */
+  const TRIAL_CAMPAIGN_START = new Date('2026-06-09T00:00:00');
+  const trialEnd = useMemo(()=>{
+    let base;
+    if(supabaseUser?.created_at){
+      base = new Date(Math.max(new Date(supabaseUser.created_at).getTime(), TRIAL_CAMPAIGN_START.getTime()));
+    } else {
+      let first = LS.get('firstUse', null);
+      if(!first){ first = Date.now(); LS.set('firstUse', first); }
+      base = new Date(Math.max(first, TRIAL_CAMPAIGN_START.getTime()));
+    }
+    return new Date(base.getTime() + 30*86400000);
+  },[supabaseUser?.id]);
+  const trialActive = trialEnd > new Date();
+  const trialDaysLeft = Math.max(0, Math.ceil((trialEnd - new Date())/86400000));
+  // Activar Pro por trial (también para invitados sin cuenta)
+  useEffect(()=>{
+    if(trialActive){ setIsPro(p=>p||true); setProSource(s=>s||'trial'); }
+  },[trialActive]);
+
   /* ── Cargar estado de suscripción ── */
   useEffect(()=>{
     if(!supabaseUser) return;
@@ -10304,7 +10371,8 @@ function AppCore({onRequestAuth}) {
         if(data){
           const bySub = (data.subscription_status==='pro'||data.subscription_status==='nutricionista') && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
           const byNutri = !!data.linked_nutricionista_id;
-          setIsPro(bySub || byNutri);
+          setIsPro(bySub || byNutri || trialActive);
+          if(!bySub && !byNutri && trialActive) setProSource('trial');
           setSubscriptionStatus(data.subscription_status||'free');
           if(byNutri && data.linked_nutricionista_nombre) setProSource('nutricionista:'+data.linked_nutricionista_nombre);
           // Refrescar el plan del nutricionista por si actualizó mensaje/metas/recomendaciones
@@ -11558,26 +11626,38 @@ function AppCore({onRequestAuth}) {
           <div style={{fontSize:56,marginBottom:16}}>👩‍⚕️</div>
           <div style={{fontSize:22,fontWeight:800,color:dark?'white':'#1C1C1E',marginBottom:8}}>Panel Nutricionista</div>
           <div style={{fontSize:13,color:dark?'rgba(255,255,255,0.5)':'#8E8E93',lineHeight:1.6,marginBottom:24,maxWidth:280}}>Necesitas el Plan Profesional para acceder al panel de gestión de pacientes.</div>
-          <div style={{background:'linear-gradient(135deg,#1D3557,#2E6DA4)',borderRadius:20,padding:'24px 20px',width:'100%',maxWidth:320,marginBottom:16}}>
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:700,letterSpacing:1.2,textTransform:'uppercase',marginBottom:8}}>Plan Profesional</div>
-            <div style={{fontSize:34,fontWeight:800,color:'white',marginBottom:4}}>$9.990<span style={{fontSize:14,fontWeight:400,color:'rgba(255,255,255,0.7)'}}>/mes</span></div>
-            <div style={{fontSize:12,color:'rgba(255,255,255,0.7)',marginBottom:20,lineHeight:1.6}}>Panel de pacientes · Planes nutricionales · Código de vinculación · Pro para tus pacientes</div>
-            <button onClick={async()=>{
-              if(!supabaseUser){setToast('Inicia sesión para suscribirte.');return;}
-              try{
-                const session=await supabase.auth.getSession();
-                const token=session.data.session?.access_token;
-                const res=await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription',{
-                  method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-                  body:JSON.stringify({plan:'nutricionista',back_url:'https://caloru.cl'}),
-                });
-                const data=await res.json();
-                if(data.init_point) window.location.href=data.init_point;
-                else setToast('Error al crear la suscripción. Intenta de nuevo.');
-              }catch{setToast('Error de conexión. Intenta de nuevo.');}
-            }} style={{width:'100%',padding:'13px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:800}}>
-              Suscribirse — $9.990/mes →
-            </button>
+          <div style={{background:'linear-gradient(135deg,#1D3557,#2E6DA4)',borderRadius:20,padding:'22px 18px',width:'100%',maxWidth:340,marginBottom:16}}>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:700,letterSpacing:1.2,textTransform:'uppercase',marginBottom:12}}>Plan Profesional · elige tu tamaño</div>
+            {[
+              {plan:'nutricionista',      precio:'$9.990',  l:'Hasta 5 pacientes',  destacado:false},
+              {plan:'nutricionista15',    precio:'$14.990', l:'Hasta 15 pacientes', destacado:true},
+              {plan:'nutricionista_ilim', precio:'$19.990', l:'Pacientes ilimitados', destacado:false},
+            ].map(t=>(
+              <button key={t.plan} onClick={async()=>{
+                if(!supabaseUser){setToast('Inicia sesión para suscribirte.');return;}
+                try{
+                  const session=await supabase.auth.getSession();
+                  const token=session.data.session?.access_token;
+                  const res=await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/create-subscription',{
+                    method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+                    body:JSON.stringify({plan:t.plan,back_url:'https://caloru.cl'}),
+                  });
+                  const data=await res.json();
+                  if(data.init_point) window.location.href=data.init_point;
+                  else setToast('Error al crear la suscripción. Intenta de nuevo.');
+                }catch{setToast('Error de conexión. Intenta de nuevo.');}
+              }} style={{
+                width:'100%',marginBottom:8,padding:'13px 14px',borderRadius:14,cursor:'pointer',fontFamily:F,
+                border:t.destacado?'2px solid #FFD700':'1.5px solid rgba(255,255,255,0.25)',
+                background:t.destacado?'rgba(255,215,0,0.12)':'rgba(255,255,255,0.07)',
+                display:'flex',alignItems:'center',justifyContent:'space-between',position:'relative',
+              }}>
+                {t.destacado&&<span style={{position:'absolute',top:-9,right:12,background:'#FFD700',color:'#000',fontSize:8.5,fontWeight:800,padding:'2px 8px',borderRadius:7}}>MÁS ELEGIDO</span>}
+                <span style={{fontSize:13,fontWeight:700,color:'white'}}>{t.l}</span>
+                <span style={{fontSize:16,fontWeight:800,color:'white'}}>{t.precio}<span style={{fontSize:10,fontWeight:400,color:'rgba(255,255,255,0.6)'}}>/mes</span></span>
+              </button>
+            ))}
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.65)',marginTop:8,lineHeight:1.5}}>Todos incluyen: panel de pacientes · pautas y seguimiento · chat · PDF · <strong style={{color:'white'}}>Pro gratis para tus pacientes</strong></div>
           </div>
           <button onClick={()=>setProMode('personal')} style={{background:'none',border:'none',color:dark?'rgba(255,255,255,0.4)':'#8E8E93',fontFamily:F,cursor:'pointer',fontSize:13,padding:'8px'}}>
             Volver a modo personal
@@ -11967,6 +12047,21 @@ function AppCore({onRequestAuth}) {
                 <div style={{fontSize:10,color:'rgba(255,255,255,0.5)'}}>Toca para volver al panel profesional</div>
               </div>
               <span style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>›</span>
+            </button>
+          )}
+
+          {/* Banner trial: mes Pro gratis */}
+          {proSource==='trial'&&trialActive&&(
+            <button className="tap" onClick={()=>{setShowPaywall(true);haptic('light');}} style={{
+              width:'100%',textAlign:'left',marginBottom:10,padding:'10px 14px',cursor:'pointer',fontFamily:F,
+              background:'linear-gradient(135deg,#FFD700,#FFA500)',borderRadius:16,border:'none',
+              display:'flex',alignItems:'center',gap:10,
+            }}>
+              <span style={{fontSize:20}}>🎁</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,fontWeight:800,color:'#1C1C1E'}}>Estás en tu mes Pro gratis</div>
+                <div style={{fontSize:11,color:'rgba(0,0,0,0.55)',fontWeight:600}}>{trialDaysLeft===1?'Último día':`Te quedan ${trialDaysLeft} días`} · Asegura tu precio →</div>
+              </div>
             </button>
           )}
 
@@ -13629,8 +13724,8 @@ function AppCore({onRequestAuth}) {
                   setNutriPlan(null); LS.set('nutriPlan',null); setProSource('');
                   if(supabaseUser) await supabase.from('profiles').update({linked_nutricionista_id:null,linked_nutricionista_nombre:null}).eq('id',supabaseUser.id);
                   supabase.from('profiles').select('subscription_status,subscription_expires_at').eq('id',supabaseUser.id).single().then(({data})=>{
-                    if(data) setIsPro((data.subscription_status==='pro'||data.subscription_status==='nutricionista')&&(!data.subscription_expires_at||new Date(data.subscription_expires_at)>new Date()));
-                    else setIsPro(false);
+                    if(data) setIsPro(((data.subscription_status==='pro'||data.subscription_status==='nutricionista')&&(!data.subscription_expires_at||new Date(data.subscription_expires_at)>new Date()))||trialActive);
+                    else setIsPro(trialActive);
                   });
                 }} style={{background:'none',border:'none',color:C.textMuted,fontSize:12,cursor:'pointer',fontFamily:F}}>✕</button>}
               </div>

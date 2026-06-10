@@ -52,17 +52,28 @@ Deno.serve(async (req) => {
       monthly: {
         reason: "Caloru Pro Mensual",
         frequency: 1,
-        transaction_amount: 3500,
+        transaction_amount: 4990,
       },
       yearly: {
         reason: "Caloru Pro Anual",
         frequency: 12,
-        transaction_amount: 29900,
+        transaction_amount: 39990,
       },
+      // Tiers por cantidad de pacientes
       nutricionista: {
         reason: "Caloru Nutricionista Mensual",
         frequency: 1,
         transaction_amount: 9990,
+      },
+      nutricionista15: {
+        reason: "Caloru Nutricionista 15 Mensual",
+        frequency: 1,
+        transaction_amount: 14990,
+      },
+      nutricionista_ilim: {
+        reason: "Caloru Nutricionista Ilimitado Mensual",
+        frequency: 1,
+        transaction_amount: 19990,
       },
     };
 
