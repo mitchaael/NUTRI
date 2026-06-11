@@ -4570,7 +4570,7 @@ const callEdgeFn = async (body, signal) => {
 /* ═══════════════════════════════════════════════════════
    FOOD PHOTO SCANNER — analiza foto de comida con IA
 ═══════════════════════════════════════════════════════ */
-function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[], veganMode=false}) {
+function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[], veganMode=false, supabaseUser=null}) {
   const dark = C.surface !== '#FFFFFF' && C.surface !== '#ffffff'; // derive from theme
   const [status, setStatus]         = useState('idle');  // idle | capturing | analyzing | results | error
   const [image, setImage]           = useState(null);    // base64 string
@@ -4684,10 +4684,31 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
     }));
   };
 
+  /* ── Subir la foto del plato (para que el nutricionista la vea) ── */
+  const uploadPhoto = async () => {
+    if(!supabaseUser || !image) return null;
+    try {
+      // Comprimir más para almacenamiento (no necesitamos la resolución del análisis)
+      const small = await compressImage(image, 800, 0.7);
+      const blob = await (await fetch(small)).blob();
+      const path = `${supabaseUser.id}/${todayKey()}-${Date.now()}.jpg`;
+      const upload = supabase.storage.from('meal-photos').upload(path, blob, {contentType:'image/jpeg'});
+      // No bloquear más de 5s — si la red está lenta, agregamos sin foto
+      const {data, error} = await Promise.race([
+        upload,
+        new Promise(res=>setTimeout(()=>res({data:null, error:'timeout'}), 5000)),
+      ]);
+      if(error || !data) return null;
+      const {data:pub} = supabase.storage.from('meal-photos').getPublicUrl(path);
+      return pub?.publicUrl || null;
+    } catch { return null; }
+  };
+
   /* ── Agregar alimentos seleccionados al log ── */
-  const addSelected = () => {
+  const addSelected = async () => {
     const foods = editedFoods.length ? editedFoods : result?.alimentos;
     if (!foods) return;
+    const fotoUrl = await uploadPhoto();
     foods.forEach((food, i) => {
       if (!selected[i]) return;
       onAdd({
@@ -4706,6 +4727,7 @@ function FoodPhotoScanner({C, F, nombre, meal, onAdd, onClose, userAllergens=[],
         emoji: food.emoji || '📸',
         grams: food.porcion_g || 100,
         origen: 'foto_ia',
+        ...(fotoUrl ? {fotoUrl} : {}),
       });
     });
     onClose();
@@ -5142,6 +5164,9 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
   const [tourStep, setTourStep] = React.useState(()=>LS.get('nutriTourDone',false)?-1:0);
   const [busca, setBusca] = React.useState('');
   const [tier, setTier] = React.useState('nutricionista');
+  const [showPerfilPub, setShowPerfilPub] = React.useState(false);
+  const [perfilPub, setPerfilPub] = React.useState({especialidad:'',bio:'',whatsapp:'',precio:'',visible:false});
+  const [savingPerfil, setSavingPerfil] = React.useState(false);
   const TIER_LIMITS = {nutricionista:5, nutricionista15:15, nutricionista_ilim:Infinity};
   const limitePacientes = TIER_LIMITS[tier] ?? 5;
 
@@ -5166,10 +5191,17 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
     if(!supabaseUser) return;
     (async()=>{
       const {data:existing} = await supabase.from('nutricionista_codes')
-        .select('code').eq('nutricionista_id', supabaseUser.id).maybeSingle();
+        .select('code,especialidad,bio,whatsapp,precio,visible').eq('nutricionista_id', supabaseUser.id).maybeSingle();
       if(existing?.code) {
         setCodigoPro(existing.code);
         LS.set('professional_code', existing.code);
+        setPerfilPub({
+          especialidad: existing.especialidad||'',
+          bio: existing.bio||'',
+          whatsapp: existing.whatsapp||'',
+          precio: existing.precio?String(existing.precio):'',
+          visible: !!existing.visible,
+        });
       } else {
         // Si ya teníamos un código en caché (que pudo no haberse guardado antes
         // por falta de permisos), persistir ESE mismo para no cambiarlo. Si no,
@@ -5289,6 +5321,62 @@ function PanelProfesional({C, F, dark, nombre, supabaseUser, onSwitchPersonal}) 
             </button>
           </div>
           <div style={{fontSize:10,color:dark?'rgba(255,255,255,0.3)':'#C7C7CC',marginTop:6,lineHeight:1.4}}>El paciente ingresa este código en <strong>Perfil → Ajustes</strong> para vincularse contigo y activar Pro gratis</div>
+        </div>
+
+        {/* Perfil público en el marketplace */}
+        <div style={{background:dark?'#1C1C1E':'white',borderRadius:18,padding:'14px 16px',marginBottom:12,border:`1px solid ${perfilPub.visible?'#34C759':(dark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)')}`}}>
+          <button onClick={()=>setShowPerfilPub(v=>!v)} style={{width:'100%',display:'flex',alignItems:'center',gap:10,background:'none',border:'none',cursor:'pointer',fontFamily:F,padding:0,textAlign:'left'}}>
+            <span style={{fontSize:20}}>🏪</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:dark?'white':'#1C1C1E'}}>Mi perfil en el marketplace</div>
+              <div style={{fontSize:10.5,color:perfilPub.visible?'#34C759':(dark?'rgba(255,255,255,0.4)':'#8E8E93'),fontWeight:perfilPub.visible?700:500}}>
+                {perfilPub.visible?'✓ Visible — pacientes nuevos pueden encontrarte':'Oculto — actívalo para captar pacientes nuevos'}
+              </div>
+            </div>
+            <span style={{fontSize:13,color:dark?'rgba(255,255,255,0.3)':'#C7C7CC',transform:showPerfilPub?'rotate(180deg)':'none',transition:'transform .2s'}}>▾</span>
+          </button>
+          {showPerfilPub&&(
+            <div style={{marginTop:14,display:'flex',flexDirection:'column',gap:10}}>
+              {[
+                {k:'especialidad', ph:'Ej: Nutrición deportiva', l:'Especialidad'},
+                {k:'whatsapp',     ph:'Ej: +56 9 1234 5678',     l:'WhatsApp de contacto'},
+                {k:'precio',       ph:'Ej: 25000',               l:'Precio por consulta (CLP)'},
+              ].map(({k,ph,l})=>(
+                <div key={k}>
+                  <div style={{fontSize:10,fontWeight:700,color:dark?'rgba(255,255,255,0.45)':'#8E8E93',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>{l}</div>
+                  <input value={perfilPub[k]} onChange={e=>setPerfilPub(p=>({...p,[k]:k==='precio'?e.target.value.replace(/[^0-9]/g,''):e.target.value}))} placeholder={ph}
+                    style={{width:'100%',padding:'10px 12px',borderRadius:12,border:`1.5px solid ${dark?'rgba(255,255,255,0.1)':'#E5E5EA'}`,fontSize:13,color:dark?'white':'#1C1C1E',background:dark?'rgba(255,255,255,0.05)':'#F7F7FA',outline:'none',fontFamily:F,boxSizing:'border-box'}}/>
+                </div>
+              ))}
+              <div>
+                <div style={{fontSize:10,fontWeight:700,color:dark?'rgba(255,255,255,0.45)':'#8E8E93',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Sobre ti (breve)</div>
+                <textarea value={perfilPub.bio} onChange={e=>setPerfilPub(p=>({...p,bio:e.target.value.slice(0,200)}))} placeholder="Ej: 8 años de experiencia. Atiendo online y presencial en Providencia."
+                  style={{width:'100%',padding:'10px 12px',borderRadius:12,border:`1.5px solid ${dark?'rgba(255,255,255,0.1)':'#E5E5EA'}`,fontSize:13,color:dark?'white':'#1C1C1E',background:dark?'rgba(255,255,255,0.05)':'#F7F7FA',outline:'none',fontFamily:F,minHeight:64,resize:'none',boxSizing:'border-box'}}/>
+              </div>
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                <button onClick={()=>setPerfilPub(p=>({...p,visible:!p.visible}))} style={{
+                  width:46,height:26,borderRadius:13,border:'none',cursor:'pointer',flexShrink:0,
+                  background:perfilPub.visible?'#34C759':(dark?'rgba(255,255,255,0.15)':'#E5E5EA'),position:'relative',transition:'background .2s',
+                }}>
+                  <span style={{position:'absolute',top:3,left:perfilPub.visible?23:3,width:20,height:20,borderRadius:10,background:'white',transition:'left .2s'}}/>
+                </button>
+                <div style={{fontSize:12,color:dark?'rgba(255,255,255,0.6)':'#6D6D72',flex:1}}>Aparecer en el marketplace de Calorú</div>
+                <button onClick={async()=>{
+                  setSavingPerfil(true);
+                  await supabase.from('nutricionista_codes').update({
+                    especialidad: perfilPub.especialidad.trim()||null,
+                    bio: perfilPub.bio.trim()||null,
+                    whatsapp: perfilPub.whatsapp.trim()||null,
+                    precio: perfilPub.precio?parseInt(perfilPub.precio):null,
+                    visible: perfilPub.visible,
+                  }).eq('nutricionista_id', supabaseUser.id);
+                  setSavingPerfil(false); haptic('success');
+                }} disabled={savingPerfil} style={{padding:'9px 16px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:800,flexShrink:0}}>
+                  {savingPerfil?'…':'Guardar'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Lista de pacientes */}
@@ -6098,12 +6186,21 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
                       const porc = it.grams?`${it.grams}g`:`${it.porcion||100}g`;
                       return (
                         <div key={i} style={{padding:'6px 0',borderTop:i>0?`1px solid ${dark?'rgba(255,255,255,0.06)':'#F2F2F7'}`:'none'}}>
-                          <div style={{display:'flex',justifyContent:'space-between',gap:8}}>
-                            <span style={{fontSize:12.5,color:dark?'white':'#1C1C1E',fontWeight:600}}>{it.emoji} {it.nombre}{q>1?` ×${q}`:''}</span>
-                            <span style={{fontSize:12,color:C.textSec,fontWeight:700,flexShrink:0}}>{Math.round(it.cal*r*q)} kcal</span>
-                          </div>
-                          <div style={{fontSize:10,color:C.textSec,marginTop:2}}>
-                            {porc} · P {Math.round(it.prot*r*q)}g · C {Math.round(it.carbs*r*q)}g · G {Math.round(it.grasas*r*q)}g{it.azucar?` · Az ${Math.round((it.azucar||0)*r*q)}g`:''}{it.sodio?` · Na ${Math.round((it.sodio||0)*r*q)}mg`:''}
+                          <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                            {it.fotoUrl&&(
+                              <img src={it.fotoUrl} alt="" loading="lazy"
+                                onClick={()=>window.open(it.fotoUrl,'_blank')}
+                                style={{width:46,height:46,borderRadius:10,objectFit:'cover',flexShrink:0,cursor:'pointer',border:`1px solid ${dark?'rgba(255,255,255,0.1)':'#E5E5EA'}`}}/>
+                            )}
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{display:'flex',justifyContent:'space-between',gap:8}}>
+                                <span style={{fontSize:12.5,color:dark?'white':'#1C1C1E',fontWeight:600}}>{it.emoji} {it.nombre}{q>1?` ×${q}`:''}{it.fotoUrl?' 📷':''}</span>
+                                <span style={{fontSize:12,color:C.textSec,fontWeight:700,flexShrink:0}}>{Math.round(it.cal*r*q)} kcal</span>
+                              </div>
+                              <div style={{fontSize:10,color:C.textSec,marginTop:2}}>
+                                {porc} · P {Math.round(it.prot*r*q)}g · C {Math.round(it.carbs*r*q)}g · G {Math.round(it.grasas*r*q)}g{it.azucar?` · Az ${Math.round((it.azucar||0)*r*q)}g`:''}{it.sodio?` · Na ${Math.round((it.sodio||0)*r*q)}mg`:''}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
@@ -9125,18 +9222,19 @@ Incluye solo la semana 1 detallada para mantener el JSON manejable.`;
    MARKETPLACE NUTRICIONISTAS
 ══════════════════════════════════════════════ */
 function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
-  const NUTRICIONISTAS = [
-    {id:1,nombre:'Catalina Morales',esp:'Nutrición deportiva',rating:4.9,reviews:127,precio:15000,disponible:true,emoji:'👩‍⚕️',tag:'🏆 Top rated'},
-    {id:2,nombre:'Diego Fuentes',esp:'Pérdida de peso',rating:4.8,reviews:89,precio:12000,disponible:true,emoji:'👨‍⚕️',tag:'🔥 Popular'},
-    {id:3,nombre:'Valentina Ríos',esp:'Nutrición vegana',rating:4.9,reviews:64,precio:13000,disponible:false,emoji:'👩‍⚕️',tag:'🌱 Vegana'},
-    {id:4,nombre:'Andrés Castillo',esp:'Diabetes y metabolismo',rating:4.7,reviews:112,precio:18000,disponible:true,emoji:'👨‍⚕️',tag:'🏥 Especialista'},
-    {id:5,nombre:'Isidora Parra',esp:'Nutrición pediátrica',rating:4.8,reviews:93,precio:14000,disponible:true,emoji:'👩‍⚕️',tag:'👶 Infantil'},
-  ];
-
+  // Marketplace REAL: nutricionistas con perfil público activado
+  const [nutris, setNutris] = useState(null); // null = cargando
   const [seleccionado, setSeleccionado] = useState(null);
   const [localToast, setLocalToast] = useState('');
   const showToast = (msg) => { setLocalToast(msg); setTimeout(()=>setLocalToast(''),3500); };
-  const [showAgendar, setShowAgendar] = useState(false);
+
+  useEffect(()=>{
+    supabase.from('nutricionista_codes')
+      .select('nutricionista_id,code,nombre,especialidad,bio,whatsapp,precio')
+      .eq('visible', true)
+      .order('created_at',{ascending:true})
+      .then(({data})=>setNutris(data||[]), ()=>setNutris([]));
+  },[]);
 
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
@@ -9152,37 +9250,50 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
           <div style={{fontSize:11,opacity:0.9}}>Nutricionistas chilenos certificados. Consulta online vía videollamada.</div>
         </div>
 
-        {NUTRICIONISTAS.map(n=>(
-          <div key={n.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1.5px solid ${seleccionado===n.id?'#34C759':C.border}`,cursor:'pointer'}} onClick={()=>setSeleccionado(seleccionado===n.id?null:n.id)}>
+        {nutris===null&&<div style={{textAlign:'center',padding:30,color:C.textMuted,fontSize:13}}>Cargando nutricionistas…</div>}
+        {nutris!==null&&nutris.length===0&&(
+          <div style={{textAlign:'center',padding:'36px 20px',background:C.surface,borderRadius:18,border:`1px solid ${C.border}`,marginBottom:14}}>
+            <div style={{fontSize:40,marginBottom:10}}>👩‍⚕️</div>
+            <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>Aún no hay nutricionistas publicados</div>
+            <div style={{fontSize:12,color:C.textSec,lineHeight:1.5}}>Estamos sumando profesionales. Si ya tienes nutricionista, pídele su código y vincúlate desde Perfil → Ajustes.</div>
+          </div>
+        )}
+        {(nutris||[]).map(n=>(
+          <div key={n.nutricionista_id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1.5px solid ${seleccionado===n.nutricionista_id?'#34C759':C.border}`,cursor:'pointer'}} onClick={()=>setSeleccionado(seleccionado===n.nutricionista_id?null:n.nutricionista_id)}>
             <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
-              <div style={{width:48,height:48,borderRadius:16,background:n.disponible?'#34C75920':'#D4202020',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}>{n.emoji}</div>
-              <div style={{flex:1}}>
-                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
-                  <div style={{fontSize:14,fontWeight:700,color:C.text}}>{n.nombre}</div>
-                  <span style={{fontSize:9,fontWeight:700,background:n.disponible?'#34C75920':'#D4202020',color:n.disponible?'#34C759':'#D42020',padding:'2px 6px',borderRadius:6}}>{n.disponible?'Disponible':'Ocupado'}</span>
-                </div>
-                <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>{n.esp}</div>
-                <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                  <span style={{fontSize:11,color:'#FFD700',fontWeight:700}}>⭐ {n.rating}</span>
-                  <span style={{fontSize:10,color:C.textMuted}}>({n.reviews} reseñas)</span>
-                  <span style={{fontSize:11,fontWeight:800,color:'#34C759',marginLeft:'auto'}}>${n.precio.toLocaleString('es-CL')}</span>
-                </div>
-                <div style={{fontSize:9,color:C.textMuted,marginTop:1}}>por consulta (45 min)</div>
+              <div style={{width:48,height:48,borderRadius:16,background:'#34C75920',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,flexShrink:0}}>👩‍⚕️</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:2}}>{n.nombre}</div>
+                {n.especialidad&&<div style={{fontSize:11,color:C.textSec,marginBottom:4}}>{n.especialidad}</div>}
+                {n.precio>0&&(
+                  <div style={{fontSize:11,fontWeight:800,color:'#34C759'}}>${n.precio.toLocaleString('es-CL')} <span style={{fontSize:9,fontWeight:500,color:C.textMuted}}>por consulta</span></div>
+                )}
               </div>
             </div>
-            {n.tag&&<div style={{marginTop:6,display:'inline-block',fontSize:10,fontWeight:700,background:C.surfaceAlt,color:C.textSec,padding:'3px 8px',borderRadius:8}}>{n.tag}</div>}
-
-            {seleccionado===n.id&&(
+            {seleccionado===n.nutricionista_id&&(
               <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${C.border}`}}>
-                <div style={{fontSize:12,color:C.textSec,marginBottom:10}}>Selecciona horario para agendar tu consulta online:</div>
-                <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
-                  {['Hoy 15:00','Hoy 17:00','Mañana 10:00','Mañana 14:00','Mañana 16:00'].map(h=>(
-                    <button key={h} style={{padding:'6px 10px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:11,fontFamily:F,cursor:'pointer',fontWeight:600}}>{h}</button>
-                  ))}
+                {n.bio&&<div style={{fontSize:12,color:C.textSec,lineHeight:1.5,marginBottom:12}}>{n.bio}</div>}
+                <div style={{display:'flex',gap:8}}>
+                  {n.whatsapp&&(
+                    <button onClick={(e)=>{
+                      e.stopPropagation();
+                      const fono = n.whatsapp.replace(/[^0-9]/g,'');
+                      const txt = `¡Hola! Te encontré en Calorú 🥗 Me gustaría agendar una consulta nutricional contigo.`;
+                      window.open(`https://wa.me/${fono}?text=${encodeURIComponent(txt)}`,'_blank');
+                      haptic('light');
+                    }} style={{flex:1,padding:'11px',borderRadius:14,border:'none',background:'#25D366',color:'white',fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:800}}>
+                      📲 Contactar por WhatsApp
+                    </button>
+                  )}
+                  <button onClick={(e)=>{
+                    e.stopPropagation();
+                    navigator.clipboard?.writeText(n.code);
+                    showToast(`Código ${n.code} copiado — pégalo en Perfil → Ajustes → Vincular con nutricionista`);
+                    haptic('success');
+                  }} style={{flex:1,padding:'11px',borderRadius:14,border:`1.5px solid #1D3557`,background:'transparent',color:'#1D3557',fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:800}}>
+                    🔗 Copiar código
+                  </button>
                 </div>
-                <button onClick={()=>showToast('¡Próximamente! Esta función estará disponible cuando lancemos el marketplace oficial.')} style={{width:'100%',padding:'11px',borderRadius:14,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>
-                  📅 Agendar consulta — ${n.precio.toLocaleString('es-CL')}
-                </button>
               </div>
             )}
           </div>
@@ -10243,12 +10354,63 @@ function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
   );
 }
 
+/* ═══════════════════════════════════════════════════════
+   WEB PUSH — notificaciones reales (app cerrada)
+═══════════════════════════════════════════════════════ */
+const VAPID_PUBLIC_KEY = 'BI4gZ8kfBMliMDumszrncB02_VaKPG9cQ4OEpdvg00EDJmImQN2AOYVXzI4MR6UZ4N2bL1_j7543OU3jGxWM7ZM';
+const urlB64ToUint8 = (s) => {
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(b64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+};
+/* Pide permiso (si hace falta), suscribe el dispositivo y guarda la
+   suscripción en Supabase. Idempotente — seguro de llamar varias veces. */
+async function enablePush(userId, {silent = false} = {}) {
+  try {
+    if (!userId || !('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return false;
+    if (silent && Notification.permission !== 'granted') return false; // no molestar
+    const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    if (perm !== 'granted') return false;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY),
+      });
+    }
+    await supabase.from('push_subscriptions').upsert(
+      {user_id: userId, subscription: sub.toJSON(), updated_at: new Date().toISOString()},
+      {onConflict: 'user_id'}
+    );
+    return true;
+  } catch { return false; }
+}
+/* Notifica por push al otro lado del chat (fire-and-forget). */
+async function notifyPush(toUserId, title, body) {
+  try {
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token;
+    if (!token) return;
+    fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/send-push', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+      body: JSON.stringify({to_user_id: toUserId, title, body}),
+    }).catch(() => {});
+  } catch { /* nunca bloquear el flujo por un push */ }
+}
+
 /* ─── Chat nutri ↔ paciente ─── */
 function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, onClose}){
   const [msgs,setMsgs] = React.useState(null);
   const [txt,setTxt]   = React.useState('');
   const [sending,setSending] = React.useState(false);
   const endRef = React.useRef(null);
+  const selfId  = sender==='nutri' ? nutricionista_id : paciente_id;
+  const otherId = sender==='nutri' ? paciente_id : nutricionista_id;
+  // Al abrir el chat: activar push para recibir respuestas (pide permiso 1 vez)
+  React.useEffect(()=>{ enablePush(selfId); },[selfId]);
   const load = React.useCallback(()=>{
     supabase.from('nutri_messages').select('*')
       .eq('nutricionista_id', nutricionista_id).eq('paciente_id', paciente_id)
@@ -10283,6 +10445,7 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
     haptic('light');
     const {error} = await supabase.from('nutri_messages').insert({nutricionista_id, paciente_id, sender, texto:t});
     if(error) load(); // si falló, recargar para reflejar el estado real
+    else notifyPush(otherId, sender==='nutri'?'💬 Mensaje de tu nutricionista':'💬 Mensaje de tu paciente', t.slice(0,120));
     setSending(false);
   };
   return (
@@ -10928,6 +11091,13 @@ function AppCore({onRequestAuth}) {
       .subscribe();
     return ()=>{ supabase.removeChannel(ch); };
   },[supabaseUser?.id, nutriPlan?.nutricionista_id]);
+
+  /* ── Push: refrescar suscripción silenciosamente si ya hay permiso ── */
+  useEffect(()=>{
+    if(!supabaseUser) return;
+    const t = setTimeout(()=>{ enablePush(supabaseUser.id, {silent:true}); }, 4000);
+    return ()=>clearTimeout(t);
+  },[supabaseUser?.id]);
   useEffect(()=>{LS.set('weightHistory',weightHistory);},[weightHistory]);
 
   /* ── Sync bidireccional al hacer login ── */
@@ -11906,7 +12076,7 @@ function AppCore({onRequestAuth}) {
 
       {/* ══ PHOTO FOOD SCANNER ══ */}
       {showPhotoScanner&&<FoodPhotoScanner C={C} F={F} nombre={nombre} meal={meal}
-        userAllergens={userAllergens} veganMode={veganMode}
+        userAllergens={userAllergens} veganMode={veganMode} supabaseUser={supabaseUser}
         onAdd={(food)=>addFood(food)}
         onClose={()=>setShowPhotoScanner(false)}
       />}
