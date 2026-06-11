@@ -891,6 +891,29 @@ const PAUTA_COMIDAS = [
 const horaDeComida = (k)=> (PAUTA_COMIDAS.find(m=>m.k===k)||{}).hora || '';
 const MACRO_KCAL = {prot:4, carbs:4, grasas:9};
 
+/* Grupos de alimentos para la pauta (secciones dentro de cada comida) */
+const GRUPOS_PAUTA = [
+  {k:'proteinas',     l:'Proteínas',         icon:'🍗', color:'#34C759'},
+  {k:'carbohidratos', l:'Carbohidratos',     icon:'🍞', color:'#FF9500'},
+  {k:'lacteos',       l:'Lácteos',           icon:'🥛', color:'#5AC8FA'},
+  {k:'frutas',        l:'Frutas',            icon:'🍎', color:'#FF2D55'},
+  {k:'verduras',      l:'Verduras',          icon:'🥦', color:'#2A9D4A'},
+  {k:'grasas',        l:'Grasas saludables', icon:'🥑', color:'#5856D6'},
+  {k:'snack',         l:'Snack',             icon:'🍿', color:'#A2845E'},
+];
+const grupoDe = (k)=> GRUPOS_PAUTA.find(g=>g.k===k) || null;
+/* Agrupa los items de una comida por grupo alimentario (sin grupo al final) */
+const itemsPorGrupo = (items=[]) => {
+  const out = [];
+  GRUPOS_PAUTA.forEach(g=>{
+    const its = items.filter(it=>it.grupo===g.k);
+    if(its.length) out.push({grupo:g, items:its});
+  });
+  const sinGrupo = items.filter(it=>!it.grupo||!grupoDe(it.grupo));
+  if(sinGrupo.length) out.push({grupo:null, items:sinGrupo});
+  return out;
+};
+
 /* ═══════════════════════════════════════════════════════
    MICRONUTRIENTES — vitaminas y minerales
    Híbrido: datos reales (por 100g) para alimentos comunes +
@@ -1030,6 +1053,9 @@ const normalizeRecs = (r) => {
     return {
       macros: r.macros || {prot:null,carbs:null,grasas:null},
       comidas: Array.isArray(r.comidas) ? r.comidas : [],
+      pesoMeta: r.pesoMeta ?? null,
+      aguaLitros: r.aguaLitros ?? null,
+      suplementos: Array.isArray(r.suplementos) ? r.suplementos : [],
     };
   }
   // Formato antiguo: array plano → todo bajo "Indicaciones generales"
@@ -1037,6 +1063,7 @@ const normalizeRecs = (r) => {
   return {
     macros: {prot:null,carbs:null,grasas:null},
     comidas: items.length ? [{comida:'Indicaciones generales', items}] : [],
+    pesoMeta: null, aguaLitros: null, suplementos: [],
   };
 };
 /* Aplana la pauta a un array [{tipo,porcion,comida}] para consumidores legacy */
@@ -5509,6 +5536,9 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
     carbs: recsInit.macros.carbs ?? null,
     grasas:recsInit.macros.grasas?? null,
   });
+  const [pesoMeta, setPesoMeta] = React.useState(recsInit.pesoMeta?String(recsInit.pesoMeta):'');
+  const [aguaLts,  setAguaLts]  = React.useState(recsInit.aguaLitros?String(recsInit.aguaLitros):'');
+  const [suplementos, setSuplementos] = React.useState(()=>recsInit.suplementos.map(s=>({...s})));
   const [pauta,  setPauta]  = React.useState(()=>{
     if(recsInit.comidas.length) return recsInit.comidas.map(c=>({comida:c.comida, hora:c.hora||horaDeComida(c.comida), items:(c.items||[]).map(it=>({...it}))}));
     return ['Desayuno','Almuerzo','Once','Cena'].map(k=>({comida:k, hora:horaDeComida(k), items:[]}));
@@ -5539,11 +5569,13 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
       nombre: nombrePlantilla.trim(), objetivo: obj,
       macros: {...macros},
       comidas: pauta.map(c=>({comida:c.comida, hora:c.hora, items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())})),
+      aguaLitros: aguaLts?parseFloat(aguaLts):null,
+      suplementos: suplementos.filter(s=>(s.nombre||'').trim()),
     };
     let dbId = null;
     if(supabaseUser){
       const {data} = await supabase.from('nutri_templates')
-        .insert({nutricionista_id:supabaseUser.id, nombre:tpl.nombre, data:{objetivo:tpl.objetivo, macros:tpl.macros, comidas:tpl.comidas}})
+        .insert({nutricionista_id:supabaseUser.id, nombre:tpl.nombre, data:{objetivo:tpl.objetivo, macros:tpl.macros, comidas:tpl.comidas, aguaLitros:tpl.aguaLitros, suplementos:tpl.suplementos}})
         .select('id').single();
       dbId = data?.id || null;
     }
@@ -5554,6 +5586,8 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
     setObj(tpl.objetivo||obj);
     if(tpl.macros) setMacros({prot:tpl.macros.prot??null, carbs:tpl.macros.carbs??null, grasas:tpl.macros.grasas??null});
     if(tpl.comidas?.length) setPauta(tpl.comidas.map(c=>({comida:c.comida, hora:c.hora||horaDeComida(c.comida), items:(c.items||[]).map(it=>({...it}))})));
+    if(tpl.aguaLitros) setAguaLts(String(tpl.aguaLitros));
+    if(tpl.suplementos?.length) setSuplementos(tpl.suplementos.map(s=>({...s})));
     haptic('light');
   };
   const borrarPlantilla = (i) => {
@@ -5600,13 +5634,16 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
       .map(c=>({comida:c.comida, hora:c.hora||'', items:(c.items||[]).filter(it=>(it.tipo||'').trim()||(it.porcion||'').trim())}))
       .filter(c=>c.items.length);
     const recomendaciones = {
-      v: 2,
+      v: 3,
       macros: {
         prot:  macros.prot!=null?Math.round(macros.prot):null,
         carbs: macros.carbs!=null?Math.round(macros.carbs):null,
         grasas:macros.grasas!=null?Math.round(macros.grasas):null,
       },
       comidas: comidasLimpias,
+      pesoMeta: pesoMeta?parseFloat(pesoMeta):null,
+      aguaLitros: aguaLts?parseFloat(aguaLts):null,
+      suplementos: suplementos.filter(s=>(s.nombre||'').trim()),
     };
     const payload = {
       nombre: nombre.trim(),
@@ -5740,6 +5777,19 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                 <MacroRow k="grasas" label="Lípidos"        color="#5856D6"/>
               </div>
               {!macrosSet&&<div style={{fontSize:11,color:C2.muted,marginTop:10,textAlign:'center',lineHeight:1.4}}>Opcional. Toca <strong>✨ Auto</strong> para distribuir según el objetivo, o ajústalo manualmente.</div>}
+              {/* Objetivos clínicos adicionales */}
+              <div style={{display:'flex',gap:10,marginTop:16}}>
+                <div style={{flex:1}}>
+                  <div style={lbl}>⚖️ Peso meta (kg)</div>
+                  <input value={pesoMeta} onChange={e=>setPesoMeta(e.target.value.replace(/[^0-9.]/g,''))} placeholder="Opcional" inputMode="decimal"
+                    style={{...inp,fontSize:15,textAlign:'center'}}/>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={lbl}>💧 Agua (L/día)</div>
+                  <input value={aguaLts} onChange={e=>setAguaLts(e.target.value.replace(/[^0-9.]/g,''))} placeholder="Ej: 2" inputMode="decimal"
+                    style={{...inp,fontSize:15,textAlign:'center'}}/>
+                </div>
+              </div>
             </div>
           )}
 
@@ -5775,15 +5825,31 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                       </div>
                       <button onClick={()=>removeComida(c.comida)} style={{background:'none',border:'none',color:C2.muted,fontSize:13,cursor:'pointer'}}>✕</button>
                     </div>
-                    {c.items.map((it,i)=>(
-                      <div key={i} style={{display:'flex',gap:6,marginBottom:6}}>
-                        <input value={it.tipo} onChange={e=>setItem(c.comida,i,'tipo',e.target.value)} placeholder="Alimento / grupo"
-                          style={{flex:1.3,padding:'9px 11px',borderRadius:10,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.surface,outline:'none',fontFamily:F,minWidth:0}}/>
-                        <input value={it.porcion} onChange={e=>setItem(c.comida,i,'porcion',e.target.value)} placeholder="Porción"
-                          style={{flex:1,padding:'9px 11px',borderRadius:10,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.surface,outline:'none',fontFamily:F,minWidth:0}}/>
-                        <button onClick={()=>delItem(c.comida,i)} style={{width:32,borderRadius:10,border:`1px solid ${C2.border}`,background:C2.surface,color:C2.muted,fontSize:12,cursor:'pointer',flexShrink:0}}>✕</button>
+                    {c.items.map((it,i)=>{
+                      const g = grupoDe(it.grupo);
+                      return (
+                      <div key={i} style={{marginBottom:8,background:C2.surface,borderRadius:12,padding:'8px 9px',borderLeft:`3px solid ${g?g.color:C2.border}`}}>
+                        <div style={{display:'flex',gap:6,marginBottom:6}}>
+                          <input value={it.tipo} onChange={e=>setItem(c.comida,i,'tipo',e.target.value)} placeholder="Alimento"
+                            style={{flex:1.3,padding:'8px 10px',borderRadius:9,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.alt,outline:'none',fontFamily:F,minWidth:0}}/>
+                          <input value={it.porcion} onChange={e=>setItem(c.comida,i,'porcion',e.target.value)} placeholder="Porción"
+                            style={{flex:1,padding:'8px 10px',borderRadius:9,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.alt,outline:'none',fontFamily:F,minWidth:0}}/>
+                          <button onClick={()=>delItem(c.comida,i)} style={{width:30,borderRadius:9,border:`1px solid ${C2.border}`,background:C2.alt,color:C2.muted,fontSize:12,cursor:'pointer',flexShrink:0}}>✕</button>
+                        </div>
+                        {/* Sección / grupo alimentario */}
+                        <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+                          {GRUPOS_PAUTA.map(gr=>(
+                            <button key={gr.k} onClick={()=>setItem(c.comida,i,'grupo',it.grupo===gr.k?null:gr.k)} style={{
+                              padding:'4px 8px',borderRadius:8,cursor:'pointer',fontFamily:F,fontSize:10,fontWeight:700,
+                              border:`1px solid ${it.grupo===gr.k?gr.color:C2.border}`,
+                              background:it.grupo===gr.k?gr.color+'20':'transparent',
+                              color:it.grupo===gr.k?gr.color:C2.muted,
+                            }}>{gr.icon} {gr.l}</button>
+                          ))}
+                        </div>
                       </div>
-                    ))}
+                      );
+                    })}
                     <button onClick={()=>addItem(c.comida)} style={{fontSize:11.5,color:meta.color,background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>+ Agregar alimento</button>
                   </div>
                 );
@@ -5798,10 +5864,25 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                   ))}
                 </div>
               )}
+              {/* Suplementos */}
+              <div style={{marginTop:6,marginBottom:14}}>
+                <div style={lbl}>💊 Suplementos (opcional)</div>
+                {suplementos.map((s,i)=>(
+                  <div key={i} style={{display:'flex',gap:6,marginBottom:6}}>
+                    <input value={s.nombre||''} onChange={e=>setSuplementos(p=>p.map((x,j)=>j===i?{...x,nombre:e.target.value}:x))} placeholder="Ej: Omega 3"
+                      style={{flex:1.2,padding:'9px 11px',borderRadius:10,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.alt,outline:'none',fontFamily:F,minWidth:0}}/>
+                    <input value={s.dosis||''} onChange={e=>setSuplementos(p=>p.map((x,j)=>j===i?{...x,dosis:e.target.value}:x))} placeholder="1 cápsula con almuerzo"
+                      style={{flex:1.4,padding:'9px 11px',borderRadius:10,border:`1px solid ${C2.border}`,fontSize:12.5,color:C2.text,background:C2.alt,outline:'none',fontFamily:F,minWidth:0}}/>
+                    <button onClick={()=>setSuplementos(p=>p.filter((_,j)=>j!==i))} style={{width:30,borderRadius:9,border:`1px solid ${C2.border}`,background:C2.alt,color:C2.muted,fontSize:12,cursor:'pointer',flexShrink:0}}>✕</button>
+                  </div>
+                ))}
+                <button onClick={()=>setSuplementos(p=>[...p,{nombre:'',dosis:''}])} style={{fontSize:11.5,color:'#5856D6',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>+ Agregar suplemento</button>
+              </div>
+
               {/* Indicaciones generales */}
               <div style={{marginTop:6}}>
                 <div style={lbl}>Indicaciones generales</div>
-                <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Beber 2 L de agua al día, evitar frituras, caminar 30 min..."
+                <textarea value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Ej: Evitar frituras, caminar 30 min diarios..."
                   style={{...inp,fontSize:13,fontWeight:500,minHeight:80,resize:'none'}}/>
               </div>
               {!askTplName ? (
@@ -5874,7 +5955,13 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
     const dias = (pLogs||[]).map(r=>({date:r.date, cal:Math.round(sumLog(r.log||[]).cal)})).filter(d=>d.cal>0);
     const esc = (s)=>String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
     const filaPeso = pWeights.length ? `${pWeights[0].weight} kg → ${pWeights[pWeights.length-1].weight} kg` : 'Sin registros';
-    const comidasHtml = norm.comidas.map(c=>`<div style="margin:6px 0"><b>${esc(c.comida)}${c.hora?` (${esc(c.hora)})`:''}</b><br>${(c.items||[]).map(it=>`• ${esc(it.tipo)} — ${esc(it.porcion)}`).join('<br>')}</div>`).join('');
+    const itemLinea = (it)=>{ const g=grupoDe(it.grupo); return `• ${g?`<b style="color:${g.color}">[${g.l}]</b> `:''}${esc(it.tipo)} — ${esc(it.porcion)}`; };
+    const comidasHtml = norm.comidas.map(c=>`<div style="margin:6px 0"><b>${esc(c.comida)}${c.hora?` (${esc(c.hora)})`:''}</b><br>${(c.items||[]).map(itemLinea).join('<br>')}</div>`).join('');
+    const extrasHtml = [
+      norm.pesoMeta?`Peso meta: <b>${esc(norm.pesoMeta)} kg</b>`:'',
+      norm.aguaLitros?`Hidratación: <b>${esc(norm.aguaLitros)} L/día</b>`:'',
+    ].filter(Boolean).join(' · ');
+    const suplHtml = norm.suplementos.length?`<h2>Suplementos</h2>${norm.suplementos.map(s=>`• ${esc(s.nombre)} — ${esc(s.dosis||'')}`).join('<br>')}`:'';
     const macHtml = ['prot','carbs','grasas'].map(k=>norm.macros[k]!=null?`${({prot:'Proteínas',carbs:'Carbohidratos',grasas:'Lípidos'})[k]}: ${norm.macros[k]} g`:'').filter(Boolean).join(' · ');
     const diasHtml = dias.map(d=>`<tr><td>${esc(new Date(d.date+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'short'}))}</td><td style="text-align:right">${d.cal} kcal</td></tr>`).join('');
     const html = `<html><head><meta charset="utf8"><title>Ficha ${esc(plan.nombre)}</title>
@@ -5885,8 +5972,10 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
         <h2>Prescripción</h2>
         <div>Objetivo: <b>${esc(objLabels[plan.objetivo]||plan.objetivo)}</b> · Meta: <b>${esc(plan.calorias_meta)} kcal/día</b></div>
         ${macHtml?`<div>${macHtml}</div>`:''}
+        ${extrasHtml?`<div style="margin-top:4px">${extrasHtml}</div>`:''}
         ${plan.mensaje?`<h2>Indicaciones</h2><div>${esc(plan.mensaje)}</div>`:''}
         ${comidasHtml?`<h2>Pauta alimentaria</h2>${comidasHtml}`:''}
+        ${suplHtml}
         <h2>Evolución de peso</h2><div>${esc(filaPeso)}</div>
         <h2>Adherencia · últimos días</h2><table>${diasHtml||'<tr><td class="muted">Sin registros</td></tr>'}</table>
         <p class="muted" style="margin-top:30px">Generado con Calorú — caloru.cl</p>
@@ -6049,13 +6138,31 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
                 </div>
               </div>
             )}
-            {/* Pauta por tiempos de comida */}
+            {/* Objetivos clínicos: peso meta + hidratación */}
+            {(norm.pesoMeta||norm.aguaLitros)&&(
+              <div style={{display:'flex',gap:8,marginBottom:14}}>
+                {norm.pesoMeta&&(
+                  <div style={{flex:1,background:dark?'rgba(255,255,255,0.06)':'#F2F2F7',borderRadius:14,padding:'10px 8px',textAlign:'center'}}>
+                    <div style={{fontSize:17,fontWeight:800,color:C.text}}>⚖️ {norm.pesoMeta}<span style={{fontSize:10,color:C.textSec}}>kg</span></div>
+                    <div style={{fontSize:9.5,color:C.textSec,fontWeight:600,marginTop:1}}>Peso meta</div>
+                  </div>
+                )}
+                {norm.aguaLitros&&(
+                  <div style={{flex:1,background:dark?'rgba(255,255,255,0.06)':'#F2F2F7',borderRadius:14,padding:'10px 8px',textAlign:'center'}}>
+                    <div style={{fontSize:17,fontWeight:800,color:C.text}}>💧 {norm.aguaLitros}<span style={{fontSize:10,color:C.textSec}}>L/día</span></div>
+                    <div style={{fontSize:9.5,color:C.textSec,fontWeight:600,marginTop:1}}>Hidratación</div>
+                  </div>
+                )}
+              </div>
+            )}
+            {/* Pauta por tiempos de comida, agrupada por secciones */}
             {norm.comidas.length>0&&(
               <div style={{marginBottom:16}}>
                 <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Pauta alimentaria</div>
                 <div style={{display:'flex',flexDirection:'column',gap:8}}>
                   {norm.comidas.map((c,ci)=>{
                     const meta = PAUTA_COMIDAS.find(m=>m.k===c.comida) || {icon:'🍽️',color:'#8E8E93'};
+                    const grupos = itemsPorGrupo(c.items||[]);
                     return (
                       <div key={ci} style={{background:dark?'rgba(255,255,255,0.05)':'#F2F2F7',borderRadius:14,padding:'10px 12px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:6}}>
@@ -6063,15 +6170,34 @@ function DetallePacienteModal({C, F, dark, plan, onClose, onDelete, onEdit}) {
                           <span style={{fontSize:12.5,fontWeight:800,color:meta.color}}>{c.comida}</span>
                           {c.hora&&<span style={{marginLeft:'auto',fontSize:11,fontWeight:700,color:meta.color,background:meta.color+'18',borderRadius:8,padding:'2px 8px'}}>🕐 {c.hora}</span>}
                         </div>
-                        {(c.items||[]).map((it,i)=>(
-                          <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderTop:i>0?`1px solid ${dark?'rgba(255,255,255,0.06)':'#E5E5EA'}`:'none'}}>
-                            <span style={{fontSize:12.5,color:C.text}}>{it.tipo}</span>
-                            <span style={{fontSize:11,color:C.textSec,fontWeight:600}}>{it.porcion}</span>
+                        {grupos.map((gr,gi)=>(
+                          <div key={gi} style={{marginTop:gi>0?7:0}}>
+                            {gr.grupo&&<div style={{fontSize:10,fontWeight:800,color:gr.grupo.color,textTransform:'uppercase',letterSpacing:.4,marginBottom:2}}>{gr.grupo.icon} {gr.grupo.l}</div>}
+                            {gr.items.map((it,i)=>(
+                              <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderLeft:gr.grupo?`2px solid ${gr.grupo.color}30`:'none',paddingLeft:gr.grupo?8:0}}>
+                                <span style={{fontSize:12.5,color:C.text}}>{it.tipo}</span>
+                                <span style={{fontSize:11,color:C.textSec,fontWeight:600}}>{it.porcion}</span>
+                              </div>
+                            ))}
                           </div>
                         ))}
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+            {/* Suplementos */}
+            {norm.suplementos.length>0&&(
+              <div style={{marginBottom:16}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>💊 Suplementos</div>
+                <div style={{background:dark?'rgba(255,255,255,0.05)':'#F2F2F7',borderRadius:14,padding:'10px 12px'}}>
+                  {norm.suplementos.map((s,i)=>(
+                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderTop:i>0?`1px solid ${dark?'rgba(255,255,255,0.06)':'#E5E5EA'}`:'none'}}>
+                      <span style={{fontSize:12.5,color:C.text,fontWeight:600}}>{s.nombre}</span>
+                      <span style={{fontSize:11,color:C.textSec}}>{s.dosis}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -10187,16 +10313,33 @@ function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
                       <span style={{fontSize:11,fontWeight:700,color:done?'#34C759':C.textSec}}>{done?'Cumplido':'Marcar'}</span>
                     </button>
                   </div>
-                  {(c.items||[]).map((it,i)=>(
-                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderTop:i>0?`1px solid ${C.border}`:'none'}}>
-                      <span style={{fontSize:12.5,color:C.text}}>{it.tipo}</span>
-                      <span style={{fontSize:11,color:C.textSec,fontWeight:600}}>{it.porcion}</span>
+                  {itemsPorGrupo(c.items||[]).map((gr,gi)=>(
+                    <div key={gi} style={{marginTop:gi>0?7:0}}>
+                      {gr.grupo&&<div style={{fontSize:10,fontWeight:800,color:gr.grupo.color,textTransform:'uppercase',letterSpacing:.4,marginBottom:2}}>{gr.grupo.icon} {gr.grupo.l}</div>}
+                      {gr.items.map((it,i)=>(
+                        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderLeft:gr.grupo?`2px solid ${gr.grupo.color}30`:'none',paddingLeft:gr.grupo?8:0}}>
+                          <span style={{fontSize:12.5,color:C.text}}>{it.tipo}</span>
+                          <span style={{fontSize:11,color:C.textSec,fontWeight:600}}>{it.porcion}</span>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
               );
             })}
           </>
+        )}
+        {/* Suplementos e hidratación prescritos */}
+        {(norm.suplementos.length>0||norm.aguaLitros)&&(
+          <div style={{background:C.surface,borderRadius:16,padding:'12px 14px',marginBottom:10,border:`1px solid ${C.border}`}}>
+            {norm.aguaLitros&&<div style={{fontSize:12.5,color:C.text,fontWeight:700,marginBottom:norm.suplementos.length?8:0}}>💧 Hidratación: <span style={{color:'#5AC8FA'}}>{norm.aguaLitros} L/día</span></div>}
+            {norm.suplementos.map((s,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderTop:i>0?`1px solid ${C.border}`:'none'}}>
+                <span style={{fontSize:12.5,color:C.text,fontWeight:600}}>💊 {s.nombre}</span>
+                <span style={{fontSize:11,color:C.textSec}}>{s.dosis}</span>
+              </div>
+            ))}
+          </div>
         )}
         {totalComidas===0&&(
           <div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'20px 0',lineHeight:1.5}}>
@@ -10207,7 +10350,12 @@ function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
         {totalComidas>0&&(
           <button className="tap" onClick={()=>{
             const esc = (s)=>String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
-            const comidasHtml = comidas.map(c=>`<div style="margin:10px 0"><b style="color:#D42020">${esc(c.comida)}${c.hora?` · ${esc(c.hora)}`:''}</b><br>${(c.items||[]).map(it=>`• ${esc(it.tipo)} — ${esc(it.porcion)}`).join('<br>')}</div>`).join('');
+            const itemLinea = (it)=>{ const g=grupoDe(it.grupo); return `• ${g?`<b style="color:${g.color}">[${g.l}]</b> `:''}${esc(it.tipo)} — ${esc(it.porcion)}`; };
+            const comidasHtml = comidas.map(c=>`<div style="margin:10px 0"><b style="color:#D42020">${esc(c.comida)}${c.hora?` · ${esc(c.hora)}`:''}</b><br>${(c.items||[]).map(itemLinea).join('<br>')}</div>`).join('');
+            const extraHtml = [
+              norm.aguaLitros?`💧 Hidratación: <b>${esc(norm.aguaLitros)} L/día</b>`:'',
+              norm.suplementos.length?`<br><b>Suplementos:</b><br>${norm.suplementos.map(s=>`• ${esc(s.nombre)} — ${esc(s.dosis||'')}`).join('<br>')}`:'',
+            ].filter(Boolean).join('');
             const macHtml = [['Proteínas',protTarget],['Carbohidratos',carbTarget],['Lípidos',grasaTarget]].filter(([,v])=>v).map(([l,v])=>`${l}: ${v} g`).join(' · ');
             const html = `<html><head><meta charset="utf8"><title>Mi pauta — Calorú</title>
               <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1c1c1e;padding:32px;max-width:680px;margin:auto}h1{color:#D42020;margin:0 0 4px}h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#8e8e93;border-bottom:1px solid #eee;padding-bottom:4px;margin-top:22px}.muted{color:#8e8e93;font-size:12px}</style></head>
@@ -10216,6 +10364,7 @@ function MiPautaModal({C, F, dark, nutriPlan, tot, metas, onClose}){
               <h2>Metas diarias</h2><div><b>${calTarget} kcal/día</b>${macHtml?` · ${macHtml}`:''}</div>
               ${nutriPlan?.mensaje?`<h2>Indicaciones</h2><div>${esc(nutriPlan.mensaje)}</div>`:''}
               <h2>Comidas</h2>${comidasHtml}
+              ${extraHtml?`<h2>Otras indicaciones</h2><div>${extraHtml}</div>`:''}
               <p class="muted" style="margin-top:28px">Generado con Calorú — caloru.cl</p></body></html>`;
             const w = window.open('','_blank');
             if(!w){ haptic('error'); return; }
