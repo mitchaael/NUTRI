@@ -8905,129 +8905,6 @@ Responde SOLO con JSON:
   );
 }
 
-/* ══════════════════════════════════════════════
-   PLAN FAMILIAR PRO
-══════════════════════════════════════════════ */
-function PlanFamiliarModal({C, F, dark, supabaseUser, isPro, onClose}) {
-  const [miembros, setMiembros] = useState(()=>LS.get('familia_miembros',[{id:1,nombre:'',edad:'',obj:'mantener',activo:true}]));
-  const [tab, setTab] = useState('miembros');
-
-  const agregarMiembro = () => {
-    if(miembros.length >= 5) return;
-    setMiembros([...miembros,{id:Date.now(),nombre:'',edad:'',obj:'mantener',activo:true}]);
-  };
-
-  const actualizarMiembro = (id, campo, valor) => {
-    const updated = miembros.map(m=>m.id===id?{...m,[campo]:valor}:m);
-    setMiembros(updated);
-    LS.set('familia_miembros', updated);
-  };
-
-  const eliminarMiembro = (id) => {
-    if(miembros.length<=1) return;
-    const updated = miembros.filter(m=>m.id!==id);
-    setMiembros(updated);
-    LS.set('familia_miembros', updated);
-  };
-
-  const objLabels = {bajar:'Bajar peso',mantener:'Mantener',subir:'Ganar músculo',recomp:'Recomposición'};
-
-  return (
-    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
-      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
-        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
-        <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text,textAlign:'center'}}>👨‍👩‍👧 Plan Familiar <span style={{fontSize:10,background:'#FFD700',color:'#000',padding:'2px 6px',borderRadius:6,fontWeight:800}}>PRO</span></div>
-        <div style={{minWidth:80}}/>
-      </div>
-      <div style={{flex:1,overflowY:'auto',padding:16}}>
-        {/* Tabs */}
-        <div style={{display:'flex',gap:4,marginBottom:14,background:C.surface,borderRadius:14,padding:4,border:`1px solid ${C.border}`}}>
-          {[['miembros','👥 Miembros'],['metas','🎯 Metas'],['comidas','🍽️ Plan']].map(([t,l])=>(
-            <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:'8px',borderRadius:10,border:'none',background:tab===t?'#D42020':'transparent',color:tab===t?'white':C.textSec,fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
-              {l}
-            </button>
-          ))}
-        </div>
-
-        {tab==='miembros'&&(
-          <>
-            <div style={{background:C.surface,borderRadius:18,padding:'14px',marginBottom:12,border:`1px solid ${C.border}`}}>
-              <div style={{fontSize:12,color:C.textSec}}>Registra hasta 5 miembros de tu familia. Cada uno tendrá sus propias metas calóricas.</div>
-            </div>
-            {miembros.map((m,i)=>(
-              <div key={m.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-                  <div style={{fontSize:13,fontWeight:700,color:C.text}}>👤 Miembro {i+1}{i===0?' (Tú)':''}</div>
-                  {i>0&&<button onClick={()=>eliminarMiembro(m.id)} style={{background:'none',border:'none',color:'#FF3B30',cursor:'pointer',fontSize:16}}>×</button>}
-                </div>
-                <input value={m.nombre} onChange={e=>actualizarMiembro(m.id,'nombre',e.target.value)} placeholder="Nombre" style={{width:'100%',padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontFamily:F,outline:'none',marginBottom:8,boxSizing:'border-box'}}/>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-                  <input value={m.edad} onChange={e=>actualizarMiembro(m.id,'edad',e.target.value)} placeholder="Edad" type="number" style={{padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontFamily:F,outline:'none'}}/>
-                  <select value={m.obj} onChange={e=>actualizarMiembro(m.id,'obj',e.target.value)} style={{padding:'8px 12px',borderRadius:10,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:13,fontFamily:F,outline:'none'}}>
-                    {Object.entries(objLabels).map(([k,v])=><option key={k} value={k}>{v}</option>)}
-                  </select>
-                </div>
-              </div>
-            ))}
-            {miembros.length<5&&(
-              <button onClick={agregarMiembro} style={{width:'100%',padding:'12px',borderRadius:16,border:`2px dashed ${C.border}`,background:'transparent',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>
-                + Agregar miembro ({miembros.length}/5)
-              </button>
-            )}
-          </>
-        )}
-
-        {tab==='metas'&&(
-          <div>
-            {miembros.filter(m=>m.nombre).map((m,i)=>{
-              const calEstimadas = m.edad<12?1600:m.edad<18?2200:m.obj==='bajar'?1700:m.obj==='subir'?2800:2000;
-              return (
-                <div key={m.id} style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:10,border:`1px solid ${C.border}`}}>
-                  <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:8}}>👤 {m.nombre} ({m.edad} años)</div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                    <div>
-                      <div style={{fontSize:22,fontWeight:900,color:'#D42020'}}>{calEstimadas} kcal</div>
-                      <div style={{fontSize:11,color:C.textSec}}>Estimado diario · {objLabels[m.obj]}</div>
-                    </div>
-                    <div style={{fontSize:28}}>{m.edad<12?'🧒':m.edad<18?'👦':'👤'}</div>
-                  </div>
-                </div>
-              );
-            })}
-            {!miembros.some(m=>m.nombre)&&(
-              <div style={{textAlign:'center',padding:'40px',color:C.textSec}}>
-                <div style={{fontSize:40,marginBottom:12}}>👨‍👩‍👧</div>
-                <div style={{fontSize:14}}>Agrega miembros en la pestaña anterior</div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {tab==='comidas'&&(
-          <div style={{background:C.surface,borderRadius:18,padding:'16px',border:`1px solid ${C.border}`}}>
-            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:8}}>🍽️ Plan de comidas familiar</div>
-            <div style={{fontSize:12,color:C.textSec,marginBottom:12}}>Basado en los miembros registrados, aquí una sugerencia de menú familiar:</div>
-            {[
-              {comida:'☀️ Desayuno',sugerencia:'Avena con frutas + leche + huevos revueltos',cal_adulto:420,cal_nino:280},
-              {comida:'🍽️ Almuerzo',sugerencia:'Arroz + pollo al horno + ensalada + legumbres',cal_adulto:680,cal_nino:450},
-              {comida:'☕ Once',sugerencia:'Pan integral + palta + jugo natural',cal_adulto:320,cal_nino:250},
-              {comida:'🌙 Cena',sugerencia:'Sopa de verduras + pan + quesillo',cal_adulto:380,cal_nino:280},
-            ].map((c,i)=>(
-              <div key={i} style={{padding:'10px 0',borderBottom:i<3?`1px solid ${C.border}`:'none'}}>
-                <div style={{fontSize:12,fontWeight:700,color:C.text,marginBottom:4}}>{c.comida}</div>
-                <div style={{fontSize:12,color:C.textSec,marginBottom:4}}>{c.sugerencia}</div>
-                <div style={{display:'flex',gap:10,fontSize:10}}>
-                  <span style={{color:'#D42020',fontWeight:700}}>👤 {c.cal_adulto} kcal</span>
-                  <span style={{color:'#34C759',fontWeight:700}}>🧒 {c.cal_nino} kcal</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 /* ══════════════════════════════════════════════
    PLANES DESCARGABLES PDF (Pro)
@@ -9437,7 +9314,7 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
         {/* Lista scrolleable */}
         <div style={{flex:1,overflowY:'auto',padding:'0 20px',WebkitOverflowScrolling:'touch'}}>
           <div style={{background:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)',borderRadius:16,padding:'10px 14px',marginBottom:16}}>
-            {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','🧬 Plan nutricional adaptativo','👨‍👩‍👧 Plan familiar (5 miembros)','📄 Planes descargables personalizados','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
+            {['🤖 Asistente IA nutricional','📸 Escáner de platos con IA','🧠 IA con memoria de preferencias','📊 Micronutrientes detallados','🇨🇱 Recetas chilenas con IA','🍂 Recetas de temporada económicas','🛒 Lista de compras inteligente','📅 Plan semanal automático','📉 Predicción de peso','👥 Liga con amigos','🏥 Modo diabetes/hipertensión','🌙 Modo fin de semana relajado','🧬 Plan nutricional adaptativo','📄 Planes descargables personalizados','📤 Exportar datos CSV','📅 Historial de 90 días'].map((f,i,arr)=>(
               <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderBottom:i<arr.length-1?`1px solid ${C.border}`:'none'}}>
                 <span style={{fontSize:15}}>{f.split(' ')[0]}</span>
                 <span style={{fontSize:13,color:C.text,fontWeight:500}}>{f.split(' ').slice(1).join(' ')}</span>
@@ -10618,7 +10495,6 @@ function AppCore({onRequestAuth}) {
   const [showLigaAmigos, setShowLigaAmigos] = useState(false);
   const [showRecetasTemporada, setShowRecetasTemporada] = useState(false);
   const [showPlanAdaptativo, setShowPlanAdaptativo] = useState(false);
-  const [showPlanFamiliar, setShowPlanFamiliar] = useState(false);
   const [showPlanesDescargables, setShowPlanesDescargables] = useState(false);
   const [showMarketplace, setShowMarketplace] = useState(false);
   const [autoTheme,setAutoTheme] = useState(()=>LS.get('autoTheme', true));
@@ -11982,7 +11858,6 @@ function AppCore({onRequestAuth}) {
       {showDesafiosComunidad&&<DesafiosComunidadModal C={C} F={F} dark={dark} log={log} agua={agua} waterGoal={waterGoal} exercises={exercises} streak={streak} tot={tot} metas={metas} supabaseUser={supabaseUser} nombre={nombre} obj={obj} onClose={()=>setShowDesafiosComunidad(false)}/>}
       {showLigaAmigos&&<LigaAmigosModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} nombre={nombre} saludScore={saludScore} streak={streak} xpTotal={xpTotal} isPro={isPro} onClose={()=>setShowLigaAmigos(false)}/>}
       {showPlanAdaptativo&&<PlanAdaptativoModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} weightHistory={weightHistory} streak={streak} tot={tot} onClose={()=>setShowPlanAdaptativo(false)}/>}
-      {showPlanFamiliar&&<PlanFamiliarModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} isPro={isPro} onClose={()=>setShowPlanFamiliar(false)}/>}
       {showPlanesDescargables&&<PlanesDescargablesModal C={C} F={F} dark={dark} nombre={nombre} perfil={perfil} obj={obj} metas={metas} ritmo={ritmo} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowPlanesDescargables(false)}/>}
       {showMarketplace&&<MarketplaceNutricionistasModal C={C} F={F} dark={dark} supabaseUser={supabaseUser} onClose={()=>setShowMarketplace(false)}/>}
       {showRecetasTemporada&&<RecetasTemporadaModal C={C} F={F} dark={dark} obj={obj} userAllergens={userAllergens} veganMode={veganMode} onClose={()=>setShowRecetasTemporada(false)}/>}
@@ -14152,7 +14027,6 @@ function AppCore({onRequestAuth}) {
                     {icon:'📅',l:'Plan Semanal',     sub:'Menú 7 días IA',       fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanSemanal(true);},      col:'#5856D6'},
                     {icon:'📉',l:'Predicción Peso',  sub:'Ver mi progreso',      fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPredicionPeso(true);},    col:'#D42020'},
                     {icon:'🧬',l:'Plan Adaptativo',  sub:'Ajuste semanal IA',    fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanAdaptativo(true);},   col:'#5856D6'},
-                    {icon:'👨‍👩‍👧',l:'Plan Familiar',   sub:'Hasta 5 miembros',    fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanFamiliar(true);},     col:'#FF9500'},
                     {icon:'🏥',l:'Salud Especial',   sub:'Diabetes / Hipert.',   fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowModoSalud(true);},        col:'#5856D6'},
                     {icon:'📄',l:'Planes PDF',       sub:'Descarga tu plan',     fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}setShowPlanesDescargables(true);},col:'#D42020'},
                     {icon:'📊',l:'Exportar CSV',     sub:'Últimos 30 días',      fn:()=>{setShowHerramientasPro(false);if(!isPro){setShowPaywall(true);return;}exportCSV();},                   col:'#34C759'},
