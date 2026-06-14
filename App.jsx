@@ -1289,131 +1289,29 @@ const DARK = {
    LOGO
 ═══════════════════════════════════════════════════════ */
 function Logo({size=40}) {
-  const id = "lg"+size;
+  const id = 'lg'+size;
   return (
-    <svg width={size} height={size} viewBox="0 0 512 512" fill="none">
+    <svg width={size} height={size} viewBox='0 0 512 512' fill='none' style={{display:'block'}}>
       <defs>
-        {/* Background: white with very subtle warm tint */}
-        <radialGradient id={id+"bg"} cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stopColor="#FFFFFF"/>
-          <stop offset="100%" stopColor="#FAF6F0"/>
+        <radialGradient id={id+'bg'} cx='42%' cy='34%' r='80%'>
+          <stop offset='0%' stopColor='#FFFFFF'/>
+          <stop offset='100%' stopColor='#EDEFF3'/>
         </radialGradient>
-
-        {/* C red: glossy 3D gradient */}
-        <linearGradient id={id+"red"} x1="30%" y1="0%" x2="70%" y2="100%">
-          <stop offset="0%"   stopColor="#F04040"/>
-          <stop offset="35%"  stopColor="#D42020"/>
-          <stop offset="100%" stopColor="#9A0F0F"/>
+        <linearGradient id={id+'red'} x1='32%' y1='2%' x2='68%' y2='100%'>
+          <stop offset='0%' stopColor='#F44A4A'/>
+          <stop offset='42%' stopColor='#D42020'/>
+          <stop offset='100%' stopColor='#9C1212'/>
         </linearGradient>
-        {/* C top gloss */}
-        <linearGradient id={id+"redhi"} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%"   stopColor="rgba(255,255,255,0.30)"/>
-          <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-        </linearGradient>
-
-        {/* Leaf: fresh green */}
-        <linearGradient id={id+"leaf"} x1="20%" y1="5%" x2="75%" y2="95%">
-          <stop offset="0%"   stopColor="#5DD975"/>
-          <stop offset="45%"  stopColor="#28B044"/>
-          <stop offset="100%" stopColor="#156B28"/>
-        </linearGradient>
-
-        {/* Fruit: citrus yellow-gold */}
-        <radialGradient id={id+"fruit"} cx="36%" cy="30%" r="62%">
-          <stop offset="0%"   stopColor="#FFF176"/>
-          <stop offset="50%"  stopColor="#F5C21A"/>
-          <stop offset="100%" stopColor="#B8860A"/>
-        </radialGradient>
-        <radialGradient id={id+"fhigh"} cx="30%" cy="25%" r="40%">
-          <stop offset="0%"   stopColor="rgba(255,255,255,0.65)"/>
-          <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-        </radialGradient>
-
-        {/* Shadows */}
-        <filter id={id+"cs"} x="-15%" y="-15%" width="130%" height="130%">
-          <feDropShadow dx="0" dy="5" stdDeviation="12" floodColor="#B01010" floodOpacity="0.30"/>
-        </filter>
-        <filter id={id+"ls"} x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="2" dy="4" stdDeviation="7" floodColor="#156B28" floodOpacity="0.35"/>
-        </filter>
-        <filter id={id+"frs"} x="-25%" y="-25%" width="150%" height="150%">
-          <feDropShadow dx="3" dy="5" stdDeviation="9" floodColor="#B8860A" floodOpacity="0.40"/>
+        <filter id={id+'sh'} x='-30%' y='-30%' width='160%' height='160%'>
+          <feDropShadow dx='0' dy='7' stdDeviation='11' floodColor='#8E0E0E' floodOpacity='0.26'/>
         </filter>
       </defs>
-
-      {/* ── BACKGROUND ── */}
-      <rect width="512" height="512" rx="112" fill={"url(#"+id+"bg)"}/>
-      {/* Thin border */}
-      <rect width="512" height="512" rx="112" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="2"/>
-
-      {/* ── C LETTER ── 
-           Center (256,256), r=150, gap=120° on right
-           Start: (331,126)  End: (331,386)
-           Sweep counterclockwise (flag=0) large-arc=1
-      ── */}
-      {/* Shadow layer */}
-      <path
-        d="M331 126 A150 150 0 1 0 331 386"
-        stroke={"url(#"+id+"red)"}
-        strokeWidth="80"
-        strokeLinecap="round"
-        fill="none"
-        filter={"url(#"+id+"cs)"}
-      />
-      {/* Main C */}
-      <path
-        d="M331 126 A150 150 0 1 0 331 386"
-        stroke={"url(#"+id+"red)"}
-        strokeWidth="78"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* Gloss highlight on C */}
-      <path
-        d="M331 126 A150 150 0 1 0 331 386"
-        stroke={"url(#"+id+"redhi)"}
-        strokeWidth="28"
-        strokeLinecap="round"
-        fill="none"
-      />
-
-      {/* ── LEAF — inside C, left side ── */}
-      {/* Leaf body */}
-      <ellipse
-        cx="208" cy="252" rx="52" ry="64"
-        fill={"url(#"+id+"leaf)"}
-        transform="rotate(-22 208 252)"
-        filter={"url(#"+id+"ls)"}
-      />
-      {/* Leaf lighter half */}
-      <ellipse
-        cx="200" cy="243" rx="28" ry="40"
-        fill="rgba(150,255,130,0.22)"
-        transform="rotate(-22 200 243)"
-      />
-      {/* Midrib */}
-      <path d="M208 192 C207 222 207 262 210 316" stroke="#0D4A1E" strokeWidth="3.2" strokeLinecap="round" fill="none"/>
-      {/* Veins */}
-      <path d="M206 222 Q189 213 182 205" stroke="#0D4A1E" strokeWidth="2" strokeLinecap="round" opacity="0.75" fill="none"/>
-      <path d="M207 244 Q188 237 181 230" stroke="#0D4A1E" strokeWidth="2" strokeLinecap="round" opacity="0.70" fill="none"/>
-      <path d="M208 266 Q192 261 186 256" stroke="#0D4A1E" strokeWidth="1.7" strokeLinecap="round" opacity="0.60" fill="none"/>
-      <path d="M208 232 Q224 222 230 213" stroke="#156B28" strokeWidth="1.5" strokeLinecap="round" opacity="0.50" fill="none"/>
-      <path d="M208 254 Q225 248 232 241" stroke="#156B28" strokeWidth="1.5" strokeLinecap="round" opacity="0.50" fill="none"/>
-      {/* Stem */}
-      <path d="M208 193 Q204 176 198 163" stroke="#6B4010" strokeWidth="5.5" strokeLinecap="round" fill="none"/>
-      <path d="M208 193 Q204 176 198 163" stroke="#A06828" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-
-      {/* ── FRUIT — small, round, near C opening ── */}
-      <circle cx="330" cy="258" r="42" fill={"url(#"+id+"fruit)"} filter={"url(#"+id+"frs)"}/>
-      {/* Highlight */}
-      <circle cx="330" cy="258" r="42" fill={"url(#"+id+"fhigh)"}/>
-      {/* Subtle peel texture */}
-      <circle cx="330" cy="258" r="42" fill="none" stroke="rgba(160,100,0,0.12)" strokeWidth="1.5"/>
-      {/* Fruit nubs */}
-      <circle cx="330" cy="218" r="5.5" fill="#D4A010" opacity="0.55"/>
-      <circle cx="330" cy="298" r="4.5" fill="#B07808" opacity="0.40"/>
-      {/* Ground shadow */}
-      <ellipse cx="334" cy="296" rx="26" ry="7" fill="rgba(0,0,0,0.09)"/>
+      <rect width='512' height='512' rx='118' fill={'url(#'+id+'bg)'}/>
+      <rect x='2.5' y='2.5' width='507' height='507' rx='116' fill='none' stroke='rgba(0,0,0,0.07)' strokeWidth='3'/>
+      <g filter={'url(#'+id+'sh)'}>
+        <path d='M318.2 166.1 A106 106 0 1 0 318.2 345.9' stroke={'url(#'+id+'red)'} strokeWidth='58' strokeLinecap='round' fill='none'/>
+      </g>
+      <path d='M300 175 A104 104 0 0 0 164 232' stroke='rgba(255,255,255,0.32)' strokeWidth='11' strokeLinecap='round' fill='none'/>
     </svg>
   );
 }
