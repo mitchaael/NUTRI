@@ -10339,11 +10339,19 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
     supabase.from('nutri_messages').select('*')
       .eq('nutricionista_id', nutricionista_id).eq('paciente_id', paciente_id)
       .order('created_at',{ascending:true})
-      .then(({data})=>setMsgs(data||[]), ()=>setMsgs([]));
+      .then(({data,error})=>{
+        if(error) return; // no borrar lo que ya se ve si falla la red
+        const rows = data||[];
+        // Conservar mensajes optimistas que aún no están en el servidor
+        setMsgs(prev=>{
+          const tmps = (prev||[]).filter(x=>String(x.id).startsWith('tmp') && !rows.some(r=>r.texto===x.texto&&r.sender===x.sender));
+          return [...rows, ...tmps];
+        });
+      }, ()=>{});
   },[nutricionista_id, paciente_id]);
   React.useEffect(()=>{
     load();
-    // Realtime: nuevos mensajes llegan al instante por websocket (sin polling)
+    // Realtime para entrega instantánea…
     const ch = supabase.channel('chat-'+nutricionista_id+'-'+paciente_id)
       .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
         filter:`paciente_id=eq.${paciente_id}`},
@@ -10353,13 +10361,16 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
           setMsgs(prev=>{
             if(!prev) return [m];
             if(prev.some(x=>x.id===m.id)) return prev;
-            // Reemplazar el optimista temporal si corresponde
             const sinTmp = prev.filter(x=>!(String(x.id).startsWith('tmp')&&x.texto===m.texto&&x.sender===m.sender));
             return [...sinTmp, m];
           });
         })
       .subscribe();
-    return ()=>{ supabase.removeChannel(ch); };
+    // …y polling de respaldo cada 6s por si el websocket se cae (común en TWA/Android)
+    const poll = setInterval(load, 6000);
+    const onVis = ()=>{ if(!document.hidden) load(); };
+    document.addEventListener('visibilitychange', onVis);
+    return ()=>{ supabase.removeChannel(ch); clearInterval(poll); document.removeEventListener('visibilitychange', onVis); };
   },[load, nutricionista_id, paciente_id]);
   React.useEffect(()=>{ if(endRef.current) endRef.current.scrollIntoView(); },[msgs&&msgs.length]);
   const send = async()=>{
