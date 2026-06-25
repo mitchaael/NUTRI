@@ -5501,6 +5501,7 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
   const [pesoMeta, setPesoMeta] = React.useState(recsInit.pesoMeta?String(recsInit.pesoMeta):'');
   const [aguaLts,  setAguaLts]  = React.useState(recsInit.aguaLitros?String(recsInit.aguaLitros):'');
   const [suplementos, setSuplementos] = React.useState(()=>recsInit.suplementos.map(s=>({...s})));
+  const [suppPicker, setSuppPicker] = React.useState(false);
   const [pauta,  setPauta]  = React.useState(()=>{
     if(recsInit.comidas.length) return recsInit.comidas.map(c=>({comida:c.comida, hora:c.hora||horaDeComida(c.comida), items:(c.items||[]).map(it=>({...it}))}));
     return ['Desayuno','Almuerzo','Once','Cena'].map(k=>({comida:k, hora:horaDeComida(k), items:[]}));
@@ -5838,7 +5839,23 @@ function NuevoPlanModal({C, F, dark, supabaseUser, editPlan=null, onClose, onCre
                     <button onClick={()=>setSuplementos(p=>p.filter((_,j)=>j!==i))} style={{width:30,borderRadius:9,border:`1px solid ${C2.border}`,background:C2.alt,color:C2.muted,fontSize:12,cursor:'pointer',flexShrink:0}}>✕</button>
                   </div>
                 ))}
-                <button onClick={()=>setSuplementos(p=>[...p,{nombre:'',dosis:''}])} style={{fontSize:11.5,color:'#5856D6',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>+ Agregar suplemento</button>
+                <div style={{display:'flex',gap:14,marginTop:2}}>
+                  <button onClick={()=>setSuppPicker(v=>!v)} style={{fontSize:11.5,color:'#5856D6',background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>💊 Elegir del catálogo</button>
+                  <button onClick={()=>setSuplementos(p=>[...p,{nombre:'',dosis:''}])} style={{fontSize:11.5,color:C2.sec,background:'none',border:'none',cursor:'pointer',fontFamily:F,fontWeight:700,padding:'4px 0'}}>+ Manual</button>
+                </div>
+                {suppPicker&&(
+                  <div style={{marginTop:8,maxHeight:200,overflowY:'auto',background:C2.alt,borderRadius:12,padding:'8px',border:`1px solid ${C2.border}`}}>
+                    {SUPPLEMENTS.map(s=>(
+                      <button key={s.id} onClick={()=>{ setSuplementos(p=>[...p,{nombre:s.n,dosis:s.dosis}]); haptic('light'); }}
+                        style={{width:'100%',display:'flex',alignItems:'center',gap:8,padding:'7px 8px',background:'none',border:'none',borderBottom:`1px solid ${C2.border}`,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                        <span style={{fontSize:16}}>{s.e}</span>
+                        <span style={{flex:1,fontSize:12.5,color:C2.text,fontWeight:600}}>{s.n}</span>
+                        <span style={{fontSize:10.5,color:C2.muted}}>{s.dosis}</span>
+                        <span style={{fontSize:13,color:'#5856D6',fontWeight:800}}>+</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Indicaciones generales */}
@@ -12207,7 +12224,17 @@ function AppCore({onRequestAuth}) {
       />}
       {showSuplementos&&<SuplementosModal C={C} F={F} dark={dark} meal={meal}
         customSupps={customSupps}
-        onSaveCustom={(s)=>{ const next=[s,...customSupps.filter(x=>x.id!==s.id)].slice(0,40); setCustomSupps(next); LS.set('customSupps',next); }}
+        onSaveCustom={(s)=>{
+          const next=[s,...customSupps.filter(x=>x.id!==s.id)].slice(0,40); setCustomSupps(next); LS.set('customSupps',next);
+          // Si tiene código de barras, compartir a la comunidad (otros lo encuentran al escanear)
+          if(s.barcode && supabaseUser){
+            supabase.from('community_products').upsert({
+              barcode:String(s.barcode), nombre:s.n, marca:'Suplemento', cat:'Suplementos',
+              porcion:s.porcion||1, cal:+s.cal||0, prot:+s.prot||0, carbs:+s.carbs||0, grasas:+s.grasas||0,
+              fibra:0, contributed_by:supabaseUser.id,
+            },{onConflict:'barcode'}).then(()=>{},()=>{});
+          }
+        }}
         onDeleteCustom={(id)=>{ const next=customSupps.filter(x=>x.id!==id); setCustomSupps(next); LS.set('customSupps',next); }}
         onRequestScan={()=>setSuppScanOpen(true)}
         scanResult={suppScanResult}
