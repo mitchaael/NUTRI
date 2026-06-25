@@ -2,6 +2,14 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { supabase, syncProfile, syncSettings, syncDay, syncWeight, restoreFromSupabase } from './supabase.js';
 
 /* ═══════════════════════════════════════════════════════
+   ANALYTICS — eventos de conversión a GA4 (y Meta Pixel cuando esté listo)
+═══════════════════════════════════════════════════════ */
+function track(event, params = {}) {
+  try { window.gtag && window.gtag('event', event, params); } catch (_) {}
+  // Meta Pixel: añadir aquí window.fbq && fbq('track', ...) cuando tengamos el ID
+}
+
+/* ═══════════════════════════════════════════════════════
    BASE DE DATOS — 300+ productos supermercados chilenos
    porcion = gramos de la porción de referencia
 ═══════════════════════════════════════════════════════ */
@@ -902,6 +910,54 @@ const GRUPOS_PAUTA = [
   {k:'snack',         l:'Snack',             icon:'🍿', color:'#A2845E'},
 ];
 const grupoDe = (k)=> GRUPOS_PAUTA.find(g=>g.k===k) || null;
+
+/* ═══════════════════════════════════════════════════════
+   CATÁLOGO DE SUPLEMENTOS — para deportistas
+   Macros por dosis estándar. qty multiplica (escalas en el log).
+═══════════════════════════════════════════════════════ */
+const SUP_CATS = ['Proteínas','Rendimiento','Aminoácidos','Vitaminas','Otros'];
+// {id,n,tipo,e,dosis,porcion,cal,prot,carbs,grasas}
+const SUPPLEMENTS = [
+  // ── Proteínas / masa ──
+  {id:'sup-whey',     n:'Proteína whey',          tipo:'Proteínas', e:'🥛', dosis:'1 scoop (30 g)', porcion:30, cal:120, prot:24, carbs:3,  grasas:1.5},
+  {id:'sup-caseina',  n:'Proteína caseína',       tipo:'Proteínas', e:'🥛', dosis:'1 scoop (30 g)', porcion:30, cal:110, prot:24, carbs:3,  grasas:1},
+  {id:'sup-vegana',   n:'Proteína vegetal',       tipo:'Proteínas', e:'🌱', dosis:'1 scoop (30 g)', porcion:30, cal:120, prot:22, carbs:4,  grasas:2},
+  {id:'sup-iso',      n:'Proteína isolada',       tipo:'Proteínas', e:'💪', dosis:'1 scoop (30 g)', porcion:30, cal:110, prot:27, carbs:1,  grasas:0.5},
+  {id:'sup-gainer',   n:'Ganador de masa',        tipo:'Proteínas', e:'🏋️', dosis:'1 dosis (150 g)',porcion:150,cal:600, prot:30, carbs:110,grasas:6},
+  {id:'sup-barra',    n:'Barra de proteína',      tipo:'Proteínas', e:'🍫', dosis:'1 barra (60 g)', porcion:60, cal:220, prot:20, carbs:22, grasas:7},
+  {id:'sup-colageno', n:'Colágeno',               tipo:'Proteínas', e:'✨', dosis:'1 dosis (10 g)', porcion:10, cal:36,  prot:9,  carbs:0,  grasas:0},
+  // ── Rendimiento / fuerza ──
+  {id:'sup-creatina', n:'Creatina monohidrato',   tipo:'Rendimiento', e:'⚡', dosis:'5 g',         porcion:5,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-pre',      n:'Pre-entreno',            tipo:'Rendimiento', e:'🔥', dosis:'1 dosis (10 g)',porcion:10,cal:5,  prot:0, carbs:1, grasas:0},
+  {id:'sup-cafeina',  n:'Cafeína',                tipo:'Rendimiento', e:'☕', dosis:'200 mg',       porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-beta',     n:'Beta-alanina',           tipo:'Rendimiento', e:'🌶️', dosis:'3 g',         porcion:3,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-citrulina',n:'Citrulina malato',       tipo:'Rendimiento', e:'🍉', dosis:'6 g',         porcion:6,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-no',       n:'Óxido nítrico / arginina',tipo:'Rendimiento',e:'💨', dosis:'5 g',         porcion:5,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-malto',    n:'Maltodextrina',          tipo:'Rendimiento', e:'🍯', dosis:'1 dosis (50 g)',porcion:50,cal:190,prot:0, carbs:48,grasas:0},
+  {id:'sup-electro',  n:'Electrolitos / sales',   tipo:'Rendimiento', e:'🧂', dosis:'1 sobre',      porcion:1,  cal:10, prot:0, carbs:2, grasas:0},
+  // ── Aminoácidos ──
+  {id:'sup-bcaa',     n:'BCAA',                   tipo:'Aminoácidos', e:'🔗', dosis:'1 dosis (10 g)',porcion:10,cal:5,  prot:0, carbs:0, grasas:0},
+  {id:'sup-eaa',      n:'EAA (esenciales)',       tipo:'Aminoácidos', e:'🔗', dosis:'1 dosis (10 g)',porcion:10,cal:5,  prot:0, carbs:0, grasas:0},
+  {id:'sup-glutamina',n:'Glutamina',              tipo:'Aminoácidos', e:'🧬', dosis:'5 g',         porcion:5,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-carnitina',n:'L-carnitina',            tipo:'Aminoácidos', e:'🔥', dosis:'2 g',         porcion:2,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-taurina',  n:'Taurina',                tipo:'Aminoácidos', e:'⚡', dosis:'2 g',         porcion:2,  cal:0,  prot:0, carbs:0, grasas:0},
+  // ── Vitaminas / minerales / salud ──
+  {id:'sup-multi',    n:'Multivitamínico',        tipo:'Vitaminas', e:'💊', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-omega',    n:'Omega 3 (aceite pescado)',tipo:'Vitaminas',e:'🐟', dosis:'2 cápsulas',   porcion:2,  cal:20, prot:0, carbs:0, grasas:2},
+  {id:'sup-vitd',     n:'Vitamina D3',            tipo:'Vitaminas', e:'☀️', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-vitc',     n:'Vitamina C',             tipo:'Vitaminas', e:'🍊', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-magnesio', n:'Magnesio',               tipo:'Vitaminas', e:'✨', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-zma',      n:'ZMA',                    tipo:'Vitaminas', e:'🌙', dosis:'3 cápsulas',   porcion:3,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-zinc',     n:'Zinc',                   tipo:'Vitaminas', e:'🛡️', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-hierro',   n:'Hierro',                 tipo:'Vitaminas', e:'🩸', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-calcio',   n:'Calcio',                 tipo:'Vitaminas', e:'🦴', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-probiotic',n:'Probióticos',            tipo:'Vitaminas', e:'🦠', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  // ── Otros / bienestar ──
+  {id:'sup-melatonina',n:'Melatonina',            tipo:'Otros', e:'😴', dosis:'1 tableta',        porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-ashwa',    n:'Ashwagandha',            tipo:'Otros', e:'🌿', dosis:'1 cápsula',        porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-termo',    n:'Quemador / termogénico', tipo:'Otros', e:'🔥', dosis:'1 cápsula',        porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-fibra',    n:'Fibra / psyllium',       tipo:'Otros', e:'🌾', dosis:'1 dosis (5 g)',    porcion:5,  cal:15, prot:0, carbs:4, grasas:0},
+];
 /* Agrupa los items de una comida por grupo alimentario (sin grupo al final) */
 const itemsPorGrupo = (items=[]) => {
   const out = [];
@@ -7453,6 +7509,7 @@ function AuthScreen({ onAuth }) {
       if (mode === 'register') {
         const { error: e } = await supabase.auth.signUp({ email, password: pass });
         if (e) throw e;
+        track('sign_up', { method: 'email' });
       } else {
         const { error: e } = await supabase.auth.signInWithPassword({ email, password: pass });
         if (e) throw e;
@@ -10415,6 +10472,64 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
   );
 }
 
+/* ─── Suplementos: catálogo para registrar ─── */
+function SuplementosModal({C, F, dark, meal, onAdd, onClose}){
+  const [cat, setCat] = React.useState('Proteínas');
+  const [q, setQ] = React.useState('');
+  const [added, setAdded] = React.useState({});
+  const lista = SUPPLEMENTS.filter(s=>{
+    const okCat = !q.trim() ? s.tipo===cat : true;
+    const okQ = !q.trim() || s.n.toLowerCase().includes(q.trim().toLowerCase());
+    return okCat && okQ;
+  });
+  const agregar = (s)=>{
+    onAdd({
+      id: Date.now()+Math.random(),
+      nombre: s.n, marca:'Suplemento', cat:'Suplementos',
+      porcion: s.porcion||1, cal:s.cal||0, prot:s.prot||0, carbs:s.carbs||0, grasas:s.grasas||0,
+      fibra:0, azucar:0, sodio:0, emoji:s.e||'💊', origen:'suplemento', supId:s.id,
+    });
+    setAdded(a=>({...a,[s.id]:(a[s.id]||0)+1}));
+    haptic('add');
+  };
+  return (
+    <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
+      <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
+        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>💊 Suplementos</div>
+        <div style={{minWidth:80}}/>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
+        <div style={{fontSize:12,color:C.textSec,marginBottom:12,lineHeight:1.4}}>Registra lo que tomas — se suma a tus macros y tu nutricionista lo ve. Agregado a <strong style={{color:C.text}}>{meal}</strong>.</div>
+        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 Buscar suplemento…"
+          style={{width:'100%',marginBottom:12,padding:'11px 14px',borderRadius:13,border:`1.5px solid ${C.border}`,fontSize:14,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,boxSizing:'border-box'}}/>
+        {!q.trim()&&(
+          <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
+            {SUP_CATS.map(c=>(
+              <button key={c} onClick={()=>setCat(c)} style={{padding:'7px 13px',borderRadius:11,cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,
+                border:`1.5px solid ${cat===c?'#D42020':C.border}`,background:cat===c?'#D4202012':'transparent',color:cat===c?'#D42020':C.textSec}}>{c}</button>
+            ))}
+          </div>
+        )}
+        {lista.map(s=>(
+          <div key={s.id} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',marginBottom:8,borderRadius:14,background:C.surface,border:`1px solid ${added[s.id]?'#34C759':C.border}`}}>
+            <span style={{fontSize:24,flexShrink:0}}>{s.e}</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>{s.n}</div>
+              <div style={{fontSize:11,color:C.textSec,marginTop:1}}>{s.dosis} · {s.cal>0?`${s.cal} kcal`:'0 kcal'}{s.prot>0?` · ${s.prot}g prot`:''}{s.carbs>0?` · ${s.carbs}g carb`:''}</div>
+            </div>
+            <button onClick={()=>agregar(s)} style={{flexShrink:0,padding:'8px 14px',borderRadius:11,border:'none',background:added[s.id]?'#34C759':'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:800}}>
+              {added[s.id]?`✓ ${added[s.id]}`:'+ Agregar'}
+            </button>
+          </div>
+        ))}
+        {lista.length===0&&<div style={{textAlign:'center',color:C.textMuted,fontSize:13,padding:'24px 0'}}>Sin resultados para "{q}"</div>}
+        <div style={{fontSize:10.5,color:C.textMuted,textAlign:'center',marginTop:8,lineHeight:1.4,padding:'0 10px'}}>Los valores son por dosis estándar; ajusta la cantidad después en "Mi Día".</div>
+      </div>
+    </div>
+  );
+}
+
 function AppCore({onRequestAuth}) {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
@@ -10656,6 +10771,7 @@ function AppCore({onRequestAuth}) {
   const [showScanner,setShowScanner] = useState(false);
   const [showModFeria,setShowModFeria] = useState(false);
   const [showPhotoScanner,setShowPhotoScanner] = useState(false);
+  const [showSuplementos,setShowSuplementos] = useState(false);
   const [showRecipe,setShowRecipe]   = useState(false);
   const [showPlanner,setShowPlanner] = useState(false);
   const [fastStart,setFastStart]   = useState(()=>LS.get('fastStart',null));
@@ -12013,6 +12129,10 @@ function AppCore({onRequestAuth}) {
         onAdd={(food)=>addFood(food)}
         onClose={()=>setShowPhotoScanner(false)}
       />}
+      {showSuplementos&&<SuplementosModal C={C} F={F} dark={dark} meal={meal}
+        onAdd={(food)=>addFood(food)}
+        onClose={()=>setShowSuplementos(false)}
+      />}
 
       {/* ══ RECIPE BUILDER ══ */}
       {showRecipe&&<RecipeBuilder C={C} F={F} allFoods={allFoods} onClose={()=>setShowRecipe(false)} onSave={(r)=>{setCustomFoods([...customFoods,r]);setShowRecipe(false);}}/>}
@@ -12954,6 +13074,18 @@ function AppCore({onRequestAuth}) {
               display:'flex',alignItems:'center',justifyContent:'center',gap:6,
             }}>
               <span style={{fontSize:18}}>📷</span> Escanear código
+            </button>
+            <button className="tap" onClick={()=>setShowSuplementos(true)} style={{
+              padding:'14px 16px',borderRadius:16,border:`1px solid ${C.border}`,
+              background:C.surface,display:'flex',alignItems:'center',gap:12,cursor:'pointer',fontFamily:F,width:'100%',textAlign:'left',
+              gridColumn:'1 / -1',
+            }}>
+              <div style={{width:40,height:40,borderRadius:12,background:'linear-gradient(135deg,#5856D6,#28B044)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>💊</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:C.text}}>Suplementos</div>
+                <div style={{fontSize:11,color:C.textSec}}>Proteína, creatina, pre-entreno, vitaminas…</div>
+              </div>
+              <div style={{background:'#5856D615',color:'#5856D6',fontSize:9,fontWeight:800,padding:'3px 8px',borderRadius:8}}>NUEVO</div>
             </button>
             <button className="tap" onClick={()=>setShowModFeria(true)} style={{
               background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,
