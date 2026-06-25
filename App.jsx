@@ -942,15 +942,15 @@ const SUPPLEMENTS = [
   {id:'sup-carnitina',n:'L-carnitina',            tipo:'Aminoácidos', e:'🔥', dosis:'2 g',         porcion:2,  cal:0,  prot:0, carbs:0, grasas:0},
   {id:'sup-taurina',  n:'Taurina',                tipo:'Aminoácidos', e:'⚡', dosis:'2 g',         porcion:2,  cal:0,  prot:0, carbs:0, grasas:0},
   // ── Vitaminas / minerales / salud ──
-  {id:'sup-multi',    n:'Multivitamínico',        tipo:'Vitaminas', e:'💊', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-omega',    n:'Omega 3 (aceite pescado)',tipo:'Vitaminas',e:'🐟', dosis:'2 cápsulas',   porcion:2,  cal:20, prot:0, carbs:0, grasas:2},
-  {id:'sup-vitd',     n:'Vitamina D3',            tipo:'Vitaminas', e:'☀️', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-vitc',     n:'Vitamina C',             tipo:'Vitaminas', e:'🍊', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-magnesio', n:'Magnesio',               tipo:'Vitaminas', e:'✨', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-zma',      n:'ZMA',                    tipo:'Vitaminas', e:'🌙', dosis:'3 cápsulas',   porcion:3,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-zinc',     n:'Zinc',                   tipo:'Vitaminas', e:'🛡️', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-hierro',   n:'Hierro',                 tipo:'Vitaminas', e:'🩸', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
-  {id:'sup-calcio',   n:'Calcio',                 tipo:'Vitaminas', e:'🦴', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
+  {id:'sup-multi',    n:'Multivitamínico',        tipo:'Vitaminas', e:'💊', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{calcio:200,hierro:14,magnesio:100,zinc:11,vitA:800,vitC:80,vitD:15,b12:2.4,folato:400}},
+  {id:'sup-omega',    n:'Omega 3 (aceite pescado)',tipo:'Vitaminas',e:'🐟', dosis:'2 cápsulas',   porcion:2,  cal:20, prot:0, carbs:0, grasas:2, micros:{vitD:5}},
+  {id:'sup-vitd',     n:'Vitamina D3',            tipo:'Vitaminas', e:'☀️', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{vitD:25}},
+  {id:'sup-vitc',     n:'Vitamina C',             tipo:'Vitaminas', e:'🍊', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{vitC:500}},
+  {id:'sup-magnesio', n:'Magnesio',               tipo:'Vitaminas', e:'✨', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{magnesio:300}},
+  {id:'sup-zma',      n:'ZMA',                    tipo:'Vitaminas', e:'🌙', dosis:'3 cápsulas',   porcion:3,  cal:0,  prot:0, carbs:0, grasas:0, micros:{zinc:30,magnesio:450}},
+  {id:'sup-zinc',     n:'Zinc',                   tipo:'Vitaminas', e:'🛡️', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{zinc:15}},
+  {id:'sup-hierro',   n:'Hierro',                 tipo:'Vitaminas', e:'🩸', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{hierro:18}},
+  {id:'sup-calcio',   n:'Calcio',                 tipo:'Vitaminas', e:'🦴', dosis:'1 tableta',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0, micros:{calcio:600,vitD:10}},
   {id:'sup-probiotic',n:'Probióticos',            tipo:'Vitaminas', e:'🦠', dosis:'1 cápsula',    porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
   // ── Otros / bienestar ──
   {id:'sup-melatonina',n:'Melatonina',            tipo:'Otros', e:'😴', dosis:'1 tableta',        porcion:1,  cal:0,  prot:0, carbs:0, grasas:0},
@@ -1091,6 +1091,14 @@ const sumMicros = (log) => {
   const acc = {}; MICROS.forEach(x=>acc[x.k]=0);
   let anyEst=false, anyReal=false;
   (log||[]).forEach(it=>{
+    // Suplementos con micros declarados (valor absoluto por dosis)
+    if(it.micros && typeof it.micros === 'object'){
+      const q = it.qty || 1;
+      MICROS.forEach(x=>{ acc[x.k] += (it.micros[x.k]||0) * q; });
+      anyReal=true; return;
+    }
+    // Suplementos sin micros declarados → no estimar (no son alimentos)
+    if(it.cat==='Suplementos' || it.origen==='suplemento') return;
     const {m,real} = getMicros100(it);
     const g = (it.grams || it.porcion || 100) * (it.qty || 1);
     MICROS.forEach(x=>{ acc[x.k] += (m[x.k]||0) * g / 100; });
@@ -10472,60 +10480,125 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
   );
 }
 
-/* ─── Suplementos: catálogo para registrar ─── */
-function SuplementosModal({C, F, dark, meal, onAdd, onClose}){
-  const [cat, setCat] = React.useState('Proteínas');
+/* ─── Suplementos: catálogo + propios + escaneo ─── */
+function SuplementosModal({C, F, dark, meal, customSupps=[], onSaveCustom, onDeleteCustom, onRequestScan, scanResult, onScanConsumed, onAdd, onClose}){
+  const [cat, setCat] = React.useState('Mis suplementos');
   const [q, setQ] = React.useState('');
   const [added, setAdded] = React.useState({});
-  const lista = SUPPLEMENTS.filter(s=>{
-    const okCat = !q.trim() ? s.tipo===cat : true;
-    const okQ = !q.trim() || s.n.toLowerCase().includes(q.trim().toLowerCase());
-    return okCat && okQ;
-  });
+  const [form, setForm] = React.useState(null); // null | {nombre,dosis,cal,prot,carbs,grasas,barcode}
+  const CATS = ['Mis suplementos', ...SUP_CATS];
+
+  // Si llega un producto escaneado → abrir el formulario prefilado
+  React.useEffect(()=>{
+    if(!scanResult) return;
+    setForm({
+      nombre: scanResult.nombre||'', dosis: scanResult.porcion?`${scanResult.porcion} g`:'1 dosis',
+      cal: scanResult.cal!=null?String(scanResult.cal):'', prot: scanResult.prot!=null?String(scanResult.prot):'',
+      carbs: scanResult.carbs!=null?String(scanResult.carbs):'', grasas: scanResult.grasas!=null?String(scanResult.grasas):'',
+      barcode: scanResult.barcode||'',
+    });
+    onScanConsumed && onScanConsumed();
+  },[scanResult]);
+
+  const base = q.trim()
+    ? [...customSupps, ...SUPPLEMENTS].filter(s=>(s.n||s.nombre||'').toLowerCase().includes(q.trim().toLowerCase()))
+    : cat==='Mis suplementos' ? customSupps : SUPPLEMENTS.filter(s=>s.tipo===cat);
+
   const agregar = (s)=>{
     onAdd({
       id: Date.now()+Math.random(),
-      nombre: s.n, marca:'Suplemento', cat:'Suplementos',
-      porcion: s.porcion||1, cal:s.cal||0, prot:s.prot||0, carbs:s.carbs||0, grasas:s.grasas||0,
+      nombre: s.n||s.nombre, marca:'Suplemento', cat:'Suplementos',
+      porcion: s.porcion||1, cal:+s.cal||0, prot:+s.prot||0, carbs:+s.carbs||0, grasas:+s.grasas||0,
       fibra:0, azucar:0, sodio:0, emoji:s.e||'💊', origen:'suplemento', supId:s.id,
+      ...(s.micros ? {micros:s.micros} : {}),
     });
     setAdded(a=>({...a,[s.id]:(a[s.id]||0)+1}));
     haptic('add');
   };
+  const guardarForm = (alsoAdd)=>{
+    if(!form.nombre.trim()) return;
+    const s = {
+      id: 'mine-'+(Date.now()), n: form.nombre.trim(), tipo:'Mis suplementos', e:'💊',
+      dosis: form.dosis.trim()||'1 dosis', porcion: 1,
+      cal:+form.cal||0, prot:+form.prot||0, carbs:+form.carbs||0, grasas:+form.grasas||0,
+      barcode: form.barcode||null,
+    };
+    onSaveCustom && onSaveCustom(s);
+    if(alsoAdd) agregar(s);
+    setForm(null); setCat('Mis suplementos'); haptic('success');
+  };
+  const inp = {width:'100%',padding:'10px 12px',borderRadius:11,border:`1.5px solid ${C.border}`,fontSize:14,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,boxSizing:'border-box'};
+
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:9999,display:'flex',flexDirection:'column',fontFamily:F,paddingTop:'env(safe-area-inset-top)'}}>
       <div style={{...modalHeaderStyle(C),display:'flex',alignItems:'center'}}>
-        <button onClick={onClose} style={backBtnStyle(C)}>‹ Volver</button>
-        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>💊 Suplementos</div>
+        <button onClick={()=>form?setForm(null):onClose()} style={backBtnStyle(C)}>‹ Volver</button>
+        <div style={{flex:1,fontSize:15,fontWeight:700,color:C.text,textAlign:'center'}}>💊 {form?'Nuevo suplemento':'Suplementos'}</div>
         <div style={{minWidth:80}}/>
       </div>
-      <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
-        <div style={{fontSize:12,color:C.textSec,marginBottom:12,lineHeight:1.4}}>Registra lo que tomas — se suma a tus macros y tu nutricionista lo ve. Agregado a <strong style={{color:C.text}}>{meal}</strong>.</div>
-        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 Buscar suplemento…"
-          style={{width:'100%',marginBottom:12,padding:'11px 14px',borderRadius:13,border:`1.5px solid ${C.border}`,fontSize:14,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,boxSizing:'border-box'}}/>
-        {!q.trim()&&(
-          <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
-            {SUP_CATS.map(c=>(
-              <button key={c} onClick={()=>setCat(c)} style={{padding:'7px 13px',borderRadius:11,cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,
-                border:`1.5px solid ${cat===c?'#D42020':C.border}`,background:cat===c?'#D4202012':'transparent',color:cat===c?'#D42020':C.textSec}}>{c}</button>
-            ))}
-          </div>
-        )}
-        {lista.map(s=>(
-          <div key={s.id} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',marginBottom:8,borderRadius:14,background:C.surface,border:`1px solid ${added[s.id]?'#34C759':C.border}`}}>
-            <span style={{fontSize:24,flexShrink:0}}>{s.e}</span>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>{s.n}</div>
-              <div style={{fontSize:11,color:C.textSec,marginTop:1}}>{s.dosis} · {s.cal>0?`${s.cal} kcal`:'0 kcal'}{s.prot>0?` · ${s.prot}g prot`:''}{s.carbs>0?` · ${s.carbs}g carb`:''}</div>
+
+      {form ? (
+        <div style={{flex:1,overflowY:'auto',padding:'16px'}}>
+          {form.barcode&&<div style={{fontSize:11,color:'#34C759',fontWeight:700,marginBottom:12}}>✓ Escaneado · código {form.barcode}</div>}
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <div><div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>NOMBRE</div><input value={form.nombre} onChange={e=>setForm(f=>({...f,nombre:e.target.value}))} placeholder="Ej: Proteína marca X" style={inp} autoFocus/></div>
+            <div><div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>DOSIS</div><input value={form.dosis} onChange={e=>setForm(f=>({...f,dosis:e.target.value}))} placeholder="Ej: 1 scoop (30 g)" style={inp}/></div>
+            <div style={{display:'flex',gap:10}}>
+              <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>KCAL</div><input value={form.cal} onChange={e=>setForm(f=>({...f,cal:e.target.value.replace(/[^0-9]/g,'')}))} inputMode="numeric" placeholder="0" style={{...inp,textAlign:'center'}}/></div>
+              <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>PROT (g)</div><input value={form.prot} onChange={e=>setForm(f=>({...f,prot:e.target.value.replace(/[^0-9.]/g,'')}))} inputMode="decimal" placeholder="0" style={{...inp,textAlign:'center'}}/></div>
             </div>
-            <button onClick={()=>agregar(s)} style={{flexShrink:0,padding:'8px 14px',borderRadius:11,border:'none',background:added[s.id]?'#34C759':'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:800}}>
-              {added[s.id]?`✓ ${added[s.id]}`:'+ Agregar'}
-            </button>
+            <div style={{display:'flex',gap:10}}>
+              <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>CARBS (g)</div><input value={form.carbs} onChange={e=>setForm(f=>({...f,carbs:e.target.value.replace(/[^0-9.]/g,'')}))} inputMode="decimal" placeholder="0" style={{...inp,textAlign:'center'}}/></div>
+              <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>GRASAS (g)</div><input value={form.grasas} onChange={e=>setForm(f=>({...f,grasas:e.target.value.replace(/[^0-9.]/g,'')}))} inputMode="decimal" placeholder="0" style={{...inp,textAlign:'center'}}/></div>
+            </div>
           </div>
-        ))}
-        {lista.length===0&&<div style={{textAlign:'center',color:C.textMuted,fontSize:13,padding:'24px 0'}}>Sin resultados para "{q}"</div>}
-        <div style={{fontSize:10.5,color:C.textMuted,textAlign:'center',marginTop:8,lineHeight:1.4,padding:'0 10px'}}>Los valores son por dosis estándar; ajusta la cantidad después en "Mi Día".</div>
-      </div>
+          <div style={{display:'flex',gap:10,marginTop:18}}>
+            <button onClick={()=>guardarForm(false)} disabled={!form.nombre.trim()} style={{flex:1,padding:'13px',borderRadius:13,border:`1.5px solid ${C.border}`,background:'transparent',color:C.text,fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:700}}>Guardar</button>
+            <button onClick={()=>guardarForm(true)} disabled={!form.nombre.trim()} style={{flex:2,padding:'13px',borderRadius:13,border:'none',background:form.nombre.trim()?'#D42020':'#C7C7CC',color:'white',fontFamily:F,cursor:'pointer',fontSize:13,fontWeight:800}}>Guardar y agregar</button>
+          </div>
+        </div>
+      ) : (
+        <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
+          <div style={{fontSize:12,color:C.textSec,marginBottom:12,lineHeight:1.4}}>Registra lo que tomas — se suma a tus macros y tu nutricionista lo ve. Agregado a <strong style={{color:C.text}}>{meal}</strong>.</div>
+          {/* Acciones: crear / escanear */}
+          <div style={{display:'flex',gap:8,marginBottom:12}}>
+            <button onClick={()=>setForm({nombre:'',dosis:'1 dosis',cal:'',prot:'',carbs:'',grasas:'',barcode:''})} style={{flex:1,padding:'11px',borderRadius:12,border:`1.5px solid #5856D6`,background:'#5856D610',color:'#5856D6',fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:800}}>+ Crear el mío</button>
+            <button onClick={()=>onRequestScan&&onRequestScan()} style={{flex:1,padding:'11px',borderRadius:12,border:`1.5px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontFamily:F,cursor:'pointer',fontSize:12.5,fontWeight:800}}>📷 Escanear código</button>
+          </div>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 Buscar suplemento…"
+            style={{width:'100%',marginBottom:12,padding:'11px 14px',borderRadius:13,border:`1.5px solid ${C.border}`,fontSize:14,color:C.text,background:C.surfaceAlt,outline:'none',fontFamily:F,boxSizing:'border-box'}}/>
+          {!q.trim()&&(
+            <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
+              {CATS.map(c=>(
+                <button key={c} onClick={()=>setCat(c)} style={{padding:'7px 13px',borderRadius:11,cursor:'pointer',fontFamily:F,fontSize:12,fontWeight:700,
+                  border:`1.5px solid ${cat===c?'#D42020':C.border}`,background:cat===c?'#D4202012':'transparent',color:cat===c?'#D42020':C.textSec}}>{c}</button>
+              ))}
+            </div>
+          )}
+          {!q.trim()&&cat==='Mis suplementos'&&customSupps.length===0&&(
+            <div style={{textAlign:'center',color:C.textMuted,fontSize:13,padding:'24px 16px',lineHeight:1.5}}>Aún no tienes suplementos propios.<br/>Usa <strong style={{color:'#5856D6'}}>Crear el mío</strong> o <strong>📷 Escanear</strong> el envase.</div>
+          )}
+          {base.map(s=>{
+            const sid = s.id;
+            const mine = String(sid).startsWith('mine-');
+            return (
+            <div key={sid} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',marginBottom:8,borderRadius:14,background:C.surface,border:`1px solid ${added[sid]?'#34C759':C.border}`}}>
+              <span style={{fontSize:24,flexShrink:0}}>{s.e||'💊'}</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>{s.n||s.nombre}</div>
+                <div style={{fontSize:11,color:C.textSec,marginTop:1}}>{s.dosis} · {(+s.cal)>0?`${s.cal} kcal`:'0 kcal'}{(+s.prot)>0?` · ${s.prot}g prot`:''}{(+s.carbs)>0?` · ${s.carbs}g carb`:''}</div>
+              </div>
+              {mine&&<button onClick={()=>onDeleteCustom&&onDeleteCustom(sid)} style={{flexShrink:0,background:'none',border:'none',color:C.textMuted,fontSize:13,cursor:'pointer',padding:'4px'}}>🗑</button>}
+              <button onClick={()=>agregar(s)} style={{flexShrink:0,padding:'8px 14px',borderRadius:11,border:'none',background:added[sid]?'#34C759':'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontSize:12,fontWeight:800}}>
+                {added[sid]?`✓ ${added[sid]}`:'+ Agregar'}
+              </button>
+            </div>
+            );
+          })}
+          {q.trim()&&base.length===0&&<div style={{textAlign:'center',color:C.textMuted,fontSize:13,padding:'24px 0'}}>Sin resultados para "{q}"</div>}
+          <div style={{fontSize:10.5,color:C.textMuted,textAlign:'center',marginTop:8,lineHeight:1.4,padding:'0 10px'}}>Los valores son por dosis estándar; ajusta la cantidad después en "Mi Día".</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -10772,6 +10845,9 @@ function AppCore({onRequestAuth}) {
   const [showModFeria,setShowModFeria] = useState(false);
   const [showPhotoScanner,setShowPhotoScanner] = useState(false);
   const [showSuplementos,setShowSuplementos] = useState(false);
+  const [customSupps,setCustomSupps] = useState(()=>LS.get('customSupps',[]));
+  const [suppScanOpen,setSuppScanOpen] = useState(false);
+  const [suppScanResult,setSuppScanResult] = useState(null);
   const [showRecipe,setShowRecipe]   = useState(false);
   const [showPlanner,setShowPlanner] = useState(false);
   const [fastStart,setFastStart]   = useState(()=>LS.get('fastStart',null));
@@ -12130,9 +12206,18 @@ function AppCore({onRequestAuth}) {
         onClose={()=>setShowPhotoScanner(false)}
       />}
       {showSuplementos&&<SuplementosModal C={C} F={F} dark={dark} meal={meal}
+        customSupps={customSupps}
+        onSaveCustom={(s)=>{ const next=[s,...customSupps.filter(x=>x.id!==s.id)].slice(0,40); setCustomSupps(next); LS.set('customSupps',next); }}
+        onDeleteCustom={(id)=>{ const next=customSupps.filter(x=>x.id!==id); setCustomSupps(next); LS.set('customSupps',next); }}
+        onRequestScan={()=>setSuppScanOpen(true)}
+        scanResult={suppScanResult}
+        onScanConsumed={()=>setSuppScanResult(null)}
         onAdd={(food)=>addFood(food)}
         onClose={()=>setShowSuplementos(false)}
       />}
+      {suppScanOpen&&<BarcodeScanner C={C} F={F} supabaseUser={supabaseUser}
+        onClose={()=>setSuppScanOpen(false)}
+        onFound={(food)=>{ setSuppScanOpen(false); setTimeout(()=>setSuppScanResult(food),200); }}/>}
 
       {/* ══ RECIPE BUILDER ══ */}
       {showRecipe&&<RecipeBuilder C={C} F={F} allFoods={allFoods} onClose={()=>setShowRecipe(false)} onSave={(r)=>{setCustomFoods([...customFoods,r]);setShowRecipe(false);}}/>}
