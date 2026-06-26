@@ -13169,8 +13169,9 @@ function AppCore({onRequestAuth}) {
             </div>
           )}
 
-          {/* Acciones rápidas */}
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
+          {/* Acciones rápidas — se ocultan mientras hay una búsqueda activa
+             para que los resultados aparezcan justo debajo del buscador */}
+          {!q&&(<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
             <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); }} style={{
               padding:'14px 12px',borderRadius:16,
               border:'1.5px solid #D4202050',
@@ -13250,7 +13251,7 @@ function AppCore({onRequestAuth}) {
             }}>
               <span style={{fontSize:18}}>🗓️</span> Plan semanal
             </button>
-          </div>
+          </div>)}
 
           <div style={{fontSize:11,color:C.textMuted,fontWeight:600,marginBottom:10,display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
             <span>{foods.length} productos</span>
