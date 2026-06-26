@@ -869,12 +869,12 @@ const expandSearch = (q) => {
   return [...new Set(terms)];
 };
 
-/** Filtra alimentos con sinónimos */
+/** Filtra alimentos con sinónimos — insensible a tildes (ver deburr) */
 const filterWithSynonyms = (foods, query) => {
   if (query.length < 2) return [];
-  const terms = expandSearch(query.toLowerCase());
+  const terms = expandSearch(query.toLowerCase()).map(deburr);
   return foods.filter(f => {
-    const name = f.nombre.toLowerCase();
+    const name = deburr(f.nombre.toLowerCase());
     return terms.some(t => name.includes(t));
   });
 };
@@ -1109,6 +1109,11 @@ const sumMicros = (log) => {
 };
 const macrosToKcal = (mac={}) =>
   Math.round((+mac.prot||0)*4 + (+mac.carbs||0)*4 + (+mac.grasas||0)*9);
+
+/* Quita tildes/acentos para que la búsqueda sea insensible a ellos.
+   Ej: "plátano" → "platano", "café" → "cafe". Nadie escribe tildes en el
+   celular, así que sin esto "platano" no encontraba "Plátano". */
+const deburr = (str='') => str.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
 /* Normaliza recomendaciones (compat con formato antiguo en array y nuevo en objeto).
    Devuelve { macros:{prot,carbs,grasas}, comidas:[{comida, items:[{tipo,porcion}]}] } */
@@ -11780,9 +11785,9 @@ function AppCore({onRequestAuth}) {
   const fastDone = fastElapsed >= fastGoal;
 
   const foods  = useMemo(()=>{
-    const s=q.toLowerCase();
+    const s=deburr(q.toLowerCase().trim());
     const filtered = allFoods.filter(a=>{
-      const matchText=(a.nombre.toLowerCase().includes(s)||a.marca.toLowerCase().includes(s));
+      const matchText=(deburr(a.nombre.toLowerCase()).includes(s)||deburr((a.marca||'').toLowerCase()).includes(s));
       const matchCat=(cat==='Todas'||a.cat===cat);
       const matchVegan=!veganMode||isVegan(a);
       const matchAllergens=userAllergens.length===0||
