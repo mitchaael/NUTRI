@@ -10676,7 +10676,7 @@ function AppCore({onRequestAuth}) {
   /* ── Cargar estado de suscripción ── */
   useEffect(()=>{
     if(!supabaseUser) return;
-    supabase.from('profiles').select('subscription_status,subscription_expires_at,linked_nutricionista_id,linked_nutricionista_nombre').eq('id',supabaseUser.id).single()
+    supabase.from('profiles').select('subscription_status,subscription_expires_at,linked_nutricionista_id,linked_nutricionista_nombre,account_type').eq('id',supabaseUser.id).single()
       .then(({data})=>{
         if(data){
           const bySub = (data.subscription_status==='pro'||data.subscription_status==='nutricionista') && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
@@ -10684,6 +10684,10 @@ function AppCore({onRequestAuth}) {
           setIsPro(bySub || byNutri || trialActive);
           if(!bySub && !byNutri && trialActive) setProSource('trial');
           setSubscriptionStatus(data.subscription_status||'free');
+          // Restaurar el tipo de cuenta desde la nube: si Nay (u otro profesional)
+          // reinstala o cambia de dispositivo, localStorage vuelve a 'personal' y
+          // perdía el acceso al panel. La verdad vive en la DB (profiles.account_type).
+          if(data.account_type && data.account_type!=='personal'){ setAccountType(data.account_type); LS.set('accountType', data.account_type); }
           if(byNutri && data.linked_nutricionista_nombre) setProSource('nutricionista:'+data.linked_nutricionista_nombre);
           // Refrescar el plan del nutricionista por si actualizó mensaje/metas/recomendaciones
           if(byNutri && supabaseUser.email){
