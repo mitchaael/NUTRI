@@ -10434,25 +10434,32 @@ function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, o
   React.useEffect(()=>{
     load();
     // Realtime para entrega instantánea…
-    const ch = supabase.channel('chat-'+nutricionista_id+'-'+paciente_id)
-      .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
-        filter:`paciente_id=eq.${paciente_id}`},
-        (payload)=>{
-          const m = payload.new;
-          if(m.nutricionista_id!==nutricionista_id) return;
-          setMsgs(prev=>{
-            if(!prev) return [m];
-            if(prev.some(x=>x.id===m.id)) return prev;
-            const sinTmp = prev.filter(x=>!(String(x.id).startsWith('tmp')&&x.texto===m.texto&&x.sender===m.sender));
-            return [...sinTmp, m];
-          });
-        })
-      .subscribe();
+    // Se envuelve en try/catch: en Safari/iOS (modo privado, bloqueadores, ciertos
+    // WebViews) `new WebSocket()` puede lanzar "The operation is insecure" de forma
+    // SINCRÓNICA, lo que crashearía toda la app vía ErrorBoundary. Si falla, seguimos
+    // funcionando solo con el polling de respaldo.
+    let ch = null;
+    try {
+      ch = supabase.channel('chat-'+nutricionista_id+'-'+paciente_id)
+        .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
+          filter:`paciente_id=eq.${paciente_id}`},
+          (payload)=>{
+            const m = payload.new;
+            if(m.nutricionista_id!==nutricionista_id) return;
+            setMsgs(prev=>{
+              if(!prev) return [m];
+              if(prev.some(x=>x.id===m.id)) return prev;
+              const sinTmp = prev.filter(x=>!(String(x.id).startsWith('tmp')&&x.texto===m.texto&&x.sender===m.sender));
+              return [...sinTmp, m];
+            });
+          })
+        .subscribe();
+    } catch(e){ if(import.meta.env.DEV) console.warn('Realtime chat no disponible, usando polling:', e?.message); }
     // …y polling de respaldo cada 6s por si el websocket se cae (común en TWA/Android)
     const poll = setInterval(load, 6000);
     const onVis = ()=>{ if(!document.hidden) load(); };
     document.addEventListener('visibilitychange', onVis);
-    return ()=>{ supabase.removeChannel(ch); clearInterval(poll); document.removeEventListener('visibilitychange', onVis); };
+    return ()=>{ try{ if(ch) supabase.removeChannel(ch); }catch(_){} clearInterval(poll); document.removeEventListener('visibilitychange', onVis); };
   },[load, nutricionista_id, paciente_id]);
   React.useEffect(()=>{ if(endRef.current) endRef.current.scrollIntoView(); },[msgs&&msgs.length]);
   const send = async()=>{
@@ -11221,18 +11228,23 @@ function AppCore({onRequestAuth}) {
      initialization") y crashea la app. */
   useEffect(()=>{
     if(!supabaseUser || !nutriPlan?.nutricionista_id) return;
-    const ch = supabase.channel('inbox-'+supabaseUser.id)
-      .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
-        filter:`paciente_id=eq.${supabaseUser.id}`},
-        (payload)=>{
-          const m = payload.new;
-          if(m.sender!=='nutri') return;
-          setUnreadChat(n=>n+1);
-          setToast(`💬 ${nutriPlan.nutricionista_nombre||'Tu nutricionista'}: ${m.texto.slice(0,60)}${m.texto.length>60?'…':''}`);
-          haptic('light');
-        })
-      .subscribe();
-    return ()=>{ supabase.removeChannel(ch); };
+    // try/catch defensivo: si el WebSocket falla (Safari/iOS "The operation is
+    // insecure"), no debe crashear la app — los avisos en vivo son opcionales.
+    let ch = null;
+    try {
+      ch = supabase.channel('inbox-'+supabaseUser.id)
+        .on('postgres_changes', {event:'INSERT', schema:'public', table:'nutri_messages',
+          filter:`paciente_id=eq.${supabaseUser.id}`},
+          (payload)=>{
+            const m = payload.new;
+            if(m.sender!=='nutri') return;
+            setUnreadChat(n=>n+1);
+            setToast(`💬 ${nutriPlan.nutricionista_nombre||'Tu nutricionista'}: ${m.texto.slice(0,60)}${m.texto.length>60?'…':''}`);
+            haptic('light');
+          })
+        .subscribe();
+    } catch(e){ if(import.meta.env.DEV) console.warn('Realtime inbox no disponible:', e?.message); }
+    return ()=>{ try{ if(ch) supabase.removeChannel(ch); }catch(_){} };
   },[supabaseUser?.id, nutriPlan?.nutricionista_id]);
 
   /* ── Push: refrescar suscripción silenciosamente si ya hay permiso ── */
