@@ -4373,6 +4373,13 @@ const NON_VEGAN_CATS = new Set(['Carnes','Cecinas','Huevos','Pescados']);
 // Categorías 100% veganas
 const VEGAN_CATS = new Set(['Frutas','Verduras','Legumbres','Granos','Aceites']);
 
+// Categorías de platos preparados: mayoritariamente llevan carne, lácteos o huevo.
+// Se asumen NO veganas por defecto, salvo que estén explícitamente en VEGAN_IDS /
+// VEGAN_OVERRIDES (ej: papas fritas, ensalada simple, mote con huesillos). Esto
+// evita falsos positivos peligrosos como "Churrasco italiano" o "Cazuela de
+// vacuno" marcados como veganos. Mejor ocultar de más que mostrar carne como vegana.
+const PREPARED_DEFAULT_NONVEGAN_CATS = new Set(['Comida rápida','Comidas CL','Platos chilenos','Preparados']);
+
 // Excepciones veganas dentro de categorías no-veganas (ej: leches vegetales en Lácteos)
 const VEGAN_OVERRIDES = new Set([
   7,8,9,10,        // Leche avena/almendra/soja/coco
@@ -4438,8 +4445,8 @@ const VEGAN_IDS = new Set([
   387,389,
   // Congelados veganos
   301,306,307,
-  // Comida rápida vegana
-  333,
+  // Comida rápida vegana (papas fritas)
+  333,545,
   // Comidas CL veganas
   288,437,
   // Suplementos veganos
@@ -4457,6 +4464,7 @@ const NON_VEGAN_NAME_KEYWORDS = [
   'ricotta','kéfir','lactosuero','suero de leche',
   'jamón','mortadela','salame','chorizo','longaniza','vienesa','tocino','paté',
   'arrollado','prieta','chicharrón','pepperoni',
+  'churrasco','chacarero','chorrillana','choripán','choripan','lomito','mechada',
   'huevo','mayonesa','miel de abeja','gelatina','colágeno','whey',
   'caldo de pollo','caldo de carne','caldo de vacuno',
   // Inglés (frecuente en productos importados escaneados)
@@ -4480,6 +4488,9 @@ const isVegan = (food) => {
   if(NON_VEGAN_CATS.has(food.cat)) return false;
   // 4. Toda la categoría Lácteos es no-vegana (salvo overrides ya revisados)
   if(food.cat === 'Lácteos') return false;
+  // 4b. Platos preparados: no-veganos por defecto salvo whitelist explícito (ya
+  //     revisado arriba en VEGAN_IDS/OVERRIDES). Evita marcar carne como vegana.
+  if(PREPARED_DEFAULT_NONVEGAN_CATS.has(food.cat)) return false;
   // 5. Categorías enteras veganas
   if(VEGAN_CATS.has(food.cat)) return true;
   // 6. Para productos sin ID en DB (escaneados/custom): heurística por nombre + ingredientes
