@@ -2143,17 +2143,23 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
   );
   const [meal,setMeal] = useState('Almuerzo');
   const [q,setQ]       = useState('');
-  const [grams,setGrams] = useState('');
+  const [cat,setCat]   = useState('Todas');
+  const [detailFood,setDetailFood] = useState(null);
+  const favorites = useState(()=>LS.get('favorites',[]))[0];
+  const recent    = useState(()=>LS.get('recentFoods',[]))[0];
   const d = new Date(curKey+'T12:00:00');
   const isToday = curKey===todayKey();
-  const results = q.trim().length>1 ? filterWithSynonyms(allFoods, q.trim()).slice(0,14) : [];
+  const results = q.trim().length>1
+    ? filterWithSynonyms(allFoods, q.trim()).slice(0,20)
+    : cat!=='Todas' ? allFoods.filter(a=>a.cat===cat).slice(0,30) : [];
+  const availCats = useMemo(()=>CATS.filter(c=>c==='Todas'||allFoods.some(a=>a.cat===c)),[allFoods]);
 
   // Navegar entre días (no permite futuro)
   const goDay = (delta)=>{
     const nd=new Date(curKey+'T12:00:00'); nd.setDate(nd.getDate()+delta);
     const nk=dateToKey(nd);
     if(nk>todayKey()) return; // no futuro
-    setCurKey(nk); setQ(''); setGrams('');
+    setCurKey(nk); setQ(''); setCat('Todas');
     setDayLog((LS.get('log_'+nk,[])||[]).map(it=>it.uid?it:{...it,uid:Date.now()+Math.random()}));
     haptic('light');
   };
@@ -2166,14 +2172,35 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
     }
     onLogChange && onLogChange(curKey, newLog);
   };
+  /* Recibe el alimento desde ModalDetalle (con grams si eligió gramos o medidas caseras).
+     Misma lógica que addFood del día normal: agrupa duplicados subiendo qty. */
   const addItem = (a)=>{
-    const g = grams!==''&&+grams>0 ? +grams : null;
-    const targetGrams = (g && g!==a.porcion) ? g : null;
-    persist([...dayLog, {...a, comida:meal, qty:1, uid:Date.now()+Math.random(), grams:targetGrams}]);
-    haptic('add'); setQ(''); setGrams('');
+    const targetGrams = (a.grams && a.grams !== a.porcion) ? a.grams : null;
+    const ex = dayLog.find(r=>r.id===a.id && r.comida===meal && ((r.grams||null)===targetGrams));
+    persist(ex
+      ? dayLog.map(r=>r.uid===ex.uid?{...r,qty:r.qty+1}:r)
+      : [...dayLog, {...a, comida:meal, qty:1, uid:Date.now()+Math.random(), grams:targetGrams}]);
+    setDetailFood(null);
+    haptic('add'); setQ('');
   };
+  const setQty  = (uid,qn)=>{ persist(qn<1 ? dayLog.filter(r=>r.uid!==uid) : dayLog.map(r=>r.uid===uid?{...r,qty:qn}:r)); haptic('light'); };
   const delItem = (uid)=>{ persist(dayLog.filter(r=>r.uid!==uid)); haptic('light'); };
   const tot = sumLog(dayLog);
+
+  const FoodRow = (a, keyPrefix) => (
+    <button key={keyPrefix+a.id} className="tap" onClick={()=>{setDetailFood(a);haptic('light');}} style={{
+      width:'100%',textAlign:'left',display:'flex',alignItems:'center',gap:10,
+      padding:'10px 12px',marginBottom:6,borderRadius:13,cursor:'pointer',fontFamily:F,
+      background:C.surface,border:`1px solid ${C.border}`,
+    }}>
+      <span style={{fontSize:20}}>{a.emoji}</span>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:13,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{a.nombre}</div>
+        <div style={{fontSize:11,color:C.textSec}}>{a.cal} kcal · {a.porcion||100}g{a.marca&&a.marca!=='Manual'?` · ${a.marca}`:''}</div>
+      </div>
+      <span style={{fontSize:18,color:'#D42020',fontWeight:800}}>＋</span>
+    </button>
+  );
 
   return (
     <div style={{position:'fixed',inset:0,background:C.bg,zIndex:90,display:'flex',flexDirection:'column',animation:'fadeUp .3s ease'}}>
@@ -2190,9 +2217,16 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
       </div>
       <div style={{flex:1,overflowY:'auto',padding:'14px 16px'}}>
         {/* Resumen del día */}
-        <div style={{background:C.surface,borderRadius:16,padding:'12px 16px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between',border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:12,color:C.textSec,fontWeight:600}}>Total registrado ese día</div>
-          <div style={{fontSize:17,fontWeight:800,color:'#D42020'}}>{Math.round(tot.cal)} kcal</div>
+        <div style={{background:C.surface,borderRadius:16,padding:'12px 16px',marginBottom:14,border:`1px solid ${C.border}`}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{fontSize:12,color:C.textSec,fontWeight:600}}>Total registrado ese día</div>
+            <div style={{fontSize:17,fontWeight:800,color:'#D42020'}}>{Math.round(tot.cal)} kcal</div>
+          </div>
+          <div style={{display:'flex',gap:10,marginTop:6}}>
+            <span style={{fontSize:11,color:C.red,fontWeight:600}}>P: {Math.round(tot.prot)}g</span>
+            <span style={{fontSize:11,color:C.amber,fontWeight:600}}>C: {Math.round(tot.carbs)}g</span>
+            <span style={{fontSize:11,color:C.purple,fontWeight:600}}>G: {Math.round(tot.grasas)}g</span>
+          </div>
         </div>
 
         {/* Selector de comida */}
@@ -2208,30 +2242,49 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
           ))}
         </div>
 
-        {/* Buscador */}
-        <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Agregar alimento olvidado</div>
-        <div style={{display:'flex',gap:8,marginBottom:10}}>
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar comida…" autoFocus
-            style={{flex:1,padding:'12px 14px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:15,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none'}}/>
-          <input value={grams} onChange={e=>setGrams(e.target.value.replace(/[^0-9]/g,''))} placeholder="g" inputMode="numeric"
-            style={{width:64,padding:'12px 8px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:15,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',textAlign:'center'}}/>
-        </div>
+        {/* Buscador — mismo flujo que un día normal */}
+        <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Agregar alimento</div>
+        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar comida…" autoFocus
+          style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${C.border}`,borderRadius:13,fontSize:15,fontFamily:F,color:C.text,background:C.surfaceAlt,outline:'none',marginBottom:10}}/>
+
+        {/* Categorías */}
+        {q.trim().length<=1&&(
+          <div style={{display:'flex',gap:6,overflowX:'auto',paddingBottom:8,marginBottom:8,WebkitOverflowScrolling:'touch'}}>
+            {availCats.map(c=>(
+              <button key={c} className="tap" onClick={()=>{setCat(c);haptic('light');}} style={{
+                padding:'7px 13px',borderRadius:11,cursor:'pointer',fontFamily:F,whiteSpace:'nowrap',flexShrink:0,
+                border:`1.5px solid ${cat===c?'#D42020':C.border}`,
+                background:cat===c?'#D42020':C.surfaceAlt,
+                color:cat===c?'white':C.textSec,fontSize:11.5,fontWeight:700,
+              }}>{c}</button>
+            ))}
+          </div>
+        )}
+
+        {/* Favoritos y recientes cuando no hay búsqueda ni categoría */}
+        {q.trim().length<=1&&cat==='Todas'&&(
+          <>
+            {favorites.length>0&&(
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:6}}>⭐ Tus favoritos</div>
+                {favorites.slice(0,5).map(a=>FoodRow(a,'fav'))}
+              </div>
+            )}
+            {recent.length>0&&(
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:6}}>🕐 Recientes</div>
+                {recent.slice(0,5).map(a=>FoodRow(a,'rec'))}
+              </div>
+            )}
+            {favorites.length===0&&recent.length===0&&(
+              <div style={{fontSize:12,color:C.textMuted,textAlign:'center',padding:'10px 0',marginBottom:8}}>Busca un alimento o elige una categoría para agregar.</div>
+            )}
+          </>
+        )}
+
         {results.length>0&&(
           <div style={{marginBottom:18}}>
-            {results.map(a=>(
-              <button key={a.id} className="tap" onClick={()=>addItem(a)} style={{
-                width:'100%',textAlign:'left',display:'flex',alignItems:'center',gap:10,
-                padding:'10px 12px',marginBottom:6,borderRadius:13,cursor:'pointer',fontFamily:F,
-                background:C.surface,border:`1px solid ${C.border}`,
-              }}>
-                <span style={{fontSize:20}}>{a.emoji}</span>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:13,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{a.nombre}</div>
-                  <div style={{fontSize:11,color:C.textSec}}>{a.cal} kcal · {a.porcion||100}g{a.marca&&a.marca!=='Manual'?` · ${a.marca}`:''}</div>
-                </div>
-                <span style={{fontSize:18,color:'#D42020',fontWeight:800}}>＋</span>
-              </button>
-            ))}
+            {results.map(a=>FoodRow(a,'res'))}
           </div>
         )}
         {q.trim().length>1&&results.length===0&&(
@@ -2249,15 +2302,20 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
                 <div key={m} style={{marginBottom:10}}>
                   <div style={{fontSize:11,fontWeight:700,color:C.textSec,marginBottom:5}}>{MI[m]} {m}</div>
                   {items.map(it=>(
-                    <div key={it.uid} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 12px',marginBottom:5,background:C.surface,borderRadius:12,border:`1px solid ${C.border}`}}>
+                    <div key={it.uid} style={{display:'flex',alignItems:'center',gap:8,padding:'9px 12px',marginBottom:5,background:C.surface,borderRadius:12,border:`1px solid ${C.border}`}}>
                       <span style={{fontSize:17}}>{it.emoji}</span>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:12.5,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{it.nombre}{it.qty>1?` ×${it.qty}`:''}</div>
-                        <div style={{fontSize:11,color:C.textSec}}>{Math.round(it.cal*itemRatio(it)*it.qty)} kcal</div>
+                        <div style={{fontSize:12.5,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{it.nombre}</div>
+                        <div style={{fontSize:11,color:C.textSec}}>{Math.round(it.cal*itemRatio(it)*it.qty)} kcal · {(it.grams||it.porcion||100)}g{it.qty>1?` ×${it.qty}`:''}</div>
+                      </div>
+                      <div style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
+                        <button className="tap" onClick={()=>setQty(it.uid,it.qty-1)} style={{width:26,height:26,borderRadius:8,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.textSec,fontSize:14,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>−</button>
+                        <span style={{fontSize:12,fontWeight:800,color:C.text,minWidth:16,textAlign:'center'}}>{it.qty}</span>
+                        <button className="tap" onClick={()=>setQty(it.uid,it.qty+1)} style={{width:26,height:26,borderRadius:8,border:'none',background:'#D42020',color:'white',fontSize:14,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>+</button>
                       </div>
                       <button className="tap" onClick={()=>delItem(it.uid)} style={{
-                        width:28,height:28,borderRadius:9,border:`1px solid ${C.border}`,background:C.surfaceAlt,
-                        color:C.textMuted,fontSize:13,cursor:'pointer',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
+                        width:26,height:26,borderRadius:8,border:`1px solid ${C.border}`,background:C.surfaceAlt,
+                        color:C.textMuted,fontSize:12,cursor:'pointer',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
                       }}>✕</button>
                     </div>
                   ))}
@@ -2268,6 +2326,12 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
       <div style={{padding:'12px 16px calc(16px + env(safe-area-inset-bottom))',borderTop:`1px solid ${C.border}`,background:C.bg}}>
         <button className="tap" onClick={onClose} style={{width:'100%',padding:'14px',borderRadius:15,border:'none',background:'#D42020',color:'#fff',fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:F}}>Listo ✓</button>
       </div>
+
+      {/* Modal de detalle — el mismo del día normal (porción / gramos / medidas caseras) */}
+      {detailFood&&(
+        <ModalDetalle food={detailFood} meal={meal} C={C} F={F}
+          onClose={()=>setDetailFood(null)} onAdd={addItem}/>
+      )}
     </div>
   );
 }
@@ -4521,6 +4585,21 @@ const PORTION_REFS = [
   {g:240, l:'1 taza'},
   {g:480, l:'2 tazas'},
 ];
+
+/* Medidas caseras para registrar sin pesa: el usuario elige la medida y cuántas,
+   y se convierte a gramos (equivalencia en volumen, densidad ≈ 1). */
+const MEDIDAS_CASERAS = [
+  {k:'cdita',  l:'Cucharadita',  emoji:'🥄', g:5},
+  {k:'cda',    l:'Cucharada',    emoji:'🥄', g:15},
+  {k:'cdacol', l:'Cda. colmada', emoji:'🥄', g:20},
+  {k:'punado', l:'Puñado',       emoji:'✊', g:30},
+  {k:'qtaza',  l:'¼ taza',       emoji:'☕', g:60},
+  {k:'mtaza',  l:'½ taza',       emoji:'☕', g:120},
+  {k:'taza',   l:'Taza',         emoji:'☕', g:240},
+  {k:'vaso',   l:'Vaso',         emoji:'🥛', g:200},
+  {k:'plato',  l:'Plato hondo',  emoji:'🍲', g:350},
+];
+const fmtMedCount = (c) => c%1===0 ? String(c) : (Math.floor(c)>0?Math.floor(c):'')+'½';
 
 const getPortionHint = (grams) => {
   if(!grams || grams<=0) return null;
@@ -7176,9 +7255,16 @@ const calcSellos = (food) => {
 ═══════════════════════════════════════════════════════ */
 function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
   const [grams, setGrams] = useState(food.porcion || 100);
-  const [mode, setMode] = useState(()=>LS.get('prefMode','porcion')); // 'porcion' | 'gramos'
+  const [mode, setMode] = useState(()=>LS.get('prefMode','porcion')); // 'porcion' | 'gramos' | 'medidas'
+  const [medida, setMedida] = useState(null);   // key de MEDIDAS_CASERAS
+  const [medCount, setMedCount] = useState(1);  // cuántas medidas (pasos de ½)
 
-  useEffect(()=>{ setGrams(food.porcion||100); setMode('porcion'); },[food.id]);
+  useEffect(()=>{ setGrams(food.porcion||100); setMode(LS.get('prefMode','porcion')); setMedida(null); setMedCount(1); },[food.id]);
+
+  const applyMedida = (mk, cnt) => {
+    const m = MEDIDAS_CASERAS.find(x=>x.k===mk);
+    if(m) setGrams(Math.max(1, Math.round(m.g*cnt)));
+  };
 
   const sellos = useMemo(()=>calcSellos(food),[food.id]);
   const r = grams / (food.porcion || 100);
@@ -7207,10 +7293,10 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
           </div>
         </div>
 
-        {/* Toggle porcion / gramos */}
+        {/* Toggle porcion / gramos / medidas caseras */}
         <div style={{display:'flex',gap:0,background:C.surfaceAlt,borderRadius:14,padding:3,marginBottom:16}}>
-          {[{v:'porcion',l:'Por porción'},{v:'gramos',l:'Por gramos'}].map(({v,l})=>(
-            <button key={v} onClick={()=>{setMode(v);LS.set('prefMode',v);if(v==='porcion')setGrams(food.porcion||100);}} style={{
+          {[{v:'porcion',l:'Porción'},{v:'gramos',l:'Gramos'},{v:'medidas',l:'Medidas'}].map(({v,l})=>(
+            <button key={v} onClick={()=>{setMode(v);LS.set('prefMode',v);if(v==='porcion')setGrams(food.porcion||100);if(v==='medidas'&&medida)applyMedida(medida,medCount);}} style={{
               flex:1,padding:'9px',borderRadius:11,border:'none',fontFamily:F,
               background:mode===v?C.surface:'transparent',
               color:mode===v?C.text:C.textSec,
@@ -7269,6 +7355,43 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
               </div>
               <button onClick={()=>setGrams(grams+5)} style={{width:38,height:38,borderRadius:11,border:'none',background:'#D42020',fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:'white',flexShrink:0}}>+</button>
             </div>
+          </div>
+        )}
+
+        {/* Medidas caseras selector */}
+        {mode==='medidas'&&(
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:11,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:8,fontFamily:F}}>Elige tu medida casera</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6,marginBottom:12}}>
+              {MEDIDAS_CASERAS.map(m=>{
+                const sel = medida===m.k;
+                return (
+                  <button key={m.k} className="tap" onClick={()=>{setMedida(m.k);applyMedida(m.k,medCount);haptic('light');}} style={{
+                    padding:'9px 4px',borderRadius:12,cursor:'pointer',fontFamily:F,
+                    border:`1.5px solid ${sel?'#D42020':C.border}`,
+                    background:sel?'#D4202014':C.surfaceAlt,
+                    display:'flex',flexDirection:'column',alignItems:'center',gap:2,
+                    transition:'all .15s',
+                  }}>
+                    <span style={{fontSize:17}}>{m.emoji}</span>
+                    <span style={{fontSize:10.5,fontWeight:700,color:sel?'#D42020':C.text,lineHeight:1.15,textAlign:'center'}}>{m.l}</span>
+                    <span style={{fontSize:9,color:sel?'#D42020':C.textMuted,fontWeight:600}}>≈{m.g}g</span>
+                  </button>
+                );
+              })}
+            </div>
+            {medida
+              ? <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <button onClick={()=>{const c=Math.max(0.5,medCount-0.5);setMedCount(c);applyMedida(medida,c);haptic('light');}} style={{width:38,height:38,borderRadius:11,border:`1.5px solid ${C.border}`,background:C.surfaceAlt,fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:C.textSec,flexShrink:0}}>−</button>
+                  <div style={{flex:1,textAlign:'center'}}>
+                    <div style={{fontSize:16,fontWeight:800,color:C.text}}>{fmtMedCount(medCount)} × {MEDIDAS_CASERAS.find(x=>x.k===medida)?.l.toLowerCase()}</div>
+                    <div style={{fontSize:11,color:'#D42020',fontWeight:700,marginTop:2}}>= {grams}g aprox.</div>
+                  </div>
+                  <button onClick={()=>{const c=medCount+0.5;setMedCount(c);applyMedida(medida,c);haptic('light');}} style={{width:38,height:38,borderRadius:11,border:'none',background:'#D42020',fontSize:18,cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',color:'white',flexShrink:0}}>+</button>
+                </div>
+              : <div style={{fontSize:11.5,color:C.textMuted,textAlign:'center'}}>Toca una medida y ajusta con − / + (acepta medias medidas)</div>
+            }
+            <div style={{fontSize:10,color:C.textMuted,marginTop:8,lineHeight:1.4,textAlign:'center'}}>Equivalencia aproximada en volumen. Para líquidos es casi exacta; para alimentos livianos (hojas, cereal inflado) puede variar.</div>
           </div>
         )}
 
@@ -7399,11 +7522,13 @@ function ModalDetalle({food, meal, C, F, onClose, onAdd, onFav, isFav}) {
           )}
         </div>
 
-        <button onClick={()=>{onAdd({...food, grams: mode==='gramos'?grams:null}); haptic('add');}} style={{
+        <button onClick={()=>{onAdd({...food, grams: mode==='porcion'?null:grams}); haptic('add');}} style={{
           width:'100%',padding:'16px',borderRadius:18,border:'none',
           background:'#D42020',
           color:'white',fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
-        }}>Agregar {grams}g a {meal}</button>
+        }}>{mode==='medidas'&&medida
+          ? `Agregar ${fmtMedCount(medCount)} × ${MEDIDAS_CASERAS.find(x=>x.k===medida)?.l.toLowerCase()} a ${meal}`
+          : `Agregar ${grams}g a ${meal}`}</button>
       </div>
     </div>
   );
