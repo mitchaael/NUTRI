@@ -9459,17 +9459,41 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
      /android/i.test(navigator.userAgent) &&
      typeof window.getDigitalGoodsService !== 'undefined');
 
+  const PLAY_SKUS = { monthly: 'caloru_pro_monthly', yearly: 'caloru_pro_yearly' };
+
+  // Envía el purchaseToken a la Edge Function, que lo valida contra Google
+  // Play y hace el acknowledge (obligatorio dentro de 72 h o Google reembolsa).
+  const verifyPlayPurchase = async (purchaseToken, sku, plan) => {
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token;
+    const res = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ purchaseToken, sku, plan }),
+    });
+    return res.ok;
+  };
+
   // Google Play Billing via Digital Goods API
   const handleGooglePlayBilling = async (plan) => {
-    const skuMap = {
-      monthly: 'caloru_pro_monthly',
-      yearly:  'caloru_pro_yearly',
-    };
-    const sku = skuMap[plan];
+    const sku = PLAY_SKUS[plan];
     try {
       // Verificar que Digital Goods API esté disponible (TWA con Play Billing)
       if (!window.getDigitalGoodsService) throw new Error('Digital Goods API no disponible');
       const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+
+      // Si ya existe una compra en esta cuenta de Play (reinstalación, o una
+      // verificación que falló antes), reactivarla en vez de cobrar de nuevo.
+      const existing = (await service.listPurchases())
+        .find(p => p.itemId === sku);
+      if (existing) {
+        if (await verifyPlayPurchase(existing.purchaseToken, sku, plan)) {
+          showToast('✅ ¡Suscripción restaurada! Recarga la app para disfrutar Calorú Pro.');
+          setTimeout(onClose, 2000);
+          return;
+        }
+      }
+
       const details = await service.getDetails([sku]);
       if (!details || details.length === 0) throw new Error('Producto no encontrado en Play Store');
       const item = details[0];
@@ -9481,14 +9505,7 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
       const paymentResponse = await paymentRequest.show();
       const purchaseToken = paymentResponse.details.purchaseToken;
       // Verificar la compra en Google Play via Edge Function (JWT requerido)
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      const verifyRes = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ purchaseToken, sku, plan }),
-      });
-      if (!verifyRes.ok) {
+      if (!await verifyPlayPurchase(purchaseToken, sku, plan)) {
         await paymentResponse.complete('fail');
         throw new Error('No se pudo verificar la compra con Google Play');
       }
@@ -9496,6 +9513,8 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
       showToast('✅ ¡Suscripción activada! Recarga la app para disfrutar Calorú Pro.');
       setTimeout(onClose, 2000);
     } catch(e) {
+      // El usuario cerró la hoja de pago de Play: no es un error que mostrar.
+      if (e?.name === 'AbortError') return;
       console.error('Play Billing error:', e);
       showToast('Error al procesar el pago. Intenta de nuevo.');
     }
