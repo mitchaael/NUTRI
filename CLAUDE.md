@@ -77,6 +77,12 @@ contenido concreto para hacer crecer la app en Chile y LATAM.
 - Priorizar el roadmap de producto
 - Encontrar gaps del mercado chileno de nutrición que Calorú puede llenar
 
+### 🤝 harvey → Agente de ventas (leads B2B y pipeline)
+Úsalo cuando el usuario pida:
+- Conseguir usuarios a través de nutricionistas, entrenadores o gimnasios
+- Prospectar e investigar leads, y preparar mensajes listos para enviar
+- Revisar el pipeline (`outreach/harvey_pipeline.csv`) y los seguimientos del día
+
 ## Reglas de delegación
 1. Si el usuario pide "analiza", "investiga" o "compara" → delegar a `analyst`
 2. Si el usuario pide "post", "contenido", "redes" o "copy" → delegar a `content-creator`
@@ -84,7 +90,8 @@ contenido concreto para hacer crecer la app en Chile y LATAM.
 4. Si el usuario pide "seguridad", "vulnerabilidades", "audit" o "revisar datos" → delegar a `security-auditor`
 5. Si el usuario pide "testear", "probar", "verificar", "bugs" o "mejoras" → delegar a `tester`
 6. Si el usuario pide "qué features", "qué mejorar", "oportunidades", "roadmap" o "qué construir" → delegar a `product-improver`
-7. Para tareas complejas, puedes usar múltiples agentes en secuencia
+7. Si el usuario pide "ventas", "leads", "prospectar", "pipeline" o habla con "Harvey" → delegar a `harvey`
+8. Para tareas complejas, puedes usar múltiples agentes en secuencia
 
 ## Al comenzar una sesión
 Siempre pregunta:

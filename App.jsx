@@ -1323,6 +1323,14 @@ const LS = {
   set:(k,v)=>{try{localStorage.setItem('caloru_'+k,JSON.stringify(v));}catch{}},
 };
 
+// Lunes de la semana de una fecha 'YYYY-MM-DD' (para el salvavidas semanal de racha)
+const lunesKey = (key) => {
+  const [y,m,d] = key.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  dt.setDate(dt.getDate() - (dt.getDay()+6)%7);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+};
+
 /* ═══════════════════════════════════════════════════════
    DESIGN SYSTEM
 ═══════════════════════════════════════════════════════ */
@@ -1377,10 +1385,12 @@ function Logo({size=40}) {
       </defs>
       <rect width='512' height='512' rx='118' fill={'url(#'+id+'bg)'}/>
       <rect x='2.5' y='2.5' width='507' height='507' rx='116' fill='none' stroke='rgba(0,0,0,0.07)' strokeWidth='3'/>
+      {/* Anillo de progreso: pista tenue + C roja + punto amarillo en la punta */}
+      <circle cx='256' cy='256' r='118' fill='none' stroke='#D42020' strokeOpacity='0.12' strokeWidth='56'/>
       <g filter={'url(#'+id+'sh)'}>
-        <path d='M318.2 166.1 A106 106 0 1 0 318.2 345.9' stroke={'url(#'+id+'red)'} strokeWidth='58' strokeLinecap='round' fill='none'/>
+        <path d='M323.7 159.3 A118 118 0 1 0 323.7 352.7' stroke={'url(#'+id+'red)'} strokeWidth='56' strokeLinecap='round' fill='none'/>
       </g>
-      <path d='M300 175 A104 104 0 0 0 164 232' stroke='rgba(255,255,255,0.32)' strokeWidth='11' strokeLinecap='round' fill='none'/>
+      <circle cx='323.7' cy='159.3' r='17' fill='#F5C21A' stroke='#FFFFFF' strokeWidth='7'/>
     </svg>
   );
 }
@@ -2339,15 +2349,14 @@ function PastDayEditor({C, F, dateKey, allFoods, supabaseUser, onClose, onLogCha
 /* ═══════════════════════════════════════════════════════
    ONBOARDING
 ═══════════════════════════════════════════════════════ */
-function Onboarding({onDone}) {
+function Onboarding({onDone, onLogin}) {
   const [step,setStep]=useState(0);
   const [nombre,setNombre]=useState('');
   const [perfil,setPerfil]=useState({peso:70,altura:170,edad:25,sexo:'M',act:'1.55'});
   const [obj,setObj]=useState('mantener');
   const [accountType,setAccountType]=useState('personal');
-  const [comunaOB,setComunaOB]=useState('Otra');
   const C=LIGHT;
-  const totalSteps=6;
+  const totalSteps=5;
 
   const steps=[
     // Step 0: Pantalla de impacto — diferenciadores
@@ -2391,6 +2400,12 @@ function Onboarding({onDone}) {
           fontSize:16,fontWeight:800,fontFamily:F,cursor:nombre.trim()?'pointer':'default',
           transition:'background .2s',
         }}>Empezar gratis →</button>
+        {onLogin&&(
+          <button onClick={onLogin} style={{
+            width:'100%',marginTop:6,padding:'12px',background:'none',border:'none',
+            color:'rgba(255,255,255,0.55)',fontSize:13,fontWeight:600,fontFamily:F,cursor:'pointer',
+          }}>¿Ya tienes cuenta? <span style={{color:'white',textDecoration:'underline'}}>Inicia sesión</span></button>
+        )}
       </div>
     </div>,
 
@@ -2547,71 +2562,6 @@ function Onboarding({onDone}) {
       }}>Ver mi plan →</button>
     </div>,
 
-    // Step 4: Termómetro por Comuna
-    (()=>{
-      const data=JUNAEB[comunaOB]||JUNAEB['Otra'];
-      const comunas=Object.keys(JUNAEB);
-      return(
-        <div key={5} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
-          <div style={{textAlign:'center'}}>
-            <div style={{fontSize:48,marginBottom:8}}>🌡️</div>
-            <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>Tu comunidad</div>
-            <div style={{fontSize:13,color:C.textSec,marginTop:4,fontFamily:F}}>¿En qué comuna vives? Te mostramos cómo está tu entorno</div>
-          </div>
-          <div style={{display:'flex',flexDirection:'column',gap:6}}>
-            <div style={{fontSize:11,color:C.textSec,fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:2}}>Tu comuna</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:6,maxHeight:200,overflowY:'auto'}}>
-              {comunas.map(c=>(
-                <button key={c} onClick={()=>setComunaOB(c)} style={{
-                  padding:'7px 14px',borderRadius:20,cursor:'pointer',fontFamily:F,
-                  border:`1.5px solid ${comunaOB===c?data.color:C.border}`,
-                  background:comunaOB===c?data.color+'18':C.surfaceAlt,
-                  color:comunaOB===c?data.color:C.textSec,
-                  fontSize:13,fontWeight:comunaOB===c?700:400,
-                  transition:'all .15s',
-                }}>{c}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{background:'linear-gradient(135deg,#1A0A0A,#0D0505)',borderRadius:20,padding:'18px'}}>
-            <div style={{fontSize:10,color:'rgba(255,255,255,.4)',fontWeight:700,textTransform:'uppercase',letterSpacing:.5,marginBottom:12}}>
-              Mapa Nutricional Junaeb 2024 · {comunaOB}
-            </div>
-            <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:12}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:11,color:'rgba(255,255,255,.5)',marginBottom:4}}>Escolares con sobrepeso u obesidad</div>
-                <div style={{height:12,background:'rgba(255,255,255,.1)',borderRadius:6,overflow:'hidden'}}>
-                  <div style={{height:'100%',width:`${data.pct}%`,background:data.color,borderRadius:6,transition:'width .6s ease'}}/>
-                </div>
-                <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}>
-                  <span style={{fontSize:10,color:'rgba(255,255,255,.3)'}}>0%</span>
-                  <span style={{fontSize:13,fontWeight:800,color:data.color}}>{data.pct}%</span>
-                  <span style={{fontSize:10,color:'rgba(255,255,255,.3)'}}>100%</span>
-                </div>
-              </div>
-            </div>
-            <div style={{background:'rgba(255,255,255,.06)',borderRadius:12,padding:'10px 12px',display:'flex',alignItems:'center',gap:8}}>
-              <div style={{width:8,height:8,borderRadius:4,background:data.color,flexShrink:0}}/>
-              <div style={{fontSize:12,color:'rgba(255,255,255,.7)',fontFamily:F}}>
-                Riesgo nutricional <strong style={{color:data.color}}>{data.nivel}</strong> en tu comuna
-              </div>
-            </div>
-          </div>
-          <div style={{background:C.surfaceAlt,borderRadius:16,padding:'14px 16px',border:`1px solid ${C.border}`}}>
-            <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:4}}>💡 ¿Por qué importa?</div>
-            <div style={{fontSize:12,color:C.textSec,lineHeight:1.6}}>
-              Los hábitos alimentarios se forman en familia y comunidad. Calorú te ayuda a construir mejores hábitos, uno a la vez — sin importar dónde vives.
-            </div>
-          </div>
-          <button onClick={()=>setStep(5)} style={{
-            padding:'16px',borderRadius:18,border:'none',
-            background:'#D42020',color:'white',
-            fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
-          }}>Ver mi proyección →</button>
-        </div>
-      );
-    })(),
-
     // Step 3: Yo futuro — proyección
     (()=>{
       const tP=calcTDEE(perfil);
@@ -2636,7 +2586,7 @@ function Onboarding({onDone}) {
           <div style={{textAlign:'center'}}>
             <div style={{fontSize:52,marginBottom:8}}>🔮</div>
             <div style={{fontSize:22,fontWeight:800,color:C.text,letterSpacing:'-.5px',fontFamily:F}}>Tu transformación</div>
-            <div style={{fontSize:13,color:C.textSec,marginTop:4,fontFamily:F}}>{nombre}, esto es lo que vas a lograr</div>
+            <div style={{fontSize:13,color:C.textSec,marginTop:4,fontFamily:F}}>{nombre}, esto es lo que puedes lograr a tu ritmo</div>
           </div>
           {/* Proyección visual */}
           <div style={{background:'linear-gradient(135deg,#0A1628,#122240)',borderRadius:24,padding:'20px',overflow:'hidden',position:'relative'}}>
@@ -2682,7 +2632,7 @@ function Onboarding({onDone}) {
               </div>
             ))}
           </div>
-          <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj,accountType,comuna:comunaOB})} style={{
+          <button onClick={()=>onDone({nombre:nombre.trim(),perfil,obj,accountType})} style={{
             padding:'17px',borderRadius:18,border:'none',
             background:'#D42020',color:'white',
             fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
@@ -7646,8 +7596,8 @@ caloru.app@gmail.com
   );
 }
 
-function AuthScreen({ onAuth }) {
-  const [mode, setMode]         = useState('login');
+function AuthScreen({ onAuth, initialMode = 'login' }) {
+  const [mode, setMode]         = useState(initialMode);
   const [email, setEmail]       = useState('');
   const [pass, setPass]         = useState('');
   const [loading, setLoading]   = useState(false);
@@ -8194,6 +8144,19 @@ function RecordatoriosModal({C, F, dark, onClose}) {
   ];
   const [reminders, setReminders] = React.useState(()=>LS.get('reminders', defaultReminders));
   const [permiso, setPermiso] = React.useState(null);
+  const [smart, setSmart] = React.useState(()=>LS.get('smartReminders', false)===true);
+  const [smartBusy, setSmartBusy] = React.useState(false);
+  const toggleSmart = async () => {
+    if(smartBusy) return;
+    setSmartBusy(true);
+    if(smart){ await disableReminders(); setSmart(false); }
+    else {
+      const ok = await syncReminders({ask:true});
+      setSmart(ok);
+      if('Notification' in window) setPermiso(Notification.permission);
+    }
+    setSmartBusy(false);
+  };
 
   const solicitarPermiso = async () => {
     if(!('Notification' in window)){setPermiso('no-soportado');return;}
@@ -8234,6 +8197,25 @@ function RecordatoriosModal({C, F, dark, onClose}) {
         <div style={{minWidth:80}}/>
       </div>
       <div style={{flex:1,overflowY:'auto',padding:16}}>
+        {/* Recordatorios inteligentes (push del servidor, app cerrada) */}
+        {pushSupported() && (
+          <div style={{background:C.surface,borderRadius:18,padding:'14px 16px',marginBottom:14,border:`1.5px solid ${smart?'#D42020':C.border}`}}>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <span style={{fontSize:26}}>🔔</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:800,color:C.text}}>Recordatorios inteligentes</div>
+                <div style={{fontSize:11,color:C.textSec,lineHeight:1.45,marginTop:2}}>Llegan aunque la app esté cerrada. Máximo 2 al día, solo si no has anotado nada.</div>
+              </div>
+              <button onClick={toggleSmart} disabled={smartBusy} aria-label="Activar recordatorios inteligentes" style={{
+                width:48,height:28,borderRadius:14,border:'none',cursor:'pointer',flexShrink:0,
+                background:smart?'#D42020':'#D4202030',position:'relative',transition:'background .2s',opacity:smartBusy?0.6:1,
+              }}>
+                <div style={{position:'absolute',top:3,left:smart?22:4,width:22,height:22,borderRadius:11,background:'white',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
+              </button>
+            </div>
+          </div>
+        )}
+        {pushSupported() && <div style={{fontSize:11,fontWeight:700,color:C.textSec,textTransform:'uppercase',letterSpacing:.5,margin:'4px 4px 8px'}}>Recordatorios por hora (con la app abierta)</div>}
         {/* Estado permisos */}
         {permiso !== 'granted' && (
           <div style={{background:dark?'rgba(255,149,0,0.1)':'rgba(255,149,0,0.08)',borderRadius:16,padding:'14px',marginBottom:14,border:'1px solid rgba(255,149,0,0.3)'}}>
@@ -10548,6 +10530,53 @@ async function notifyPush(toUserId, title, body) {
   } catch { /* nunca bloquear el flujo por un push */ }
 }
 
+/* ─── Recordatorios diarios con la app cerrada (con o sin cuenta) ───
+   El dispositivo se registra en Supabase (RPC register_reminder_device) con
+   su zona horaria, el último día con registro y la racha. La Edge Function
+   send-reminders decide a quién avisar (máx. 2 al día, solo si no anotó hoy). */
+function pushSupported() {
+  return typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+async function getPushSubscription(ask) {
+  if (!pushSupported()) return null;
+  const perm = Notification.permission === 'granted' ? 'granted'
+    : ask ? await Notification.requestPermission() : Notification.permission;
+  if (perm !== 'granted') return null;
+  const reg = await navigator.serviceWorker.ready;
+  return (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY),
+  });
+}
+async function syncReminders({ask = false} = {}) {
+  try {
+    const sub = await getPushSubscription(ask);
+    if (!sub) return false;
+    const j = sub.toJSON();
+    const s = LS.get('streak', {days: 0, last: ''});
+    const { error } = await supabase.rpc('register_reminder_device', {
+      p_endpoint: j.endpoint,
+      p_subscription: j,
+      p_tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Santiago',
+      p_last_log_date: s.last || null,
+      p_streak: s.days || 0,
+    });
+    if (error) return false;
+    LS.set('smartReminders', true);
+    LS.set('reminderSync', `${s.last}:${s.days}`);
+    return true;
+  } catch { return false; }
+}
+async function disableReminders() {
+  LS.set('smartReminders', false);
+  try {
+    if (!pushSupported()) return;
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await supabase.rpc('disable_reminder_device', {p_endpoint: sub.endpoint});
+  } catch { /* sin conexión: queda apagado localmente */ }
+}
+
 /* ─── Chat nutri ↔ paciente ─── */
 function ChatNutri({C, F, dark, nutricionista_id, paciente_id, sender, titulo, onClose}){
   const [msgs,setMsgs] = React.useState(null);
@@ -11043,7 +11072,7 @@ function AppCore({onRequestAuth}) {
   useEffect(()=>{LS.set('recentFoods',recent);},[recent]);
   useEffect(()=>{LS.set('weights',weights);},[weights]);
 
-  /* ── streak con día de gracia (1 por mes) ── */
+  /* ── streak con salvavidas (1 por semana) ── */
   useEffect(()=>{
     if(log.length>0){
       const today=todayKey();
@@ -11058,30 +11087,50 @@ function AppCore({onRequestAuth}) {
         twoPrev.setDate(twoPrev.getDate()-2);
         const twoPrevKey = `${twoPrev.getFullYear()}-${String(twoPrev.getMonth()+1).padStart(2,'0')}-${String(twoPrev.getDate()).padStart(2,'0')}`;
 
-        const currentMonth = today.slice(0,7); // YYYY-MM
-        const graceAvailable = streak.days > 0 &&
-          (!streak.graceMonth || streak.graceMonth !== currentMonth);
+        const currentWeek = lunesKey(today);
+        const graceAvailable = streak.days > 0 && streak.graceWeek !== currentWeek;
 
-        let newDays, newGraceMonth;
+        let newDays, newGraceWeek;
         if(streak.last===prevKey){
           // Ayer fue el último registro → racha continúa
           newDays = streak.days+1;
-          newGraceMonth = streak.graceMonth||'';
+          newGraceWeek = streak.graceWeek||'';
         } else if(streak.last===twoPrevKey && graceAvailable){
-          // Se saltó ayer pero tiene día de gracia disponible → ¡racha salvada!
+          // Se saltó ayer pero tiene salvavidas disponible → ¡racha salvada!
           newDays = streak.days+1;
-          newGraceMonth = currentMonth;
-          setTimeout(()=>setToast('🛡️ Día de gracia usado — ¡racha salvada! (1 por mes)'), 200);
+          newGraceWeek = currentWeek;
+          setTimeout(()=>setToast('🛟 Usaste tu salvavidas: ¡racha salvada! Tienes 1 por semana.'), 200);
         } else {
           // Racha perdida
           newDays = 1;
-          newGraceMonth = streak.graceMonth||'';
+          newGraceWeek = streak.graceWeek||'';
         }
-        const s={days:newDays, last:today, graceMonth:newGraceMonth};
+        const s={days:newDays, last:today, graceWeek:newGraceWeek};
         setStreak(s); LS.set('streak',s);
       }
     }
   },[log.length]);
+
+  /* ── recordatorios push: pedir permiso justo después de anotar una comida ── */
+  const [showReminderAsk,setShowReminderAsk] = useState(false);
+  useEffect(()=>{
+    if(log.length===0 || !pushSupported() || Notification.permission!=='default') return;
+    const a = LS.get('reminderAsk',{n:0,at:0});
+    if(a.n>=2 || Date.now()-a.at < 7*864e5) return; // máx. 2 veces, con 7 días entre medio
+    const t = setTimeout(()=>{
+      LS.set('reminderAsk',{n:a.n+1, at:Date.now()});
+      setShowReminderAsk(true);
+    },1500);
+    return ()=>clearTimeout(t);
+  },[log.length]);
+
+  /* ── recordatorios push: avisar al servidor el último día con registro (1 vez por cambio) ── */
+  useEffect(()=>{
+    if(!streak.last || !pushSupported() || Notification.permission!=='granted') return;
+    if(LS.get('smartReminders',null)===false) return;
+    if(LS.get('reminderSync','')===`${streak.last}:${streak.days}`) return;
+    syncReminders();
+  },[streak.last, streak.days]);
 
   /* ── font + styles ── */
   useEffect(()=>{
@@ -12066,11 +12115,12 @@ function AppCore({onRequestAuth}) {
     </div>
   );
 
-  if(!onboarded) return <Onboarding onDone={({nombre:n,perfil:p,obj:o,accountType:at,comuna:cm})=>{
+  if(!onboarded) return <Onboarding onLogin={supabaseUser?null:()=>onRequestAuth&&onRequestAuth('login')} onDone={({nombre:n,perfil:p,obj:o,accountType:at,comuna:cm})=>{
     setNombre(n); setPerfil(p); setObj(o);
     setAccountType(at||'personal');
     if(cm){setComuna(cm);LS.set('comuna',cm);}
     setOnboarded(true); LS.set('onboarded',true);
+    track('onboarding_complete', {account_type:at||'personal', objetivo:o, con_cuenta:!!supabaseUser});
     LS.set('nombre',n); LS.set('perfil',p); LS.set('obj',o);
     LS.set('accountType',at||'personal');
     // Save to Supabase if logged in
@@ -12291,6 +12341,28 @@ function AppCore({onRequestAuth}) {
       {showReporteSemanal&&<ReporteSemanalModal C={C} F={F} dark={dark} isPro={isPro} onClose={()=>setShowReporteSemanal(false)}/>}
       {showRecordatorios&&<RecordatoriosModal C={C} F={F} dark={dark} onClose={()=>setShowRecordatorios(false)}/>}
       {showWelcomeBack&&<WelcomeBack C={C} F={F} nombre={nombre} streak={streak} daysAway={daysAway} onClose={()=>setShowWelcomeBack(false)}/>}
+      {showReminderAsk&&(
+        <div onClick={()=>setShowReminderAsk(false)} style={{position:'fixed',inset:0,zIndex:10003,background:'rgba(0,0,0,0.55)',display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'26px 22px calc(22px + env(safe-area-inset-bottom, 0px))',width:'100%',maxWidth:480,textAlign:'center',fontFamily:F,animation:'fadeUp .3s ease'}}>
+            <div style={{fontSize:44,marginBottom:8}}>🔔</div>
+            <div style={{fontSize:19,fontWeight:800,color:C.text,letterSpacing:'-.3px',marginBottom:6}}>¿Te aviso para no perder tu registro?</div>
+            <div style={{fontSize:13,color:C.textSec,lineHeight:1.55,marginBottom:20}}>
+              Máximo 2 avisos al día (almuerzo y noche), y solo si todavía no has anotado nada. Los apagas cuando quieras.
+            </div>
+            <button onClick={async()=>{
+              setShowReminderAsk(false);
+              const ok = await syncReminders({ask:true});
+              haptic(ok?'success':'light');
+              setToast(ok?'🔔 Listo: te aviso a la hora de almuerzo y en la noche':'Puedes activarlos cuando quieras en Stats → Recordatorios 🔔');
+            }} style={{width:'100%',padding:'15px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,marginBottom:8}}>
+              Sí, avísame
+            </button>
+            <button onClick={()=>setShowReminderAsk(false)} style={{width:'100%',padding:'12px',borderRadius:16,border:'none',background:'none',color:C.textSec,fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:F}}>
+              Ahora no
+            </button>
+          </div>
+        </div>
+      )}
       {showMilestone&&<MilestoneCelebration C={C} F={F} milestone={showMilestone} onClose={()=>setShowMilestone(null)}/>}
       {showLegal&&<LegalModal type={showLegal} onClose={()=>setShowLegal(null)}/>}
 
@@ -12755,6 +12827,18 @@ function AppCore({onRequestAuth}) {
                 <div style={{fontSize:18}}>🔥</div>
                 <div style={{fontSize:15,fontWeight:800,color:streak.days>0?C.red:C.textMuted,lineHeight:1}}>{streak.days}</div>
                 <div style={{fontSize:9,color:C.textMuted,fontWeight:500}}>días</div>
+                {streak.days>0&&(
+                  <button onClick={()=>{
+                    haptic('light');
+                    setToast(streak.graceWeek!==lunesKey(todayKey())
+                      ?'🛟 Salvavidas disponible: si un día se te olvida anotar, tu racha no se corta. Tienes 1 por semana.'
+                      :'🛟 Ya usaste el salvavidas de esta semana. El lunes tienes uno nuevo.');
+                  }} style={{display:'block',margin:'4px auto 0',padding:'1px 6px',borderRadius:8,border:'none',cursor:'pointer',fontFamily:F,
+                    fontSize:10,fontWeight:700,lineHeight:1.4,
+                    background:streak.graceWeek!==lunesKey(todayKey())?'#0A84FF18':C.surfaceAlt,
+                    color:streak.graceWeek!==lunesKey(todayKey())?'#0A84FF':C.textMuted,
+                  }}>🛟 {streak.graceWeek!==lunesKey(todayKey())?'1':'0'}</button>
+                )}
               </div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:5,marginTop:12}}>
@@ -13946,8 +14030,8 @@ function AppCore({onRequestAuth}) {
                     <div style={{fontSize:12,fontWeight:700,color:C.text}}>Sin cuenta activa</div>
                     <div style={{fontSize:10,color:C.textMuted,marginTop:1}}>Tus datos solo existen en este celular</div>
                   </div>
-                  <button className="tap" onClick={()=>window.location.reload()} style={{padding:'6px 12px',borderRadius:10,border:'none',background:'#D42020',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F,flexShrink:0}}>
-                    Iniciar sesión
+                  <button className="tap" onClick={()=>onRequestAuth && onRequestAuth('register')} style={{padding:'6px 12px',borderRadius:10,border:'none',background:'#D42020',color:'white',fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:F,flexShrink:0}}>
+                    Crear cuenta
                   </button>
                 </div>
               )}
@@ -14248,7 +14332,7 @@ function AppCore({onRequestAuth}) {
                     if(!supabaseUser){
                       haptic('error');
                       setToast('Primero crea tu cuenta o inicia sesión para vincularte con tu nutricionista 👩‍⚕️');
-                      onRequestAuth && onRequestAuth();
+                      onRequestAuth && onRequestAuth('register');
                       return;
                     }
                     if(!nutriCode.trim()){ haptic('error'); setToast('Ingresa el código que te dio tu nutricionista (NUT-XXXXX).'); return; }
@@ -14704,7 +14788,15 @@ function AppCore({onRequestAuth}) {
 export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [showAuth, setShowAuth]   = useState(false);
-  const [guestMode, setGuestMode] = useState(false);
+  const [authMode, setAuthMode]   = useState('login');
+  // Un dispositivo nuevo entra directo al onboarding (primero mostrar valor,
+  // la cuenta se pide después). Quien eligió "Continuar sin cuenta" no vuelve
+  // a ver el login cada vez que abre la app.
+  const [guestMode, setGuestMode] = useState(()=>{
+    const g = LS.get('guestMode',false) || !LS.get('onboarded',false);
+    if (g) LS.set('guestMode', true); // se limpia al iniciar sesión
+    return g;
+  });
 
   useEffect(()=>{
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -14713,6 +14805,7 @@ export default function App() {
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
+        LS.set('guestMode', false);
         setShowAuth(false);
         setAuthReady(true);
       }
@@ -14721,8 +14814,13 @@ export default function App() {
   }, []);
 
   const handleAuth = (user) => {
-    if (!user) setGuestMode(true);
+    if (!user) { setGuestMode(true); LS.set('guestMode', true); }
     setShowAuth(false);
+  };
+
+  const requestAuth = (mode) => {
+    setAuthMode(mode === 'register' ? 'register' : 'login');
+    setShowAuth(true);
   };
 
   if (!authReady) return (
@@ -14731,11 +14829,11 @@ export default function App() {
     </div>
   );
 
-  if (showAuth) return <AuthScreen onAuth={handleAuth}/>;
+  if (showAuth) return <AuthScreen onAuth={handleAuth} initialMode={authMode}/>;
 
   return (
     <ErrorBoundary>
-      <AppCore onRequestAuth={()=>setShowAuth(true)}/>
+      <AppCore onRequestAuth={requestAuth}/>
     </ErrorBoundary>
   );
 }
