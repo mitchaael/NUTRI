@@ -23,10 +23,19 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SKU_PLAN_MAP: Record<string, { plan: string; months: number }> = {
-  "caloru_pro_monthly": { plan: "monthly", months: 1 },
-  "caloru_pro_yearly":  { plan: "yearly",  months: 12 },
+const SKU_PLAN_MAP: Record<string, { plan: string; months: number; status: "pro" | "nutricionista" }> = {
+  "caloru_pro_monthly": { plan: "monthly", months: 1,  status: "pro" },
+  "caloru_pro_yearly":  { plan: "yearly",  months: 12, status: "pro" },
+  // Plan Profesional (nutricionistas) — mismo subscription_plan que usa mp-webhook
+  "caloru_nutri_5":     { plan: "nutricionista",      months: 1, status: "nutricionista" },
+  "caloru_nutri_15":    { plan: "nutricionista15",    months: 1, status: "nutricionista" },
+  "caloru_nutri_ilim":  { plan: "nutricionista_ilim", months: 1, status: "nutricionista" },
 };
+
+// JWT exige base64url (sin +, / ni =). Con base64 normal Google rechaza el token.
+const b64url = (bytes: Uint8Array) =>
+  btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64urlStr = (s: string) => b64url(new TextEncoder().encode(s));
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -94,12 +103,13 @@ Deno.serve(async (req) => {
   }
 
   let googleVerified = false;
+  let expiryMs: number | null = null;
   try {
     // Obtener access token de Google via JWT de service account
     const serviceAccount = JSON.parse(GOOGLE_SERVICE_ACCOUNT_KEY);
     const now = Math.floor(Date.now() / 1000);
-    const jwtHeader = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
-    const jwtPayload = btoa(JSON.stringify({
+    const jwtHeader = b64urlStr(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+    const jwtPayload = b64urlStr(JSON.stringify({
       iss: serviceAccount.client_email,
       scope: "https://www.googleapis.com/auth/androidpublisher",
       aud: "https://oauth2.googleapis.com/token",
@@ -120,7 +130,7 @@ Deno.serve(async (req) => {
       "RSASSA-PKCS1-v1_5", cryptoKey,
       new TextEncoder().encode(sigInput)
     );
-    const jwtSig = btoa(String.fromCharCode(...new Uint8Array(sig)));
+    const jwtSig = b64url(new Uint8Array(sig));
     const jwt = `${sigInput}.${jwtSig}`;
 
     // Intercambiar JWT por access token
@@ -144,6 +154,15 @@ Deno.serve(async (req) => {
       // cancelReason ausente = suscripción activa
       if (playData.paymentState >= 1 && !playData.cancelReason) {
         googleVerified = true;
+        expiryMs = Number(playData.expiryTimeMillis) || null;
+        // Confirmar (acknowledge) la suscripción: si no, Google la reembolsa a los 3 días
+        if (playData.acknowledgementState === 0) {
+          const ack = await fetch(
+            `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${GOOGLE_PLAY_PACKAGE_NAME}/purchases/subscriptions/${sku}/tokens/${purchaseToken}:acknowledge`,
+            { method: "POST", headers: { "Authorization": `Bearer ${accessToken}`, "Content-Type": "application/json" }, body: "{}" },
+          );
+          if (!ack.ok) console.error("Acknowledge falló:", ack.status, await ack.text());
+        }
       }
     } else {
       const errText = await playRes.text();
@@ -165,8 +184,9 @@ Deno.serve(async (req) => {
   }
 
   // 5. Activar Pro en Supabase
-  const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + planConfig.months);
+  // Usar el vencimiento real que informa Google (incluye trial y renovaciones)
+  const expiresAt = expiryMs ? new Date(expiryMs) : new Date();
+  if (!expiryMs) expiresAt.setMonth(expiresAt.getMonth() + planConfig.months);
 
   const updateRes = await fetch(
     `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`,
@@ -178,7 +198,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        subscription_status: "pro",
+        subscription_status: planConfig.status,
         subscription_plan: planConfig.plan,
         subscription_id: purchaseToken,
         subscription_expires_at: expiresAt.toISOString(),

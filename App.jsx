@@ -9428,6 +9428,11 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
           <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>Suscríbete por <strong>$9.990/mes</strong> y tus pacientes obtienen Calorú Pro automáticamente. Ellos pueden reembolsarlo por Isapre o Fonasa.</div>
           <button onClick={async()=>{
             if(!supabaseUser){showToast('Inicia sesión para registrarte.');return;}
+            if(puedePagarConPlay()){
+              try{ await comprarConPlay('nutricionista'); showToast('✅ ¡Plan activado! Recarga la app para ver tu panel.'); }
+              catch(e){ console.error('Play Billing error:',e); showToast('No se completó el pago. Intenta de nuevo.'); }
+              return;
+            }
             try{
               const session=await supabase.auth.getSession();
               const token=session.data.session?.access_token;
@@ -9447,52 +9452,58 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
     </div>
   );
 }
+/* ═══════════════════════════════════════════════════════
+   GOOGLE PLAY BILLING (dentro de la app de Play / TWA)
+   Google exige Play Billing para suscripciones digitales vendidas dentro de la app.
+═══════════════════════════════════════════════════════ */
+const PLAY_SKUS = {
+  monthly:'caloru_pro_monthly', yearly:'caloru_pro_yearly',
+  nutricionista:'caloru_nutri_5', nutricionista15:'caloru_nutri_15', nutricionista_ilim:'caloru_nutri_ilim',
+};
+const puedePagarConPlay = () =>
+  typeof window !== 'undefined' && !!window.getDigitalGoodsService &&
+  (isTWAApp() || (window.matchMedia('(display-mode: standalone)').matches && /android/i.test(navigator.userAgent)));
+// Abre la hoja de pago de Google Play y verifica la compra en el servidor. Lanza error si falla o se cancela.
+async function comprarConPlay(plan) {
+  const sku = PLAY_SKUS[plan];
+  if (!sku) throw new Error('Plan sin producto en Play');
+  const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+  const details = await service.getDetails([sku]);
+  if (!details || details.length === 0) throw new Error('Producto no encontrado en Play Store');
+  const item = details[0];
+  const paymentRequest = new PaymentRequest(
+    [{ supportedMethods: 'https://play.google.com/billing', data: { sku: item.itemId } }],
+    { total: { label: item.title, amount: { currency: item.price.currency, value: '0' } } }
+  );
+  const paymentResponse = await paymentRequest.show();
+  const purchaseToken = paymentResponse.details.purchaseToken;
+  const session = await supabase.auth.getSession();
+  const token = session.data.session?.access_token;
+  const verifyRes = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ purchaseToken, sku, plan }),
+  });
+  if (!verifyRes.ok) {
+    await paymentResponse.complete('fail');
+    throw new Error('No se pudo verificar la compra con Google Play');
+  }
+  await paymentResponse.complete('success');
+  track('purchase', { plan, canal: 'play' });
+  return true;
+}
+
 function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const [loading, setLoading] = useState(false);
   const [localToast, setLocalToast] = useState('');
   const showToast = (msg) => { setLocalToast(msg); setTimeout(()=>setLocalToast(''),3500); };
 
-  // Detectar si estamos dentro de un TWA (Android app de Google Play)
-  // La detección precisa requiere que el referrer incluya el package name de la app
-  const isTWA = document.referrer.startsWith('android-app://cl.caloru.app') ||
-    (window.matchMedia('(display-mode: standalone)').matches &&
-     /android/i.test(navigator.userAgent) &&
-     typeof window.getDigitalGoodsService !== 'undefined');
+  const isTWA = puedePagarConPlay();
 
   // Google Play Billing via Digital Goods API
   const handleGooglePlayBilling = async (plan) => {
-    const skuMap = {
-      monthly: 'caloru_pro_monthly',
-      yearly:  'caloru_pro_yearly',
-    };
-    const sku = skuMap[plan];
     try {
-      // Verificar que Digital Goods API esté disponible (TWA con Play Billing)
-      if (!window.getDigitalGoodsService) throw new Error('Digital Goods API no disponible');
-      const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-      const details = await service.getDetails([sku]);
-      if (!details || details.length === 0) throw new Error('Producto no encontrado en Play Store');
-      const item = details[0];
-      // Iniciar el flujo de pago de Play Store
-      const paymentRequest = new PaymentRequest(
-        [{ supportedMethods: 'https://play.google.com/billing', data: { sku: item.itemId } }],
-        { total: { label: item.title, amount: { currency: item.price.currency, value: '0' } } }
-      );
-      const paymentResponse = await paymentRequest.show();
-      const purchaseToken = paymentResponse.details.purchaseToken;
-      // Verificar la compra en Google Play via Edge Function (JWT requerido)
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      const verifyRes = await fetch('https://fywghvfdwltayylswnid.supabase.co/functions/v1/verify-play-purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ purchaseToken, sku, plan }),
-      });
-      if (!verifyRes.ok) {
-        await paymentResponse.complete('fail');
-        throw new Error('No se pudo verificar la compra con Google Play');
-      }
-      await paymentResponse.complete('success');
+      await comprarConPlay(plan);
       showToast('✅ ¡Suscripción activada! Recarga la app para disfrutar Calorú Pro.');
       setTimeout(onClose, 2000);
     } catch(e) {
@@ -12492,6 +12503,11 @@ function AppCore({onRequestAuth}) {
             ].map(t=>(
               <button key={t.plan} onClick={async()=>{
                 if(!supabaseUser){setToast('Inicia sesión para suscribirte.');return;}
+                if(puedePagarConPlay()){
+                  try{ await comprarConPlay(t.plan); setToast('✅ ¡Plan activado! Recarga la app para ver tu panel.'); }
+                  catch(e){ console.error('Play Billing error:',e); setToast('No se completó el pago. Intenta de nuevo.'); }
+                  return;
+                }
                 try{
                   const session=await supabase.auth.getSession();
                   const token=session.data.session?.access_token;
@@ -14648,6 +14664,11 @@ function AppCore({onRequestAuth}) {
                   <button key={k} onClick={async()=>{
                     if(k==='professional' && supabaseUser && subscriptionStatus && subscriptionStatus!=='nutricionista'){
                       setToast('Necesitas el Plan Nutricionista ($9.990/mes) — te llevamos a pagar 👩‍⚕️');
+                      if(puedePagarConPlay()){
+                        try{ await comprarConPlay('nutricionista'); setToast('✅ ¡Plan activado! Recarga la app para ver tu panel.'); }
+                        catch(e){ console.error('Play Billing error:',e); setToast('No se completó el pago. Intenta de nuevo.'); }
+                        return;
+                      }
                       try{
                         const session=await supabase.auth.getSession();
                         const token=session.data.session?.access_token;
