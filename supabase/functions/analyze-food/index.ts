@@ -243,11 +243,12 @@ const RATE_LIMIT_FREE = 20;
 const RATE_LIMIT_PRO  = 60;
 
 // Topes diarios por modo. Costo aprox. con Sonnet 5.5: foto ~US$0,014, chat ~US$0,006, texto ~US$0,004.
-// Peor caso al día: free ~US$0,16 · Pro ~US$0,75.
+// Peor caso al día: free ~US$0,03 · Pro ~US$0,75.
 const DAILY_LIMITS: Record<string, { free: number; pro: number }> = {
-  photo:   { free: 3,  pro: 15 },
-  text:    { free: 5,  pro: 40 },
-  chat:    { free: 15, pro: 60 },
+  // Gratis: 1 al día de cada cosa. Más que eso cubre las 3 comidas y nadie pagaría Pro.
+  photo:   { free: 1,  pro: 15 },
+  text:    { free: 1,  pro: 40 },
+  chat:    { free: 1,  pro: 60 },
   insight: { free: 3,  pro: 6 },
 };
 
@@ -409,9 +410,10 @@ Deno.serve(async (req) => {
     const { mode, image, messages, system, prompt, nombre, max_tokens } = body;
 
     // Tope diario por modo (además del límite por hora)
-    if (typeof mode === "string" && DAILY_LIMITS[mode]) {
-      const limit = DAILY_LIMITS[mode][userIsPro ? "pro" : "free"];
-      if (!await dailyUsageAllowed(userId, mode, limit)) {
+    const usoKey = mode === "chat" && body.uso === "insight" ? "insight" : mode;
+    if (typeof usoKey === "string" && DAILY_LIMITS[usoKey]) {
+      const limit = DAILY_LIMITS[usoKey][userIsPro ? "pro" : "free"];
+      if (!await dailyUsageAllowed(userId, usoKey, limit)) {
         return new Response(
           JSON.stringify({
             error: userIsPro

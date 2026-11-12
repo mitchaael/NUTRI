@@ -2391,7 +2391,7 @@ function Onboarding({onDone, onLogin}) {
         {[
           {icon:'🇨🇱', title:'475+ productos chilenos reales', sub:'Lo que ninguna app internacional tiene'},
           {icon:'🤖', title:'IA que registra por ti', sub:'"Me comí un completo con todo" — listo'},
-          {icon:'💰', title:'Pro desde $4.990/mes — 1er mes gratis', sub:'La competencia cobra hasta $20.000/mes'},
+          {icon:'💰', title:'Pro desde $3.900/mes — 7 días gratis en el plan anual', sub:'La competencia cobra hasta $20.000/mes'},
         ].map(({icon,title,sub})=>(
           <div key={title} style={{display:'flex',alignItems:'center',gap:12,background:'rgba(255,255,255,0.07)',borderRadius:14,padding:'12px 14px'}}>
             <span style={{fontSize:22,flexShrink:0}}>{icon}</span>
@@ -6581,8 +6581,8 @@ ${isPro&&iaMemoria?.disgustos?.length>0?`🚫 No le gusta: ${iaMemoria.disgustos
 • NUTRICIONISTA: Perfil > Ajustes > "Vincular con nutricionista". Ingresa el código NUT-XXXXX.
 • ALERGIAS: Perfil > Ajustes > Alergias. Filtra productos automáticamente.
 • MODO VEGANO: Perfil > Ajustes. Filtra sugerencias con carne/lácteos.
-• PRO ($4.990/mes, 1er mes gratis): Foto IA, Nutri IA ilimitado, micronutrientes, sin límites.
-• MODO PROFESIONAL (nutricionistas): Requiere plan Profesional ($9.990/mes). Gestiona pacientes.
+• PRO ($3.900/mes o $24.900/año, 7 días gratis en el anual vía Google Play): Foto IA, Nutri IA ilimitado, micronutrientes, sin límites.
+• MODO PROFESIONAL (nutricionistas): Requiere plan Profesional (desde $10.000/mes). Gestiona pacientes.
 • MODO SIN CALORÍAS: Perfil > Ajustes. Muestra semáforos en vez de números.
 • TEMA: Auto (oscuro 20:00–07:00), claro u oscuro. Perfil > Ajustes.
 • PRODUCTOS COMUNITARIOS: Si no encuentras un alimento, agrégalo para la comunidad.
@@ -6680,7 +6680,11 @@ Ajusta al tamaño. Nombre descriptivo ("Empanada de pino horneada", "Arroz con p
       const reply = parseAndRegisterFood(rawReply);
       setMsgs(prev=>[...prev, {role:'assistant', content:reply}]);
     } catch(e) {
-      setMsgs(prev=>[...prev, {role:'assistant', content:'❌ Error de conexión. Verifica tu internet.'}]);
+      const limite = /límite|máximo/i.test(e?.message||'');
+      setMsgs(prev=>[...prev, {role:'assistant', content: limite
+        ? `⏳ ${e.message}\n\nCon **Calorú Pro** puedes conversar conmigo todo lo que quieras, además de fotos con IA ilimitadas. ✨`
+        : '❌ Error de conexión. Verifica tu internet.'}]);
+      if(limite) track('ai_limit_hit',{modo:'chat'});
     }
     setLoading(false);
   };
@@ -9425,7 +9429,7 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
 
         <div style={{background:dark?'rgba(52,199,89,0.08)':'rgba(52,199,89,0.05)',borderRadius:14,padding:'12px 14px',border:'1px solid rgba(52,199,89,0.2)'}}>
           <div style={{fontSize:11,color:'#34C759',fontWeight:700,marginBottom:4}}>💡 ¿Eres nutricionista?</div>
-          <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>Suscríbete por <strong>$9.990/mes</strong> y tus pacientes obtienen Calorú Pro automáticamente. Ellos pueden reembolsarlo por Isapre o Fonasa.</div>
+          <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>Suscríbete por <strong>$10.000/mes</strong> y tus pacientes obtienen Calorú Pro automáticamente. Ellos pueden reembolsarlo por Isapre o Fonasa.</div>
           <button onClick={async()=>{
             if(!supabaseUser){showToast('Inicia sesión para registrarte.');return;}
             if(puedePagarConPlay()){
@@ -9445,7 +9449,7 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
               else showToast('Error al crear la suscripción. Intenta de nuevo.');
             }catch{showToast('Error de conexión. Intenta de nuevo.');}
           }} style={{marginTop:8,padding:'8px 16px',borderRadius:10,border:'none',background:'#34C759',color:'white',fontFamily:F,cursor:'pointer',fontSize:11,fontWeight:700}}>
-            Suscribirme — $9.990/mes
+            Suscribirme — $10.000/mes
           </button>
         </div>
       </div>
@@ -9602,14 +9606,14 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
             <button onClick={()=>handleSubscribe('monthly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'transparent',color:'#D42020',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13}}>
               <div style={{fontSize:18,marginBottom:2}}>📅</div>
               <div>Mensual</div>
-              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>{isTWA?(playPrices.monthly||'…'):'$4.990 CLP'}</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>{isTWA?(playPrices.monthly||'$3.900 CLP'):'$3.900 CLP'}</div>
               <div style={{fontSize:10,color:C.textSec,marginTop:1}}>/ mes</div>
             </button>
             <button onClick={()=>handleSubscribe('yearly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13,position:'relative'}}>
-              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>{isTWA?'AHORRA 28%':'AHORRA 33%'}</div>
+              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 47%</div>
               <div style={{fontSize:18,marginBottom:2}}>🗓️</div>
               <div>Anual</div>
-              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>{isTWA?(playPrices.yearly||'…'):'$39.990 CLP'}</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>{isTWA?(playPrices.yearly||'$24.900 CLP'):'$24.900 CLP'}</div>
               <div style={{fontSize:10,opacity:0.8,marginTop:1}}>{isTWA?'7 días gratis · luego / año':'/ año'}</div>
             </button>
           </div>
@@ -11116,11 +11120,11 @@ function AppCore({onRequestAuth}) {
     }
     return new Date(base.getTime() + 30*86400000);
   },[supabaseUser?.id]);
-  // Usuarios nuevos (sin mes gratis): 3 análisis de foto con IA para probar
+  // Usuarios nuevos (sin mes gratis): 1 análisis de foto con IA para probar
   useEffect(()=>{
     if(LS.get('photoCreditsWelcome',false)) return;
     LS.set('photoCreditsWelcome',true);
-    if(trialEnd.getTime()===0) LS.set('photoCredits',(LS.get('photoCredits',0)||0)+3);
+    if(trialEnd.getTime()===0) LS.set('photoCredits',(LS.get('photoCredits',0)||0)+1);
   },[trialEnd]);
   const trialActive = trialEnd > new Date();
   const trialDaysLeft = Math.max(0, Math.ceil((trialEnd - new Date())/86400000));
@@ -11449,12 +11453,18 @@ function AppCore({onRequestAuth}) {
   /* Foto con IA: Pro, o usuarios con análisis de regalo */
   const openPhotoScanner = () => {
     if(!isPro){
-      const c = LS.get('photoCredits',0)||0;
-      if(c<=0){ setShowPaywall(true); return; }
-      // La IA necesita cuenta: no gastar el crédito de un invitado
-      if(!supabaseUser){ setToast('📸 Crea tu cuenta gratis para usar tus fotos con IA'); onRequestAuth&&onRequestAuth('register'); return; }
-      LS.set('photoCredits',c-1);
-      setToast(`📸 Te quedan ${c-1} análisis gratis`);
+      // La IA necesita cuenta
+      if(!supabaseUser){ setToast('📸 Crea tu cuenta gratis para analizar tu plato con IA'); onRequestAuth&&onRequestAuth('register'); return; }
+      const hoy = todayKey();
+      if(LS.get('freePhotoDay','')!==hoy){
+        LS.set('freePhotoDay',hoy);
+        setToast('📸 Usando tu foto gratis de hoy');
+      } else {
+        const c = LS.get('photoCredits',0)||0;
+        if(c<=0){ track('ai_limit_hit',{modo:'photo'}); setShowPaywall(true); return; }
+        LS.set('photoCredits',c-1);
+        setToast(`📸 Usando un análisis de regalo (te quedan ${c-1})`);
+      }
     }
     setShowPhotoScanner(true); haptic('light');
   };
@@ -11983,7 +11993,7 @@ function AppCore({onRequestAuth}) {
         const prevLog=LS.get('log_'+prevKey,[]);
         const prevProt=Math.round(sumLog(prevLog).prot);
         const insightUserMsg=`Datos de hoy de ${nombre}: ${Math.round(tot.cal)} kcal de ${metas.cal} kcal meta (${metas.cal>0?Math.round(tot.cal/metas.cal*100):0}%), ${Math.round(tot.prot)}g proteína de ${metas.prot}g meta, racha de ${streak.days} días consecutivos.${prevProt>0?` Ayer consumió ${prevProt}g de proteína.`:''} Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}. Genera UN SOLO insight motivacional personalizado en máximo 2 oraciones. Usa EXACTAMENTE estos números, no inventes otros. Solo el insight, sin saludos ni explicaciones.`;
-        const data = await callEdgeFn({ mode: 'chat', system: 'Eres un nutricionista chileno amigable y motivador. Generas insights breves y personalizados basándote en los datos reales del usuario. Solo devuelves el insight sin saludos, sin "Hola", sin explicaciones adicionales.', messages:[{role:'user',content:insightUserMsg}] });
+        const data = await callEdgeFn({ mode: 'chat', uso: 'insight', system: 'Eres un nutricionista chileno amigable y motivador. Generas insights breves y personalizados basándote en los datos reales del usuario. Solo devuelves el insight sin saludos, sin "Hola", sin explicaciones adicionales.', messages:[{role:'user',content:insightUserMsg}] });
         const text=data.text||'';
         if(text){ setDailyInsight(text); LS.set(insightKey,text); LS.set(insightKey+'_cal', tot.cal); }
       }catch(e){}
@@ -12532,9 +12542,9 @@ function AppCore({onRequestAuth}) {
           <div style={{background:'linear-gradient(135deg,#1D3557,#2E6DA4)',borderRadius:20,padding:'22px 18px',width:'100%',maxWidth:340,marginBottom:16}}>
             <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',fontWeight:700,letterSpacing:1.2,textTransform:'uppercase',marginBottom:12}}>Plan Profesional · elige tu tamaño</div>
             {[
-              {plan:'nutricionista',      precio:'$9.990',  l:'Hasta 5 pacientes',  destacado:false},
-              {plan:'nutricionista15',    precio:'$14.990', l:'Hasta 15 pacientes', destacado:true},
-              {plan:'nutricionista_ilim', precio:'$19.990', l:'Pacientes ilimitados', destacado:false},
+              {plan:'nutricionista',      precio:'$10.000', l:'Hasta 5 pacientes',  destacado:false},
+              {plan:'nutricionista15',    precio:'$15.000', l:'Hasta 15 pacientes', destacado:true},
+              {plan:'nutricionista_ilim', precio:'$20.000', l:'Pacientes ilimitados', destacado:false},
             ].map(t=>(
               <button key={t.plan} onClick={async()=>{
                 if(!supabaseUser){setToast('Inicia sesión para suscribirte.');return;}
@@ -12942,7 +12952,7 @@ function AppCore({onRequestAuth}) {
               </div>}
             </div>
             <div style={{display:'flex',gap:6}}>
-              <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }} style={{
+              <button className="tap" onClick={()=>{ if(!isPro&&!supabaseUser){setToast('🤖 Crea tu cuenta gratis para hablar con Nutri IA');onRequestAuth&&onRequestAuth('register');return;} setShowAI(true); }} style={{
                 width:34,height:34,borderRadius:11,border:`1px solid ${C.border}`,
                 background:'#D4202018',color:'#D42020',fontSize:16,cursor:'pointer',
                 fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,
@@ -14698,7 +14708,7 @@ function AppCore({onRequestAuth}) {
                 {[{k:'personal',l:'👤 Personal'},{k:'professional',l:'👩‍⚕️ Profesional'}].map(({k,l})=>(
                   <button key={k} onClick={async()=>{
                     if(k==='professional' && supabaseUser && subscriptionStatus && subscriptionStatus!=='nutricionista'){
-                      setToast('Necesitas el Plan Nutricionista ($9.990/mes) — te llevamos a pagar 👩‍⚕️');
+                      setToast('Necesitas el Plan Nutricionista ($10.000/mes) — te llevamos a pagar 👩‍⚕️');
                       if(puedePagarConPlay()){
                         try{ await comprarConPlay('nutricionista'); setToast('✅ ¡Plan activado! Recarga la app para ver tu panel.'); }
                         catch(e){ console.error('Play Billing error:',e); setToast('No se completó el pago. Intenta de nuevo.'); }
@@ -15157,7 +15167,7 @@ function AppCore({onRequestAuth}) {
 
       {/* ══ NUTRIBOT FLOTANTE ══ */}
       {tab===0&&(
-        <button className="tap float-in" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowAI(true); }}
+        <button className="tap float-in" onClick={()=>{ if(!isPro&&!supabaseUser){setToast('🤖 Crea tu cuenta gratis para hablar con Nutri IA');onRequestAuth&&onRequestAuth('register');return;} setShowAI(true); }}
           style={{
             position:'fixed', bottom:'calc(90px + env(safe-area-inset-bottom, 0px))', right:16,
             zIndex:25, background:'none', border:'none', cursor:'pointer', padding:0,
