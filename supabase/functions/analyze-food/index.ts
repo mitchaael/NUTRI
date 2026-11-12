@@ -242,6 +242,34 @@ const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hora
 const RATE_LIMIT_FREE = 20;
 const RATE_LIMIT_PRO  = 60;
 
+// Topes diarios por modo. Costo aprox. con Sonnet 5.5: foto ~US$0,014, chat ~US$0,006, texto ~US$0,004.
+// Peor caso al día: free ~US$0,16 · Pro ~US$0,75.
+const DAILY_LIMITS: Record<string, { free: number; pro: number }> = {
+  photo:   { free: 3,  pro: 15 },
+  text:    { free: 5,  pro: 40 },
+  chat:    { free: 15, pro: 60 },
+  insight: { free: 3,  pro: 6 },
+};
+
+async function dailyUsageAllowed(userId: string, mode: string, limit: number): Promise<boolean> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return true;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/ai_usage_hit`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ p_user: userId, p_mode: mode, p_limit: limit }),
+    });
+    if (!res.ok) { console.error("ai_usage_hit falló:", res.status); return true; } // falla abierta
+    return (await res.json()) === true;
+  } catch {
+    return true;
+  }
+}
+
 async function checkRateLimit(userId: string, isPro: boolean): Promise<boolean> {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return true; // falla abierta si no hay config
   const limit = isPro ? RATE_LIMIT_PRO : RATE_LIMIT_FREE;
@@ -349,7 +377,7 @@ Deno.serve(async (req) => {
 
     // Verificar plan de suscripción desde Supabase (no confiar en el cliente)
     const profileRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,subscription_expires_at`,
+      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=subscription_status,subscription_expires_at,linked_nutricionista_id`,
       { headers: { "apikey": SUPABASE_SERVICE_ROLE_KEY!, "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` } }
     );
     if (profileRes.ok) {
@@ -358,7 +386,8 @@ Deno.serve(async (req) => {
       const isActiveSub = !profile?.subscription_expires_at ||
         new Date(profile.subscription_expires_at) > new Date();
       userIsPro = (profile?.subscription_status === 'pro' ||
-                   profile?.subscription_status === 'nutricionista') && isActiveSub;
+                   profile?.subscription_status === 'nutricionista') && isActiveSub
+                  || !!profile?.linked_nutricionista_id; // pacientes vinculados reciben Pro de su nutri
     }
   } catch {
     return new Response(
@@ -378,6 +407,22 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const { mode, image, messages, system, prompt, nombre, max_tokens } = body;
+
+    // Tope diario por modo (además del límite por hora)
+    if (typeof mode === "string" && DAILY_LIMITS[mode]) {
+      const limit = DAILY_LIMITS[mode][userIsPro ? "pro" : "free"];
+      if (!await dailyUsageAllowed(userId, mode, limit)) {
+        return new Response(
+          JSON.stringify({
+            error: userIsPro
+              ? "Llegaste al máximo de uso de IA por hoy. Mañana se renueva."
+              : "Llegaste al límite gratis de IA por hoy. Con Calorú Pro tienes mucho más.",
+            limite_diario: true,
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     // Sanitizar nombre de usuario para evitar prompt injection
     const safeName = nombre ? String(nombre).replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 50) : null;

@@ -9499,6 +9499,21 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
   const showToast = (msg) => { setLocalToast(msg); setTimeout(()=>setLocalToast(''),3500); };
 
   const isTWA = puedePagarConPlay();
+  // En la app de Play, mostrar el precio real (moneda local) que entrega Google Play
+  const [playPrices, setPlayPrices] = useState({});
+  useEffect(()=>{
+    if(!isTWA) return;
+    (async()=>{
+      try{
+        const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+        const det = await service.getDetails([PLAY_SKUS.monthly, PLAY_SKUS.yearly]);
+        const fmt = (p)=>{ try{ return new Intl.NumberFormat('es-CL',{style:'currency',currency:p.currency,maximumFractionDigits:p.currency==='CLP'?0:2}).format(+p.value); }catch{ return `${p.currency} ${p.value}`; } };
+        const out = {};
+        (det||[]).forEach(d=>{ if(d.itemId===PLAY_SKUS.monthly) out.monthly=fmt(d.price); if(d.itemId===PLAY_SKUS.yearly) out.yearly=fmt(d.price); });
+        setPlayPrices(out);
+      }catch(e){ console.warn('No se pudieron leer precios de Play', e); }
+    })();
+  },[isTWA]);
 
   // Google Play Billing via Digital Goods API
   const handleGooglePlayBilling = async (plan) => {
@@ -9587,17 +9602,18 @@ function PaywallModal({C, F, dark, onClose, supabaseUser}) {
             <button onClick={()=>handleSubscribe('monthly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'transparent',color:'#D42020',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13}}>
               <div style={{fontSize:18,marginBottom:2}}>📅</div>
               <div>Mensual</div>
-              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$4.990 CLP</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>{isTWA?(playPrices.monthly||'…'):'$4.990 CLP'}</div>
               <div style={{fontSize:10,color:C.textSec,marginTop:1}}>/ mes</div>
             </button>
             <button onClick={()=>handleSubscribe('yearly')} disabled={loading} style={{padding:'14px 10px',borderRadius:16,border:'2px solid #D42020',background:'#D42020',color:'white',fontFamily:F,cursor:'pointer',fontWeight:700,fontSize:13,position:'relative'}}>
-              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>AHORRA 33%</div>
+              <div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',background:'#FFD700',color:'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:8,whiteSpace:'nowrap'}}>{isTWA?'AHORRA 28%':'AHORRA 33%'}</div>
               <div style={{fontSize:18,marginBottom:2}}>🗓️</div>
               <div>Anual</div>
-              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>$39.990 CLP</div>
-              <div style={{fontSize:10,opacity:0.8,marginTop:1}}>/ año</div>
+              <div style={{fontSize:16,fontWeight:800,marginTop:2}}>{isTWA?(playPrices.yearly||'…'):'$39.990 CLP'}</div>
+              <div style={{fontSize:10,opacity:0.8,marginTop:1}}>{isTWA?'7 días gratis · luego / año':'/ año'}</div>
             </button>
           </div>
+          {isTWA&&<div style={{fontSize:10,color:C.textMuted,textAlign:'center',lineHeight:1.4,marginBottom:10}}>Plan anual: 7 días gratis si nunca has tenido Pro. Después se cobra el año completo; cancela antes desde Google Play y no pagas nada.</div>}
           <button onClick={onClose} style={{width:'100%',padding:'13px',borderRadius:14,border:`1px solid ${C.border}`,background:'transparent',color:C.textSec,fontFamily:F,cursor:'pointer',fontSize:14,fontWeight:600}}>
             Ahora no
           </button>
@@ -11078,17 +11094,34 @@ function AppCore({onRequestAuth}) {
      Usuarios existentes también lo reciben (relanzamiento). Invitados: anclado
      al primer uso del dispositivo. */
   const TRIAL_CAMPAIGN_START = new Date('2026-06-09T00:00:00');
+  /* La campaña terminó: quien empezó a usar Calorú desde esta fecha ya no recibe el mes
+     automático (regalar Pro sin pedir nada no convertía: 23 Pro, 0 pagos). Los que ya lo
+     tenían lo conservan hasta que venza. Los nuevos reciben 3 fotos IA de regalo y la
+     prueba de 7 días se ofrece desde Google Play (plan anual). */
+  const TRIAL_CAMPAIGN_END = new Date('2026-11-11T22:00:00-03:00');
   const trialEnd = useMemo(()=>{
     let base;
     if(supabaseUser?.created_at){
-      base = new Date(Math.max(new Date(supabaseUser.created_at).getTime(), TRIAL_CAMPAIGN_START.getTime()));
+      const creada = new Date(supabaseUser.created_at).getTime();
+      const first = LS.get('firstUse', null);
+      // Si el dispositivo ya se usaba antes del corte (invitado que luego creó cuenta), cuenta desde ahí
+      const inicio = first ? Math.min(first, creada) : creada;
+      if(inicio >= TRIAL_CAMPAIGN_END.getTime()) return new Date(0);
+      base = new Date(Math.max(inicio, TRIAL_CAMPAIGN_START.getTime()));
     } else {
       let first = LS.get('firstUse', null);
       if(!first){ first = Date.now(); LS.set('firstUse', first); }
+      if(first >= TRIAL_CAMPAIGN_END.getTime()) return new Date(0);
       base = new Date(Math.max(first, TRIAL_CAMPAIGN_START.getTime()));
     }
     return new Date(base.getTime() + 30*86400000);
   },[supabaseUser?.id]);
+  // Usuarios nuevos (sin mes gratis): 3 análisis de foto con IA para probar
+  useEffect(()=>{
+    if(LS.get('photoCreditsWelcome',false)) return;
+    LS.set('photoCreditsWelcome',true);
+    if(trialEnd.getTime()===0) LS.set('photoCredits',(LS.get('photoCredits',0)||0)+3);
+  },[trialEnd]);
   const trialActive = trialEnd > new Date();
   const trialDaysLeft = Math.max(0, Math.ceil((trialEnd - new Date())/86400000));
   // Activar Pro por trial (también para invitados sin cuenta)
@@ -11418,6 +11451,8 @@ function AppCore({onRequestAuth}) {
     if(!isPro){
       const c = LS.get('photoCredits',0)||0;
       if(c<=0){ setShowPaywall(true); return; }
+      // La IA necesita cuenta: no gastar el crédito de un invitado
+      if(!supabaseUser){ setToast('📸 Crea tu cuenta gratis para usar tus fotos con IA'); onRequestAuth&&onRequestAuth('register'); return; }
       LS.set('photoCredits',c-1);
       setToast(`📸 Te quedan ${c-1} análisis gratis`);
     }
