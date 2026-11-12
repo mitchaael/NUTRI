@@ -2,7 +2,10 @@ const ANTHROPIC_API_KEY       = Deno.env.get("ANTHROPIC_API_KEY");
 const SUPABASE_URL            = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY       = Deno.env.get("SUPABASE_ANON_KEY");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const MODEL = "claude-sonnet-4-6";
+const MODEL = "claude-sonnet-5-5";
+// Sonnet 5.5 piensa por defecto y "disabled" da 400. "between_tools" es el modo sin pensamiento
+// extendido: responde directo como Sonnet 4.6 y no gasta tokens pensando.
+const THINKING = { type: "between_tools" };
 const BRAVE_API_KEY = Deno.env.get("BRAVE_API_KEY");
 
 // ── Palabras que indican que el usuario menciona o registra comida ──
@@ -317,7 +320,9 @@ Deno.serve(async (req) => {
 
       anthropicBody = {
         model: MODEL,
-        max_tokens: 1500,
+        thinking: THINKING,
+        // El tokenizador de Sonnet 5.5 cuenta ~30% más tokens que el de 4.6: límites ajustados
+        max_tokens: 2000,
         system: [
           {
             type: "text",
@@ -469,7 +474,8 @@ ${clientContext}`;
 
       anthropicBody = {
         model: MODEL,
-        max_tokens: Math.min(max_tokens || 1000, 2000),
+        thinking: THINKING,
+        max_tokens: Math.min(Math.round((max_tokens || 1000) * 1.3), 2600),
         system: enrichedSystem,
         messages: sanitizedMessages,
       };
@@ -486,7 +492,8 @@ ${clientContext}`;
 
       anthropicBody = {
         model: MODEL,
-        max_tokens: 200,
+        thinking: THINKING,
+        max_tokens: 300,
         system: "Eres un nutricionista chileno amigable. Generas tips nutricionales breves, concretos y motivadores. Los consejos son relevantes para la alimentación chilena (menciona alimentos locales cuando aplique). Máximo 2 oraciones. Sin saludos.",
         messages: [
           {
@@ -509,7 +516,6 @@ ${clientContext}`;
         "Content-Type": "application/json",
         "x-api-key": ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
-        "anthropic-beta": "prompt-caching-2024-07-31",
       },
       body: JSON.stringify(anthropicBody),
     });
@@ -524,7 +530,10 @@ ${clientContext}`;
     }
 
     const data = await anthropicRes.json();
-    const text = data.content && data.content[0] ? data.content[0].text : "";
+    // La respuesta puede traer bloques "thinking" antes del texto: leer solo los bloques de texto
+    const text = Array.isArray(data.content)
+      ? data.content.filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("")
+      : "";
 
     if (mode === "photo") {
       try {
