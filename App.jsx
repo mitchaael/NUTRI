@@ -11070,6 +11070,23 @@ function WeekChallengeCard({C, F, done, onDismiss}) {
   );
 }
 
+/* ═══════════════════════════════════════════════════════
+   INVITA A UN AMIGO — 7 días de Pro cuando tu invitado registra 3 días
+═══════════════════════════════════════════════════════ */
+function InviteCard({C, F, onInvite, onDismiss}) {
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10,padding:'12px 14px',borderRadius:18,background:C.surface,border:'1.5px solid #FFD70066'}}>
+      <span style={{fontSize:24}}>🎁</span>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:13,fontWeight:800,color:C.text}}>Invita a un amigo, gana 7 días Pro</div>
+        <div style={{fontSize:11,color:C.textSec}}>Cuando registre 3 días en Calorú, te regalamos Pro.</div>
+      </div>
+      <button className="tap" onClick={onInvite} style={{padding:'9px 12px',borderRadius:12,border:'none',background:'#D42020',color:'white',fontSize:12,fontWeight:800,cursor:'pointer',fontFamily:F,flexShrink:0}}>Invitar</button>
+      <button className="tap" aria-label="Ocultar" onClick={onDismiss} style={{border:'none',background:'transparent',color:C.textMuted,fontSize:15,cursor:'pointer',padding:'0 2px'}}>✕</button>
+    </div>
+  );
+}
+
 function AppCore({onRequestAuth}) {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
@@ -11136,9 +11153,16 @@ function AppCore({onRequestAuth}) {
   /* ── Cargar estado de suscripción ── */
   useEffect(()=>{
     if(!supabaseUser) return;
-    supabase.from('profiles').select('subscription_status,subscription_expires_at,linked_nutricionista_id,linked_nutricionista_nombre,account_type').eq('id',supabaseUser.id).single()
+    supabase.from('profiles').select('subscription_status,subscription_plan,subscription_expires_at,linked_nutricionista_id,linked_nutricionista_nombre,account_type').eq('id',supabaseUser.id).single()
       .then(({data})=>{
         if(data){
+          // Premio por referidos: avisar una vez por cada extensión
+          if(data.subscription_plan==='referido' && data.subscription_expires_at && new Date(data.subscription_expires_at)>new Date()
+             && LS.get('referidoAvisado','')!==data.subscription_expires_at){
+            LS.set('referidoAvisado', data.subscription_expires_at);
+            setTimeout(()=>setToast('🎁 ¡Un amigo se unió a Calorú! Ganaste 7 días de Pro'),1500);
+            track('referral_reward_seen');
+          }
           const bySub = (data.subscription_status==='pro'||data.subscription_status==='nutricionista') && (!data.subscription_expires_at || new Date(data.subscription_expires_at)>new Date());
           const byNutri = !!data.linked_nutricionista_id;
           setIsPro(bySub || byNutri || trialActive);
@@ -11423,6 +11447,31 @@ function AppCore({onRequestAuth}) {
     const t = setTimeout(()=>{ LS.set('reviewAsked',true); setShowReviewAsk(true); },3000);
     return ()=>clearTimeout(t);
   },[streak.days, showReminderAsk, showFirstLog]);
+
+  /* ── Referidos: el código queda asociado a la cuenta; el invitado reclama al tener 3 días ── */
+  useEffect(()=>{
+    if(!supabaseUser) return;
+    if(LS.get('refCodeUser','')!==supabaseUser.id){
+      supabase.rpc('register_ref_code',{p_code: refCode()}).then(({data})=>{
+        if(data){ LS.set('refCode', data); LS.set('refCodeUser', supabaseUser.id); }
+      });
+    }
+  },[supabaseUser?.id]);
+  useEffect(()=>{
+    const ref = LS.get('referredBy', null);
+    if(!supabaseUser || !ref || LS.get('referralDone', false)) return;
+    supabase.rpc('claim_referral',{p_code: ref}).then(({data})=>{
+      if(data?.premiado || data?.motivo==='codigo_invalido'){ LS.set('referralDone', true); if(data?.premiado) track('referral_rewarded'); }
+    });
+  },[supabaseUser?.id, streak.days]);
+  const [inviteHidden,setInviteHidden] = useState(()=>LS.get('inviteHidden',false));
+  const invitarAmigo = async () => {
+    if(!supabaseUser){ setToast('🎁 Crea tu cuenta gratis para invitar y ganar Pro'); onRequestAuth&&onRequestAuth('register'); return; }
+    const text = `Estoy usando Calorú para contar calorías con comida chilena real 🥗 Pruébala gratis: ${shareLink('invitar')}`;
+    track('invite_share',{origen:'tarjeta'});
+    try { if (navigator.share) { await navigator.share({ title:'Calorú', text }); return; } } catch (_) { return; }
+    window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+  };
 
   /* ── desafío "Tu primera semana": las tareas cumplidas quedan marcadas para siempre ── */
   const [weekDone,setWeekDone] = useState(()=>LS.get('weekTasks',{}));
@@ -13004,6 +13053,7 @@ function AppCore({onRequestAuth}) {
         ══════════════════════════════════ */}
         {tab===0&&<div className={tabAnim}>
 
+          {!inviteHidden&&accountType!=='professional'&&streak.days>=2&&<InviteCard C={C} F={F} onInvite={invitarAmigo} onDismiss={()=>{setInviteHidden(true);LS.set('inviteHidden',true);}}/>}
           {showWeekCard&&<WeekChallengeCard C={C} F={F} done={weekDone} onDismiss={()=>{setWeekHidden(true);LS.set('weekHidden',true);track('week_challenge_hide');}}/>}
 
           {/* ── REPETIR AYER ── */}
@@ -14743,7 +14793,7 @@ function AppCore({onRequestAuth}) {
                 </div>
                 {nutriPlan&&<button onClick={async()=>{
                   setNutriPlan(null); LS.set('nutriPlan',null); setProSource('');
-                  if(supabaseUser) await supabase.from('profiles').update({linked_nutricionista_id:null,linked_nutricionista_nombre:null}).eq('id',supabaseUser.id);
+                  if(supabaseUser) await supabase.rpc('unlink_nutricionista');
                   supabase.from('profiles').select('subscription_status,subscription_expires_at').eq('id',supabaseUser.id).single().then(({data})=>{
                     if(data) setIsPro(((data.subscription_status==='pro'||data.subscription_status==='nutricionista')&&(!data.subscription_expires_at||new Date(data.subscription_expires_at)>new Date()))||trialActive);
                     else setIsPro(trialActive);
@@ -14772,10 +14822,7 @@ function AppCore({onRequestAuth}) {
                       if(codeErr){ haptic('error'); setToast('Error de conexión. Revisa tu internet e intenta de nuevo.'); setLoadingNutriCode(false); return; }
                       if(nutrData) {
                         // 1. Vincular en profiles
-                        await supabase.from('profiles').update({
-                          linked_nutricionista_id: nutrData.nutricionista_id,
-                          linked_nutricionista_nombre: nutrData.nombre,
-                        }).eq('id', supabaseUser.id);
+                        await supabase.rpc('link_nutricionista', { p_code: codeNorm });
                         // 2. Buscar plan del nutricionista asignado a este paciente (por email)
                         let planRow = null;
                         if(supabaseUser.email) {
