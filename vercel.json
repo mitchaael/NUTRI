@@ -25,14 +25,14 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://fywghvfdwltayylswnid.supabase.co https://api.anthropic.com https://cl.openfoodfacts.org https://world.openfoodfacts.org https://api.mercadopago.com; media-src 'self' blob:; worker-src 'self' blob:; frame-ancestors 'none';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://fywghvfdwltayylswnid.supabase.co https://api.anthropic.com https://cl.openfoodfacts.org https://world.openfoodfacts.org https://api.mercadopago.com; media-src 'self' blob:; worker-src 'self' blob:; frame-ancestors 'none';"
         }
       ]
     }
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|\\.well-known/|manifest\\.json|sw\\.js|favicon\\.ico|icon-.*\\.png|privacy\\.html).*)",
+      "source": "/((?!api/|\\.well-known/|manifest\\.json|sw\\.js|favicon\\.ico|icon-.*\\.png|privacy\\.html|calorias/|sitemap\\.xml|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ]

@@ -17,3 +17,8 @@ outreach/*.json
 
 # Supabase temp
 supabase/.temp/
+
+# Generado en el build por scripts/generate-seo.mjs
+public/calorias/
+public/sitemap.xml
+public/robots.txt

@@ -48,6 +48,9 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
+  // Páginas estáticas SEO (/calorias/…) y archivos sueltos: que los sirva la red, sin tocar la caché de la app
+  // (si no, su HTML se guardaría como /index.html y la app arrancaría mostrando esa página)
+  if (url.pathname.startsWith('/calorias') || url.pathname === '/sitemap.xml' || url.pathname === '/robots.txt' || url.pathname === '/privacy.html') return;
 
   // HTML / navegación → network-first (siempre la última versión si hay red)
   if (e.request.mode === 'navigate' || e.request.destination === 'document') {

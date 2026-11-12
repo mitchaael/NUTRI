@@ -1331,6 +1331,24 @@ const lunesKey = (key) => {
   return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 };
 
+/* ── Referidos: cada instalación tiene un código; los links compartidos lo llevan ── */
+const refCode = () => {
+  let c = LS.get('refCode', null);
+  if (!c) { c = Math.random().toString(36).slice(2, 8).toUpperCase(); LS.set('refCode', c); }
+  return c;
+};
+const shareLink = (medio) => `https://caloru.cl/?ref=${refCode()}&utm_source=share&utm_medium=${medio}`;
+// Al abrir desde un link compartido: guardar quién invitó (una sola vez)
+try {
+  const r = new URLSearchParams(window.location.search).get('ref');
+  if (r && /^[A-Z0-9]{4,10}$/.test(r) && !LS.get('referredBy', null) && r !== LS.get('refCode', null)) {
+    LS.set('referredBy', r);
+    track('referral_open', { ref: r });
+  }
+} catch (_) {}
+const isTWAApp = () => { try { return document.referrer.startsWith('android-app://cl.caloru.app'); } catch { return false; } };
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=cl.caloru.app';
+
 /* ═══════════════════════════════════════════════════════
    DESIGN SYSTEM
 ═══════════════════════════════════════════════════════ */
@@ -3961,7 +3979,7 @@ function ShareAchievementModal({C, F, achievement, onClose}) {
     haptic('success');
     canvas.toBlob(async(blob)=>{
       try {
-        await navigator.share({files:[new File([blob],'logro-caloru.png',{type:'image/png'})],title:cfg.titulo,text:`${cfg.titulo} en Calorú — Tu nutrición, a tu ritmo 🇨🇱 https://caloru.cl/?utm_source=share&utm_medium=logro`});
+        await navigator.share({files:[new File([blob],'logro-caloru.png',{type:'image/png'})],title:cfg.titulo,text:`${cfg.titulo} en Calorú — Tu nutrición, a tu ritmo 🇨🇱 ${shareLink('logro')}`});
       } catch {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href=url; a.download='logro-caloru.png'; a.click();
@@ -4094,7 +4112,7 @@ function ShareCard({C, F, nombre, tot, metas, obj, streak, exercises, onClose, x
     haptic('success');
     canvas.toBlob(async(blob)=>{
       try{
-        await navigator.share({files:[new File([blob],'caloru.png',{type:'image/png'})],title:'Mi progreso en Calorú',text:'Mira mi progreso en Calorú 🥗 https://caloru.cl/?utm_source=share&utm_medium=progreso'});
+        await navigator.share({files:[new File([blob],'caloru.png',{type:'image/png'})],title:'Mi progreso en Calorú',text:`Mira mi progreso en Calorú 🥗 ${shareLink('progreso')}`});
       }catch{
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a'); a.href=url; a.download='caloru-progreso.png'; a.click();
@@ -10797,6 +10815,230 @@ function SuplementosModal({C, F, dark, meal, customSupps=[], onSaveCustom, onDel
   );
 }
 
+/* ═══════════════════════════════════════════════════════
+   PRIMER REGISTRO GUIADO — al terminar el onboarding
+   El "aha" es ver tu primera comida restada de tu meta.
+═══════════════════════════════════════════════════════ */
+const mealPorHora = (h=new Date().getHours()) => h<11?'Desayuno':h<16?'Almuerzo':h<20?'Once':'Cena';
+// Por nombre (no por id): dedupeFoods se queda con la versión más nueva de cada nombre
+const _DESAYUNO = ["Marraqueta","Palta Hass","Café con leche Nescafé","Huevo entero grande","Pan molde blanco Harry's","Yogurt natural Soprole","Plátano","Té negro en bolsita"];
+const QUICK_IDS = {
+  Desayuno:_DESAYUNO,
+  Once:    _DESAYUNO,
+  Almuerzo:["Arroz blanco cocido","Pechuga de pollo Ariztía","Ensalada mixta simple","Cazuela de pollo","Empanada de pino horneada","Porotos con riendas","Puré de papa con mantequilla","Completo italiano"],
+  Cena:    ["Arroz blanco cocido","Pechuga de pollo Ariztía","Ensalada mixta simple","Cazuela de pollo","Huevos revueltos (2 huevos)","Porotos con riendas","Puré de papa con mantequilla","Completo italiano"],
+  Snack:   ["Manzana fuji","Plátano","Yogurt natural Soprole","Galletas Tritón Costa","Huevo entero grande","Café con leche Nescafé","Palta Hass","Té negro en bolsita"],
+};
+function FirstLogSheet({C, F, nombre, meal, tot, metaCal, onAdd, onSearch, onClose}) {
+  const [added, setAdded] = useState([]);
+  const quick = (QUICK_IDS[meal]||QUICK_IDS.Almuerzo).map(n=>DB.find(f=>f.nombre===n)).filter(Boolean);
+  const quedan = Math.max(0, Math.round((metaCal||0) - tot.cal));
+  const add = (f) => { onAdd(f); setAdded(a=>[...a,f.id]); haptic('add'); };
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:10002,background:'rgba(0,0,0,0.55)',display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+      <div style={{width:'100%',maxWidth:480,background:C.surface,borderRadius:'24px 24px 0 0',padding:'24px 18px calc(20px + env(safe-area-inset-bottom))',animation:'slideUp .3s ease',maxHeight:'90vh',overflowY:'auto'}}>
+        {added.length===0 ? (<>
+          <div style={{fontSize:40,marginBottom:6}}>{MI[meal]||'🍽️'}</div>
+          <div style={{fontSize:20,fontWeight:800,color:C.text,letterSpacing:'-.3px',marginBottom:4}}>¡Listo{nombre?`, ${nombre.split(' ')[0]}`:''}! Partamos con tu {meal.toLowerCase()}</div>
+          <div style={{fontSize:13,color:C.textSec,lineHeight:1.5,marginBottom:16}}>Toca lo que comiste y te muestro cuánto te queda hoy. Toma 10 segundos.</div>
+        </>) : (
+          <div style={{textAlign:'center',marginBottom:16}}>
+            <div style={{fontSize:13,fontWeight:700,color:'#34C759',marginBottom:4}}>✓ {added.length} {added.length===1?'alimento registrado':'alimentos registrados'}</div>
+            <div style={{fontSize:38,fontWeight:900,color:C.text,letterSpacing:'-1px',lineHeight:1.1}}>{quedan.toLocaleString('es-CL')} kcal</div>
+            <div style={{fontSize:13,color:C.textSec,marginTop:2}}>te quedan hoy de tu meta de {Math.round(metaCal||0).toLocaleString('es-CL')}</div>
+          </div>
+        )}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:8,marginBottom:14}}>
+          {quick.map(f=>{
+            const on=added.includes(f.id);
+            return (
+              <button key={f.id} className="tap" onClick={()=>add(f)} style={{display:'flex',alignItems:'center',gap:8,padding:'11px 10px',borderRadius:14,border:`1.5px solid ${on?'#34C759':C.border}`,background:on?'#34C75914':C.surfaceAlt,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                <span style={{fontSize:22}}>{f.emoji}</span>
+                <span style={{flex:1,minWidth:0}}>
+                  <span style={{display:'block',fontSize:12,fontWeight:700,color:C.text,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{f.nombre}</span>
+                  <span style={{display:'block',fontSize:11,color:C.textMuted}}>{f.cal} kcal{on?' · ✓':''}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {added.length>0 ? (
+          <button className="tap" onClick={onClose} style={{width:'100%',padding:'15px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,marginBottom:8}}>Listo, ver mi día →</button>
+        ) : null}
+        <button className="tap" onClick={onSearch} style={{width:'100%',padding:'13px',borderRadius:16,border:`1px solid ${C.border}`,background:'transparent',color:C.text,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:F,marginBottom:6}}>🔍 Buscar otro alimento</button>
+        {added.length===0&&<button className="tap" onClick={onClose} style={{width:'100%',padding:'10px',border:'none',background:'transparent',color:C.textMuted,fontSize:13,cursor:'pointer',fontFamily:F}}>Lo hago después</button>}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   REGISTRO POR TEXTO CON IA — "dos marraquetas con palta y un café"
+   Sirve sobre todo cuando el alimento no está en la base (usuarios de otros países).
+═══════════════════════════════════════════════════════ */
+function TextFoodSheet({C, F, meal, initial='', supabaseUser, onAdd, onClose, onNeedAccount}) {
+  const [texto, setTexto] = useState(initial);
+  const [status, setStatus] = useState('idle'); // idle | loading | results | error
+  const [items, setItems] = useState([]);
+  const [sel, setSel] = useState({});
+  const [error, setError] = useState('');
+  const calcular = async () => {
+    const t = texto.trim();
+    if (t.length < 2) return;
+    setStatus('loading'); setError('');
+    try {
+      const data = await callEdgeFn({ mode:'text', texto:t.slice(0,300) });
+      const al = data.result?.alimentos || [];
+      if (data.result?.error || !al.length) throw new Error(data.result?.error || 'No pude entender qué comiste. Prueba con más detalle.');
+      setItems(al); setSel(Object.fromEntries(al.map((_,i)=>[i,true]))); setStatus('results');
+      track('text_log_ai',{items:al.length}); LS.set('textLogUsed',true);
+    } catch (e) {
+      setError(e.message || 'Error al calcular'); setStatus('error');
+    }
+  };
+  const agregar = () => {
+    items.forEach((f,i)=>{
+      if(!sel[i]) return;
+      onAdd({
+        id: Date.now()+Math.random()+i, nombre:f.nombre, marca:'Estimado', cat:'Escaneado',
+        porcion:f.porcion_g||100, cal:f.cal||0, prot:f.prot||0, carbs:f.carbs||0, grasas:f.grasas||0,
+        fibra:f.fibra||0, azucar:0, sodio:0, emoji:f.emoji||'✨', grams:f.porcion_g||100, origen:'texto_ia',
+      });
+    });
+    onClose();
+  };
+  const totalSel = items.reduce((t,f,i)=>sel[i]?t+(f.cal||0):t,0);
+  return (
+    <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:75,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+      <div onClick={e=>e.stopPropagation()} style={{width:'100%',maxWidth:480,background:C.surface,borderRadius:'24px 24px 0 0',padding:'20px 18px calc(20px + env(safe-area-inset-bottom))',animation:'slideUp .3s ease',maxHeight:'90vh',overflowY:'auto'}}>
+        <div style={{width:40,height:4,borderRadius:2,background:C.border,margin:'0 auto 14px'}}/>
+        <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:4}}>✍️ Escribe lo que comiste</div>
+        <div style={{fontSize:12,color:C.textSec,marginBottom:12}}>La IA lo separa y calcula las calorías. Se anota en {meal.toLowerCase()}.</div>
+        {!supabaseUser ? (
+          <div style={{textAlign:'center',padding:'10px 4px 4px'}}>
+            <div style={{fontSize:13,color:C.text,lineHeight:1.5,marginBottom:14}}>Para usar la IA necesitas una cuenta. Es gratis y además respalda tus registros en la nube.</div>
+            <button className="tap" onClick={onNeedAccount} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F}}>Crear cuenta gratis</button>
+          </div>
+        ) : status!=='results' ? (<>
+          <textarea value={texto} onChange={e=>setTexto(e.target.value.slice(0,300))} autoFocus rows={3}
+            placeholder="Ej: dos marraquetas con palta y un café con leche"
+            style={{width:'100%',boxSizing:'border-box',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:14,fontFamily:F,resize:'none',outline:'none',marginBottom:10}}/>
+          {status==='error'&&<div style={{fontSize:12,color:'#FF3B30',marginBottom:10}}>{error}</div>}
+          <button className="tap" disabled={status==='loading'||texto.trim().length<2} onClick={calcular} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,opacity:(status==='loading'||texto.trim().length<2)?0.6:1}}>
+            {status==='loading'?'✨ Calculando…':'✨ Calcular con IA'}
+          </button>
+        </>) : (<>
+          <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:12}}>
+            {items.map((f,i)=>(
+              <button key={i} className="tap" onClick={()=>setSel(s=>({...s,[i]:!s[i]}))} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:14,border:`1.5px solid ${sel[i]?'#34C759':C.border}`,background:sel[i]?'#34C75910':C.surfaceAlt,cursor:'pointer',fontFamily:F,textAlign:'left'}}>
+                <span style={{fontSize:22}}>{f.emoji||'🍽️'}</span>
+                <span style={{flex:1,minWidth:0}}>
+                  <span style={{display:'block',fontSize:13,fontWeight:700,color:C.text}}>{f.nombre}</span>
+                  <span style={{display:'block',fontSize:11,color:C.textMuted}}>{f.porcion_g} g · P {f.prot} · C {f.carbs} · G {f.grasas}</span>
+                </span>
+                <span style={{fontSize:13,fontWeight:800,color:C.text}}>{Math.round(f.cal)} kcal</span>
+              </button>
+            ))}
+          </div>
+          <div style={{fontSize:11,color:C.textMuted,marginBottom:10,textAlign:'center'}}>Valores estimados por IA. Puedes ajustar los gramos después en tu registro.</div>
+          <button className="tap" disabled={totalSel===0} onClick={agregar} style={{width:'100%',padding:'14px',borderRadius:16,border:'none',background:'#D42020',color:'white',fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,marginBottom:6,opacity:totalSel===0?0.6:1}}>Agregar · {Math.round(totalSel)} kcal</button>
+          <button className="tap" onClick={()=>setStatus('idle')} style={{width:'100%',padding:'10px',border:'none',background:'transparent',color:C.textSec,fontSize:13,cursor:'pointer',fontFamily:F}}>Editar texto</button>
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   PEDIR RESEÑA — solo en la app de Play, con racha ≥ 3, una vez.
+   Sin premios a cambio (lo prohíbe la política de Play).
+═══════════════════════════════════════════════════════ */
+function ReviewAskModal({C, F, onClose}) {
+  const [paso, setPaso] = useState('ask'); // ask | rate | feedback
+  const [txt, setTxt] = useState('');
+  const invitar = async () => {
+    const text = `Estoy usando Calorú para contar calorías con comida chilena real 🥗 Pruébala: ${shareLink('invitar')}`;
+    track('invite_share');
+    try { if (navigator.share) { await navigator.share({ title:'Calorú', text }); return; } } catch (_) { return; }
+    window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+  };
+  const btn = (bg, color='white') => ({width:'100%',padding:'14px',borderRadius:16,border:bg==='transparent'?`1px solid ${C.border}`:'none',background:bg,color,fontSize:15,fontWeight:800,cursor:'pointer',fontFamily:F,marginBottom:8});
+  return (
+    <div onClick={onClose} style={{position:'fixed',inset:0,zIndex:10003,background:'rgba(0,0,0,0.55)',display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+      <div onClick={e=>e.stopPropagation()} style={{width:'100%',maxWidth:480,background:C.surface,borderRadius:'24px 24px 0 0',padding:'26px 22px calc(22px + env(safe-area-inset-bottom))',animation:'slideUp .3s ease',textAlign:'center'}}>
+        {paso==='ask'&&(<>
+          <div style={{fontSize:44,marginBottom:8}}>🔥</div>
+          <div style={{fontSize:19,fontWeight:800,color:C.text,marginBottom:6}}>¡Llevas 3 días seguidos!</div>
+          <div style={{fontSize:13,color:C.textSec,lineHeight:1.55,marginBottom:20}}>¿Te está sirviendo Calorú?</div>
+          <button className="tap" style={btn('#D42020')} onClick={()=>{setPaso('rate');track('review_ask',{respuesta:'si'});}}>Sí, me sirve 😊</button>
+          <button className="tap" style={btn('transparent', C.text)} onClick={()=>{setPaso('feedback');track('review_ask',{respuesta:'no'});}}>Podría ser mejor</button>
+        </>)}
+        {paso==='rate'&&(<>
+          <div style={{fontSize:44,marginBottom:8}}>⭐</div>
+          <div style={{fontSize:19,fontWeight:800,color:C.text,marginBottom:6}}>¿Nos ayudas con una reseña?</div>
+          <div style={{fontSize:13,color:C.textSec,lineHeight:1.55,marginBottom:20}}>Somos una app chilena hecha por una persona. Una reseña en Google Play hace que más gente nos encuentre.</div>
+          <button className="tap" style={btn('#D42020')} onClick={()=>{track('review_open_play');window.open(PLAY_URL,'_blank');onClose();}}>Dejar reseña en Play</button>
+          <button className="tap" style={btn('transparent', C.text)} onClick={invitar}>🎁 Invitar a un amigo</button>
+          <button className="tap" onClick={onClose} style={{border:'none',background:'transparent',color:C.textMuted,fontSize:13,cursor:'pointer',fontFamily:F,padding:6}}>Ahora no</button>
+        </>)}
+        {paso==='feedback'&&(<>
+          <div style={{fontSize:19,fontWeight:800,color:C.text,marginBottom:6}}>¿Qué te gustaría que mejoremos?</div>
+          <div style={{fontSize:13,color:C.textSec,lineHeight:1.55,marginBottom:12}}>Lo leo yo mismo, de verdad.</div>
+          <textarea value={txt} onChange={e=>setTxt(e.target.value.slice(0,1000))} rows={4} placeholder="Ej: no encuentro los alimentos que como…"
+            style={{width:'100%',boxSizing:'border-box',padding:'12px 14px',borderRadius:14,border:`1.5px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:14,fontFamily:F,resize:'none',outline:'none',marginBottom:10}}/>
+          <button className="tap" disabled={!txt.trim()} style={{...btn('#D42020'),opacity:txt.trim()?1:0.6}} onClick={()=>{track('feedback_sent');window.open('mailto:caloruapp@gmail.com?subject='+encodeURIComponent('Feedback Calorú')+'&body='+encodeURIComponent(txt),'_blank');onClose();}}>Enviar</button>
+          <button className="tap" onClick={onClose} style={{border:'none',background:'transparent',color:C.textMuted,fontSize:13,cursor:'pointer',fontFamily:F,padding:6}}>Cerrar</button>
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   DESAFÍO "TU PRIMERA SEMANA" — una meta concreta para cada día.
+   Premio: 5 análisis de foto con IA gratis.
+═══════════════════════════════════════════════════════ */
+const WEEK_TASKS = [
+  {id:'first',  t:'Registra tu primera comida'},
+  {id:'three',  t:'Anota 3 comidas en un día'},
+  {id:'text',   t:'Escribe lo que comiste con IA ✍️'},
+  {id:'remind', t:'Activa los recordatorios 🔔'},
+  {id:'streak3',t:'Llega a 3 días de racha 🔥'},
+  {id:'streak5',t:'Llega a 5 días de racha'},
+  {id:'streak7',t:'¡7 días seguidos! 🏆'},
+];
+const WEEK_REWARD = 5;
+function WeekChallengeCard({C, F, done, onDismiss}) {
+  const n = WEEK_TASKS.filter(x=>done[x.id]).length;
+  const next = WEEK_TASKS.find(x=>!done[x.id]);
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{marginBottom:10,padding:'14px',borderRadius:18,background:C.surface,border:`1px solid ${C.border}`}}>
+      <div style={{display:'flex',alignItems:'center',gap:10}}>
+        <div style={{fontSize:24}}>🎯</div>
+        <div style={{flex:1,minWidth:0}} onClick={()=>setOpen(o=>!o)}>
+          <div style={{fontSize:13,fontWeight:800,color:C.text}}>Tu primera semana · {n}/{WEEK_TASKS.length}</div>
+          <div style={{fontSize:11,color:C.textSec,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{next?`Siguiente: ${next.t}`:'¡Completado!'} · Premio: {WEEK_REWARD} fotos con IA gratis</div>
+        </div>
+        <button className="tap" onClick={()=>setOpen(o=>!o)} aria-label="Ver tareas" style={{border:'none',background:'transparent',color:C.textMuted,fontSize:14,cursor:'pointer',padding:'0 4px'}}>{open?'▲':'▼'}</button>
+        <button className="tap" onClick={onDismiss} aria-label="Ocultar" style={{border:'none',background:'transparent',color:C.textMuted,fontSize:15,cursor:'pointer',padding:'0 2px'}}>✕</button>
+      </div>
+      <div style={{height:6,borderRadius:3,background:C.surfaceAlt,marginTop:10,overflow:'hidden'}}>
+        <div style={{height:'100%',width:`${n/WEEK_TASKS.length*100}%`,background:'#34C759',borderRadius:3,transition:'width .4s ease'}}/>
+      </div>
+      {open&&(
+        <div style={{marginTop:10,display:'flex',flexDirection:'column',gap:6}}>
+          {WEEK_TASKS.map(x=>(
+            <div key={x.id} style={{display:'flex',alignItems:'center',gap:8,fontSize:12,color:done[x.id]?C.textMuted:C.text,textDecoration:done[x.id]?'line-through':'none'}}>
+              <span style={{width:18,textAlign:'center'}}>{done[x.id]?'✅':'⬜'}</span>{x.t}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AppCore({onRequestAuth}) {
   const [splash,setSplash]     = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
@@ -11042,6 +11284,7 @@ function AppCore({onRequestAuth}) {
   const [showScanner,setShowScanner] = useState(false);
   const [showModFeria,setShowModFeria] = useState(false);
   const [showPhotoScanner,setShowPhotoScanner] = useState(false);
+  const [showTextLog,setShowTextLog] = useState(null); // null | texto inicial
   const [showSuplementos,setShowSuplementos] = useState(false);
   const [customSupps,setCustomSupps] = useState(()=>LS.get('customSupps',[]));
   const [suppScanOpen,setSuppScanOpen] = useState(false);
@@ -11113,8 +11356,9 @@ function AppCore({onRequestAuth}) {
 
   /* ── recordatorios push: pedir permiso justo después de anotar una comida ── */
   const [showReminderAsk,setShowReminderAsk] = useState(false);
+  const [showFirstLog,setShowFirstLog] = useState(false);
   useEffect(()=>{
-    if(log.length===0 || !pushSupported() || Notification.permission!=='default') return;
+    if(showFirstLog || log.length===0 || !pushSupported() || Notification.permission!=='default') return;
     const a = LS.get('reminderAsk',{n:0,at:0});
     if(a.n>=2 || Date.now()-a.at < 7*864e5) return; // máx. 2 veces, con 7 días entre medio
     const t = setTimeout(()=>{
@@ -11122,7 +11366,52 @@ function AppCore({onRequestAuth}) {
       setShowReminderAsk(true);
     },1500);
     return ()=>clearTimeout(t);
-  },[log.length]);
+  },[log.length, showFirstLog]);
+
+  /* ── pedir reseña en Play: racha ≥ 3, solo en la TWA, una sola vez ── */
+  const [showReviewAsk,setShowReviewAsk] = useState(false);
+  useEffect(()=>{
+    if(streak.days<3 || !isTWAApp() || LS.get('reviewAsked',false) || showReminderAsk || showFirstLog) return;
+    const t = setTimeout(()=>{ LS.set('reviewAsked',true); setShowReviewAsk(true); },3000);
+    return ()=>clearTimeout(t);
+  },[streak.days, showReminderAsk, showFirstLog]);
+
+  /* ── desafío "Tu primera semana": las tareas cumplidas quedan marcadas para siempre ── */
+  const [weekDone,setWeekDone] = useState(()=>LS.get('weekTasks',{}));
+  const [weekHidden,setWeekHidden] = useState(()=>LS.get('weekHidden',false));
+  useEffect(()=>{
+    const now = {
+      first:  !!LS.get('firstLog',null) || log.length>0,
+      three:  log.length>=3,
+      text:   !!LS.get('textLogUsed',false),
+      remind: !!LS.get('smartReminders',false),
+      streak3:streak.days>=3, streak5:streak.days>=5, streak7:streak.days>=7,
+    };
+    const merged = {...weekDone};
+    let cambio = false;
+    for (const k in now) if (now[k] && !merged[k]) { merged[k]=true; cambio=true; track('week_task',{tarea:k}); }
+    if (!cambio) return;
+    setWeekDone(merged); LS.set('weekTasks',merged);
+    if (WEEK_TASKS.every(x=>merged[x.id]) && !LS.get('weekRewarded',false)) {
+      LS.set('weekRewarded',true);
+      LS.set('photoCredits',(LS.get('photoCredits',0)||0)+WEEK_REWARD);
+      setConfetti(true); setTimeout(()=>setConfetti(false),3000);
+      setToast(`🏆 ¡Semana completa! Ganaste ${WEEK_REWARD} análisis de foto con IA`);
+      track('week_challenge_complete');
+    }
+  },[log.length, streak.days, showTextLog, showReminderAsk]);
+  const showWeekCard = !weekHidden && accountType!=='professional' && !LS.get('weekRewarded',false);
+
+  /* Foto con IA: Pro, o usuarios con análisis de regalo */
+  const openPhotoScanner = () => {
+    if(!isPro){
+      const c = LS.get('photoCredits',0)||0;
+      if(c<=0){ setShowPaywall(true); return; }
+      LS.set('photoCredits',c-1);
+      setToast(`📸 Te quedan ${c-1} análisis gratis`);
+    }
+    setShowPhotoScanner(true); haptic('light');
+  };
 
   /* ── recordatorios push: avisar al servidor el último día con registro (1 vez por cambio) ── */
   useEffect(()=>{
@@ -11870,6 +12159,26 @@ function AppCore({onRequestAuth}) {
     };
   },[nutriPlan, metasBase.cal, metasBase.prot, metasBase.carbs, metasBase.grasas]);
   const tot    = useMemo(()=>sumLog(log),[log]);
+
+  /* "¿Comiste lo mismo que ayer?" — repetir la comida de esta hora en 1 toque */
+  const [repeatHidden,setRepeatHidden] = useState(()=>LS.get('repeatDismiss',''));
+  const repeatSug = useMemo(()=>{
+    const m = mealPorHora();
+    if(log.some(r=>r.comida===m)) return null;
+    const ay = new Date(); ay.setDate(ay.getDate()-1);
+    const items = (LS.get('log_'+dateToKey(ay),[])||[]).filter(r=>r.comida===m);
+    if(!items.length) return null;
+    if(repeatHidden===todayKey()+m) return null;
+    return {meal:m, items, cal:Math.round(sumLog(items).cal)};
+  },[log, repeatHidden]);
+  const repeatYesterday = () => {
+    if(!repeatSug) return;
+    const base = Date.now();
+    setLog(prev=>[...prev, ...repeatSug.items.map((r,i)=>({...r, uid:base+i+Math.random()}))]);
+    haptic('add');
+    setToast(`✓ ${repeatSug.meal} de ayer registrado`);
+    track('repeat_yesterday',{comida:repeatSug.meal, items:repeatSug.items.length});
+  };
   const pct    = metas.cal>0?tot.cal/metas.cal:0;
   const tips   = getTips(tot, metas, obj, agua, pct, exercises, streak, waterGoal);
   const saludScore = calcSaludScore(tot, metas, agua, exercises, streak);
@@ -11988,6 +12297,28 @@ function AppCore({onRequestAuth}) {
     return filtered;
   },[q,cat,veganMode,userAllergens,searchSort,searchMaxCal,customFoods.length]);
 
+  /* Embudo: búsquedas sin resultado (qué alimentos nos faltan) */
+  useEffect(()=>{
+    const s=q.trim();
+    if(s.length<3||foods.length>0) return;
+    const t=setTimeout(()=>track('search_no_result',{query:s.toLowerCase().slice(0,60)}),1500);
+    return ()=>clearTimeout(t);
+  },[q,foods.length]);
+
+  /* Embudo: días de vuelta desde la instalación (return_d1, return_d7…) */
+  useEffect(()=>{
+    const hoy=todayKey();
+    let inst=LS.get('installDate',null);
+    if(!inst){ inst=hoy; LS.set('installDate',hoy); }
+    // Usuarios antiguos que ya registraron: no contarlos como "primer registro"
+    if(!LS.get('firstLog',null)&&streak.days>0) LS.set('firstLog',streak.last||hoy);
+    if(LS.get('lastOpenTracked','')===hoy) return;
+    LS.set('lastOpenTracked',hoy);
+    const dia=Math.round((new Date(hoy+'T12:00:00')-new Date(inst+'T12:00:00'))/86400000);
+    track('app_open_day',{dia});
+    if([1,3,7,14,30].includes(dia)) track('return_d'+dia);
+  },[]);
+
   /* ── actions ── */
   const toggleFav = (food) => {
     const isFav=favorites.some(f=>f.id===food.id);
@@ -12012,6 +12343,7 @@ function AppCore({onRequestAuth}) {
       return [...prev,{...a,comida:meal,qty:1,uid:Date.now()+Math.random(),grams:targetGrams}];
     });
     setRecent(prev=>{const f=prev.filter(x=>x.id!==a.id);return [a,...f].slice(0,8);});
+    if(!LS.get('firstLog',null)){ LS.set('firstLog',todayKey()); track('first_log',{origen:a.origen||a.cat||'base'}); }
     /* Auto-save scanned/manual products to "Agregados por ti" */
     if((a.cat==='Escaneado'||a.barcode||a.marca==='Manual'||a.marca==='Estimado')){
       setCustomFoods(prev=>{
@@ -12120,7 +12452,8 @@ function AppCore({onRequestAuth}) {
     setAccountType(at||'personal');
     if(cm){setComuna(cm);LS.set('comuna',cm);}
     setOnboarded(true); LS.set('onboarded',true);
-    track('onboarding_complete', {account_type:at||'personal', objetivo:o, con_cuenta:!!supabaseUser});
+    track('onboarding_complete', {account_type:at||'personal', objetivo:o, con_cuenta:!!supabaseUser, referido:LS.get('referredBy','')||'ninguno'});
+    if((at||'personal')==='personal' && log.length===0){ setMeal(mealPorHora()); setShowFirstLog(true); }
     LS.set('nombre',n); LS.set('perfil',p); LS.set('obj',o);
     LS.set('accountType',at||'personal');
     // Save to Supabase if logged in
@@ -12341,6 +12674,14 @@ function AppCore({onRequestAuth}) {
       {showReporteSemanal&&<ReporteSemanalModal C={C} F={F} dark={dark} isPro={isPro} onClose={()=>setShowReporteSemanal(false)}/>}
       {showRecordatorios&&<RecordatoriosModal C={C} F={F} dark={dark} onClose={()=>setShowRecordatorios(false)}/>}
       {showWelcomeBack&&<WelcomeBack C={C} F={F} nombre={nombre} streak={streak} daysAway={daysAway} onClose={()=>setShowWelcomeBack(false)}/>}
+      {showTextLog!==null&&<TextFoodSheet C={C} F={F} meal={meal} initial={showTextLog} supabaseUser={supabaseUser}
+        onAdd={(f)=>addFood(f)} onClose={()=>setShowTextLog(null)}
+        onNeedAccount={()=>{setShowTextLog(null);track('text_log_need_account');onRequestAuth&&onRequestAuth('register');}}/>}
+      {showReviewAsk&&<ReviewAskModal C={C} F={F} onClose={()=>setShowReviewAsk(false)}/>}
+      {showFirstLog&&<FirstLogSheet C={C} F={F} nombre={nombre} meal={meal} tot={tot} metaCal={metas.cal}
+        onAdd={(f)=>addFood(f)}
+        onSearch={()=>{setShowFirstLog(false);setTab(1);track('first_log_sheet',{accion:'buscar'});}}
+        onClose={()=>{setShowFirstLog(false);track('first_log_sheet',{accion:log.length?'listo':'despues'});}}/>}
       {showReminderAsk&&(
         <div onClick={()=>setShowReminderAsk(false)} style={{position:'fixed',inset:0,zIndex:10003,background:'rgba(0,0,0,0.55)',display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
           <div onClick={e=>e.stopPropagation()} style={{background:C.surface,borderRadius:'24px 24px 0 0',padding:'26px 22px calc(22px + env(safe-area-inset-bottom, 0px))',width:'100%',maxWidth:480,textAlign:'center',fontFamily:F,animation:'fadeUp .3s ease'}}>
@@ -12602,6 +12943,21 @@ function AppCore({onRequestAuth}) {
         ══════════════════════════════════ */}
         {tab===0&&<div className={tabAnim}>
 
+          {showWeekCard&&<WeekChallengeCard C={C} F={F} done={weekDone} onDismiss={()=>{setWeekHidden(true);LS.set('weekHidden',true);track('week_challenge_hide');}}/>}
+
+          {/* ── REPETIR AYER ── */}
+          {repeatSug&&(
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10,padding:'12px 14px',borderRadius:18,background:C.surface,border:`1.5px solid ${MC[repeatSug.meal]}55`}}>
+              <span style={{fontSize:24}}>{MI[repeatSug.meal]}</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:800,color:C.text}}>¿{repeatSug.meal==='Once'?'Tomaste once':repeatSug.meal==='Desayuno'?'Desayunaste':repeatSug.meal==='Almuerzo'?'Almorzaste':'Cenaste'} lo mismo que ayer?</div>
+                <div style={{fontSize:11,color:C.textSec,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{repeatSug.items.map(r=>r.nombre.split(' ').slice(0,3).join(' ')).join(' + ')} · {repeatSug.cal} kcal</div>
+              </div>
+              <button className="tap" onClick={repeatYesterday} style={{padding:'9px 12px',borderRadius:12,border:'none',background:MC[repeatSug.meal],color:'white',fontSize:12,fontWeight:800,cursor:'pointer',fontFamily:F,flexShrink:0}}>Sí, anotar</button>
+              <button className="tap" aria-label="Cerrar" onClick={()=>{const k=todayKey()+repeatSug.meal;LS.set('repeatDismiss',k);setRepeatHidden(k);}} style={{border:'none',background:'transparent',color:C.textMuted,fontSize:16,cursor:'pointer',padding:'0 2px'}}>✕</button>
+            </div>
+          )}
+
           {/* Switch profesional → volver al panel */}
           {accountType==='professional'&&(
             <button className="tap" onClick={()=>setProMode('professional')} style={{
@@ -12634,7 +12990,7 @@ function AppCore({onRequestAuth}) {
           )}
 
           {/* Banner fijo: escanear plato con IA */}
-          <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); haptic('light'); }} style={{
+          <button className="tap" onClick={openPhotoScanner} style={{
             width:'100%',textAlign:'left',marginBottom:12,padding:'14px 16px',cursor:'pointer',fontFamily:F,
             background:'linear-gradient(135deg,#D42020,#FF6B35)',borderRadius:20,border:'none',
             display:'flex',alignItems:'center',gap:14,position:'relative',overflow:'hidden',
@@ -13401,7 +13757,7 @@ function AppCore({onRequestAuth}) {
           {/* Acciones rápidas — se ocultan mientras hay una búsqueda activa
              para que los resultados aparezcan justo debajo del buscador */}
           {!q&&(<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
-            <button className="tap" onClick={()=>{ if(!isPro){setShowPaywall(true);return;} setShowPhotoScanner(true); }} style={{
+            <button className="tap" onClick={openPhotoScanner} style={{
               padding:'14px 12px',borderRadius:16,
               border:'1.5px solid #D4202050',
               background:dark?'rgba(0,122,255,0.12)':'rgba(0,122,255,0.06)',
@@ -13413,6 +13769,11 @@ function AppCore({onRequestAuth}) {
               <span style={{fontSize:20}}>📸</span> Escanear plato con IA
               <span style={{fontSize:9,fontWeight:700,background:'#D42020',color:'white',padding:'2px 6px',borderRadius:6,marginLeft:2}}>NUEVO</span>
             </button>
+            <button className="tap" onClick={()=>setShowTextLog('')} style={{
+              padding:'12px',borderRadius:16,border:'1.5px solid #34C75960',
+              background:dark?'rgba(52,199,89,0.12)':'rgba(52,199,89,0.07)',color:C.text,fontSize:12,fontWeight:700,
+              cursor:'pointer',fontFamily:F,display:'flex',alignItems:'center',justifyContent:'center',gap:6,gridColumn:'1 / -1',
+            }}><span style={{fontSize:18}}>✍️</span> Escribe lo que comiste (IA, gratis)</button>
             <button className="tap" onClick={()=>setShowRestaurant(true)} style={{
               padding:'12px',borderRadius:16,border:`1px solid ${C.border}`,
               background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,
@@ -13494,7 +13855,8 @@ function AppCore({onRequestAuth}) {
               <div style={{textAlign:'center',padding:'32px 20px'}}>
                 <div style={{fontSize:36,marginBottom:10}}>🔍</div>
                 <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:4}}>Sin resultados para "{q}"</div>
-                <div style={{fontSize:12,color:C.textSec,marginBottom:14}}>Puedes escanearlo o crearlo manualmente</div>
+                <div style={{fontSize:12,color:C.textSec,marginBottom:14}}>Calcúlalo con IA, escanéalo o créalo manualmente</div>
+                <button className="tap" onClick={()=>setShowTextLog(q)} style={{width:'100%',maxWidth:320,margin:'0 auto 10px',display:'block',padding:'12px 16px',borderRadius:14,border:'none',background:'#34C759',color:'white',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:F}}>✨ Calcular “{q.slice(0,30)}” con IA</button>
                 <div style={{display:'flex',gap:8,justifyContent:'center'}}>
                   <button className="tap" onClick={()=>setShowScanner(true)} style={{padding:'10px 16px',borderRadius:14,border:`1px solid ${C.border}`,background:C.surfaceAlt,color:C.text,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>📷 Escanear</button>
                   <button className="tap" onClick={()=>setShowCustom(true)} style={{padding:'10px 16px',borderRadius:14,border:'none',background:'#D42020',color:'white',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:F}}>✏️ Crear manualmente</button>

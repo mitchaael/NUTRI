@@ -6,6 +6,96 @@ const MODEL = "claude-sonnet-5-5";
 // Sonnet 5.5 piensa por defecto y "disabled" da 400. "between_tools" es el modo sin pensamiento
 // extendido: responde directo como Sonnet 4.6 y no gasta tokens pensando.
 const THINKING = { type: "between_tools" };
+
+// Tabla de porciones, reglas y formato JSON compartidos por los modos photo y text
+const NUTRI_BASE = `TABLA DE PORCIONES CHILENAS DE REFERENCIA (úsala como base):
+• Marraqueta (1 unidad): 80g | 210kcal | P:7 C:40 G:2 F:2
+• Hallulla (1 unidad): 70g | 185kcal | P:6 C:36 G:2 F:1
+• Sopaipilla (1 unidad): 60g | 170kcal | P:3 C:24 G:7 F:1
+• Pan molde (1 rebanada): 30g | 75kcal | P:2 C:14 G:1 F:1
+• Empanada de pino horneada: 150g | 350kcal | P:14 C:35 G:16 F:2
+• Empanada de pino frita: 180g | 450kcal | P:14 C:38 G:25 F:2
+• Cazuela de vacuno/pollo (plato): 500ml | 300kcal | P:28 C:22 G:8 F:3
+• Pastel de choclo (porción): 350g | 480kcal | P:18 C:55 G:18 F:5
+• Completo italiano: 200g | 480kcal | P:18 C:42 G:26 F:3
+• Completo simple (sin palta): 170g | 370kcal | P:14 C:40 G:18 F:2
+• Arroz cocido (plato): 180g | 230kcal | P:4 C:50 G:1 F:1
+• Arroz con pollo (plato): 400g | 520kcal | P:32 C:55 G:14 F:2
+• Chorrillana (plato): 500g | 900kcal | P:30 C:60 G:55 F:4
+• Porotos guisados (plato): 350g | 380kcal | P:22 C:55 G:6 F:15
+• Charquicán (plato): 380g | 420kcal | P:25 C:45 G:14 F:8
+• Puré de papa (porción): 200g | 280kcal | P:5 C:38 G:12 F:3
+• Humitas (1 unidad): 200g | 220kcal | P:5 C:38 G:6 F:4
+• Lomo a lo pobre (plato): 450g | 750kcal | P:45 C:50 G:35 F:4
+• Salmón a la plancha (filete): 180g | 290kcal | P:36 C:0 G:15 F:0
+• Merluza a la plancha (filete): 180g | 160kcal | P:34 C:0 G:2 F:0
+• Pechuga de pollo a la plancha: 150g | 230kcal | P:43 C:0 G:5 F:0
+• Muslo/pata de pollo asado: 150g | 280kcal | P:32 C:0 G:17 F:0
+• Bistec/lomo a la plancha: 180g | 300kcal | P:38 C:0 G:16 F:0
+• Ensalada chilena (tomate+cebolla): 150g | 60kcal | P:2 C:10 G:2 F:2
+• Palta (1/2): 75g | 120kcal | P:2 C:4 G:11 F:5
+• Pizza (1/8 grande): 110g | 270kcal | P:11 C:33 G:11 F:2
+• Sushi niguiri (6 piezas): 180g | 320kcal | P:14 C:50 G:6 F:2
+• Yogur chico (Soprole/Colún): 125g | 110kcal | P:5 C:16 G:3 F:0
+• Manzana/pera mediana: 150g | 80kcal | P:0 C:21 G:0 F:3
+• Plátano mediano: 120g | 105kcal | P:1 C:27 G:0 F:3
+• Naranja: 180g | 85kcal | P:2 C:21 G:0 F:4
+• Pote de manjar (La Lechera 1 cda): 20g | 60kcal | P:1 C:13 G:1 F:0
+
+REGLAS CRÍTICAS:
+- Responde ÚNICAMENTE con JSON válido. Sin texto extra, backticks ni markdown.
+- Si no hay comida visible claramente: {"error": "No pude identificar alimentos en esta imagen"}
+- Si es un producto envasado con marca visible (Coca-Cola, Nestlé, Soprole, etc.), úsala en el nombre.
+- Incluye salsas, aderezos, aceite y bebidas si son visibles.
+- Sé conservador en porciones — mejor subestimar que sobreestimar.
+- "confianza":"alta" = alimento y porción claramente visibles | "media" = porción estimada | "baja" = difícil de distinguir.
+
+FORMATO DE RESPUESTA OBLIGATORIO:
+{
+  "plato": "Descripción breve del plato completo",
+  "confianza": "alta|media|baja",
+  "alimentos": [
+    {
+      "nombre": "Nombre descriptivo del alimento",
+      "porcion_g": número,
+      "cal": número,
+      "prot": número,
+      "carbs": número,
+      "grasas": número,
+      "fibra": número,
+      "emoji": "emoji"
+    }
+  ],
+  "total": {
+    "cal": número,
+    "prot": número,
+    "carbs": número,
+    "grasas": número,
+    "fibra": número
+  },
+  "consejo": "Tip nutricional breve y motivador sobre este plato"
+}`;
+
+const PHOTO_HEADER = `Eres un nutricionista y chef experto en gastronomía chilena y latinoamericana. El usuario te envía una foto de su comida desde Chile.
+
+TAREA:
+1. Identifica TODOS los alimentos, preparaciones, salsas y bebidas visibles.
+2. Estima la porción en gramos según el tamaño del plato o envase visible.
+3. Calcula kcal, proteínas, carbohidratos, grasas y fibra por ítem.
+4. Suma el total del plato completo.
+
+`;
+
+const TEXT_HEADER = `Eres un nutricionista experto en gastronomía chilena y latinoamericana. El usuario describe con sus palabras lo que comió (puede ser de Chile, México, Colombia, Argentina u otro país de LATAM).
+
+TAREA:
+1. Separa cada alimento, preparación o bebida mencionada.
+2. Usa la cantidad que indica el usuario; si no la dice, asume una porción típica casera.
+3. Calcula kcal, proteínas, carbohidratos, grasas y fibra por ítem.
+4. Suma el total.
+
+`;
+
 const BRAVE_API_KEY = Deno.env.get("BRAVE_API_KEY");
 
 // ── Palabras que indican que el usuario menciona o registra comida ──
@@ -326,81 +416,7 @@ Deno.serve(async (req) => {
         system: [
           {
             type: "text",
-            text: `Eres un nutricionista y chef experto en gastronomía chilena y latinoamericana. El usuario te envía una foto de su comida desde Chile.
-
-TAREA:
-1. Identifica TODOS los alimentos, preparaciones, salsas y bebidas visibles.
-2. Estima la porción en gramos según el tamaño del plato o envase visible.
-3. Calcula kcal, proteínas, carbohidratos, grasas y fibra por ítem.
-4. Suma el total del plato completo.
-
-TABLA DE PORCIONES CHILENAS DE REFERENCIA (úsala como base):
-• Marraqueta (1 unidad): 80g | 210kcal | P:7 C:40 G:2 F:2
-• Hallulla (1 unidad): 70g | 185kcal | P:6 C:36 G:2 F:1
-• Sopaipilla (1 unidad): 60g | 170kcal | P:3 C:24 G:7 F:1
-• Pan molde (1 rebanada): 30g | 75kcal | P:2 C:14 G:1 F:1
-• Empanada de pino horneada: 150g | 350kcal | P:14 C:35 G:16 F:2
-• Empanada de pino frita: 180g | 450kcal | P:14 C:38 G:25 F:2
-• Cazuela de vacuno/pollo (plato): 500ml | 300kcal | P:28 C:22 G:8 F:3
-• Pastel de choclo (porción): 350g | 480kcal | P:18 C:55 G:18 F:5
-• Completo italiano: 200g | 480kcal | P:18 C:42 G:26 F:3
-• Completo simple (sin palta): 170g | 370kcal | P:14 C:40 G:18 F:2
-• Arroz cocido (plato): 180g | 230kcal | P:4 C:50 G:1 F:1
-• Arroz con pollo (plato): 400g | 520kcal | P:32 C:55 G:14 F:2
-• Chorrillana (plato): 500g | 900kcal | P:30 C:60 G:55 F:4
-• Porotos guisados (plato): 350g | 380kcal | P:22 C:55 G:6 F:15
-• Charquicán (plato): 380g | 420kcal | P:25 C:45 G:14 F:8
-• Puré de papa (porción): 200g | 280kcal | P:5 C:38 G:12 F:3
-• Humitas (1 unidad): 200g | 220kcal | P:5 C:38 G:6 F:4
-• Lomo a lo pobre (plato): 450g | 750kcal | P:45 C:50 G:35 F:4
-• Salmón a la plancha (filete): 180g | 290kcal | P:36 C:0 G:15 F:0
-• Merluza a la plancha (filete): 180g | 160kcal | P:34 C:0 G:2 F:0
-• Pechuga de pollo a la plancha: 150g | 230kcal | P:43 C:0 G:5 F:0
-• Muslo/pata de pollo asado: 150g | 280kcal | P:32 C:0 G:17 F:0
-• Bistec/lomo a la plancha: 180g | 300kcal | P:38 C:0 G:16 F:0
-• Ensalada chilena (tomate+cebolla): 150g | 60kcal | P:2 C:10 G:2 F:2
-• Palta (1/2): 75g | 120kcal | P:2 C:4 G:11 F:5
-• Pizza (1/8 grande): 110g | 270kcal | P:11 C:33 G:11 F:2
-• Sushi niguiri (6 piezas): 180g | 320kcal | P:14 C:50 G:6 F:2
-• Yogur chico (Soprole/Colún): 125g | 110kcal | P:5 C:16 G:3 F:0
-• Manzana/pera mediana: 150g | 80kcal | P:0 C:21 G:0 F:3
-• Plátano mediano: 120g | 105kcal | P:1 C:27 G:0 F:3
-• Naranja: 180g | 85kcal | P:2 C:21 G:0 F:4
-• Pote de manjar (La Lechera 1 cda): 20g | 60kcal | P:1 C:13 G:1 F:0
-
-REGLAS CRÍTICAS:
-- Responde ÚNICAMENTE con JSON válido. Sin texto extra, backticks ni markdown.
-- Si no hay comida visible claramente: {"error": "No pude identificar alimentos en esta imagen"}
-- Si es un producto envasado con marca visible (Coca-Cola, Nestlé, Soprole, etc.), úsala en el nombre.
-- Incluye salsas, aderezos, aceite y bebidas si son visibles.
-- Sé conservador en porciones — mejor subestimar que sobreestimar.
-- "confianza":"alta" = alimento y porción claramente visibles | "media" = porción estimada | "baja" = difícil de distinguir.
-
-FORMATO DE RESPUESTA OBLIGATORIO:
-{
-  "plato": "Descripción breve del plato completo",
-  "confianza": "alta|media|baja",
-  "alimentos": [
-    {
-      "nombre": "Nombre descriptivo del alimento",
-      "porcion_g": número,
-      "cal": número,
-      "prot": número,
-      "carbs": número,
-      "grasas": número,
-      "fibra": número,
-      "emoji": "emoji"
-    }
-  ],
-  "total": {
-    "cal": número,
-    "prot": número,
-    "carbs": número,
-    "grasas": número,
-    "fibra": número
-  },
-  "consejo": "Tip nutricional breve y motivador sobre este plato"
-}`,
+            text: `${PHOTO_HEADER}${NUTRI_BASE}`,
             cache_control: { type: "ephemeral" },
           },
         ],
@@ -480,6 +496,23 @@ ${clientContext}`;
         messages: sanitizedMessages,
       };
 
+    } else if (mode === "text") {
+      // Registro por texto libre: "dos marraquetas con palta y un café"
+      const texto = typeof body.texto === "string" ? body.texto.trim().slice(0, 300) : "";
+      if (texto.length < 2) {
+        return new Response(
+          JSON.stringify({ error: "Falta el campo 'texto'" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      anthropicBody = {
+        model: MODEL,
+        thinking: THINKING,
+        max_tokens: 1500,
+        system: [{ type: "text", text: `${TEXT_HEADER}${NUTRI_BASE}`, cache_control: { type: "ephemeral" } }],
+        messages: [{ role: "user", content: `Lo que comí: ${texto}` }],
+      };
+
     } else if (mode === "insight") {
       // Solo se acepta un prompt corto predefinido — no contenido de usuario
       const ALLOWED_INSIGHT_PROMPTS = [
@@ -505,7 +538,7 @@ ${clientContext}`;
 
     } else {
       return new Response(
-        JSON.stringify({ error: "mode debe ser 'photo', 'chat' o 'insight'" }),
+        JSON.stringify({ error: "mode debe ser 'photo', 'text', 'chat' o 'insight'" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -535,7 +568,7 @@ ${clientContext}`;
       ? data.content.filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("")
       : "";
 
-    if (mode === "photo") {
+    if (mode === "photo" || mode === "text") {
       try {
         const cleaned = text.replace(/```json\n?|```/g, "").trim();
         const parsed = JSON.parse(cleaned);
