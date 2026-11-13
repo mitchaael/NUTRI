@@ -2375,6 +2375,11 @@ function Onboarding({onDone, onLogin}) {
   const [accountType,setAccountType]=useState('personal');
   const C=LIGHT;
   const totalSteps=5;
+  // Medición del embudo: un evento por pantalla vista (el paso 1 solo lo ven los profesionales)
+  useEffect(()=>{
+    const nombres=['inicio','tipo_cuenta','perfil','objetivo','plan'];
+    track('onboarding_step',{step, paso:nombres[step]||String(step)});
+  },[step]);
 
   const steps=[
     // Step 0: Pantalla de impacto — diferenciadores
@@ -2404,7 +2409,7 @@ function Onboarding({onDone, onLogin}) {
       </div>
       <div style={{marginTop:'auto'}}>
         <input value={nombre} onChange={e=>setNombre(e.target.value)}
-          placeholder="¿Cómo te llamas?"
+          placeholder="¿Cómo te llamas? (opcional)"
           style={{
             width:'100%',padding:'16px 20px',borderRadius:18,marginBottom:10,
             border:`2px solid ${nombre?'#D42020':'rgba(255,255,255,0.15)'}`,
@@ -2412,12 +2417,16 @@ function Onboarding({onDone, onLogin}) {
             background:'rgba(255,255,255,0.08)',outline:'none',textAlign:'center',
             transition:'border-color .2s',
           }}/>
-        <button onClick={()=>nombre.trim()&&setStep(1)} style={{
+        <button onClick={()=>{setAccountType('personal');setStep(2);}} style={{
           width:'100%',padding:'16px',borderRadius:18,border:'none',
-          background:nombre.trim()?'#D42020':'rgba(255,255,255,0.15)',color:'white',
-          fontSize:16,fontWeight:800,fontFamily:F,cursor:nombre.trim()?'pointer':'default',
+          background:'#D42020',color:'white',
+          fontSize:16,fontWeight:800,fontFamily:F,cursor:'pointer',
           transition:'background .2s',
         }}>Empezar gratis →</button>
+        <button onClick={()=>{setAccountType('professional');setStep(1);}} style={{
+          width:'100%',marginTop:6,padding:'10px',background:'none',border:'none',
+          color:'rgba(255,255,255,0.55)',fontSize:13,fontWeight:600,fontFamily:F,cursor:'pointer',
+        }}>¿Eres nutricionista o coach? <span style={{color:'white',textDecoration:'underline'}}>Entra como profesional</span></button>
         {onLogin&&(
           <button onClick={onLogin} style={{
             width:'100%',marginTop:6,padding:'12px',background:'none',border:'none',
@@ -2472,7 +2481,7 @@ function Onboarding({onDone, onLogin}) {
     // Step 2: Perfil físico
     <div key={2} style={{padding:'28px 24px',display:'flex',flexDirection:'column',gap:18}}>
       <div>
-        <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>Tu perfil, {nombre} 💪</div>
+        <div style={{fontSize:22,fontWeight:800,color:C.text,fontFamily:F,letterSpacing:'-.5px'}}>Tu perfil{nombre.trim()?`, ${nombre.trim()}`:''} 💪</div>
         <div style={{fontSize:13,color:C.textSec,fontFamily:F,fontWeight:500,marginTop:4}}>Necesitamos esto para calcular tus calorías exactas</div>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
@@ -2604,7 +2613,7 @@ function Onboarding({onDone, onLogin}) {
           <div style={{textAlign:'center'}}>
             <div style={{fontSize:52,marginBottom:8}}>🔮</div>
             <div style={{fontSize:22,fontWeight:800,color:C.text,letterSpacing:'-.5px',fontFamily:F}}>Tu transformación</div>
-            <div style={{fontSize:13,color:C.textSec,marginTop:4,fontFamily:F}}>{nombre}, esto es lo que puedes lograr a tu ritmo</div>
+            <div style={{fontSize:13,color:C.textSec,marginTop:4,fontFamily:F}}>{nombre.trim()?`${nombre.trim()}, esto`:'Esto'} es lo que puedes lograr a tu ritmo</div>
           </div>
           {/* Proyección visual */}
           <div style={{background:'linear-gradient(135deg,#0A1628,#122240)',borderRadius:24,padding:'20px',overflow:'hidden',position:'relative'}}>
@@ -2669,7 +2678,7 @@ function Onboarding({onDone, onLogin}) {
           <div style={{height:'100%',width:`${step/(totalSteps-1)*100}%`,background:'#D42020',transition:'width .4s ease'}}/>
         </div>}
         {step>0&&(
-          <button onClick={()=>setStep(step-1)} style={{
+          <button onClick={()=>setStep(step===2&&accountType!=='professional'?0:step-1)} style={{
             margin:'4px 12px 0',background:'none',border:'none',
             color:C.textSec,fontSize:15,fontWeight:700,
             cursor:'pointer',fontFamily:F,
@@ -6414,7 +6423,7 @@ function LogroUnlockModal({C, F, logro, onClose}) {
 ═══════════════════════════════════════════════════════ */
 function WelcomeBack({C, F, nombre, streak, daysAway, onClose}) {
   const alive = streak.days > 0;
-  const msg = daysAway<=1?`¡Bienvenido, ${nombre}!`:daysAway<=3?`¡Te extrañamos, ${nombre}!`:`¡${nombre} volvió!`;
+  const msg = !nombre?(daysAway<=3?'¡Te extrañamos!':'¡Volviste!'):daysAway<=1?`¡Bienvenido, ${nombre}!`:daysAway<=3?`¡Te extrañamos, ${nombre}!`:`¡${nombre} volvió!`;
   const sub = daysAway<=1?'Tu racha sigue viva. No la pierdas hoy.'
     :daysAway<=3?`${daysAway} días sin registrar. Retomar es lo más difícil — ya lo hiciste.`
     :daysAway<=14?'Una semana fuera no borra tu progreso. Empecemos de nuevo.'
@@ -6546,7 +6555,7 @@ function AIAssistant({C, F, nombre, tot, metas, obj, log, streak, onClose, userA
   const systemPrompt = `Eres NutriBot, el asistente personal de Calorú — app chilena de nutrición. Eres cercano, motivador y EXPERTO en nutrición chilena Y en todas las funciones de la app. Actúas como consultor 360: conoces todo del usuario y puedes ayudarlo con nutrición y con el uso de la app.
 
 ══ PERFIL COMPLETO DEL USUARIO ══
-Nombre: ${nombre} | Objetivo: ${objLabels[obj]||obj} | Racha: ${streak.days} días 🔥
+Nombre: ${nombre||'—'} | Objetivo: ${objLabels[obj]||obj} | Racha: ${streak.days} días 🔥
 ${perfil.peso?`Físico: ${perfil.sexo==='M'?'Hombre':'Mujer'}, ${perfil.edad} años, ${perfil.peso}kg, ${perfil.altura}cm${imc?` | IMC: ${imc} (${imcLabel})`:''}`:''}
 ${perfil.act?`Actividad: ${actLabels[String(perfil.act)]||perfil.act}`:''}
 Condición médica: ${conds.length?conds.join(', '):'Sin condición especial'}
@@ -6625,7 +6634,7 @@ Ajusta al tamaño. Nombre descriptivo ("Empanada de pino horneada", "Arroz con p
     if(msgs.length===0){
       const kcalRestantes = Math.max(0, metas.cal - Math.round(tot.cal));
       const saludo = saludScore>=70?'¡Vas muy bien hoy! 💪':saludScore>=40?'Buen inicio del día 🌱':'¡Empecemos juntos hoy! ☀️';
-      setMsgs([{role:'assistant',content:`¡Hola ${nombre}! Soy NutriBot, tu asistente personal de Calorú 🤖\n\n${saludo} Llevas **${Math.round(tot.cal)} kcal** (${pct}% de tu meta) y te quedan **${kcalRestantes} kcal** hoy.\n\nPuedo ayudarte con nutrición, consejos personalizados y cualquier duda sobre la app. ¿Qué necesitas?`}]);
+      setMsgs([{role:'assistant',content:`¡Hola${nombre?` ${nombre}`:''}! Soy NutriBot, tu asistente personal de Calorú 🤖\n\n${saludo} Llevas **${Math.round(tot.cal)} kcal** (${pct}% de tu meta) y te quedan **${kcalRestantes} kcal** hoy.\n\nPuedo ayudarte con nutrición, consejos personalizados y cualquier duda sobre la app. ¿Qué necesitas?`}]);
     }
   },[]);
 
@@ -8317,7 +8326,7 @@ function PlanSemanalIAModal({C, F, dark, nombre, perfil, obj, metas, ritmo, user
       const vegan = veganMode ? 'Es VEGANO.' : '';
       const condMap = {diabetes:'TIENE DIABETES TIPO 2: bajo índice glucémico, sin azúcares simples.',hipertension:'TIENE HIPERTENSIÓN: máx 2000mg sodio/día.',colesterol:'TIENE COLESTEROL ALTO: sin grasas saturadas ni trans.',celiaco:'TIENE CELIAQUÍA: sin gluten.'};
       const condTexto = conds.map(c=>condMap[c]).filter(Boolean).join(' ');
-      const prompt = `Crea un plan de alimentación semanal completo para ${nombre}.
+      const prompt = `Crea un plan de alimentación semanal completo para ${nombre||'el usuario'}.
 Objetivo: ${objTexto}. Ritmo: ${ritmoTexto}. Calorías diarias: ${metas.cal} kcal. Proteínas: ${metas.prot}g. ${alerg} ${vegan} ${condTexto}
 Usa ingredientes disponibles en supermercados chilenos (Jumbo, Lider, Santa Isabel).
 Responde SOLO con este JSON:
@@ -8583,7 +8592,7 @@ function DesafiosComunidadModal({C, F, dark, log, agua, waterGoal, exercises, st
     try {
       const alimentos = log.slice(0,8).map(i=>i.nombre).join(', ') || 'variado';
       const objTexto = {bajar:'bajar de peso',mantener:'mantener peso',subir:'ganar músculo'}[obj]||'mantener peso';
-      const prompt = `El usuario ${nombre} quiere ${objTexto}. Racha: ${streak.days} días. Come: ${alimentos}. Proteína hoy: ${Math.round(tot.prot)}/${metas.prot}g.
+      const prompt = `El usuario${nombre?` ${nombre}`:''} quiere ${objTexto}. Racha: ${streak.days} días. Come: ${alimentos}. Proteína hoy: ${Math.round(tot.prot)}/${metas.prot}g.
 Genera 3 desafíos semanales personalizados y motivadores en formato JSON:
 {"desafios":[{"id":"d1","emoji":"emoji","titulo":"título corto","desc":"descripción motivadora específica para este usuario","xp":número entre 30 y 100,"tipo":"nutricion|ejercicio|habito"}]}
 Solo JSON, sin texto adicional.`;
@@ -9015,7 +9024,7 @@ function PlanAdaptativoModal({C, F, dark, nombre, perfil, obj, metas, ritmo, wei
         ? `Esta semana cambió ${cambioPeso}kg (meta: ${progresoEsperado}kg/semana). ${estaEnMeta?'Va bien.':'Necesita ajuste.'}`
         : 'Sin suficiente historial de peso.';
 
-      const prompt = `Crea un plan nutricional adaptativo para ${nombre}.
+      const prompt = `Crea un plan nutricional adaptativo para ${nombre||'el usuario'}.
 Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}.
 Peso actual: ${pesoActual}kg. Calorías actuales: ${metas.cal}kcal/día.
 Progreso esta semana: ${progreso}
@@ -9181,11 +9190,11 @@ function PlanesDescargablesModal({C, F, dark, nombre, perfil, obj, metas, ritmo,
       const vegan = veganMode?'VEGANO.':'';
       const objTexto = {bajar:'perder peso',mantener:'mantener peso',subir:'ganar músculo',recomp:'recomposición'}[obj];
 
-      const prompt = `Crea un ${plan.titulo} para ${nombre}. Objetivo: ${objTexto}. Calorías: ${metas.cal}kcal. ${alerg} ${vegan}
+      const prompt = `Crea un ${plan.titulo} para ${nombre||'el usuario'}. Objetivo: ${objTexto}. Calorías: ${metas.cal}kcal. ${alerg} ${vegan}
 Ingredientes de supermercados chilenos. Duración: ${plan.duracion}.
 Responde SOLO con JSON:
 {
-  "titulo": "${plan.titulo} - ${nombre}",
+  "titulo": "${plan.titulo}${nombre?` - ${nombre}`:''}",
   "duracion": "${plan.duracion}",
   "objetivo": "${objTexto}",
   "calorias_diarias": ${metas.cal},
@@ -12033,7 +12042,7 @@ function AppCore({onRequestAuth}) {
   useEffect(()=>{
     const insightKey='insight_'+todayKey();
     if(LS.get(insightKey,'')) return; // ya generado hoy
-    if(!nombre||log.length===0) return; // esperar datos reales
+    if(log.length===0) return; // esperar datos reales
     const generate=async()=>{
       setInsightLoading(true);
       try{
@@ -12041,7 +12050,7 @@ function AppCore({onRequestAuth}) {
         const prevKey=dateToKey(prevDay);
         const prevLog=LS.get('log_'+prevKey,[]);
         const prevProt=Math.round(sumLog(prevLog).prot);
-        const insightUserMsg=`Datos de hoy de ${nombre}: ${Math.round(tot.cal)} kcal de ${metas.cal} kcal meta (${metas.cal>0?Math.round(tot.cal/metas.cal*100):0}%), ${Math.round(tot.prot)}g proteína de ${metas.prot}g meta, racha de ${streak.days} días consecutivos.${prevProt>0?` Ayer consumió ${prevProt}g de proteína.`:''} Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}. Genera UN SOLO insight motivacional personalizado en máximo 2 oraciones. Usa EXACTAMENTE estos números, no inventes otros. Solo el insight, sin saludos ni explicaciones.`;
+        const insightUserMsg=`Datos de hoy de ${nombre||'el usuario'}: ${Math.round(tot.cal)} kcal de ${metas.cal} kcal meta (${metas.cal>0?Math.round(tot.cal/metas.cal*100):0}%), ${Math.round(tot.prot)}g proteína de ${metas.prot}g meta, racha de ${streak.days} días consecutivos.${prevProt>0?` Ayer consumió ${prevProt}g de proteína.`:''} Objetivo: ${obj==='bajar'?'bajar de peso':obj==='subir'?'ganar músculo':obj==='recomp'?'recomposición corporal':'mantener peso'}. Genera UN SOLO insight motivacional personalizado en máximo 2 oraciones. Usa EXACTAMENTE estos números, no inventes otros. Solo el insight, sin saludos ni explicaciones.`;
         const data = await callEdgeFn({ mode: 'chat', uso: 'insight', system: 'Eres un nutricionista chileno amigable y motivador. Generas insights breves y personalizados basándote en los datos reales del usuario. Solo devuelves el insight sin saludos, sin "Hola", sin explicaciones adicionales.', messages:[{role:'user',content:insightUserMsg}] });
         const text=data.text||'';
         if(text){ setDailyInsight(text); LS.set(insightKey,text); LS.set(insightKey+'_cal', tot.cal); }
