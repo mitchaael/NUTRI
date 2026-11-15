@@ -9438,7 +9438,7 @@ function MarketplaceNutricionistasModal({C, F, dark, onClose, supabaseUser}) {
 
         <div style={{background:dark?'rgba(52,199,89,0.08)':'rgba(52,199,89,0.05)',borderRadius:14,padding:'12px 14px',border:'1px solid rgba(52,199,89,0.2)'}}>
           <div style={{fontSize:11,color:'#34C759',fontWeight:700,marginBottom:4}}>💡 ¿Eres nutricionista?</div>
-          <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>Suscríbete por <strong>$10.000/mes</strong> y tus pacientes obtienen Calorú Pro automáticamente. Ellos pueden reembolsarlo por Isapre o Fonasa.</div>
+          <div style={{fontSize:11,color:C.textSec,marginBottom:4}}>Suscríbete desde <strong>$10.000/mes</strong> y tus pacientes obtienen Calorú Pro automáticamente.</div>
           <button onClick={async()=>{
             if(!supabaseUser){showToast('Inicia sesión para registrarte.');return;}
             if(puedePagarConPlay()){
